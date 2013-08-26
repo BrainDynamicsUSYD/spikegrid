@@ -1,0 +1,16 @@
+*/bin/*
+*/obj/*
+*.dll
+*.exe
+*.mdb
+*.out
+res/*
+Hippocampus.*
+res2/*
+*.mexa64
+*.aux
+*.log
+*.pdf
+*.swp
+*/*.swp
+conductance.c.*

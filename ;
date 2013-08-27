@@ -7,8 +7,8 @@ int steps           =     0   ;  //total number of steps
 //Architecture properties
 #define size 100
 //const int size      = 100;                  //grid size (size x size total neurons)
-#define couplerange 15
-//const int couplerange = 15;                   //adam calls this ext
+#define couplerange 15;
+const int couplerange = 15;                   //adam calls this ext
 const float WE      = 0.41;                 //excitatory coupling strength
 const float sigE    = 14;                   //char. length for Ex symapses (int / float?)
 const float WI      = 0.19;                 //Inhib coupling strength

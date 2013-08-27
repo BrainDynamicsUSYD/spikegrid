@@ -47,11 +47,8 @@ float* CreateCouplingMatrix()
                 float val = mexhat(x*x+y*y);//compute the mexican hat function
                 if (val>0) {val=val*SE;} else {val=val*SI;}//and multiply by some constants
                 matrix[(x+couplerange)*couple_array_size + y + couplerange] = val;//and set the array
-                printf("%f,",val);
             }
-            else {printf("0,");}
         }
-        printf("\n");
     }
     return matrix;
 }
@@ -86,7 +83,6 @@ void evolvept (const int x,const  int y,const float* const __restrict connection
         for (j =0 ; j<couple_array_size;j++) 
         {
             const int coupleidx = i*couple_array_size + j;
-            if((gE[outoff+j]<0.0) || (gI[outoff+j]<0.0)){printf("ERROR\n");}
             if (connections[coupleidx] > 0) //add either to gE or gI
             {
                 gE[outoff+j] += connections[coupleidx]*Estrmod;
@@ -126,12 +122,13 @@ void fixboundary(float* __restrict gE, float* __restrict gI)
 }
 //rhs_func used when integrating the neurons forward through time
 float rhs_func (const float V,const float gE,const float gI) {return -(glk*(V-Vlk) + gE*(V-Vex) +gI*(V-Vin));}
-
+float gE[conductance_array_size*conductance_array_size]; //gE/gI matrices are reused in each call to minimise allocations
+float gI[conductance_array_size*conductance_array_size];
 void step1 ( const float* const __restrict connections,coords_ringbuffer* fdata,const float* const __restrict input,float* output,const int time)
 {
     coords* current_firestore = fdata->data[fdata->curidx];//get the thing for currently firing neurons
-    float* gE     = calloc(sizeof(float),conductance_array_size*conductance_array_size);//arrays to store gE and gI - larger than neurons grid size
-    float* gI     = calloc(sizeof(float),conductance_array_size*conductance_array_size);
+    memset(gE,0,sizeof(float)*conductance_array_size*conductance_array_size);
+    memset(gI,0,sizeof(float)*conductance_array_size*conductance_array_size);
     for (int i=1;i<fdata->count;i++) //start at 1 so we don't get currently firing (which should be empty anyway)
     {
         coords* fire_with_this_lag;//this is a bit of a funny definition due to macros.
@@ -160,7 +157,6 @@ void step1 ( const float* const __restrict connections,coords_ringbuffer* fdata,
             output[idx2]=input[idx2]+0.5*dt*(rhs1 + rhs2);
         }
     }
-    free(gE);free(gI);//don't need these matrices any more so throw them away. TODO: Even better - reuse them
     int this_fcount=0;//now find which neurons fired at the current time step
     for (int x=0;x<size;x++)
     {
@@ -201,7 +197,6 @@ float* connections;
 void setup()
 {
     couple_array_size=2*couplerange+1;
-    conductance_array_size=size+2*couplerange;
     //compute some constants
     steps = duration/dt;
     int cap=max(setcap(taudE,taurE,1E-6),setcap(taudI,taurI,1E-6));

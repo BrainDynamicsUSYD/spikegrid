@@ -14,3 +14,4 @@ res2/*
 *.swp
 */*.swp
 conductance.c.*
+cachegrind.out.*

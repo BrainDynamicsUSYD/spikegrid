@@ -5,7 +5,7 @@ while time<1000
     time=time+1;
     data2=conductance(data);
     data=data2;
-    if (mod (time,10)==11)
+    if (mod (time,10)==0)
         imagesc(data ,[-80 -55])
         colorbar
         title(time)

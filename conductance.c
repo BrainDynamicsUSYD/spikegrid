@@ -36,6 +36,7 @@ void setcaptests()
 }
 
 //add conductance from a firing neuron the gE and gI arrays
+////TODO: add the skip part to skip zero entries as in the threestate code
 void evolvept (const int x,const  int y,const float* const __restrict connections,const float Estrmod,const float Istrmod,float* __restrict gE,float* __restrict gI)
 {
     //ex coupling

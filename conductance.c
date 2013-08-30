@@ -9,7 +9,8 @@
 #include <stdio.h> //printf
 #include <stdlib.h> //malloc/calloc etc  random/srandom
 #include <time.h>   //time - for seeding RNG
-#include <string.h>
+#include <string.h> //memcpy
+#include <unistd.h> //gethostname
 //calculate how far back histories need to be kept for the tauR/tauD values we have picked.  As this number is typically ~ 200-300, finding it exactly will provide a nice speed boot
 #ifdef MATLAB
     #include "mex.h" //matlab
@@ -269,7 +270,13 @@ mxArray* print(output out)
 //currently does no checking on input / output, so if you screw up your matlab expect segfaults
 void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
 {
-    if (setup_done==0) {setup();setup_done=1;printf("done setup\n");}
+    if (setup_done==0) 
+    {
+        char* buffer = malloc(1024);
+        gethostname(buffer,1023);
+        if (!strcmp(buffer,"headnode.physics.usyd.edu.au")) {printf("DON'T RUN THIS CODE ON HEADNODE\n");exit(EXIT_FAILURE);}
+        setup();setup_done=1;printf("done setup\n");
+    }
     const float* inputdata = mxGetData(prhs[0]);
     matlab_step(inputdata);
     plhs[0]=mxCreateNumericMatrix(grid_size,grid_size,mxSINGLE_CLASS,mxREAL);
@@ -307,6 +314,9 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
 #endif
 int main()
 {
+    char* buffer = malloc(1024);
+    gethostname(buffer,1023);
+    if (!strcmp(buffer,"headnode.physics.usyd.edu.au")) {printf("DON'T RUN THIS CODE ON HEADNODE\n");exit(EXIT_FAILURE);}
     setup();
     float* input=calloc(sizeof(float),grid_size*grid_size);
     randinit(input);

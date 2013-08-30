@@ -1,4 +1,6 @@
 //This is a good candidate for using C++ here to create a generic class
+#ifndef RINGBUFFER
+#define RINGBUFFER
 #define RINGBUFFER_DEF(A) typedef struct  \
 {                               \
     A** data;                   \
@@ -12,3 +14,4 @@
         {out=_input.data[_input.curidx-offset];} \
         else                                    \
         {out=_input.data[_input.curidx-offset+_input.count];}
+#endif

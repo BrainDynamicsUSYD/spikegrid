@@ -43,4 +43,19 @@ extern int couple_array_size;
 extern float* potentials;
 extern float* potentials2;
 #define conductance_array_size (grid_size + 2*couplerange)
+
+//STDP related constants
+extern const float stdp_limit;
+extern const float  stdp_tau;
+extern const float stdp_strength;
+
+typedef enum ON_OFF {ON=0,OFF=1} on_off;
+
+typedef struct model_features
+{
+	on_off STDP;
+} model_features;
+
+
+extern const model_features features;
 #endif

@@ -40,3 +40,11 @@ const float glk     = 0.05;                 //leak conductance (ms^-1)
 int couple_array_size;
 float* potentials;
 float* potentials2;
+
+//STDP
+const float stdp_limit=0.1;
+const float stdp_tau = 20;
+const float stdp_strength = 0.0004;
+
+//features
+const model_features features = {.STDP=ON};

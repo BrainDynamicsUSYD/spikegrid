@@ -2,6 +2,8 @@
 #include "parameters.h"
 #include "helpertypes.h"
 #include "coupling.h"
+#include "STDP.h"
+
 #include "assert.h"
 #include <math.h> //exp
 #include <stdio.h> //printf
@@ -13,7 +15,7 @@
     #include "mex.h" //matlab
     #include "matrix.h"  //matlab
 #endif
-RINGBUFFER_DEF(coords)
+float* STDP_connections;
 //creates a random initial condition - small fluctuations away from Vrt
 void randinit(float* input)
 {
@@ -35,9 +37,32 @@ void setcaptests()
     assert (setcap(2.0,0.5,1E-6)==270);
 }
 
+//add gE/gI when using STDP - untested
+void evolvept_STDP (const int x,const  int y,const float* const __restrict connections_STDP,const float Estrmod,const float Istrmod,float* __restrict gE,float* __restrict gI)
+{
+    //ex coupling
+    if (features.STDP == OFF) {return;}
+    for (int i = 0; i < couple_array_size;i++)
+    {
+        const int outoff = (x +i )*conductance_array_size +y;//as gE and gI are larger than the neuron grid size, don't have to worry about wrapping
+        for (int j = 0 ; j<couple_array_size;j++) 
+        {
+            const int coupleidx =(x*grid_size +y)*couple_array_size*couple_array_size + i*couple_array_size + j;
+            if (connections_STDP[coupleidx] > 0) //add either to gE or gI
+            {
+                gE[outoff+j] += connections_STDP[coupleidx]*Estrmod;
+            }
+            else
+            {
+                gI[outoff+j] += -(connections_STDP[coupleidx]*Istrmod);
+            }
+        }
+    } 
+}
+
 //add conductance from a firing neuron the gE and gI arrays
 ////TODO: add the skip part to skip zero entries as in the threestate code
-void evolvept (const int x,const  int y,const float* const __restrict connections,const float Estrmod,const float Istrmod,float* __restrict gE,float* __restrict gI)
+void evolvept (const int x,const  int y,const float* const __restrict connections,const float Estrmod,const float Istrmod,float* __restrict gE,float* __restrict gI,const float* STDP_CONNS)
 {
     //ex coupling
     
@@ -57,6 +82,7 @@ void evolvept (const int x,const  int y,const float* const __restrict connection
             }
         }
     } 
+    evolvept_STDP(x,y,STDP_CONNS,Estrmod,Istrmod,gE,gI);
 }
 void fixboundary(float* __restrict gE, float* __restrict gI)
 {
@@ -88,10 +114,11 @@ void fixboundary(float* __restrict gE, float* __restrict gI)
 float rhs_func (const float V,const float gE,const float gI) {return -(glk*(V-Vlk) + gE*(V-Vex) +gI*(V-Vin));}
 float gE[conductance_array_size*conductance_array_size]; //gE/gI matrices are reused in each call to minimise allocations
 float gI[conductance_array_size*conductance_array_size];
-void step1 ( const float* const __restrict connections,coords_ringbuffer* fdata,const float* const __restrict input,float* output,const int time)
+//step the model through time
+void step1 ( const float* const __restrict connections,coords_ringbuffer* fdata,const float* const __restrict input,float* output)
 {
     coords* current_firestore = fdata->data[fdata->curidx];//get the thing for currently firing neurons
-    memset(gE,0,sizeof(float)*conductance_array_size*conductance_array_size);
+    memset(gE,0,sizeof(float)*conductance_array_size*conductance_array_size); //zero the gE/gI matrices so they can be reused
     memset(gI,0,sizeof(float)*conductance_array_size*conductance_array_size);
     for (int i=1;i<fdata->count;i++) //start at 1 so we don't get currently firing (which should be empty anyway)
     {
@@ -104,7 +131,7 @@ void step1 ( const float* const __restrict connections,coords_ringbuffer* fdata,
         while (fire_with_this_lag[idx].x != -1)
         {
             coords c = fire_with_this_lag[idx]; //add conductances
-            evolvept(c.x,c.y,connections,Estr,Istr,gE,gI);
+            evolvept(c.x,c.y,connections,Estr,Istr,gE,gI,STDP_connections);
             idx++;
         }
     }
@@ -158,6 +185,7 @@ void step1 ( const float* const __restrict connections,coords_ringbuffer* fdata,
 
 coords_ringbuffer* spikes;
 float* connections;
+//allocate memory - that sort of thing
 void setup()
 {
     couple_array_size=2*couplerange+1;
@@ -177,6 +205,7 @@ void setup()
     potentials=calloc(sizeof(float),grid_size*grid_size);
     potentials2=calloc(sizeof(float),grid_size*grid_size);
     connections=CreateCouplingMatrix();
+    STDP_connections = calloc(sizeof(float),grid_size*grid_size*couple_array_size*couple_array_size);
 
 }
 int mytime=0;
@@ -184,11 +213,60 @@ void matlab_step(const float* inp)
 {
     mytime++;
     spikes->curidx=mytime%(spikes->count);
-    step1(connections,spikes,inp,potentials2,mytime);
+    step1(connections,spikes,inp,potentials2);
+    if (features.STDP==ON)
+    {
+        doSTDP(STDP_connections,spikes,connections,stdp_strength);
+    }
    
 }
 int setup_done=0;
 #ifdef MATLAB
+//some classes for returning the data to matlab
+typedef enum print_type_e {FLOAT=1} print_type;
+typedef enum array_size_e {LARGE=2} array_size;
+typedef struct output_s 
+{
+    char* name;
+    void* data;
+    print_type type;
+    array_size size;
+} output;
+output Outputabble[]={
+    {"gE",gE,FLOAT,LARGE}, //gE is a 'large' matrix - as it wraps around the edges
+    {"gI",gI,FLOAT,LARGE}, //same for gI
+    {NULL,0,0,0}};         //a marker that we are at the end of the outputabbles list
+//this function is incredibly messy.  
+mxArray* print(output out)
+{
+    char* data = out.data; //use char as sizeof(char)==1 always
+    int vsize;
+    mxArray* ret;
+    switch (out.type)
+    {
+        case FLOAT: //need to know how much data to copy and what sort of matlab array to create
+            ret = mxCreateNumericMatrix(grid_size,grid_size,mxSINGLE_CLASS,mxREAL);
+            vsize=sizeof(float);
+            break;
+    }
+    char* datapointer=(char*)mxGetPr(ret);//use char for same reasons as above
+    switch (out.size)
+    {   //TODO: add normal array size
+        case LARGE:
+            for (int i=0;i<grid_size;i++)
+            {
+                for (int j=0;j<grid_size;j++)
+                {   //I think this line is correct - it is very messy
+                    memcpy(&datapointer[vsize*(i*grid_size+j)],&data[((i+couplerange)*conductance_array_size + j + couplerange)*vsize],vsize);
+                }
+            }
+            break;
+
+    }
+    return ret;
+}
+//function called by matlab
+//currently does no checking on input / output, so if you screw up your matlab expect segfaults
 void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
 {
     if (setup_done==0) {setup();setup_done=1;printf("done setup\n");}
@@ -203,6 +281,28 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
             pointer[i*grid_size+j]=potentials2[i*grid_size + j];
         }
     }
+    if (nrhs>1)
+    {
+        int rhsidx = 1;
+        while (rhsidx<nrhs)
+        {
+            char* data=malloc(sizeof(char)*1024);
+            mxGetString(prhs[rhsidx],data,1023);
+            int outidx = 0;
+            while (Outputabble[outidx].name != NULL)
+            {
+                if (!strcmp(Outputabble[outidx].name,data))
+                {
+                    plhs[rhsidx]=print(Outputabble[outidx]);
+                    outidx=-1;
+                    break;
+                }
+            }
+            if (outidx != -1) {printf("UNKNOWN THING TO OUTPUT\n");}
+            free(data);
+            rhsidx++;
+        }
+    }
 }
 #endif
 int main()
@@ -210,7 +310,7 @@ int main()
     setup();
     float* input=calloc(sizeof(float),grid_size*grid_size);
     randinit(input);
-    while (mytime<1000)
+    while (mytime<100)
     {
         matlab_step(input);
         for (int i=0;i<grid_size;i++)

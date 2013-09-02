@@ -160,6 +160,10 @@ void step1 ( const float* const __restrict connections,coords_ringbuffer* fdata,
                 current_firestore[this_fcount] =c;
                 output[x*grid_size+y]=Vrt;
                 this_fcount++;
+                if (Output==ON)
+                {
+                    printf("%i,%i;",x,y);
+                }
             }
             else if (((float)random())/((float)RAND_MAX) < (rate*0.001*dt))
             {
@@ -181,7 +185,8 @@ void step1 ( const float* const __restrict connections,coords_ringbuffer* fdata,
         }
     }
     current_firestore[this_fcount].x=-1;
-    
+    if (Output==ON) {printf("\n");}
+
 }
 
 coords_ringbuffer* spikes;

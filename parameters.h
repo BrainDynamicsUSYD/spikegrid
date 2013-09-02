@@ -58,4 +58,8 @@ typedef struct model_features
 
 
 extern const model_features features;
+
+
+//output constants
+extern const on_off Output;
 #endif

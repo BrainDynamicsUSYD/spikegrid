@@ -48,3 +48,5 @@ const float stdp_strength = 0.0004;
 
 //features
 const model_features features = {.STDP=ON};
+
+const on_off Output = ON;

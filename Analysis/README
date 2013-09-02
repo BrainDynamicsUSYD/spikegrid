@@ -1,0 +1,13 @@
+This folder currently contains two classification programs
+
+Classify.exe will take a sequence of `x1,y1;x2,y2;` coordinates with each time step on a new line and convert it to a sequence of wave center locations.
+
+Analysis.exe will then calculate the MSD.
+
+Some parameters may need to be changed at the top of the files.
+
+easiest way to run this whole mess is to put your input files into input/...
+
+Running ./parallel.sh will call both programs correctly and put the output into out.
+
+You can then use msdplot.m to plot everything on a log-log scale in matlab

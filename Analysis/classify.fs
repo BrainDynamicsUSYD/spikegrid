@@ -1,11 +1,9 @@
-module Classify
 open System.Collections.Generic
 open System.IO
 open Arrayops
 open Params
 open System.Linq
 let inline makefloat (a,b) = float a, float b
-let inline pointadd (a,b) (c,d) = a+c,b+d
 let inline scale (a,b) v = v*a,v*b
 let inline pointsub (a,b) (c,d) = a-c,b-d
 let newminus a b =
@@ -27,37 +25,14 @@ let makeCoordf (x,y) =
              else if y < (size |> float) then y
              else y - (size |> float)
     rx,ry
-type Class = 
-    |Firing
-    |Grouped of int
-    |NotFiring
-let makeCoord (x,y) = 
-    let rx = if x < 0 then x+size
-             else if x < size then x
-             else x - size
-    let ry = if y < 0 then y+size
-             else if y < size then y
-             else y - size
-    rx,ry
+
+
 let Center points = 
     let factor = 1.0 / (float (points |> Array.length))
     let pt1 = makefloat points.[0]
     let average = ref ((makefloat points.[0])) 
     points |> Array.iter (fun elem -> average := pointadd !average (scale (newminus (makefloat elem) pt1) factor))
     !average |> makeCoordf
-let neighbours point (arr:Class[,]) group=
-    let queue = Queue<_>()
-    let ret = List<_>()
-    queue.Enqueue(point)
-    while queue.Count <> 0 do
-        let pt = queue.Dequeue()
-        let n = mods 
-                |> List.map (pointadd pt >> makeCoord) 
-                |> List.filter (fun (x,y) -> arr.[x,y] = Firing )
-        n |> List.iter (fun (x,y) -> arr.[x,y] <- Grouped(group))
-        n |> List.iter (ret.Add >> ignore)
-        n |> List.iter (queue.Enqueue)
-    ret
 let readline (parsed:System.IO.StreamReader) =
     match parsed.ReadLine() with
     |null -> [||]
@@ -65,7 +40,7 @@ let readline (parsed:System.IO.StreamReader) =
         |> Array.filter (fun t -> t <> "")
         |> Array.choose (fun t -> 
                 match t.Split(',') with
-                |[|a;b|] -> Some((int a)-1,(int b)-1)
+                |[|a;b|] -> Some((int a),(int b))
                 |_ ->     None  
                 )
 let classify reader writer=

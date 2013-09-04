@@ -3,36 +3,8 @@ open System.IO
 open Arrayops
 open Params
 open System.Linq
-let inline makefloat (a,b) = float a, float b
-let inline scale (a,b) v = v*a,v*b
-let inline pointsub (a,b) (c,d) = a-c,b-d
-let newminus a b =
-    let ax,ay = pointsub a b
-    let rx = 
-        if ax > (float size / 2.0) then ax - (float size)  
-        else if ax < (-float size / 2.0) then ax + float size
-        else ax
-    let ry = 
-        if ay > (float size / 2.0) then ay - (float size)
-        else if ay < (-float size / 2.0) then ay + float size 
-        else ay
-    rx,ry
-let makeCoordf (x,y) = 
-    let rx = if x < 0.0 then x+(size |> float)
-             else if x < (size |> float) then x
-             else x - (size |> float)
-    let ry = if y < 0.0 then y+(size |> float)
-             else if y < (size |> float) then y
-             else y - (size |> float)
-    rx,ry
 
 
-let Center points = 
-    let factor = 1.0 / (float (points |> Array.length))
-    let pt1 = makefloat points.[0]
-    let average = ref ((makefloat points.[0])) 
-    points |> Array.iter (fun elem -> average := pointadd !average (scale (newminus (makefloat elem) pt1) factor))
-    !average |> makeCoordf
 let readline (parsed:System.IO.StreamReader) =
     match parsed.ReadLine() with
     |null -> [||]

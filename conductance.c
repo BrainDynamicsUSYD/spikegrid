@@ -3,7 +3,7 @@
 #include "helpertypes.h"
 #include "coupling.h"
 #include "STDP.h"
-
+#include "STD.h"
 #include "assert.h"
 #include <math.h> //exp
 #include <stdio.h> //printf
@@ -116,7 +116,7 @@ float rhs_func (const float V,const float gE,const float gI) {return -(Param.mis
 float gE[conductance_array_size*conductance_array_size]; //gE/gI matrices are reused in each call to minimise allocations
 float gI[conductance_array_size*conductance_array_size];
 //step the model through time
-void step1 ( const float* const __restrict connections,coords_ringbuffer* fdata,const float* const __restrict input,float* output)
+void step1 ( const float* const __restrict connections,coords_ringbuffer* fdata,const float* const __restrict input,float* output,const int time)
 {
     coords* current_firestore = fdata->data[fdata->curidx];//get the thing for currently firing neurons
     memset(gE,0,sizeof(float)*conductance_array_size*conductance_array_size); //zero the gE/gI matrices so they can be reused
@@ -132,7 +132,22 @@ void step1 ( const float* const __restrict connections,coords_ringbuffer* fdata,
         while (fire_with_this_lag[idx].x != -1)
         {
             coords c = fire_with_this_lag[idx]; //add conductances
-            evolvept(c.x,c.y,connections,Estr,Istr,gE,gI,STDP_connections);
+            if (Param.features.STD == ON)
+            {
+                const int stdidx=c.x*grid_size+c.y;
+                const float dt = ((float)(time-STD.ftimes[stdidx]))/1000.0/Param.time.dt;//calculate inter spike interval in seconds
+                STD.ftimes[stdidx]=time; //update the time
+                const float prevu=STD.U[stdidx]; //need the previous U value
+                STD.U[stdidx] = Param.STD.U + STD.U[stdidx]*(1.0-Param.STD.U)*exp(-dt/Param.STD.F);
+                STD.R[stdidx] = 1.0 + (STD.R[stdidx] - prevu*STD.R[stdidx] - 1.0)*exp(-dt/Param.STD.D);
+                const float strmod = STD.U[stdidx] * STD.R[stdidx] * 2.0; //multiplication by 2 is not in the cited papers, but you could eliminate it by multiplying some other parameters by 2, but multiplying by 2 here enables easier comparison with the non-STD model
+                //TODO: I don't like how I have 2 different calls to evolvept - need better solution.
+                evolvept(c.x,c.y,connections,Estr*strmod,Istr*strmod,gE,gI,STDP_connections);
+            }
+            else
+            {
+                evolvept(c.x,c.y,connections,Estr,Istr,gE,gI,STDP_connections);
+            }
             idx++;
         }
     }
@@ -211,6 +226,7 @@ void setup()
     potentials2=calloc(sizeof(float),grid_size*grid_size);
     connections=CreateCouplingMatrix();
     STDP_connections = calloc(sizeof(float),grid_size*grid_size*couple_array_size*couple_array_size);
+    if (Param.features.STD == ON) {STD_init();}
 
 }
 int mytime=0;
@@ -218,7 +234,7 @@ void matlab_step(const float* inp)
 {
     mytime++;
     spikes->curidx=mytime%(spikes->count);
-    step1(connections,spikes,inp,potentials2);
+    step1(connections,spikes,inp,potentials2,mytime);
     if (Param.features.STDP==ON)
     {
         doSTDP(STDP_connections,spikes,connections);

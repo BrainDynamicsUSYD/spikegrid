@@ -25,7 +25,7 @@ void randinit(float* input)
     {
         for (int y=0;y<grid_size;y++)
         {
-            input[x*grid_size + y ] = ((float)random())/((float)RAND_MAX)/20.0 + Vrt;
+            input[x*grid_size + y ] = ((float)random())/((float)RAND_MAX)/20.0 + Param.potential.Vrt;
         }
     }
 }
@@ -42,7 +42,7 @@ void setcaptests()
 void evolvept_STDP (const int x,const  int y,const float* const __restrict connections_STDP,const float Estrmod,const float Istrmod,float* __restrict gE,float* __restrict gI)
 {
     //ex coupling
-    if (features.STDP == OFF) {return;}
+    if (Param.features.STDP == OFF) {return;}
     for (int i = 0; i < couple_array_size;i++)
     {
         const int outoff = (x +i )*conductance_array_size +y;//as gE and gI are larger than the neuron grid size, don't have to worry about wrapping
@@ -112,7 +112,7 @@ void fixboundary(float* __restrict gE, float* __restrict gI)
 
 }
 //rhs_func used when integrating the neurons forward through time
-float rhs_func (const float V,const float gE,const float gI) {return -(glk*(V-Vlk) + gE*(V-Vex) +gI*(V-Vin));}
+float rhs_func (const float V,const float gE,const float gI) {return -(Param.misc.glk*(V-Param.potential.Vlk) + gE*(V-Param.potential.Vex) + gI*(V-Param.potential.Vin));}
 float gE[conductance_array_size*conductance_array_size]; //gE/gI matrices are reused in each call to minimise allocations
 float gI[conductance_array_size*conductance_array_size];
 //step the model through time
@@ -125,9 +125,9 @@ void step1 ( const float* const __restrict connections,coords_ringbuffer* fdata,
     {
         coords* fire_with_this_lag;//this is a bit of a funny definition due to macros.
         RINGBUFFER_GETOFFSET(*fdata,i,fire_with_this_lag)
-        const float delta = (float)(i*dt);//small helper constant
-        const float Estr = (1.0/(taudE-taurE))*(exp(-delta/taudE)-exp(-delta/taurE));
-        const float Istr = (1.0/(taudI-taurI))*(exp(-delta/taudI)-exp(-delta/taurI));
+        const float delta = (float)(i*Param.time.dt);//small helper constant
+        const float Estr = (1.0/(Param.synapse.taudE-Param.synapse.taurE))*(exp(-delta/Param.synapse.taudE)-exp(-delta/Param.synapse.taurE));
+        const float Istr = (1.0/(Param.synapse.taudI-Param.synapse.taurI))*(exp(-delta/Param.synapse.taudI)-exp(-delta/Param.synapse.taurI));
         int idx=0; //iterate through all neurons firing with this lag
         while (fire_with_this_lag[idx].x != -1)
         {
@@ -144,9 +144,9 @@ void step1 ( const float* const __restrict connections,coords_ringbuffer* fdata,
             const int idx = (x+couplerange)*conductance_array_size + y + couplerange; //index for gE/gI
             const int idx2=  x*grid_size+y;//index for voltages
             const float rhs1=rhs_func(input[idx2],gE[idx],gI[idx]);
-            const float Vtemp = input[idx2] + 0.5*dt*rhs1;
+            const float Vtemp = input[idx2] + 0.5*Param.time.dt*rhs1;
             const float rhs2=rhs_func(Vtemp,      gE[idx],gI[idx]);
-            output[idx2]=input[idx2]+0.5*dt*(rhs1 + rhs2);
+            output[idx2]=input[idx2]+0.5*Param.time.dt*(rhs1 + rhs2);
         }
     }
     int this_fcount=0;//now find which neurons fired at the current time step
@@ -154,20 +154,20 @@ void step1 ( const float* const __restrict connections,coords_ringbuffer* fdata,
     {
         for (int y=0;y<grid_size;y++)
         {
-            if (input[x*grid_size + y]  > Vth)
+            if (input[x*grid_size + y]  > Param.potential.Vth)
             {
                 const coords c= {x,y}; //required to keep the compiler happy - can't do an inline constructor
                 current_firestore[this_fcount] =c;
-                output[x*grid_size+y]=Vrt;
+                output[x*grid_size+y]=Param.potential.Vrt;
                 this_fcount++;
                 if (Output==ON)
                 {
                     printf("%i,%i;",x,y);
                 }
             }
-            else if (((float)random())/((float)RAND_MAX) < (rate*0.001*dt))
+            else if (((float)random())/((float)RAND_MAX) < (Param.misc.rate*0.001*Param.time.dt))
             {
-                output[x*grid_size+y]=Vth+0.1;//make sure it fires
+                output[x*grid_size+y]=Param.potential.Vth+0.1;//make sure it fires
             }
         }
     }
@@ -180,7 +180,7 @@ void step1 ( const float* const __restrict connections,coords_ringbuffer* fdata,
         while (fire_with_this_lag[idx].x != -1)
         {
             coords c = fire_with_this_lag[idx]; 
-            output[c.x*grid_size+c.y]=Vrt;
+            output[c.x*grid_size+c.y]=Param.potential.Vrt;
             idx++;
         }
     }
@@ -196,8 +196,7 @@ void setup()
 {
     couple_array_size=2*couplerange+1;
     //compute some constants
-    steps = duration/dt;
-    int cap=max(setcap(taudE,taurE,1E-6),setcap(taudI,taurI,1E-6));
+    int cap=max(setcap(Param.synapse.taudE,Param.synapse.taurE,1E-6),setcap(Param.synapse.taudI,Param.synapse.taurI,1E-6));
     //set up our data structure to store spikes
     spikes = malloc(sizeof(coords_ringbuffer));
     spikes->count = cap;
@@ -220,9 +219,9 @@ void matlab_step(const float* inp)
     mytime++;
     spikes->curidx=mytime%(spikes->count);
     step1(connections,spikes,inp,potentials2);
-    if (features.STDP==ON)
+    if (Param.features.STDP==ON)
     {
-        doSTDP(STDP_connections,spikes,connections,stdp_strength);
+        doSTDP(STDP_connections,spikes,connections);
     }
    
 }

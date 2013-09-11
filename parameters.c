@@ -53,7 +53,7 @@ const parameters Param =
     .features =
     {
         .STDP    = OFF,
-        .STD     = ON
+        .STD     = OFF
     }
 };
 

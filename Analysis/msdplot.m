@@ -1,13 +1,17 @@
 clear all
 set(0,'DefaultAxesFontSize',10,'DefaultTextFontSize',10);
-f=[dir('out/*centers')]% ;dir('out/data/*centers')];
+f=[dir('out/**')]% ;dir('out/data/*centers')];
 hold off
 cmap=jet(200);
 valid={};
 vcount=1;
 for x=1:length(f)
     fname=sprintf('out/%s',f(x).name);
-    
+    if strcmp(f(x).name , '.')
+        continue
+    elseif strcmp(f(x).name,'..')
+        continue
+    end
     stat=importdata(fname);
     if isempty(stat)
         dummy____=fname

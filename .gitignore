@@ -15,3 +15,6 @@ res2/*
 */*.swp
 conductance.c.*
 cachegrind.out.*
+Analysis/input/*
+Analysis/data/*
+Analysis/out/*

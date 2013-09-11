@@ -16,7 +16,7 @@ let Size = 100
 [<Literal>] //maximum value of tau to calculate.  It might be possible to set this to length-min as the code is now much faster
 let maxtau = 10000
 [<Literal>] //For the first few timesteps, the random initial conditions dominate.  Throw out all data for t<min
-let min = 100
+let min = 00
 //maximum distance that patterns may travel in a timestep.  
 //If the patterns travel further than this then it is viewed as a pattern dying and a new pattern being created.
 //If this is too small, spurios pattern annhilation / creation events will occur

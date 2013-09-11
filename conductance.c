@@ -1,3 +1,7 @@
+#ifdef MATLAB
+    #include "mex.h" //matlab
+    #include "matrix.h"  //matlab
+#endif
 #include "ringbuffer.h"
 #include "parameters.h"
 #include "helpertypes.h"
@@ -12,10 +16,6 @@
 #include <string.h> //memcpy
 #include <unistd.h> //gethostname
 //calculate how far back histories need to be kept for the tauR/tauD values we have picked.  As this number is typically ~ 200-300, finding it exactly will provide a nice speed boot
-#ifdef MATLAB
-    #include "mex.h" //matlab
-    #include "matrix.h"  //matlab
-#endif
 float* STDP_connections;
 //creates a random initial condition - small fluctuations away from Vrt
 void randinit(float* input)
@@ -200,7 +200,7 @@ void step1 ( const float* const __restrict connections,coords_ringbuffer* fdata,
         }
     }
     current_firestore[this_fcount].x=-1;
-    if (Output==ON) {printf("\n");}
+    if (Output==ON &&time % 10 ==0 ) {printf("\n");}
 
 }
 
@@ -340,7 +340,7 @@ int main()
     setup();
     float* input=calloc(sizeof(float),grid_size*grid_size);
     randinit(input);
-    while (mytime<100)
+    while (mytime<1000)
     {
         matlab_step(input);
         for (int i=0;i<grid_size;i++)

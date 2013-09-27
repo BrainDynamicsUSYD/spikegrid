@@ -1,4 +1,5 @@
 #include "parameters.h"
+#include "coupling.h" //not actually required at the moment but should ensure that function types match
 #include <math.h> //logf / exp
 #include <stdlib.h> //calloc
 /*typedef struct coupling

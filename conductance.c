@@ -136,11 +136,14 @@ void step1 ( const float* const __restrict connections,coords_ringbuffer* fdata,
             if (Param.features.STD == ON)
             {
                 const int stdidx=c.x*grid_size+c.y;
-                const float dt = ((float)(time-STD.ftimes[stdidx]))/1000.0/Param.time.dt;//calculate inter spike interval in seconds
-                STD.ftimes[stdidx]=time; //update the time
-                const float prevu=STD.U[stdidx]; //need the previous U value
-                STD.U[stdidx] = Param.STD.U + STD.U[stdidx]*(1.0-Param.STD.U)*exp(-dt/Param.STD.F);
-                STD.R[stdidx] = 1.0 + (STD.R[stdidx] - prevu*STD.R[stdidx] - 1.0)*exp(-dt/Param.STD.D);
+                if (i==1)
+                {
+                    const float dt = ((float)(time-STD.ftimes[stdidx]))/1000.0/Param.time.dt;//calculate inter spike interval in seconds
+                    STD.ftimes[stdidx]=time; //update the time
+                    const float prevu=STD.U[stdidx]; //need the previous U value
+                    STD.U[stdidx] = Param.STD.U + STD.U[stdidx]*(1.0-Param.STD.U)*exp(-dt/Param.STD.F);
+                    STD.R[stdidx] = 1.0 + (STD.R[stdidx] - prevu*STD.R[stdidx] - 1.0)*exp(-dt/Param.STD.D);
+                }
                 const float strmod = STD.U[stdidx] * STD.R[stdidx] * 2.0; //multiplication by 2 is not in the cited papers, but you could eliminate it by multiplying some other parameters by 2, but multiplying by 2 here enables easier comparison with the non-STD model
                 //TODO: I don't like how I have 2 different calls to evolvept - need better solution.
                 evolvept(c.x,c.y,connections,Estr*strmod,Istr*strmod,gE,gI,STDP_connections);

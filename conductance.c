@@ -9,6 +9,7 @@
 #include "coupling.h"
 #include "STDP.h"
 #include "STD.h"
+#include "movie.h"
 #include "assert.h"
 #include <math.h> //exp
 #include <stdio.h> //printf
@@ -243,13 +244,14 @@ void matlab_step(const float* inp)
     {
         doSTDP(STDP_connections,spikes,connections);
     }
+    if (mytime % 10 == 0) {printVoltage(potentials2);}
    
 }
 int setup_done=0;
 #ifdef MATLAB
 //some classes for returning the data to matlab
 typedef enum print_type_e {FLOAT=1} print_type;
-typedef enum array_size_e {LARGE=2} array_size;
+typedef enum array_size_e {LARGE=2,NORMAL=3} array_size;
 typedef struct output_s 
 {
     char* name;
@@ -260,6 +262,8 @@ typedef struct output_s
 output Outputabble[]={
     {"gE",gE,FLOAT,LARGE}, //gE is a 'large' matrix - as it wraps around the edges
     {"gI",gI,FLOAT,LARGE}, //same for gI
+    {"R",STD.R,FLOAT,NORMAL},
+    {"U",STD.U,FLOAT,NORMAL},
     {NULL,0,0,0}};         //a marker that we are at the end of the outputabbles list
 //this function is incredibly messy.  
 mxArray* print(output out)
@@ -283,6 +287,15 @@ mxArray* print(output out)
                 for (int j=0;j<grid_size;j++)
                 {   //I think this line is correct - it is very messy
                     memcpy(&datapointer[vsize*(i*grid_size+j)],&data[((i+couplerange)*conductance_array_size + j + couplerange)*vsize],vsize);
+                }
+            }
+            break;
+        case NORMAL:
+            for (int i=0;i<grid_size;i++)
+            {
+                for (int j=0;j<grid_size;j++)
+                {   //I think this line is correct - it is very messy
+                    memcpy(&datapointer[vsize*(i*grid_size+j)],&data[(i*grid_size+ j )*vsize],vsize);
                 }
             }
             break;
@@ -328,6 +341,7 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
                     outidx=-1;
                     break;
                 }
+                outidx++;
             }
             if (outidx != -1) {printf("UNKNOWN THING TO OUTPUT\n");}
             free(data);

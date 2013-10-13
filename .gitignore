@@ -18,3 +18,5 @@ cachegrind.out.*
 Analysis/input/*
 Analysis/data/*
 Analysis/out/*
+pics/*
+*.avi

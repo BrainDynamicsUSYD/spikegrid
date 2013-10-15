@@ -3,23 +3,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include "output.h"
+#include "pixeltypes.h"
+#include "taggedarray.h"
 #include "parameters.h"
-/* A coloured pixel. */
-
-typedef struct {
-    uint8_t red;
-    uint8_t green;
-    uint8_t blue;
-} pixel_t;
-
-/* A picture. */
-
-typedef struct  {
-    pixel_t *pixels;
-    size_t width;
-    size_t height;
-} bitmap_t;
-
 // Given "bitmap", this returns the pixel of bitmap at the point ("x", "y").
 pixel_t * pixel_at (bitmap_t * bitmap, const int x, const int y)
 {
@@ -119,36 +106,17 @@ int save_png_to_file (bitmap_t *bitmap, const char *path)
  fopen_failed:
     return status;
 }
-int rescalefloat (const float in)
-{
-    return (int)((in - Param.potential.Vin)/(Param.potential.Vth-Param.potential.Vin)*255.0);
-}
+
 int printcount=0;
 char fnamebuffer[30];
 void printVoltage (const float* const voltages)
 {
-    bitmap_t b = {.pixels=malloc(sizeof(pixel_t)*grid_size*grid_size), .width=grid_size, .height=grid_size};
-    for (int i=0;i<grid_size;i++)
-    {
-        for (int j=0;j<grid_size;j++)
-        {
-            const float val =  voltages[i*grid_size + j ];
-            if (val > Param.potential.Vrt) 
-            {
-                b.pixels[i*grid_size+j].red = 255;
-                b.pixels[i*grid_size+j].green = 255;
-                b.pixels[i*grid_size+j].blue = 255;
-            }
-            else
-            {
-                b.pixels[i*grid_size+j].red = rescalefloat(val);
-                b.pixels[i*grid_size+j].green = 0;
-                b.pixels[i*grid_size+j].blue = 0;
-            }
-        }
-    }
+
+    tagged_array v = {.data=voltages,.size=grid_size};
+    bitmap_t* b = FloattoBitmap(v,Param.potential.Vrt,Param.potential.Vin);
     sprintf(fnamebuffer,"pics/%i.png",printcount);
     printcount++;
-    save_png_to_file(&b,fnamebuffer);
-    free(b.pixels);
+    save_png_to_file(b,fnamebuffer);
+    free(b->pixels);
+    free(b);
 }

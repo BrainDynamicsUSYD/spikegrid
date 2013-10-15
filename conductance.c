@@ -1,8 +1,4 @@
-#ifdef MATLAB
-    #undef __STDC_UTF_16__ //This fixes a bug when trying to use a vaguely modern version of GCC with matlab.  Unfortunately it produces a warning
-    #include "mex.h" //matlab
-    #include "matrix.h"  //matlab
-#endif
+#include "matlab_includes.h"
 #include "ringbuffer.h"
 #include "parameters.h"
 #include "helpertypes.h"
@@ -10,6 +6,7 @@
 #include "STDP.h"
 #include "STD.h"
 #include "movie.h"
+#include "output.h"
 #include "assert.h"
 #include <math.h> //exp
 #include <stdio.h> //printf
@@ -250,59 +247,13 @@ void matlab_step(const float* inp)
 int setup_done=0;
 #ifdef MATLAB
 //some classes for returning the data to matlab
-typedef enum print_type_e {FLOAT=1} print_type;
-typedef enum array_size_e {LARGE=2,NORMAL=3} array_size;
-typedef struct output_s 
-{
-    char* name;
-    void* data;
-    print_type type;
-    array_size size;
-} output;
-output Outputabble[]={
-    {"gE",gE,FLOAT,LARGE}, //gE is a 'large' matrix - as it wraps around the edges
-    {"gI",gI,FLOAT,LARGE}, //same for gI
-    {"R",STD.R,FLOAT,NORMAL},
-    {"U",STD.U,FLOAT,NORMAL},
-    {NULL,0,0,0}};         //a marker that we are at the end of the outputabbles list
-//this function is incredibly messy.  
-mxArray* print(output out)
-{
-    char* data = out.data; //use char as sizeof(char)==1 always
-    int vsize;
-    mxArray* ret;
-    switch (out.type)
-    {
-        case FLOAT: //need to know how much data to copy and what sort of matlab array to create
-            ret = mxCreateNumericMatrix(grid_size,grid_size,mxSINGLE_CLASS,mxREAL);
-            vsize=sizeof(float);
-            break;
-    }
-    char* datapointer=(char*)mxGetPr(ret);//use char for same reasons as above
-    switch (out.size)
-    {   //TODO: add normal array size
-        case LARGE:
-            for (int i=0;i<grid_size;i++)
-            {
-                for (int j=0;j<grid_size;j++)
-                {   //I think this line is correct - it is very messy
-                    memcpy(&datapointer[vsize*(i*grid_size+j)],&data[((i+couplerange)*conductance_array_size + j + couplerange)*vsize],vsize);
-                }
-            }
-            break;
-        case NORMAL:
-            for (int i=0;i<grid_size;i++)
-            {
-                for (int j=0;j<grid_size;j++)
-                {   //I think this line is correct - it is very messy
-                    memcpy(&datapointer[vsize*(i*grid_size+j)],&data[(i*grid_size+ j )*vsize],vsize);
-                }
-            }
-            break;
 
-    }
-    return ret;
-}
+output Outputabble[]={ //note - neat feature - missing elements initailized to 0
+    {"gE",{gE,conductance_array_size,couplerange}}, //gE is a 'large' matrix - as it wraps around the edges
+    {"gI",{gE,conductance_array_size,couplerange}}, //gE is a 'large' matrix - as it wraps around the edges
+    {"R",{STD.R,grid_size}},
+    {"U",{STD.R,grid_size}},
+    {NULL}};         //a marker that we are at the end of the outputabbles list
 //function called by matlab
 //currently does no checking on input / output, so if you screw up your matlab expect segfaults
 void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
@@ -312,7 +263,7 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
         char* buffer = malloc(1024);
         gethostname(buffer,1023);
         if (!strcmp(buffer,"headnode.physics.usyd.edu.au")) {printf("DON'T RUN THIS CODE ON HEADNODE\n");exit(EXIT_FAILURE);}
-        setup();setup_done=1;printf("done setup\n");
+        printf("setup started\n");setup();setup_done=1;printf("done setup\n");
     }
     const float* inputdata = mxGetData(prhs[0]);
     matlab_step(inputdata);
@@ -337,7 +288,7 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
             {
                 if (!strcmp(Outputabble[outidx].name,data))
                 {
-                    plhs[rhsidx]=print(Outputabble[outidx]);
+                    plhs[rhsidx]=outputToMxArray(Outputabble[outidx].data);
                     outidx=-1;
                     break;
                 }

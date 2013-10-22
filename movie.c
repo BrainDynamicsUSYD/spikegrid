@@ -8,7 +8,7 @@
 #include "taggedarray.h"
 #include "parameters.h"
 // Given "bitmap", this returns the pixel of bitmap at the point ("x", "y").
-pixel_t * pixel_at (bitmap_t * bitmap, const int x, const int y)
+pixel_t __attribute((const,pure)) * pixel_at (bitmap_t * bitmap, const int x, const int y)
 {
     return bitmap->pixels + bitmap->width * y + x;
 }

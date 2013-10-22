@@ -4,7 +4,7 @@
 #include <stdlib.h> //calloc
 
 Compute_float erange;
-Compute_float exrange()
+ Compute_float __attribute__((const))exrange()
 {
    return -(Param.couple.sigE*Param.couple.sigI*logf(Param.couple.WE/Param.couple.WI))/(Param.couple.sigE-Param.couple.sigI); //from mathematica
 }

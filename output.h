@@ -6,7 +6,7 @@
 typedef struct {
     char* name;
     tagged_array data;
-} output;
+} output_s;
 bitmap_t* FloattoBitmap(const tagged_array input,const Compute_float maxval, const Compute_float minval);
 #ifdef MATLAB
 mxArray* outputToMxArray (const tagged_array input); 

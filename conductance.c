@@ -38,7 +38,8 @@ void setcaptests()
 }
 
 //add gE/gI when using STDP - untested
-void evolvept_STDP (const int x,const  int y,const Compute_float* const __restrict connections_STDP,const Compute_float Estrmod,const Compute_float Istrmod,Compute_float* __restrict gE,Compute_float* __restrict gI)
+//when STDP is turned off, gcc will warn about this function needing const.  It is wrong
+void evolvept_STDP  (const int x,const  int y,const Compute_float* const __restrict connections_STDP,const Compute_float Estrmod,const Compute_float Istrmod,Compute_float* __restrict gE,Compute_float* __restrict gI)
 {
     //ex coupling
     if (Param.features.STDP == OFF) {return;}
@@ -111,7 +112,7 @@ void fixboundary(Compute_float* __restrict gE, Compute_float* __restrict gI)
 
 }
 //rhs_func used when integrating the neurons forward through time
-Compute_float rhs_func (const Compute_float V,const Compute_float gE,const Compute_float gI) {return -(Param.misc.glk*(V-Param.potential.Vlk) + gE*(V-Param.potential.Vex) + gI*(V-Param.potential.Vin));}
+Compute_float __attribute__((const)) rhs_func  (const Compute_float V,const Compute_float gE,const Compute_float gI) {return -(Param.misc.glk*(V-Param.potential.Vlk) + gE*(V-Param.potential.Vex) + gI*(V-Param.potential.Vin));}
 Compute_float gE[conductance_array_size*conductance_array_size]; //gE/gI matrices are reused in each call to minimise allocations
 Compute_float gI[conductance_array_size*conductance_array_size];
 //step the model through time
@@ -177,7 +178,7 @@ void step1 ( const Compute_float* const __restrict connections,coords_ringbuffer
                 current_firestore[this_fcount] =c;
                 output[x*grid_size+y]=Param.potential.Vrt;
                 this_fcount++;
-                if (Output==ON)
+                if (Param.features.Output==ON)
                 {
                     printf("%i,%i;",x,y);
                 }
@@ -202,7 +203,7 @@ void step1 ( const Compute_float* const __restrict connections,coords_ringbuffer
         }
     }
     current_firestore[this_fcount].x=-1;
-    if (Output==ON &&time % 10 ==0 ) {printf("\n");}
+    if (Param.features.Output==ON &&time % 10 ==0 ) {printf("\n");}
 
 }
 

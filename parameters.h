@@ -69,10 +69,10 @@ static const parameters Param =
     },
     .features =
     {
-        .STDP    = OFF,
-        .STD            = ON             
+        .STDP       = OFF,
+        .STD        = ON ,
+        .Output     = ON
     }
 };
-static const on_off Output = ON;
 #endif
 

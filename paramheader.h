@@ -1,3 +1,5 @@
+//making OFF 0 will turn off features by default
+typedef enum ON_OFF {OFF=0,ON=1} on_off;
 typedef struct time_parameters
 {
     const Compute_float dt   ;                   //time step (ms)
@@ -48,13 +50,12 @@ typedef struct STD_parameters
     const Compute_float D;
     const Compute_float F;
 } STD_parameters;
-//making OFF 0 will turn off features by default
-typedef enum ON_OFF {OFF=0,ON=1} on_off;
 
 typedef struct model_features
 {
 	const on_off STDP; //enable / disable STDP (spike-timing dependent plasticity)
     const on_off STD;  //enable / disable STD  (short term depression)
+    const on_off Output;
 } model_features;
 
 //output constants

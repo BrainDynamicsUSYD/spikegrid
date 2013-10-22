@@ -1,8 +1,9 @@
 #ifndef PARAMATERS
 #define PARAMATERS
+//the following typedef must be before the include to get the right compute types
+//typedef float Compute_float ; //for speed
+typedef double Compute_float ; //for accuracy
 #include "paramheader.h"
-typedef float Compute_float ; //for speed
-//typedef Compute_float double; //for accuracy
 
 //Architecture properties
 #define grid_size 100
@@ -11,10 +12,11 @@ typedef float Compute_float ; //for speed
 
 //some computed constants which are useful
 int couple_array_size;
-float* potentials;
-float* potentials2;
+Compute_float* potentials;
+Compute_float* potentials2;
 
 ////TODO: compiler does not warn on missing elements - fix
+//Fun note - with the right optimisations GCC actually will pull these constants inline (for example disassemble evolvept_STDP with STDP off)
 static const parameters Param =
 {
     .time =

@@ -15,16 +15,16 @@
 #include <string.h> //memcpy
 #include <unistd.h> //gethostname
 //calculate how far back histories need to be kept for the tauR/tauD values we have picked.  As this number is typically ~ 200-300, finding it exactly will provide a nice speed boot
-float* STDP_connections;
+Compute_float* STDP_connections;
 //creates a random initial condition - small fluctuations away from Vrt
-void randinit(float* input)
+void randinit(Compute_float* input)
 {
     srandom((unsigned)(time(0)));
     for (int x=0;x<grid_size;x++)
     {
         for (int y=0;y<grid_size;y++)
         {
-            input[x*grid_size + y ] = ((float)random())/((float)RAND_MAX)/20.0 + Param.potential.Vrt;
+            input[x*grid_size + y ] = ((Compute_float)random())/((Compute_float)RAND_MAX)/20.0 + Param.potential.Vrt;
         }
     }
 }
@@ -38,7 +38,7 @@ void setcaptests()
 }
 
 //add gE/gI when using STDP - untested
-void evolvept_STDP (const int x,const  int y,const float* const __restrict connections_STDP,const float Estrmod,const float Istrmod,float* __restrict gE,float* __restrict gI)
+void evolvept_STDP (const int x,const  int y,const Compute_float* const __restrict connections_STDP,const Compute_float Estrmod,const Compute_float Istrmod,Compute_float* __restrict gE,Compute_float* __restrict gI)
 {
     //ex coupling
     if (Param.features.STDP == OFF) {return;}
@@ -62,7 +62,7 @@ void evolvept_STDP (const int x,const  int y,const float* const __restrict conne
 
 //add conductance from a firing neuron the gE and gI arrays
 ////TODO: add the skip part to skip zero entries as in the threestate code
-void evolvept (const int x,const  int y,const float* const __restrict connections,const float Estrmod,const float Istrmod,float* __restrict gE,float* __restrict gI,const float* STDP_CONNS)
+void evolvept (const int x,const  int y,const Compute_float* const __restrict connections,const Compute_float Estrmod,const Compute_float Istrmod,Compute_float* __restrict gE,Compute_float* __restrict gI,const Compute_float* STDP_CONNS)
 {
     //ex coupling
     
@@ -84,7 +84,7 @@ void evolvept (const int x,const  int y,const float* const __restrict connection
     } 
     evolvept_STDP(x,y,STDP_CONNS,Estrmod,Istrmod,gE,gI);
 }
-void fixboundary(float* __restrict gE, float* __restrict gI)
+void fixboundary(Compute_float* __restrict gE, Compute_float* __restrict gI)
 {
     //top + bottom
     for (int i=0;i<couplerange;i++)
@@ -111,22 +111,22 @@ void fixboundary(float* __restrict gE, float* __restrict gI)
 
 }
 //rhs_func used when integrating the neurons forward through time
-float rhs_func (const float V,const float gE,const float gI) {return -(Param.misc.glk*(V-Param.potential.Vlk) + gE*(V-Param.potential.Vex) + gI*(V-Param.potential.Vin));}
-float gE[conductance_array_size*conductance_array_size]; //gE/gI matrices are reused in each call to minimise allocations
-float gI[conductance_array_size*conductance_array_size];
+Compute_float rhs_func (const Compute_float V,const Compute_float gE,const Compute_float gI) {return -(Param.misc.glk*(V-Param.potential.Vlk) + gE*(V-Param.potential.Vex) + gI*(V-Param.potential.Vin));}
+Compute_float gE[conductance_array_size*conductance_array_size]; //gE/gI matrices are reused in each call to minimise allocations
+Compute_float gI[conductance_array_size*conductance_array_size];
 //step the model through time
-void step1 ( const float* const __restrict connections,coords_ringbuffer* fdata,const float* const __restrict input,float* output,const int time)
+void step1 ( const Compute_float* const __restrict connections,coords_ringbuffer* fdata,const Compute_float* const __restrict input,Compute_float* output,const int time)
 {
     coords* current_firestore = fdata->data[fdata->curidx];//get the thing for currently firing neurons
-    memset(gE,0,sizeof(float)*conductance_array_size*conductance_array_size); //zero the gE/gI matrices so they can be reused
-    memset(gI,0,sizeof(float)*conductance_array_size*conductance_array_size);
+    memset(gE,0,sizeof(Compute_float)*conductance_array_size*conductance_array_size); //zero the gE/gI matrices so they can be reused
+    memset(gI,0,sizeof(Compute_float)*conductance_array_size*conductance_array_size);
     for (int i=1;i<fdata->count;i++) //start at 1 so we don't get currently firing (which should be empty anyway)
     {
         coords* fire_with_this_lag;//this is a bit of a funny definition due to macros.
         RINGBUFFER_GETOFFSET(*fdata,i,fire_with_this_lag)
-        const float delta = (float)(i*Param.time.dt);//small helper constant
-        const float Estr = (1.0/(Param.synapse.taudE-Param.synapse.taurE))*(exp(-delta/Param.synapse.taudE)-exp(-delta/Param.synapse.taurE));
-        const float Istr = (1.0/(Param.synapse.taudI-Param.synapse.taurI))*(exp(-delta/Param.synapse.taudI)-exp(-delta/Param.synapse.taurI));
+        const Compute_float delta = (Compute_float)(i*Param.time.dt);//small helper constant
+        const Compute_float Estr = (1.0/(Param.synapse.taudE-Param.synapse.taurE))*(exp(-delta/Param.synapse.taudE)-exp(-delta/Param.synapse.taurE));
+        const Compute_float Istr = (1.0/(Param.synapse.taudI-Param.synapse.taurI))*(exp(-delta/Param.synapse.taudI)-exp(-delta/Param.synapse.taurI));
         int idx=0; //iterate through all neurons firing with this lag
         while (fire_with_this_lag[idx].x != -1)
         {
@@ -136,13 +136,13 @@ void step1 ( const float* const __restrict connections,coords_ringbuffer* fdata,
                 const int stdidx=c.x*grid_size+c.y;
                 if (i==1)
                 {
-                    const float dt = ((float)(time-STD.ftimes[stdidx]))/1000.0/Param.time.dt;//calculate inter spike interval in seconds
+                    const Compute_float dt = ((Compute_float)(time-STD.ftimes[stdidx]))/1000.0/Param.time.dt;//calculate inter spike interval in seconds
                     STD.ftimes[stdidx]=time; //update the time
-                    const float prevu=STD.U[stdidx]; //need the previous U value
+                    const Compute_float prevu=STD.U[stdidx]; //need the previous U value
                     STD.U[stdidx] = Param.STD.U + STD.U[stdidx]*(1.0-Param.STD.U)*exp(-dt/Param.STD.F);
                     STD.R[stdidx] = 1.0 + (STD.R[stdidx] - prevu*STD.R[stdidx] - 1.0)*exp(-dt/Param.STD.D);
                 }
-                const float strmod = STD.U[stdidx] * STD.R[stdidx] * 2.0; //multiplication by 2 is not in the cited papers, but you could eliminate it by multiplying some other parameters by 2, but multiplying by 2 here enables easier comparison with the non-STD model
+                const Compute_float strmod = STD.U[stdidx] * STD.R[stdidx] * 2.0; //multiplication by 2 is not in the cited papers, but you could eliminate it by multiplying some other parameters by 2, but multiplying by 2 here enables easier comparison with the non-STD model
                 //TODO: I don't like how I have 2 different calls to evolvept - need better solution.
                 evolvept(c.x,c.y,connections,Estr*strmod,Istr*strmod,gE,gI,STDP_connections);
             }
@@ -160,9 +160,9 @@ void step1 ( const float* const __restrict connections,coords_ringbuffer* fdata,
         { //step all neurons through time - use midpoint method
             const int idx = (x+couplerange)*conductance_array_size + y + couplerange; //index for gE/gI
             const int idx2=  x*grid_size+y;//index for voltages
-            const float rhs1=rhs_func(input[idx2],gE[idx],gI[idx]);
-            const float Vtemp = input[idx2] + 0.5*Param.time.dt*rhs1;
-            const float rhs2=rhs_func(Vtemp,      gE[idx],gI[idx]);
+            const Compute_float rhs1=rhs_func(input[idx2],gE[idx],gI[idx]);
+            const Compute_float Vtemp = input[idx2] + 0.5*Param.time.dt*rhs1;
+            const Compute_float rhs2=rhs_func(Vtemp,      gE[idx],gI[idx]);
             output[idx2]=input[idx2]+0.5*Param.time.dt*(rhs1 + rhs2);
         }
     }
@@ -182,7 +182,7 @@ void step1 ( const float* const __restrict connections,coords_ringbuffer* fdata,
                     printf("%i,%i;",x,y);
                 }
             }
-            else if (((float)random())/((float)RAND_MAX) < (Param.misc.rate*0.001*Param.time.dt))
+            else if (((Compute_float)random())/((Compute_float)RAND_MAX) < (Param.misc.rate*0.001*Param.time.dt))
             {
                 output[x*grid_size+y]=Param.potential.Vth+0.1;//make sure it fires
             }
@@ -207,7 +207,7 @@ void step1 ( const float* const __restrict connections,coords_ringbuffer* fdata,
 }
 
 coords_ringbuffer* spikes;
-float* connections;
+Compute_float* connections;
 //allocate memory - that sort of thing
 void setup()
 {
@@ -224,15 +224,15 @@ void setup()
         spikes->data[i][0].x=-1;//need to make sure that we don't start with spikes by ending at 0
     }
     //for storing voltages
-    potentials=calloc(sizeof(float),grid_size*grid_size);
-    potentials2=calloc(sizeof(float),grid_size*grid_size);
+    potentials=calloc(sizeof(Compute_float),grid_size*grid_size);
+    potentials2=calloc(sizeof(Compute_float),grid_size*grid_size);
     connections=CreateCouplingMatrix();
-    STDP_connections = calloc(sizeof(float),grid_size*grid_size*couple_array_size*couple_array_size);
+    STDP_connections = calloc(sizeof(Compute_float),grid_size*grid_size*couple_array_size*couple_array_size);
     if (Param.features.STD == ON) {STD_init();}
 
 }
 int mytime=0;
-void matlab_step(const float* inp)
+void matlab_step(const Compute_float* inp)
 {
     mytime++;
     spikes->curidx=mytime%(spikes->count);
@@ -265,10 +265,10 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
         if (!strcmp(buffer,"headnode.physics.usyd.edu.au")) {printf("DON'T RUN THIS CODE ON HEADNODE\n");exit(EXIT_FAILURE);}
         printf("setup started\n");setup();setup_done=1;printf("done setup\n");
     }
-    const float* inputdata = mxGetData(prhs[0]);
+    const Compute_float* inputdata = mxGetData(prhs[0]);
     matlab_step(inputdata);
     plhs[0]=mxCreateNumericMatrix(grid_size,grid_size,mxSINGLE_CLASS,mxREAL);
-    float* pointer=(float*)mxGetPr(plhs[0]);
+    Compute_float* pointer=(Compute_float*)mxGetPr(plhs[0]);
     for (int i=0;i<grid_size;i++)
     {
         for (int j=0;j<grid_size;j++)
@@ -307,7 +307,7 @@ int main()
     gethostname(buffer,1023);
     if (!strcmp(buffer,"headnode.physics.usyd.edu.au")) {printf("DON'T RUN THIS CODE ON HEADNODE\n");exit(EXIT_FAILURE);}
     setup();
-    float* input=calloc(sizeof(float),grid_size*grid_size);
+    Compute_float* input=calloc(sizeof(Compute_float),grid_size*grid_size);
     randinit(input);
     while (mytime<1000)
     {

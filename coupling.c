@@ -2,24 +2,20 @@
 #include "coupling.h" //not actually required at the moment but should ensure that function types match
 #include <math.h> //logf / exp
 #include <stdlib.h> //calloc
-/*typedef struct coupling
-{
-    float* excouple;
-    float* incouple
-};*/
-float erange;
-float exrange()
+
+Compute_float erange;
+Compute_float exrange()
 {
    return -(Param.couple.sigE*Param.couple.sigI*logf(Param.couple.WE/Param.couple.WI))/(Param.couple.sigE-Param.couple.sigI); //from mathematica
 }
 
 //check how far back we need to keep track of histories
-int setcap(float D,float R,float minval)
+int setcap(Compute_float D,Compute_float R,Compute_float minval)
 {
-    float prev = -1000;//initial values
-    float alpha = 0;
-    float time=0;
-    float norm=1.0/(D-R);
+    Compute_float prev = -1000;//initial values
+    Compute_float alpha = 0;
+    Compute_float time=0;
+    Compute_float norm=1.0/(D-R);
     while(1)
     {
         time+=Param.time.dt;
@@ -32,12 +28,12 @@ int setcap(float D,float R,float minval)
 }
 
 //compute the mexican hat function used for coupling
-float mexhat(const float rsq){return Param.couple.WE*exp(-rsq/Param.couple.sigE)-Param.couple.WI*exp(-rsq/Param.couple.sigI);}
+Compute_float mexhat(const Compute_float rsq){return Param.couple.WE*exp(-rsq/Param.couple.sigE)-Param.couple.WI*exp(-rsq/Param.couple.sigI);}
 
 //does what it says on the tin
-float* CreateCouplingMatrix()
+Compute_float* CreateCouplingMatrix()
 {
-    float* matrix = calloc(sizeof(float),couple_array_size*couple_array_size); //matrix of coupling values
+    Compute_float* matrix = calloc(sizeof(Compute_float),couple_array_size*couple_array_size); //matrix of coupling values
     erange=exrange();
     for(int x=-couplerange;x<=couplerange;x++)
     {
@@ -45,7 +41,7 @@ float* CreateCouplingMatrix()
         {
             if (x*x+y*y<=couplerange*couplerange)//if we are within coupling range
             {
-                float val = mexhat(x*x+y*y);//compute the mexican hat function
+                Compute_float val = mexhat(x*x+y*y);//compute the mexican hat function
                 if (val>0) {val=val*Param.couple.SE;} else {val=val*Param.couple.SI;}//and multiply by some constants
                 matrix[(x+couplerange)*couple_array_size + y + couplerange] = val;//and set the array
             }

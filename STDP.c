@@ -15,7 +15,7 @@ inline static int dist(int cur,int prev)
 //invert the distances
 inline static int invertdist(int v) {return ((2*couplerange) - v);}
 //this method is incredibly hard to understand.  Many weird things are driven by speed.  But basically, implement STDP.
-void ApplySTDP(float* __restrict__ dmats,const coords* curfire,const coords* prevfire,const float str,const float* constm)
+void ApplySTDP(Compute_float * __restrict__ dmats,const coords* curfire,const coords* prevfire,const Compute_float str,const Compute_float* constm)
 {
     int cindex = 0;
     while(curfire[cindex].x != -1)
@@ -62,13 +62,13 @@ void ApplySTDP(float* __restrict__ dmats,const coords* curfire,const coords* pre
 
 //Next idea for STDP speed improvements - The Magnitude check is based on the direction from the previous to the current (increasing) - as a result, the innermost loop frequently calculates the offset - swapping curfire and prevfire
 
-void doSTDP (float* dmats,const coords_ringbuffer* const fdata , const float*constm)
+void doSTDP (Compute_float* dmats,const coords_ringbuffer* const fdata , const Compute_float*constm)
 {
     coords* curfire = fdata->data[fdata->curidx];
     if (Param.STDP.stdp_strength==0.0) {return;} //early bail if no STDP
     for(int offset = 1;offset<fdata->count;offset++)
     {
-        float strn =Param.STDP.stdp_strength* exp(-((float)offset)/Param.STDP.stdp_tau);
+        Compute_float strn =Param.STDP.stdp_strength* exp(-((Compute_float)offset)/Param.STDP.stdp_tau);
         coords* fire_with_this_lag;
         RINGBUFFER_GETOFFSET(*fdata,offset,fire_with_this_lag);
         ApplySTDP(dmats,curfire,fire_with_this_lag,strn,constm);

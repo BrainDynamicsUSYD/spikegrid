@@ -1,8 +1,8 @@
 #ifndef TAGGEDARRAY
 #define TAGGEDARRAY
-
+#include "parameters.h"
 typedef struct {
-    const float* const data;
+    const Compute_float* const data;
     const int size;
     const int offset;} 
     tagged_array;

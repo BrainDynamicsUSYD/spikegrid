@@ -109,7 +109,7 @@ int save_png_to_file (bitmap_t *bitmap, const char *path)
 
 int printcount=0;
 char fnamebuffer[30];
-void printVoltage (const float* const voltages)
+void printVoltage (const Compute_float* const voltages)
 {
 
     tagged_array v = {.data=voltages,.size=grid_size};

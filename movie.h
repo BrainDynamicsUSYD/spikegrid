@@ -1,1 +1,1 @@
-void printVoltage (const float* const voltages);
+void printVoltage (const Compute_float* const voltages);

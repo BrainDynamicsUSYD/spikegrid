@@ -90,7 +90,6 @@ int save_png_to_file (bitmap_t *bitmap, const char *path)
 
     /* The routine has successfully written the file, so we set
        "status" to a value which indicates success. */
-    printf("success\n");
     status = 0;
 
     for (y = 0; y < bitmap->height; y++) {

@@ -76,7 +76,7 @@ static const parameters Param =
         .STDP       = OFF,
         .STD        = ON ,
         .Output     = ON,
-        .Movie      = ON
+        .Movie      = OFF
         
     }
 };

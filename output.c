@@ -9,10 +9,9 @@ bitmap_t* FloattoBitmap(const tagged_array input,const Compute_float maxval, con
 {
     const int size = input.size - (2*input.offset);
     bitmap_t* bp = (bitmap_t*)malloc(sizeof(bitmap_t));
-	bitmap_t b = *bp;
-    b.pixels = malloc(sizeof(pixel_t)*input.size*input.size);
-    b.width=input.size;
-    b.height=input.size;
+    bp->pixels = malloc(sizeof(pixel_t)*input.size*input.size);
+    bp->width=input.size;
+    bp->height=input.size;
 
     for (int i=0;i<input.size;i++)
     {
@@ -21,15 +20,15 @@ bitmap_t* FloattoBitmap(const tagged_array input,const Compute_float maxval, con
             const Compute_float val =  input.data[(i+input.offset)*input.size + j + input.offset ];
             if (val > maxval) 
             {
-                b.pixels[i*size+j].red = 255;
-                b.pixels[i*size+j].green = 255;
-                b.pixels[i*size+j].blue = 255;
+                bp->pixels[i*size+j].red = 255;
+                bp->pixels[i*size+j].green = 255;
+                bp->pixels[i*size+j].blue = 255;
             }
             else
             {
-                b.pixels[i*size+j].red = rescalefloat(val,maxval,minval);
-                b.pixels[i*size+j].green = 0;
-                b.pixels[i*size+j].blue = 0;
+                bp->pixels[i*size+j].red = rescalefloat(val,maxval,minval);
+                bp->pixels[i*size+j].green = 0;
+                bp->pixels[i*size+j].blue = 0;
             }
         }
     }

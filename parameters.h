@@ -67,11 +67,17 @@ static const parameters Param =
         .D  = 0.11,
         .F  = 0.005
     },
+    .Movie = 
+    {
+        .Delay = 10,
+    },
     .features =
     {
         .STDP       = OFF,
         .STD        = ON ,
-        .Output     = ON
+        .Output     = ON,
+        .Movie      = ON
+        
     }
 };
 static const Compute_float One = (Compute_float)1;

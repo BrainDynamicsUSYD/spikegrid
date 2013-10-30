@@ -50,15 +50,18 @@ typedef struct STD_parameters
     const Compute_float D;
     const Compute_float F;
 } STD_parameters;
-
+typedef struct movie_parmeters
+{
+    const int Delay;
+} movie_parameters;
 typedef struct model_features
 {
 	const on_off STDP; //enable / disable STDP (spike-timing dependent plasticity)
     const on_off STD;  //enable / disable STD  (short term depression)
     const on_off Output;
+    const on_off Movie;
 } model_features;
 
-//output constants
 
 typedef struct parameters
 {
@@ -69,5 +72,6 @@ typedef struct parameters
     const misc_parameters misc;
     const STDP_parameters STDP;
     const STD_parameters STD;
+    const movie_parameters Movie;
     const model_features features;
 } parameters;

@@ -242,7 +242,7 @@ void matlab_step(const Compute_float* inp)
     {
         doSTDP(STDP_connections,spikes,connections);
     }
-    if (mytime % 10 == 0) {printVoltage(potentials2);}
+    if (Param.features.Movie==ON &&  mytime % Param.Movie.Delay == 0) {printVoltage(potentials2);}
    
 }
 int setup_done=0;

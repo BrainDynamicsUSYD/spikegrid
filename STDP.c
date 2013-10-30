@@ -1,6 +1,6 @@
 #include "parameters.h"
 #include "STDP.h"
-#include <math.h> //fabsf
+#include <tgmath.h> //fabsf
 #define STDP_RANGE_SQUARED (couplerange*couplerange)
 //helper function for STDP.  Calculates distance between two neurons, taking into account wrapping in the network
 //interesting idea - in some cases I don't care about this wrapping and could cheat

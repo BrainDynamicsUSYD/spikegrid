@@ -7,6 +7,6 @@ void STD_init()
     {
         STD.ftimes[i]=0; //progably not required
         STD.U[i] = Param.STD.U;
-        STD.R[i] = 1.0;
+        STD.R[i] = One;
     }
 }

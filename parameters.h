@@ -1,8 +1,8 @@
 #ifndef PARAMATERS
 #define PARAMATERS
 //the following typedef must be before the include to get the right compute types
-//typedef float Compute_float ; //for speed
-typedef double Compute_float ; //for accuracy
+typedef float Compute_float ; //for speed
+//typedef double Compute_float ; //for accuracy
 #include "paramheader.h"
 
 //Architecture properties
@@ -74,5 +74,6 @@ static const parameters Param =
         .Output     = ON
     }
 };
+static const Compute_float One = (Compute_float)1;
 #endif
 

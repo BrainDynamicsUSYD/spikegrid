@@ -1,6 +1,6 @@
 #include "parameters.h"
 #include "coupling.h" //not actually required at the moment but should ensure that function types match
-#include <math.h> //logf / exp
+#include <tgmath.h> //logf / exp
 #include <stdlib.h> //calloc
 
 Compute_float erange;
@@ -15,7 +15,7 @@ int setcap(Compute_float D,Compute_float R,Compute_float minval)
     Compute_float prev = -1000;//initial values
     Compute_float alpha = 0;
     Compute_float time=0;
-    Compute_float norm=1.0/(D-R);
+    Compute_float norm=One/(D-R);
     while(1)
     {
         time+=Param.time.dt;
@@ -41,7 +41,7 @@ Compute_float* CreateCouplingMatrix()
         {
             if (x*x+y*y<=couplerange*couplerange)//if we are within coupling range
             {
-                Compute_float val = mexhat(x*x+y*y);//compute the mexican hat function
+                float val = mexhat((Compute_float)(x*x+y*y));//compute the mexican hat function
                 if (val>0) {val=val*Param.couple.SE;} else {val=val*Param.couple.SI;}//and multiply by some constants
                 matrix[(x+couplerange)*couple_array_size + y + couplerange] = val;//and set the array
             }

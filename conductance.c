@@ -8,7 +8,7 @@
 #include "movie.h"
 #include "output.h"
 #include "assert.h"
-#include <math.h> //exp
+#include <tgmath.h> //exp
 #include <stdio.h> //printf
 #include <stdlib.h> //malloc/calloc etc  random/srandom
 #include <time.h>   //time - for seeding RNG
@@ -125,9 +125,9 @@ void step1 ( const Compute_float* const __restrict connections,coords_ringbuffer
     {
         coords* fire_with_this_lag;//this is a bit of a funny definition due to macros.
         RINGBUFFER_GETOFFSET(*fdata,i,fire_with_this_lag)
-        const Compute_float delta = (Compute_float)(i*Param.time.dt);//small helper constant
-        const Compute_float Estr = (1.0/(Param.synapse.taudE-Param.synapse.taurE))*(exp(-delta/Param.synapse.taudE)-exp(-delta/Param.synapse.taurE));
-        const Compute_float Istr = (1.0/(Param.synapse.taudI-Param.synapse.taurI))*(exp(-delta/Param.synapse.taudI)-exp(-delta/Param.synapse.taurI));
+        const Compute_float delta = ((Compute_float)i)*Param.time.dt;//small helper constant
+        const Compute_float Estr = (One/(Param.synapse.taudE-Param.synapse.taurE))*(exp(-delta/Param.synapse.taudE)-exp(-delta/Param.synapse.taurE));
+        const Compute_float Istr = (One/(Param.synapse.taudI-Param.synapse.taurI))*(exp(-delta/Param.synapse.taudI)-exp(-delta/Param.synapse.taurI));
         int idx=0; //iterate through all neurons firing with this lag
         while (fire_with_this_lag[idx].x != -1)
         {
@@ -140,8 +140,8 @@ void step1 ( const Compute_float* const __restrict connections,coords_ringbuffer
                     const Compute_float dt = ((Compute_float)(time-STD.ftimes[stdidx]))/1000.0/Param.time.dt;//calculate inter spike interval in seconds
                     STD.ftimes[stdidx]=time; //update the time
                     const Compute_float prevu=STD.U[stdidx]; //need the previous U value
-                    STD.U[stdidx] = Param.STD.U + STD.U[stdidx]*(1.0-Param.STD.U)*exp(-dt/Param.STD.F);
-                    STD.R[stdidx] = 1.0 + (STD.R[stdidx] - prevu*STD.R[stdidx] - 1.0)*exp(-dt/Param.STD.D);
+                    STD.U[stdidx] = Param.STD.U + STD.U[stdidx]*(One-Param.STD.U)*exp(-dt/Param.STD.F);
+                    STD.R[stdidx] = One + (STD.R[stdidx] - prevu*STD.R[stdidx] - One)*exp(-dt/Param.STD.D);
                 }
                 const Compute_float strmod = STD.U[stdidx] * STD.R[stdidx] * 2.0; //multiplication by 2 is not in the cited papers, but you could eliminate it by multiplying some other parameters by 2, but multiplying by 2 here enables easier comparison with the non-STD model
                 //TODO: I don't like how I have 2 different calls to evolvept - need better solution.
@@ -249,7 +249,7 @@ int setup_done=0;
 #ifdef MATLAB
 //some classes for returning the data to matlab
 
-output Outputabble[]={ //note - neat feature - missing elements initailized to 0
+output_s Outputabble[]={ //note - neat feature - missing elements initailized to 0
     {"gE",{gE,conductance_array_size,couplerange}}, //gE is a 'large' matrix - as it wraps around the edges
     {"gI",{gE,conductance_array_size,couplerange}}, //gE is a 'large' matrix - as it wraps around the edges
     {"R",{STD.R,grid_size}},

@@ -132,6 +132,7 @@ void step1 ( const Compute_float* const __restrict connections,coords_ringbuffer
         while (fire_with_this_lag[idx].x != -1)
         {
             coords c = fire_with_this_lag[idx]; //add conductances
+            Compute_float strmod=One;
             if (Param.features.STD == ON)
             {
                 const int stdidx=c.x*grid_size+c.y;
@@ -143,14 +144,9 @@ void step1 ( const Compute_float* const __restrict connections,coords_ringbuffer
                     STD.U[stdidx] = Param.STD.U + STD.U[stdidx]*(One-Param.STD.U)*exp(-dt/Param.STD.F);
                     STD.R[stdidx] = One + (STD.R[stdidx] - prevu*STD.R[stdidx] - One)*exp(-dt/Param.STD.D);
                 }
-                const Compute_float strmod = STD.U[stdidx] * STD.R[stdidx] * 2.0; //multiplication by 2 is not in the cited papers, but you could eliminate it by multiplying some other parameters by 2, but multiplying by 2 here enables easier comparison with the non-STD model
-                //TODO: I don't like how I have 2 different calls to evolvept - need better solution.
-                evolvept(c.x,c.y,connections,Estr*strmod,Istr*strmod,gE,gI,STDP_connections);
+                strmod = STD.U[stdidx] * STD.R[stdidx] * 2.0; //multiplication by 2 is not in the cited papers, but you could eliminate it by multiplying some other parameters by 2, but multiplying by 2 here enables easier comparison with the non-STD model
             }
-            else
-            {
-                evolvept(c.x,c.y,connections,Estr,Istr,gE,gI,STDP_connections);
-            }
+            evolvept(c.x,c.y,connections,Estr*strmod,Istr*strmod,gE,gI,STDP_connections);
             idx++;
         }
     }

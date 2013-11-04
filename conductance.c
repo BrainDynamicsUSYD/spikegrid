@@ -151,7 +151,7 @@ void step1 (layer_t layer,const int time)
                     STD.U[stdidx] = Param.STD.U + STD.U[stdidx]*(One-Param.STD.U)*exp(-dt/Param.STD.F);
                     STD.R[stdidx] = One + (STD.R[stdidx] - prevu*STD.R[stdidx] - One)*exp(-dt/Param.STD.D);
                 }
-                strmod = STD.U[stdidx] * STD.R[stdidx] * 2.0; //multiplication by 2 is not in the cited papers, but you could eliminate it by multiplying some other parameters by 2, but multiplying by 2 here enables easier comparison with the non-STD model
+                strmod = STD.U[stdidx] * STD.R[stdidx] * 2.0; //multiplication by 2 is not in the cited papers, but you could eliminate it by multiplying some other parameters by 2, but multiplying by 2 here enables easier comparison with the non-STD model.  Max has an improvement that calculates a first-order approxiamation that should be included
             }
             evolvept(c.x,c.y,layer.connections,Estr*strmod,Istr*strmod,layer.gE,layer.gI,layer.STDP_connections);
             idx++;
@@ -251,8 +251,8 @@ int setup_done=0;
 //some classes for returning the data to matlab
 
 output_s Outputabble[]={ //note - neat feature - missing elements initailized to 0
-    {"gE",{gE,conductance_array_size,couplerange}}, //gE is a 'large' matrix - as it wraps around the edges
-    {"gI",{gE,conductance_array_size,couplerange}}, //gE is a 'large' matrix - as it wraps around the edges
+    {"gE",{layer.gE,conductance_array_size,couplerange}}, //gE is a 'large' matrix - as it wraps around the edges
+    {"gI",{layer.gI,conductance_array_size,couplerange}}, //gE is a 'large' matrix - as it wraps around the edges
     {"R",{STD.R,grid_size}},
     {"U",{STD.R,grid_size}},
     {NULL}};         //a marker that we are at the end of the outputabbles list
@@ -275,7 +275,7 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
     {
         for (int j=0;j<grid_size;j++)
         {
-            pointer[i*grid_size+j]=potentials2[i*grid_size + j];
+            pointer[i*grid_size+j]=layer.voltages_out[i*grid_size + j];
         }
     }
     if (nrhs>1)
@@ -290,7 +290,9 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
             {
                 if (!strcmp(Outputabble[outidx].name,data))
                 {
+                    printf("outputting %s\n",data);
                     plhs[rhsidx]=outputToMxArray(Outputabble[outidx].data);
+                    printf("outputted %s\n",data);
                     outidx=-1;
                     break;
                 }

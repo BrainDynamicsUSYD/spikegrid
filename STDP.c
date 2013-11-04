@@ -62,15 +62,15 @@ void ApplySTDP(Compute_float * __restrict__ dmats,const coords* curfire,const co
 
 //Next idea for STDP speed improvements - The Magnitude check is based on the direction from the previous to the current (increasing) - as a result, the innermost loop frequently calculates the offset - swapping curfire and prevfire
 
-void doSTDP (Compute_float* dmats,const coords_ringbuffer* const fdata , const Compute_float*constm)
+void doSTDP (Compute_float* dmats,const coords_ringbuffer fdata , const Compute_float*constm)
 {
-    coords* curfire = fdata->data[fdata->curidx];
+    coords* curfire = fdata.data[fdata.curidx];
     if (Param.STDP.stdp_strength==0.0) {return;} //early bail if no STDP
-    for(int offset = 1;offset<fdata->count;offset++)
+    for(int offset = 1;offset<fdata.count;offset++)
     {
         Compute_float strn =Param.STDP.stdp_strength* exp(-((Compute_float)offset)/Param.STDP.stdp_tau);
         coords* fire_with_this_lag;
-        RINGBUFFER_GETOFFSET(*fdata,offset,fire_with_this_lag);
+        RINGBUFFER_GETOFFSET(fdata,offset,fire_with_this_lag);
         ApplySTDP(dmats,curfire,fire_with_this_lag,strn,constm);
     }
 }

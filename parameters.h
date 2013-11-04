@@ -9,12 +9,7 @@ typedef float Compute_float ; //for speed
 #define grid_size 100
 #define couplerange 15
 #define conductance_array_size (grid_size + 2*couplerange)
-
-//some computed constants which are useful
 int couple_array_size;
-Compute_float* potentials;
-Compute_float* potentials2;
-
 ////TODO: compiler does not warn on missing elements - fix
 //Fun note - with the right optimisations GCC actually will pull these constants inline (for example disassemble evolvept_STDP with STDP off)
 static const parameters Param =
@@ -29,8 +24,8 @@ static const parameters Param =
         .sigE    = 14,                   //char. length for Ex symapses (int / float?)
         .WI      = 0.19,                 //Inhib coupling strength
         .sigI    = 42,                   //char. length for In synapses (int / float?)
-        .SE             = 1.5,           //amnt to multiply Ex conns; why not use We? (d=1.00; vary 1-1.5)
-        .SI             = 2.3,           //amnt to multiply In conns; why not use In? (d= 2.55; vary 2.3-4)
+        .SE      = 1.5,                  //amnt to multiply Ex conns; why not use We? (d=1.00; vary 1-1.5)
+        .SI      = 2.3,                  //amnt to multiply In conns; why not use In? (d= 2.55; vary 2.3-4)
         .syn     = 1,    
     },
     .synapse =
@@ -39,7 +34,7 @@ static const parameters Param =
         .taudE   = 1.5,                  //Ex spike decay time
         .taurI   = 0.5,                  //In spike rise time
         .taudI   = 2.0,                  //In spike decay time
-        .tref      = 5,                    //refractory time
+        .tref      = 5,                  //refractory time
 
     },
     .potential = 

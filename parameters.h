@@ -70,7 +70,7 @@ static const parameters Param =
     {
         .STDP       = OFF,
         .STD        = ON ,
-        .Output     = ON,
+        .Output     = OFF,
         .Movie      = OFF
         
     }

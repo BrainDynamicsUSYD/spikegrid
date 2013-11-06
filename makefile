@@ -11,5 +11,7 @@ SOURCES= coupling.c  STDP.c conductance.c STD.c movie.c output.c
 BINARY=a.out
 a.out: ${SOURCES}
 	${CC}  ${CFLAGS} ${SOURCES} -o ${BINARY} ${LDFLAGS}
+profile:
+	${CC} ${CFLAGS} -pg ${SOURCES} -o ${BINARY} ${LDFLAGS}
 clean:
 	rm ${BINARY}

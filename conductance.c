@@ -123,15 +123,15 @@ void fixboundary(Compute_float* __restrict gE, Compute_float* __restrict gI)
 //rhs_func used when integrating the neurons forward through time
 Compute_float __attribute__((const)) rhs_func  (const Compute_float V,const Compute_float gE,const Compute_float gI) {return -(Param.misc.glk*(V-Param.potential.Vlk) + gE*(V-Param.potential.Vex) + gI*(V-Param.potential.Vin));}
 //step the model through time
-void step1 (layer_t layer,const int time)
+void step1 (layer_t* layer,const int time)
 {
-    coords* current_firestore = layer.spikes.data[layer.spikes.curidx];//get the thing for currently firing neurons
-    memset(layer.gE,0,sizeof(Compute_float)*conductance_array_size*conductance_array_size); //zero the gE/gI matrices so they can be reused
-    memset(layer.gI,0,sizeof(Compute_float)*conductance_array_size*conductance_array_size);
-    for (int i=1;i<layer.spikes.count;i++) //start at 1 so we don't get currently firing (which should be empty anyway)
+    coords* current_firestore = layer->spikes.data[layer->spikes.curidx];//get the thing for currently firing neurons
+    memset(layer->gE,0,sizeof(Compute_float)*conductance_array_size*conductance_array_size); //zero the gE/gI matrices so they can be reused
+    memset(layer->gI,0,sizeof(Compute_float)*conductance_array_size*conductance_array_size);
+    for (int i=1;i<layer->spikes.count;i++) //start at 1 so we don't get currently firing (which should be empty anyway)
     {
         coords* fire_with_this_lag;//this is a bit of a funny definition due to macros.
-        RINGBUFFER_GETOFFSET(layer.spikes,i,fire_with_this_lag)
+        RINGBUFFER_GETOFFSET(layer->spikes,i,fire_with_this_lag)
         const Compute_float delta = ((Compute_float)i)*Param.time.dt;//small helper constant
         const Compute_float Estr = (One/(Param.synapse.taudE-Param.synapse.taurE))*(exp(-delta/Param.synapse.taudE)-exp(-delta/Param.synapse.taurE));
         const Compute_float Istr = (One/(Param.synapse.taudI-Param.synapse.taurI))*(exp(-delta/Param.synapse.taudI)-exp(-delta/Param.synapse.taurI));
@@ -153,21 +153,21 @@ void step1 (layer_t layer,const int time)
                 }
                 strmod = STD.U[stdidx] * STD.R[stdidx] * 2.0; //multiplication by 2 is not in the cited papers, but you could eliminate it by multiplying some other parameters by 2, but multiplying by 2 here enables easier comparison with the non-STD model.  Max has an improvement that calculates a first-order approxiamation that should be included
             }
-            evolvept(c.x,c.y,layer.connections,Estr*strmod,Istr*strmod,layer.gE,layer.gI,layer.STDP_connections);
+            evolvept(c.x,c.y,layer->connections,Estr*strmod,Istr*strmod,layer->gE,layer->gI,layer->STDP_connections);
             idx++;
         }
     }
-    fixboundary(layer.gE,layer.gI);
+    fixboundary(layer->gE,layer->gI);
     for (int x=0;x<grid_size;x++) 
     {
         for (int y=0;y<grid_size;y++)
         { //step all neurons through time - use midpoint method
             const int idx = (x+couplerange)*conductance_array_size + y + couplerange; //index for gE/gI
             const int idx2=  x*grid_size+y;//index for voltages
-            const Compute_float rhs1=rhs_func(layer.voltages[idx2],layer.gE[idx],layer.gI[idx]);
-            const Compute_float Vtemp = layer.voltages[idx2] + 0.5*Param.time.dt*rhs1;
-            const Compute_float rhs2=rhs_func(Vtemp,layer.gE[idx],layer.gI[idx]);
-            layer.voltages_out[idx2]=layer.voltages[idx2]+0.5*Param.time.dt*(rhs1 + rhs2);
+            const Compute_float rhs1=rhs_func(layer->voltages[idx2],layer->gE[idx],layer->gI[idx]);
+            const Compute_float Vtemp = layer->voltages[idx2] + 0.5*Param.time.dt*rhs1;
+            const Compute_float rhs2=rhs_func(Vtemp,layer->gE[idx],layer->gI[idx]);
+            layer->voltages_out[idx2]=layer->voltages[idx2]+0.5*Param.time.dt*(rhs1 + rhs2);
         }
     }
     int this_fcount=0;//now find which neurons fired at the current time step
@@ -175,11 +175,11 @@ void step1 (layer_t layer,const int time)
     {
         for (int y=0;y<grid_size;y++)
         {
-            if (layer.voltages[x*grid_size + y]  > Param.potential.Vth)
+            if (layer->voltages[x*grid_size + y]  > Param.potential.Vth)
             {
                 const coords c= {x,y}; //required to keep the compiler happy - can't do an inline constructor
                 current_firestore[this_fcount] =c;
-                layer.voltages_out[x*grid_size+y]=Param.potential.Vrt;
+                layer->voltages_out[x*grid_size+y]=Param.potential.Vrt;
                 this_fcount++;
                 if (Param.features.Output==ON)
                 {
@@ -188,7 +188,7 @@ void step1 (layer_t layer,const int time)
             }
             else if (((Compute_float)random())/((Compute_float)RAND_MAX) < (Param.misc.rate*0.001*Param.time.dt))
             {
-                layer.voltages_out[x*grid_size+y]=Param.potential.Vth+0.1;//make sure it fires
+                layer->voltages_out[x*grid_size+y]=Param.potential.Vth+0.1;//make sure it fires
             }
         }
     }
@@ -196,12 +196,12 @@ void step1 (layer_t layer,const int time)
     for (int i=1;i<=51;i++) //start at 1 so we don't get currently firing (which should be empty anyway)
     {   //put refractory neurons at reset potential
         coords* fire_with_this_lag;//this is a bit of a funny definition due to macros.
-        RINGBUFFER_GETOFFSET(layer.spikes,i,fire_with_this_lag)
+        RINGBUFFER_GETOFFSET(layer->spikes,i,fire_with_this_lag)
         int idx=0;
         while (fire_with_this_lag[idx].x != -1)
         {
             coords c = fire_with_this_lag[idx]; 
-            layer.voltages_out[c.x*grid_size+c.y]=Param.potential.Vrt;
+            layer->voltages_out[c.x*grid_size+c.y]=Param.potential.Vrt;
             idx++;
         }
     }
@@ -209,7 +209,7 @@ void step1 (layer_t layer,const int time)
     if (Param.features.Output==ON &&time % 10 ==0 ) {printf("\n");}
 
 }
-layer_t layer;
+layer_t glayer;
 //allocate memory - that sort of thing
 void setup()
 {
@@ -217,33 +217,33 @@ void setup()
     //compute some constants
     int cap=max(setcap(Param.synapse.taudE,Param.synapse.taurE,1E-6),setcap(Param.synapse.taudI,Param.synapse.taurI,1E-6));
     //set up our data structure to store spikes
-    layer.spikes.count=cap;
-    layer.spikes.data=calloc(sizeof(coords*), cap);
-    layer.connections        = CreateCouplingMatrix();
-    layer.STDP_connections   = calloc(sizeof(Compute_float),grid_size*grid_size*couple_array_size*couple_array_size);
-    memset(layer.voltages,0,grid_size*grid_size);
-    memset(layer.voltages_out,0,grid_size*grid_size);
+    glayer.spikes.count=cap;
+    glayer.spikes.data=calloc(sizeof(coords*), cap);
+    glayer.connections        = CreateCouplingMatrix();
+    glayer.STDP_connections   = calloc(sizeof(Compute_float),grid_size*grid_size*couple_array_size*couple_array_size);
+    memset(glayer.voltages,0,grid_size*grid_size);
+    memset(glayer.voltages_out,0,grid_size*grid_size);
     for (int i=0;i<cap;i++)
     {
-        layer.spikes.data[i]=calloc(sizeof(coords),(grid_size*grid_size + 1));//assume worst case - all neurons firing.  Need to leave spae on the end for the -1 which marks the end.
-        layer.spikes.data[i][0].x=-1;//need to make sure that we don't start with spikes by ending at 0
+        glayer.spikes.data[i]=calloc(sizeof(coords),(grid_size*grid_size + 1));//assume worst case - all neurons firing.  Need to leave spae on the end for the -1 which marks the end.
+        glayer.spikes.data[i][0].x=-1;//need to make sure that we don't start with spikes by ending at 0
     }
     //for storing voltages
     if (Param.features.STD == ON) {STD_init();}
 
 }
 int mytime=0;
-void matlab_step(const Compute_float* inp)
+void matlab_step(const Compute_float* const inp)
 {
     mytime++;
-    memcpy(layer.voltages,inp,sizeof(float)*grid_size*grid_size);
-    layer.spikes.curidx=mytime%(layer.spikes.count);
-    step1(layer,mytime);
+    memcpy(glayer.voltages,inp,sizeof(float)*grid_size*grid_size);
+    glayer.spikes.curidx=mytime%(glayer.spikes.count);
+    step1(&glayer,mytime);
     if (Param.features.STDP==ON)
     {
-        doSTDP(layer.STDP_connections,layer.spikes,layer.connections);
+        doSTDP(glayer.STDP_connections,glayer.spikes,glayer.connections);
     }
-    if (Param.features.Movie==ON &&  mytime % Param.Movie.Delay == 0) {printVoltage(layer.voltages_out);}
+    if (Param.features.Movie==ON &&  mytime % Param.Movie.Delay == 0) {printVoltage(glayer.voltages_out);}
    
 }
 int setup_done=0;
@@ -251,8 +251,8 @@ int setup_done=0;
 //some classes for returning the data to matlab
 
 output_s Outputabble[]={ //note - neat feature - missing elements initailized to 0
-    {"gE",{layer.gE,conductance_array_size,couplerange}}, //gE is a 'large' matrix - as it wraps around the edges
-    {"gI",{layer.gI,conductance_array_size,couplerange}}, //gE is a 'large' matrix - as it wraps around the edges
+    {"gE",{glayer.gE,conductance_array_size,couplerange}}, //gE is a 'large' matrix - as it wraps around the edges
+    {"gI",{glayer.gI,conductance_array_size,couplerange}}, //gE is a 'large' matrix - as it wraps around the edges
     {"R",{STD.R,grid_size}},
     {"U",{STD.R,grid_size}},
     {NULL}};         //a marker that we are at the end of the outputabbles list
@@ -275,8 +275,9 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
     {
         for (int j=0;j<grid_size;j++)
         {
-            pointer[i*grid_size+j]=layer.voltages_out[i*grid_size + j];
+            pointer[i*grid_size+j]=glayer.voltages_out[i*grid_size + j];
         }
+        printf("%f\n",glayer.voltages_out[i*grid_size]);
     }
     if (nrhs>1)
     {
@@ -290,9 +291,7 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
             {
                 if (!strcmp(Outputabble[outidx].name,data))
                 {
-                    printf("outputting %s\n",data);
                     plhs[rhsidx]=outputToMxArray(Outputabble[outidx].data);
-                    printf("outputted %s\n",data);
                     outidx=-1;
                     break;
                 }
@@ -313,14 +312,15 @@ int main()
     setup();
     Compute_float* input=calloc(sizeof(Compute_float),grid_size*grid_size);
     randinit(input);
-    while (mytime<1000)
+    while (mytime<100)
     {
         matlab_step(input);
+        printf("%i\n",mytime);
         for (int i=0;i<grid_size;i++)
         {
             for (int j=0;j<grid_size;j++)
             {
-                input[i*grid_size+j]=layer.voltages_out[i*grid_size + j];
+                input[i*grid_size+j]=glayer.voltages_out[i*grid_size + j];
             }
         }
     }

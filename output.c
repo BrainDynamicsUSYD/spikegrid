@@ -38,7 +38,7 @@ bitmap_t* FloattoBitmap(const tagged_array input,const Compute_float maxval, con
 mxArray* outputToMxArray (const tagged_array input) 
 {
     const int size = input.size - (2*input.offset);
-    const int elemtype =mxSINGLE_CLASS;// sizeof(Compute_float)==sizeof(float)?mxSINGLE_CLASS:mxDOUBLE_CLASS;
+    const int elemtype = sizeof(Compute_float)==sizeof(float)?mxSINGLE_CLASS:mxDOUBLE_CLASS;
     mxArray* ret = mxCreateNumericMatrix(size,size,elemtype,mxREAL);
     Compute_float* dataptr = (Compute_float*)mxGetPr(ret);
     for (int i=0;i<size;i++)

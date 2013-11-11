@@ -1,5 +1,4 @@
 #include "parameters.h"
-#include "layer.h"
 #include "parameters.h"
 #include "evolve.h"
 #include "helpertypes.h"
@@ -82,14 +81,17 @@ void fixboundary(Compute_float* __restrict gE, Compute_float* __restrict gI)
 	}
 
 }
+
+//these gE/gI values should be static to the function - but sometimes they need to be exposed as read only
+Compute_float gE[conductance_array_size*conductance_array_size];
+Compute_float gI[conductance_array_size*conductance_array_size];
+const volatile Compute_float* const GE = &gE[0]; //the volatile here may not be required (but checking this is very hard
+const volatile Compute_float* const GI = &gI[0];
 //rhs_func used when integrating the neurons forward through time
-Compute_float __attribute__((const)) rhs_func  (const Compute_float V,const Compute_float gE,const Compute_float gI) {return -(Param.misc.glk*(V-Param.potential.Vlk) + gE*(V-Param.potential.Vex) + gI*(V-Param.potential.Vin));}
+Compute_float __attribute__((const)) rhs_func  (const Compute_float V,const Compute_float ge,const Compute_float gi) {return -(Param.misc.glk*(V-Param.potential.Vlk) + ge*(V-Param.potential.Vex) + gi*(V-Param.potential.Vin));}
 //step the model through time
 void step1 (layer_t* layer,const int time)
 {
-
-    static Compute_float gE[conductance_array_size*conductance_array_size];
-    static Compute_float gI[conductance_array_size*conductance_array_size];
     coords* current_firestore = layer->spikes.data[layer->spikes.curidx];//get the thing for currently firing neurons
     memset(gE,0,sizeof(Compute_float)*conductance_array_size*conductance_array_size); //zero the gE/gI matrices so they can be reused
     memset(gI,0,sizeof(Compute_float)*conductance_array_size*conductance_array_size);

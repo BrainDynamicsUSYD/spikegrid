@@ -13,8 +13,16 @@ RINGBUFFER_DEF(coords);
        typeof (b) _b = (b); \
         _a<_b?_a:_b;})
 typedef struct {
-    const Compute_float* const data;
+    const Compute_float* volatile const data;
     const int size;
     const int offset;} 
     tagged_array;
+typedef struct layer
+{
+    Compute_float* connections; //need some way to constify this.  Also - think up some efficient way to only add the points in a circle.
+    Compute_float* STDP_connections;
+    Compute_float voltages[grid_size*grid_size]; //possibly these should be pointers so that things can be copied in/out a bit faster.  Even better would probably be to move the v_out to somewhere else
+    Compute_float voltages_out[grid_size*grid_size];
+    coords_ringbuffer spikes;
+} layer_t;
 #endif

@@ -9,7 +9,6 @@
 #include "output.h"
 #include "assert.h"
 #include "evolve.h"
-#include "layer.h"
 #include <tgmath.h> //exp
 #include <stdio.h> //printf
 #include <stdlib.h> //malloc/calloc etc  random/srandom
@@ -80,16 +79,17 @@ int setup_done=0;
 #ifdef MATLAB
 //some classes for returning the data to matlab
 
-output_s Outputabble[]={ //note - neat feature - missing elements initailized to 0
-    {"gE",{glayer.gE,conductance_array_size,couplerange}}, //gE is a 'large' matrix - as it wraps around the edges
-    {"gI",{glayer.gI,conductance_array_size,couplerange}}, //gE is a 'large' matrix - as it wraps around the edges
-    {"R",{STD.R,grid_size}},
-    {"U",{STD.R,grid_size}},
-    {NULL}};         //a marker that we are at the end of the outputabbles list
+
 //function called by matlab
 //currently does no checking on input / output, so if you screw up your matlab expect segfaults
 void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
 {
+    output_s Outputabble[]={ //note - neat feature - missing elements initailized to 0
+        {"gE",{GE,conductance_array_size,couplerange}}, //gE is a 'large' matrix - as it wraps around the edges
+        {"gI",{GI,conductance_array_size,couplerange}}, //gE is a 'large' matrix - as it wraps around the edges
+        {"R",{STD.R,grid_size}},
+        {"U",{STD.R,grid_size}},
+        {NULL}};         //a marker that we are at the end of the outputabbles list
     if (setup_done==0) 
     {
         char* buffer = malloc(1024);

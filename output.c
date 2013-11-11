@@ -1,5 +1,4 @@
 #include "pixeltypes.h"
-#include "taggedarray.h"
 #include "output.h"
 int __attribute__((const)) rescalefloat (const Compute_float in,const Compute_float maxval, const Compute_float minval)
 {

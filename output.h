@@ -2,7 +2,7 @@
 #define OUTPUT
 #include "matlab_includes.h"
 #include "pixeltypes.h"
-#include "taggedarray.h"
+#include "helpertypes.h"
 typedef struct {
     char* name;
     tagged_array data;

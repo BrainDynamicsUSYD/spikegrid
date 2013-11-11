@@ -111,7 +111,7 @@ char fnamebuffer[30];
 void printVoltage (const Compute_float* const voltages)
 {
 
-    tagged_array v = {.data=voltages,.size=grid_size};
+    tagged_array v = {.data=voltages,.size=grid_size,.offset=0};
     bitmap_t* b = FloattoBitmap(v,Param.potential.Vrt,Param.potential.Vin);
     sprintf(fnamebuffer,"pics/%i.png",printcount);
     printcount++;

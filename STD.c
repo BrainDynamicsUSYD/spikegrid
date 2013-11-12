@@ -1,12 +1,14 @@
 #include "STD.h"
 #include "parameters.h"
-#include <stdlib.h>
-void STD_init()
+#include "helpertypes.h"
+STD_data STD_init(const STD_parameters s)
 {
+    STD_data ret;
     for(int i=0;i < grid_size*grid_size;i++)
     {
-        STD.ftimes[i]=0; //progably not required
-        STD.U[i] = Param.STD.U;
-        STD.R[i] = One;
+        ret.ftimes[i]=0; //progably not required
+        ret.U[i] = s.U;
+        ret.R[i] = One;
     }
+    return ret;
 }

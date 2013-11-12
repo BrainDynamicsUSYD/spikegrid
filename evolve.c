@@ -112,13 +112,13 @@ void step1 (layer_t* layer,const int time)
                 const int stdidx=c.x*grid_size+c.y;
                 if (i==1)
                 {
-                    const Compute_float dt = ((Compute_float)(time-STD.ftimes[stdidx]))/1000.0/Param.time.dt;//calculate inter spike interval in seconds
-                    STD.ftimes[stdidx]=time; //update the time
-                    const Compute_float prevu=STD.U[stdidx]; //need the previous U value
-                    STD.U[stdidx] = Param.STD.U + STD.U[stdidx]*(One-Param.STD.U)*exp(-dt/Param.STD.F);
-                    STD.R[stdidx] = One + (STD.R[stdidx] - prevu*STD.R[stdidx] - One)*exp(-dt/Param.STD.D);
+                    const Compute_float dt = ((Compute_float)(time-layer->std.ftimes[stdidx]))/1000.0/Param.time.dt;//calculate inter spike interval in seconds
+                    layer->std.ftimes[stdidx]=time; //update the time
+                    const Compute_float prevu=layer->std.U[stdidx]; //need the previous U value
+                    layer->std.U[stdidx] = Param.STD.U + layer->std.U[stdidx]*(One-Param.STD.U)*exp(-dt/Param.STD.F);
+                    layer->std.R[stdidx] = One + (layer->std.R[stdidx] - prevu*layer->std.R[stdidx] - One)*exp(-dt/Param.STD.D);
                 }
-                strmod = STD.U[stdidx] * STD.R[stdidx] * 2.0; //multiplication by 2 is not in the cited papers, but you could eliminate it by multiplying some other parameters by 2, but multiplying by 2 here enables easier comparison with the non-STD model.  Max has an improvement that calculates a first-order approxiamation that should be included
+                strmod = layer->std.U[stdidx] * layer->std.R[stdidx] * 2.0; //multiplication by 2 is not in the cited papers, but you could eliminate it by multiplying some other parameters by 2, but multiplying by 2 here enables easier comparison with the non-STD model.  Max has an improvement that calculates a first-order approxiamation that should be included
             }
             evolvept(c.x,c.y,layer->connections,Estr*strmod,Istr*strmod,gE,gI,layer->STDP_connections);
             idx++;

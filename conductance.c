@@ -38,28 +38,43 @@ void setcaptests()
     assert (setcap(2.0,0.5,1E-6)==270);
 }
 
+layer_t setuplayer(const parameters p)
+{
+    const int cap = max(setcap(p.synapse.taudE,p.synapse.taurE,1E-6),setcap(p.synapse.taudI,p.synapse.taurI,1E-6));
+    layer_t layer = 
+        {
+            .spikes=
+            {   
+                .count=cap,
+                .data=calloc(sizeof(coords*), cap)
+            },
+            .connections = CreateCouplingMatrix(Param.couple),
+            .STDP_connections = p.features.STDP==ON?calloc(sizeof(Compute_float),grid_size*grid_size*couple_array_size*couple_array_size):NULL,
+            .std              = STD_init(p.STD), //this is so fast that it doesn't matter to run in init
+        };
+
+    memset(layer.voltages,0,grid_size*grid_size); //probably not required
+    memset(layer.voltages_out,0,grid_size*grid_size);//probably not required
+    for (int i=0;i<cap;i++)
+    {
+        layer.spikes.data[i]=calloc(sizeof(coords),(grid_size*grid_size + 1));//assume worst case - all neurons firing.  Need to leave spae on the end for the -1 which marks the end.
+        layer.spikes.data[i][0].x=-1;//need to make sure that we don't start with spikes by ending at 0
+    }
+    return layer;
+}
+
 layer_t glayer;
+void dummy()
+{
+    printf("dummy\n");
+}
 //allocate memory - that sort of thing
 void setup()
 {
     couple_array_size=2*couplerange+1;
     //compute some constants
-    int cap=max(setcap(Param.synapse.taudE,Param.synapse.taurE,1E-6),setcap(Param.synapse.taudI,Param.synapse.taurI,1E-6));
-    //set up our data structure to store spikes
-    glayer.spikes.count=cap;
-    glayer.spikes.data=calloc(sizeof(coords*), cap);
-    glayer.connections        = CreateCouplingMatrix(Param.couple);
-    glayer.STDP_connections   = calloc(sizeof(Compute_float),grid_size*grid_size*couple_array_size*couple_array_size);
-    memset(glayer.voltages,0,grid_size*grid_size);
-    memset(glayer.voltages_out,0,grid_size*grid_size);
-    for (int i=0;i<cap;i++)
-    {
-        glayer.spikes.data[i]=calloc(sizeof(coords),(grid_size*grid_size + 1));//assume worst case - all neurons firing.  Need to leave spae on the end for the -1 which marks the end.
-        glayer.spikes.data[i][0].x=-1;//need to make sure that we don't start with spikes by ending at 0
-    }
-    //for storing voltages
-    if (Param.features.STD == ON) {STD_init();}
-
+    glayer = setuplayer(Param);
+    dummy();   
 }
 int mytime=0;
 void matlab_step(const Compute_float* const inp)

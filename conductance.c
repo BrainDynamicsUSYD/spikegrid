@@ -48,7 +48,7 @@ void setup()
     //set up our data structure to store spikes
     glayer.spikes.count=cap;
     glayer.spikes.data=calloc(sizeof(coords*), cap);
-    glayer.connections        = CreateCouplingMatrix();
+    glayer.connections        = CreateCouplingMatrix(Param.couple);
     glayer.STDP_connections   = calloc(sizeof(Compute_float),grid_size*grid_size*couple_array_size*couple_array_size);
     memset(glayer.voltages,0,grid_size*grid_size);
     memset(glayer.voltages_out,0,grid_size*grid_size);

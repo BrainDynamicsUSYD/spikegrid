@@ -3,14 +3,14 @@
 #include <tgmath.h> //logf / exp
 #include <stdlib.h> //calloc
 
-Compute_float erange;
- Compute_float __attribute__((const))exrange()
+/* //This function is useful - but not used
+ Compute_float __attribute__((const))exrange(const couple_parameters c)
 {
-   return -(Param.couple.sigE*Param.couple.sigI*logf(Param.couple.WE/Param.couple.WI))/(Param.couple.sigE-Param.couple.sigI); //from mathematica
+   return -(c.sigE*c.sigI*logf(c.WE/c.WI))/(c.sigE-c.sigI); //from mathematica
 }
-
+*/
 //check how far back we need to keep track of histories
-int setcap(Compute_float D,Compute_float R,Compute_float minval)
+int setcap(const Compute_float D,const Compute_float R,const Compute_float minval)
 {
     Compute_float prev = -1000;//initial values
     Compute_float alpha = 0;
@@ -28,21 +28,20 @@ int setcap(Compute_float D,Compute_float R,Compute_float minval)
 }
 
 //compute the mexican hat function used for coupling
-Compute_float mexhat(const Compute_float rsq){return Param.couple.WE*exp(-rsq/Param.couple.sigE)-Param.couple.WI*exp(-rsq/Param.couple.sigI);}
+Compute_float mexhat(const Compute_float rsq,const couple_parameters c){return c.WE*exp(-rsq/c.sigE)-c.WI*exp(-rsq/c.sigI);}
 
 //does what it says on the tin
-Compute_float* CreateCouplingMatrix()
+Compute_float* CreateCouplingMatrix(const couple_parameters c)
 {
     Compute_float* matrix = calloc(sizeof(Compute_float),couple_array_size*couple_array_size); //matrix of coupling values
-    erange=exrange();
     for(int x=-couplerange;x<=couplerange;x++)
     {
         for(int y=-couplerange;y<=couplerange;y++)
         {
             if (x*x+y*y<=couplerange*couplerange)//if we are within coupling range
             {
-                float val = mexhat((Compute_float)(x*x+y*y));//compute the mexican hat function
-                if (val>0) {val=val*Param.couple.SE;} else {val=val*Param.couple.SI;}//and multiply by some constants
+                float val = mexhat((Compute_float)(x*x+y*y),c);//compute the mexican hat function
+                if (val>0) {val=val*c.SE;} else {val=val*c.SI;}//and multiply by some constants
                 matrix[(x+couplerange)*couple_array_size + y + couplerange] = val;//and set the array
             }
         }

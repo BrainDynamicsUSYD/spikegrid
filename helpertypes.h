@@ -15,7 +15,8 @@ RINGBUFFER_DEF(coords);
 typedef struct {
     const Compute_float* volatile const data;
     const int size;
-    const int offset;} 
+    const int offset;
+   } 
     tagged_array;
 typedef struct layer
 {

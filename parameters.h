@@ -30,12 +30,9 @@ static const parameters Param =
     },
     .synapse =
     {
-        .taurE   = 0.5,                  //Ex spike rise time
-        .taudE   = 1.5,                  //Ex spike decay time
-        .taurI   = 0.5,                  //In spike rise time
-        .taudI   = 2.0,                  //In spike decay time
+        .Ex = {.R=0.5,.D=1.5},            //excitatory rise / decay time
+        .In = {.R=0.5,.D=2.0},            //inhibitory rise / decay time
         .tref      = 5,                  //refractory time
-
     },
     .potential = 
     {
@@ -44,11 +41,11 @@ static const parameters Param =
         .Vlk     = -70,                  //leak reversal potential
         .Vex     = 0,                    //Ex reversal potential
         .Vin     = -80,                  //In reversal potential
+        .glk     = 0.05                  //leak current
     },
     .misc =
     {
         .rate = 1,
-        .glk  = 0.05
     },
     .STDP = 
     {

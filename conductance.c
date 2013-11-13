@@ -33,14 +33,27 @@ void randinit(Compute_float* input)
 
 void setcaptests()
 {   
-    //todo:Get Adam to check these values
-    assert (setcap(1.5,0.5,1E-6)==209);
-    assert (setcap(2.0,0.5,1E-6)==270);
+    decay_parameters t1 = {.D=1.5,.R=0.5};
+    decay_parameters t2 = {.D=2.0,.R=0.5};
+    //todo:Get Adam to check these values - also add more tests
+    assert (setcap(t1,1E-6)==209);
+    assert (setcap(t2,1E-6)==270);
+}
+
+//todo: make const
+Compute_float* Synapse_timecourse (const int cap, const decay_parameters D)
+{
+    Compute_float* ret = calloc(sizeof(Compute_float),cap);
+    for (int i=0;i<cap;i++)
+    {
+        ret[i]=(One/(D.D-D.R))*(exp(-i/D.D)-exp(-i/D.R));
+    }
+    return ret;
 }
 
 layer_t setuplayer(const parameters p)
 {
-    const int cap = max(setcap(p.synapse.taudE,p.synapse.taurE,1E-6),setcap(p.synapse.taudI,p.synapse.taurI,1E-6));
+    const int cap = max(setcap(p.synapse.Ex,1E-6),setcap(p.synapse.In,1E-6));
     layer_t layer = 
         {
             .spikes=
@@ -50,7 +63,9 @@ layer_t setuplayer(const parameters p)
             },
             .connections = CreateCouplingMatrix(p.couple),
             .STDP_connections = p.features.STDP==ON?calloc(sizeof(Compute_float),grid_size*grid_size*couple_array_size*couple_array_size):NULL,
-            .std              = STD_init(p.STD), //this is so fast that it doesn't matter to run in init
+            .std                = STD_init(p.STD), //this is so fast that it doesn't matter to run in init
+            .Extimecourse       = Synapse_timecourse(cap,p.synapse.Ex),
+            .Intimecourse       = Synapse_timecourse(cap,p.synapse.In),
         };
 
     memset(layer.voltages,0,grid_size*grid_size); //probably not required

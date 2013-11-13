@@ -88,7 +88,7 @@ Compute_float gI[conductance_array_size*conductance_array_size];
 const volatile Compute_float* const GE = &gE[0]; //the volatile here may not be required (but checking this is very hard
 const volatile Compute_float* const GI = &gI[0];
 //rhs_func used when integrating the neurons forward through time
-Compute_float __attribute__((const)) rhs_func  (const Compute_float V,const Compute_float ge,const Compute_float gi) {return -(Param.misc.glk*(V-Param.potential.Vlk) + ge*(V-Param.potential.Vex) + gi*(V-Param.potential.Vin));}
+Compute_float __attribute__((const)) rhs_func  (const Compute_float V,const Compute_float ge,const Compute_float gi,const potential_parameters p) {return -(p.glk*(V-p.Vlk) + ge*(V-p.Vex) + gi*(V-p.Vin));}
 //step the model through time
 void step1 (layer_t* layer,const int time)
 {
@@ -99,9 +99,9 @@ void step1 (layer_t* layer,const int time)
     {
         coords* fire_with_this_lag;//this is a bit of a funny definition due to macros.
         RINGBUFFER_GETOFFSET(layer->spikes,i,fire_with_this_lag)
-        const Compute_float delta = ((Compute_float)i)*Param.time.dt;//small helper constant
-        const Compute_float Estr = (One/(Param.synapse.taudE-Param.synapse.taurE))*(exp(-delta/Param.synapse.taudE)-exp(-delta/Param.synapse.taurE));
-        const Compute_float Istr = (One/(Param.synapse.taudI-Param.synapse.taurI))*(exp(-delta/Param.synapse.taudI)-exp(-delta/Param.synapse.taurI));
+        const int delta =(int)((Compute_float)i)*Param.time.dt;//small helper constant. TODO: Question - are all these conversions necersarry?
+        const Compute_float Estr = layer->Extimecourse[delta];
+        const Compute_float Istr = layer->Intimecourse[delta]; 
         int idx=0; //iterate through all neurons firing with this lag
         while (fire_with_this_lag[idx].x != -1)
         {
@@ -131,9 +131,9 @@ void step1 (layer_t* layer,const int time)
         { //step all neurons through time - use midpoint method
             const int idx = (x+couplerange)*conductance_array_size + y + couplerange; //index for gE/gI
             const int idx2=  x*grid_size+y;//index for voltages
-            const Compute_float rhs1=rhs_func(layer->voltages[idx2],gE[idx],gI[idx]);
+            const Compute_float rhs1=rhs_func(layer->voltages[idx2],gE[idx],gI[idx],Param.potential);
             const Compute_float Vtemp = layer->voltages[idx2] + 0.5*Param.time.dt*rhs1;
-            const Compute_float rhs2=rhs_func(Vtemp,gE[idx],gI[idx]);
+            const Compute_float rhs2=rhs_func(Vtemp,gE[idx],gI[idx],Param.potential);
             layer->voltages_out[idx2]=layer->voltages[idx2]+0.5*Param.time.dt*(rhs1 + rhs2);
         }
     }

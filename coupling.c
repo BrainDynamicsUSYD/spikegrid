@@ -10,16 +10,16 @@
 }
 */
 //check how far back we need to keep track of histories
-int setcap(const Compute_float D,const Compute_float R,const Compute_float minval)
+int setcap(const decay_parameters d,const Compute_float minval)
 {
     Compute_float prev = -1000;//initial values
     Compute_float alpha = 0;
     Compute_float time=0;
-    Compute_float norm=One/(D-R);
+    Compute_float norm=One/(d.D-d.R);
     while(1)
     {
         time+=Param.time.dt;
-        alpha=(exp(-time/D) - exp(-time/R))*norm;
+        alpha=(exp(-time/d.D) - exp(-time/d.R))*norm;
         // check that the spike is in the decreasing phase and that it has magnitude less than the critical value
         if (alpha<minval && alpha<prev) {break;}
         prev=alpha;

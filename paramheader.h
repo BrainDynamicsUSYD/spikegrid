@@ -15,13 +15,16 @@ const Compute_float SI      ;                 //amount to multiply In conns (que
 const Compute_float syn     ;                    //synaptic strength multiplier (why not just We/Wi? - I am guessing some sort of convenience factor)
 } couple_parameters;
 
+typedef struct decay_parameters{
+    const Compute_float R;
+    const Compute_float D;
+} decay_parameters;
+
 typedef struct synapse_parameters
 {
-const Compute_float taurE  ;                  //Ex spike rise time
-const Compute_float taudE   ;                  //Ex spike decay time
-const Compute_float taurI   ;                  //In spike rise time
-const Compute_float taudI   ;                  //In spike decay time
-const int tref     ;                    //refractory time
+    const decay_parameters Ex;
+    const decay_parameters In;
+    const int tref     ;                    //refractory time
 } synapse_parameters;
 
 typedef struct potential_parameters
@@ -31,12 +34,12 @@ const Compute_float Vth    ;                  //Threshold potential
 const Compute_float Vlk     ;                  //leak reversal potential
 const Compute_float Vex    ;                    //Ex reversal potential
 const Compute_float Vin     ;                  //In reversal potential
+const Compute_float glk    ;                 //leak conductance (ms^-1)
 } potential_parameters;
 
 typedef struct misc_parameters //TODO: really need to rename this
 {
 const Compute_float rate   ;                    //Rate of external input (spikes/neuron/s)
-const Compute_float glk    ;                 //leak conductance (ms^-1)
 } misc_parameters;
 typedef struct STDP_parameters
 {

@@ -15,7 +15,7 @@ inline static int dist(int cur,int prev)
 //invert the distances
 inline static int invertdist(int v) {return ((2*couplerange) - v);}
 //this method is incredibly hard to understand.  Many weird things are driven by speed.  But basically, implement STDP.
-void ApplySTDP(Compute_float * __restrict__ dmats,const coords* curfire,const coords* prevfire,const Compute_float str,const Compute_float* constm)
+void ApplySTDP(Compute_float * __restrict__ dmats,const coords* curfire,const coords* prevfire,const Compute_float str,const Compute_float* constm,const STDP_parameters S)
 {
     int cindex = 0;
     while(curfire[cindex].x != -1)
@@ -41,7 +41,7 @@ void ApplySTDP(Compute_float * __restrict__ dmats,const coords* curfire,const co
                 const int cdy = cy + couplerange;
                 const int rx = invertdist(cdx); //moving this into loop has no effect - each is one lea instrucion only - possibly never even calculated
                 const int ry = invertdist(cdy);
-                if((dmats[(px*grid_size+py)*couple_array_size*couple_array_size + cdx*couple_array_size + cdy]) <  fabsf(Param.STDP.stdp_limit * constm[cdx*couple_array_size+cdy])  )
+                if((dmats[(px*grid_size+py)*couple_array_size*couple_array_size + cdx*couple_array_size + cdy]) <  fabsf(S.stdp_limit * constm[cdx*couple_array_size+cdy])  )
                 {   
                     dmats[(px*grid_size+py)*couple_array_size*couple_array_size + cdx*couple_array_size + cdy] += str; //all the lookup code here is cached
                     dmats[(nx*grid_size+ny)*couple_array_size*couple_array_size + rx*couple_array_size + ry]   -= str;
@@ -62,15 +62,15 @@ void ApplySTDP(Compute_float * __restrict__ dmats,const coords* curfire,const co
 
 //Next idea for STDP speed improvements - The Magnitude check is based on the direction from the previous to the current (increasing) - as a result, the innermost loop frequently calculates the offset - swapping curfire and prevfire
 
-void doSTDP (Compute_float* dmats,const coords_ringbuffer fdata , const Compute_float*constm)
+void doSTDP (Compute_float* dmats,const coords_ringbuffer fdata , const Compute_float*constm,const STDP_parameters S)
 {
     coords* curfire = fdata.data[fdata.curidx];
-    if (Param.STDP.stdp_strength==0.0) {return;} //early bail if no STDP
+    if (S.stdp_strength==0.0) {return;} //early bail if no STDP
     for(int offset = 1;offset<fdata.count;offset++)
     {
-        Compute_float strn =Param.STDP.stdp_strength* exp(-((Compute_float)offset)/Param.STDP.stdp_tau);
+        Compute_float strn = S.stdp_strength* exp(-((Compute_float)offset)/S.stdp_tau);
         coords* fire_with_this_lag;
         RINGBUFFER_GETOFFSET(fdata,offset,fire_with_this_lag);
-        ApplySTDP(dmats,curfire,fire_with_this_lag,strn,constm);
+        ApplySTDP(dmats,curfire,fire_with_this_lag,strn,constm,S);
     }
 }

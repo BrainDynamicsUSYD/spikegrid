@@ -48,7 +48,7 @@ layer_t setuplayer(const parameters p)
                 .count=cap,
                 .data=calloc(sizeof(coords*), cap)
             },
-            .connections = CreateCouplingMatrix(Param.couple),
+            .connections = CreateCouplingMatrix(p.couple),
             .STDP_connections = p.features.STDP==ON?calloc(sizeof(Compute_float),grid_size*grid_size*couple_array_size*couple_array_size):NULL,
             .std              = STD_init(p.STD), //this is so fast that it doesn't matter to run in init
         };
@@ -64,17 +64,12 @@ layer_t setuplayer(const parameters p)
 }
 
 layer_t glayer;
-void dummy()
-{
-    printf("dummy\n");
-}
 //allocate memory - that sort of thing
 void setup()
 {
     couple_array_size=2*couplerange+1;
     //compute some constants
     glayer = setuplayer(Param);
-    dummy();   
 }
 int mytime=0;
 void matlab_step(const Compute_float* const inp)
@@ -85,7 +80,7 @@ void matlab_step(const Compute_float* const inp)
     step1(&glayer,mytime);
     if (Param.features.STDP==ON)
     {
-        doSTDP(glayer.STDP_connections,glayer.spikes,glayer.connections);
+        doSTDP(glayer.STDP_connections,glayer.spikes,glayer.connections,Param.STDP);
     }
     if (Param.features.Movie==ON &&  mytime % Param.Movie.Delay == 0) {printVoltage(glayer.voltages_out);}
    

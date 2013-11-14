@@ -16,6 +16,7 @@ typedef struct STD_data
     int ftimes[grid_size*grid_size];
     Compute_float U[grid_size*grid_size];
     Compute_float R[grid_size*grid_size];
+    const STD_parameters* P;
 } STD_data;
 typedef struct layer
 {
@@ -27,6 +28,7 @@ typedef struct layer
     const Compute_float* Intimecourse;  //store time course of In synapses  - need to make const
     coords_ringbuffer spikes;
     STD_data std;
+    const potential_parameters* P;
 } layer_t;
 //these break vim syntax highlighting so move to the end
 #define max(a,b) \

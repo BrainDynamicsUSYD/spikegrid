@@ -41,10 +41,7 @@ static const parameters Param =
         .Vlk     = -70,                  //leak reversal potential
         .Vex     = 0,                    //Ex reversal potential
         .Vin     = -80,                  //In reversal potential
-        .glk     = 0.05                  //leak current
-    },
-    .misc =
-    {
+        .glk     = 0.05,                 //leak current
         .rate = 1,
     },
     .STDP = 
@@ -63,7 +60,7 @@ static const parameters Param =
     {
         .Delay = 10,
     },
-    .features =
+    .features =  //currently, features are global
     {
         .STDP       = OFF,
         .STD        = ON ,

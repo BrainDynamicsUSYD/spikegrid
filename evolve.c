@@ -1,5 +1,4 @@
 #include "parameters.h"
-#include "parameters.h"
 #include "evolve.h"
 #include "helpertypes.h"
 #include "STD.h"
@@ -115,8 +114,8 @@ void step1 (layer_t* layer,const int time)
                     const Compute_float dt = ((Compute_float)(time-layer->std.ftimes[stdidx]))/1000.0/Param.time.dt;//calculate inter spike interval in seconds
                     layer->std.ftimes[stdidx]=time; //update the time
                     const Compute_float prevu=layer->std.U[stdidx]; //need the previous U value
-                    layer->std.U[stdidx] = Param.STD.U + layer->std.U[stdidx]*(One-Param.STD.U)*exp(-dt/Param.STD.F);
-                    layer->std.R[stdidx] = One + (layer->std.R[stdidx] - prevu*layer->std.R[stdidx] - One)*exp(-dt/Param.STD.D);
+                    layer->std.U[stdidx] = layer->std.P->U + layer->std.U[stdidx]*(One-layer->std.P->U)*exp(-dt/layer->std.P->F);
+                    layer->std.R[stdidx] = One + (layer->std.R[stdidx] - prevu*layer->std.R[stdidx] - One)*exp(-dt/layer->std.P->D);
                 }
                 strmod = layer->std.U[stdidx] * layer->std.R[stdidx] * 2.0; //multiplication by 2 is not in the cited papers, but you could eliminate it by multiplying some other parameters by 2, but multiplying by 2 here enables easier comparison with the non-STD model.  Max has an improvement that calculates a first-order approxiamation that should be included
             }
@@ -131,9 +130,9 @@ void step1 (layer_t* layer,const int time)
         { //step all neurons through time - use midpoint method
             const int idx = (x+couplerange)*conductance_array_size + y + couplerange; //index for gE/gI
             const int idx2=  x*grid_size+y;//index for voltages
-            const Compute_float rhs1=rhs_func(layer->voltages[idx2],gE[idx],gI[idx],Param.potential);
+            const Compute_float rhs1=rhs_func(layer->voltages[idx2],gE[idx],gI[idx],*(layer->P));
             const Compute_float Vtemp = layer->voltages[idx2] + 0.5*Param.time.dt*rhs1;
-            const Compute_float rhs2=rhs_func(Vtemp,gE[idx],gI[idx],Param.potential);
+            const Compute_float rhs2=rhs_func(Vtemp,gE[idx],gI[idx],*(layer->P));
             layer->voltages_out[idx2]=layer->voltages[idx2]+0.5*Param.time.dt*(rhs1 + rhs2);
         }
     }
@@ -142,20 +141,20 @@ void step1 (layer_t* layer,const int time)
     {
         for (int y=0;y<grid_size;y++)
         {
-            if (layer->voltages[x*grid_size + y]  > Param.potential.Vth)
+            if (layer->voltages[x*grid_size + y]  > layer->P->Vth)
             {
                 const coords c= {x,y}; //required to keep the compiler happy - can't do an inline constructor
                 current_firestore[this_fcount] =c;
-                layer->voltages_out[x*grid_size+y]=Param.potential.Vrt;
+                layer->voltages_out[x*grid_size+y]=layer->P->Vrt;
                 this_fcount++;
                 if (Param.features.Output==ON)
                 {
                     printf("%i,%i;",x,y);
                 }
             }
-            else if (((Compute_float)random())/((Compute_float)RAND_MAX) < (Param.misc.rate*0.001*Param.time.dt))
+            else if (((Compute_float)random())/((Compute_float)RAND_MAX) < (layer->P->rate*0.001*Param.time.dt))
             {
-                layer->voltages_out[x*grid_size+y]=Param.potential.Vth+0.1;//make sure it fires
+                layer->voltages_out[x*grid_size+y]=layer->P->Vth+0.1;//make sure it fires
             }
         }
     }
@@ -168,7 +167,7 @@ void step1 (layer_t* layer,const int time)
         while (fire_with_this_lag[idx].x != -1)
         {
             coords c = fire_with_this_lag[idx]; 
-            layer->voltages_out[c.x*grid_size+c.y]=Param.potential.Vrt;
+            layer->voltages_out[c.x*grid_size+c.y]=layer->P->Vrt;
             idx++;
         }
     }

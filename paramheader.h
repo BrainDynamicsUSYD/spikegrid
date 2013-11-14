@@ -35,12 +35,9 @@ const Compute_float Vlk     ;                  //leak reversal potential
 const Compute_float Vex    ;                    //Ex reversal potential
 const Compute_float Vin     ;                  //In reversal potential
 const Compute_float glk    ;                 //leak conductance (ms^-1)
+const Compute_float rate   ;                    //Rate of external input (spikes/neuron/s)
 } potential_parameters;
 
-typedef struct misc_parameters //TODO: really need to rename this
-{
-const Compute_float rate   ;                    //Rate of external input (spikes/neuron/s)
-} misc_parameters;
 typedef struct STDP_parameters
 {
     const Compute_float stdp_limit;
@@ -72,7 +69,6 @@ typedef struct parameters
     const couple_parameters couple;
     const synapse_parameters synapse;
     const potential_parameters potential;
-    const misc_parameters misc;
     const STDP_parameters STDP;
     const STD_parameters STD;
     const movie_parameters Movie;

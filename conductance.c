@@ -63,9 +63,10 @@ layer_t setuplayer(const parameters p)
             },
             .connections = CreateCouplingMatrix(p.couple),
             .STDP_connections = p.features.STDP==ON?calloc(sizeof(Compute_float),grid_size*grid_size*couple_array_size*couple_array_size):NULL,
-            .std                = STD_init(p.STD), //this is so fast that it doesn't matter to run in init
+            .std                = STD_init(&p.STD), //this is so fast that it doesn't matter to run in init
             .Extimecourse       = Synapse_timecourse(cap,p.synapse.Ex),
             .Intimecourse       = Synapse_timecourse(cap,p.synapse.In),
+            .P                  = &(p.potential),
         };
 
     memset(layer.voltages,0,grid_size*grid_size); //probably not required

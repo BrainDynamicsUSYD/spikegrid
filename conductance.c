@@ -1,5 +1,4 @@
 #include "matlab_includes.h"
-#include "ringbuffer.h"
 #include "parameters.h"
 #include "helpertypes.h"
 #include "coupling.h"
@@ -67,6 +66,7 @@ layer_t setuplayer(const parameters p)
             .Extimecourse       = Synapse_timecourse(cap,p.synapse.Ex),
             .Intimecourse       = Synapse_timecourse(cap,p.synapse.In),
             .P                  = &(p.potential),
+            .S                  = &(p.STDP)
         };
 
     memset(layer.voltages,0,grid_size*grid_size); //probably not required
@@ -83,7 +83,7 @@ layer_t glayer;
 //allocate memory - that sort of thing
 void setup()
 {
-    couple_array_size=2*couplerange+1;
+    couple_array_size=2*couplerange+1; //move this somewhere else
     //compute some constants
     glayer = setuplayer(Param);
 }
@@ -96,7 +96,7 @@ void matlab_step(const Compute_float* const inp)
     step1(&glayer,mytime);
     if (Param.features.STDP==ON)
     {
-        doSTDP(glayer.STDP_connections,glayer.spikes,glayer.connections,Param.STDP);
+        doSTDP(glayer.STDP_connections,&glayer.spikes,glayer.connections,glayer.S);
     }
     if (Param.features.Movie==ON &&  mytime % Param.Movie.Delay == 0) {printVoltage(glayer.voltages_out);}
    

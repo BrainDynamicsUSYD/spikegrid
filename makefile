@@ -7,7 +7,7 @@ extraextrawarnings=-Wconversion
 export CFLAGS=-g -Wall -Wextra -std=gnu99 ${optflags} ${extrawarnings}
 export CLIBFLAGS= -fPIC -shared
 export LDFLAGS=-lm -lpng
-SOURCES= coupling.c  STDP.c conductance.c STD.c movie.c output.c evolve.c
+SOURCES= coupling.c  STDP.c conductance.c STD.c movie.c output.c evolve.c helpertypes.c
 BINARY=a.out
 a.out: ${SOURCES}
 	${CC}  ${CFLAGS} ${SOURCES} -o ${BINARY} ${LDFLAGS}

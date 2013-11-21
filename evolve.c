@@ -96,8 +96,7 @@ void step1 (layer_t* layer,const int time)
     memset(gI,0,sizeof(Compute_float)*conductance_array_size*conductance_array_size);
     for (int i=1;i<layer->spikes.count;i++) //start at 1 so we don't get currently firing (which should be empty anyway)
     {
-        coords* fire_with_this_lag;//this is a bit of a funny definition due to macros.
-        RINGBUFFER_GETOFFSET(layer->spikes,i,fire_with_this_lag)
+        const coords* const fire_with_this_lag = ringbuffer_getoffset(&layer->spikes,i);
         const int delta =(int)((Compute_float)i)*Param.time.dt;//small helper constant. TODO: Question - are all these conversions necersarry?
         const Compute_float Estr = layer->Extimecourse[delta];
         const Compute_float Istr = layer->Intimecourse[delta]; 
@@ -161,8 +160,7 @@ void step1 (layer_t* layer,const int time)
     //todo: fix for time scale properly
     for (int i=1;i<=51;i++) //start at 1 so we don't get currently firing (which should be empty anyway)
     {   //put refractory neurons at reset potential
-        coords* fire_with_this_lag;//this is a bit of a funny definition due to macros.
-        RINGBUFFER_GETOFFSET(layer->spikes,i,fire_with_this_lag)
+        const coords* const fire_with_this_lag = ringbuffer_getoffset(&layer->spikes,i);
         int idx=0;
         while (fire_with_this_lag[idx].x != -1)
         {

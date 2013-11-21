@@ -12,7 +12,7 @@ typedef float Compute_float ; //for speed
 int couple_array_size;
 ////TODO: compiler does not warn on missing elements - fix
 //Fun note - with the right optimisations GCC actually will pull these constants inline (for example disassemble evolvept_STDP with STDP off)
-static const parameters Param =
+static const parameters Param = //the fact that this is static is a little messy - in theory gcc will create a copy for each .c file.  However - in reality, this doesn't appear to happen (perhaps GCC realises that it is const so that only one copy is required.  If the const is ever removed, static will cause incredibly weird behaviour.
 {
     .time =
     {
@@ -69,6 +69,6 @@ static const parameters Param =
         
     }
 };
-static const Compute_float One = (Compute_float)1;
+static const Compute_float One = (Compute_float)1; //a useful constant so that you cna get a floating point 1 without needing a cast to float / double.  (the whole idea of compute_float is that it make switching 
 #endif
 

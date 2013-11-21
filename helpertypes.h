@@ -1,9 +1,14 @@
 #ifndef HELPERS
 #define HELPERS
-#include "ringbuffer.h"
 #include "parameters.h"
 typedef struct coords {int x;int y;} coords;
-RINGBUFFER_DEF(coords);
+typedef struct ringbuffer {
+    coords ** data;
+    int count;
+    int curidx;
+} ringbuffer;
+
+coords* ringbuffer_getoffset (const ringbuffer* const input,const int offset);
 
 typedef struct {
     const Compute_float* volatile const data;
@@ -26,9 +31,10 @@ typedef struct layer
     Compute_float voltages_out[grid_size*grid_size]; //return value - probably shouldn't be here
     const Compute_float* Extimecourse;  //store time course of Ex synapses  - need to make const
     const Compute_float* Intimecourse;  //store time course of In synapses  - need to make const
-    coords_ringbuffer spikes;
+    ringbuffer spikes;
     STD_data std;
     const potential_parameters* P;
+    const STDP_parameters * S;
 } layer_t;
 //these break vim syntax highlighting so move to the end
 #define max(a,b) \

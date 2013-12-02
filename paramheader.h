@@ -12,7 +12,6 @@ const Compute_float WI     ;                 //Inhib coupling strength
 const Compute_float sigI   ;                   //char. length for In synapses (int / float?)
 const Compute_float SE      ;                    //amount to multiply Ex conns (question why not just use We?)
 const Compute_float SI      ;                 //amount to multiply In conns (question why not just use In?)
-const Compute_float syn     ;                    //synaptic strength multiplier (why not just We/Wi? - I am guessing some sort of convenience factor)
 } couple_parameters;
 
 typedef struct decay_parameters{

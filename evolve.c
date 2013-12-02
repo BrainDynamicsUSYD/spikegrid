@@ -87,7 +87,7 @@ Compute_float gI[conductance_array_size*conductance_array_size];
 const volatile Compute_float* const GE = &gE[0]; //the volatile here may not be required (but checking this is very hard
 const volatile Compute_float* const GI = &gI[0];
 //rhs_func used when integrating the neurons forward through time
-Compute_float __attribute__((const)) rhs_func  (const Compute_float V,const Compute_float ge,const Compute_float gi,const potential_parameters p) {return -(p.glk*(V-p.Vlk) + ge*(V-p.Vex) + gi*(V-p.Vin));}
+Compute_float __attribute__((const)) rhs_func  (const Compute_float V,const Compute_float ge,const Compute_float gi,const conductance_parameters p) {return -(p.glk*(V-p.Vlk) + ge*(V-p.Vex) + gi*(V-p.Vin));}
 //step the model through time
 void step1 (layer_t* layer,const int time)
 {

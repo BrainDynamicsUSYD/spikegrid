@@ -33,7 +33,7 @@ typedef struct layer
     const Compute_float* Intimecourse;  //store time course of In synapses  - need to make const
     ringbuffer spikes;
     STD_data std;
-    const potential_parameters* P;
+    const conductance_parameters* P;
     const STDP_parameters * S;
 } layer_t;
 //these break vim syntax highlighting so move to the end

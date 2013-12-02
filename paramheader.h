@@ -26,16 +26,16 @@ typedef struct synapse_parameters
     const int tref     ;                    //refractory time
 } synapse_parameters;
 
-typedef struct potential_parameters
+typedef struct conductance_parameters
 {
-const Compute_float Vrt    ;                  //reset potential
-const Compute_float Vth    ;                  //Threshold potential
-const Compute_float Vlk     ;                  //leak reversal potential
-const Compute_float Vex    ;                    //Ex reversal potential
-const Compute_float Vin     ;                  //In reversal potential
-const Compute_float glk    ;                 //leak conductance (ms^-1)
-const Compute_float rate   ;                    //Rate of external input (spikes/neuron/s)
-} potential_parameters;
+    const Compute_float Vrt    ;                  //reset potential
+    const Compute_float Vth    ;                  //Threshold potential
+    const Compute_float Vlk     ;                  //leak reversal potential
+    const Compute_float Vex    ;                    //Ex reversal potential
+    const Compute_float Vin     ;                  //In reversal potential
+    const Compute_float glk    ;                 //leak conductance (ms^-1)
+    const Compute_float rate   ;                    //Rate of external input (spikes/neuron/s)
+} conductance_parameters;
 
 typedef struct STDP_parameters
 {
@@ -67,7 +67,7 @@ typedef struct parameters
     const time_parameters time;
     const couple_parameters couple;
     const synapse_parameters synapse;
-    const potential_parameters potential;
+    const conductance_parameters potential;
     const STDP_parameters STDP;
     const STD_parameters STD;
     const movie_parameters Movie;

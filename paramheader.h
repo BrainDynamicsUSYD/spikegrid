@@ -1,3 +1,10 @@
+#ifndef PARAMHEADER
+#define PARAMHEADER
+#ifdef FAST
+typedef float Compute_float ; //for speed
+#else
+typedef double Compute_float ; //for accuracy
+#endif
 //making OFF 0 will turn off features by default
 typedef enum ON_OFF {OFF=0,ON=1} on_off;
 typedef struct time_parameters
@@ -73,3 +80,10 @@ typedef struct parameters
     const movie_parameters Movie;
     const model_features features;
 } parameters;
+
+static const Compute_float One = (Compute_float)1; //a useful constant so that you cna get a floating point 1 without needing a cast to float / double.  (the whole idea of compute_float is that it make switching 
+
+#define PARAMETERS
+#include "parameters.h"
+
+#endif

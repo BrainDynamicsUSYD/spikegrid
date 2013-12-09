@@ -1,15 +1,14 @@
-#ifndef PARAMATERS
-#define PARAMATERS
-//the following typedef must be before the include to get the right compute types
-typedef float Compute_float ; //for speed
-//typedef double Compute_float ; //for accuracy
-#include "paramheader.h"
+//size section
 
-//Architecture properties
 #define grid_size 100
 #define couplerange 15
 #define conductance_array_size (grid_size + 2*couplerange)
-int couple_array_size;
+#define couple_array_size (2*couplerange + 1)
+#ifndef PARAMATERS
+#define PARAMATERS
+//the following typedef must be before the include to get the right compute types
+#include "paramheader.h"
+
 ////TODO: compiler does not warn on missing elements - fix
 //Fun note - with the right optimisations GCC actually will pull these constants inline (for example disassemble evolvept_STDP with STDP off)
 static const parameters Param = //the fact that this is static is a little messy - in theory gcc will create a copy for each .c file.  However - in reality, this doesn't appear to happen (perhaps GCC realises that it is const so that only one copy is required.  If the const is ever removed, static will cause incredibly weird behaviour.
@@ -68,6 +67,5 @@ static const parameters Param = //the fact that this is static is a little messy
         
     }
 };
-static const Compute_float One = (Compute_float)1; //a useful constant so that you cna get a floating point 1 without needing a cast to float / double.  (the whole idea of compute_float is that it make switching 
 #endif
 

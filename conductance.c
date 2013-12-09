@@ -1,5 +1,5 @@
 #include "matlab_includes.h"
-#include "parameters.h"
+#include "paramheader.h"
 #include "helpertypes.h"
 #include "coupling.h"
 #include "STDP.h"
@@ -35,8 +35,8 @@ void setcaptests()
     decay_parameters t1 = {.D=1.5,.R=0.5};
     decay_parameters t2 = {.D=2.0,.R=0.5};
     //todo:Get Adam to check these values - also add more tests
-    assert (setcap(t1,1E-6)==209);
-    assert (setcap(t2,1E-6)==270);
+    assert (setcap(t1,1E-6,Param.time.dt)==209);
+    assert (setcap(t2,1E-6,Param.time.dt)==270);
 }
 
 //todo: make const
@@ -52,7 +52,7 @@ Compute_float* Synapse_timecourse (const int cap, const decay_parameters D)
 
 layer_t setuplayer(const parameters p)
 {
-    const int cap = max(setcap(p.synapse.Ex,1E-6),setcap(p.synapse.In,1E-6));
+    const int cap = max(setcap(p.synapse.Ex,1E-6,Param.time.dt),setcap(p.synapse.In,1E-6,Param.time.dt));
     layer_t layer = 
         {
             .spikes=
@@ -83,7 +83,6 @@ layer_t glayer;
 //allocate memory - that sort of thing
 void setup()
 {
-    couple_array_size=2*couplerange+1; //move this somewhere else
     //compute some constants
     glayer = setuplayer(Param);
 }

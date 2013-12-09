@@ -1,4 +1,4 @@
-#include "parameters.h"
+#include "paramheader.h"
 #include "coupling.h" //not actually required at the moment but should ensure that function types match
 #include <tgmath.h> //logf / exp
 #include <stdlib.h> //calloc
@@ -10,20 +10,20 @@
 }
 */
 //check how far back we need to keep track of histories
-int setcap(const decay_parameters d,const Compute_float minval)
+int setcap(const decay_parameters d,const Compute_float minval, const Compute_float dt)
 {
     Compute_float prev = -1000;//initial values
     Compute_float time=0;
     Compute_float norm=One/(d.D-d.R);
     while(1)
     {
-        time+=Param.time.dt;
+        time+=dt;
         Compute_float alpha=(exp(-time/d.D) - exp(-time/d.R))*norm;
         // check that the spike is in the decreasing phase and that it has magnitude less than the critical value
         if (alpha<minval && alpha<prev) {break;}
         prev=alpha;
     }
-    return (int)(time/Param.time.dt) +1; //this keeps compatibility with the matlab - seems slightly inelegent - maybe remove
+    return (int)(time/dt) +1; //this keeps compatibility with the matlab - seems slightly inelegent - maybe remove
 }
 
 //compute the mexican hat function used for coupling

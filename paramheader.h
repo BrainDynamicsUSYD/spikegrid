@@ -13,12 +13,12 @@ typedef struct time_parameters
 } time_parameters;
 typedef struct couple_parameters
 {
-const Compute_float WE       ;               //excitatory coupling strength
-const Compute_float sigE   ;                   //char. length for Ex symapses (int / float?)
-const Compute_float WI     ;                 //Inhib coupling strength
-const Compute_float sigI   ;                   //char. length for In synapses (int / float?)
-const Compute_float SE      ;                    //amount to multiply Ex conns (question why not just use We?)
-const Compute_float SI      ;                 //amount to multiply In conns (question why not just use In?)
+    const Compute_float WE       ;               //excitatory coupling strength
+    const Compute_float sigE   ;                   //char. length for Ex symapses (int / float?)
+    const Compute_float WI     ;                 //Inhib coupling strength
+    const Compute_float sigI   ;                   //char. length for In synapses (int / float?)
+    const Compute_float SE      ;                    //amount to multiply Ex conns (question why not just use We?)
+    const Compute_float SI      ;                 //amount to multiply In conns (question why not just use In?)
 } couple_parameters;
 
 typedef struct decay_parameters{
@@ -83,7 +83,10 @@ typedef struct parameters
 
 static const Compute_float One = (Compute_float)1; //a useful constant so that you cna get a floating point 1 without needing a cast to float / double.  (the whole idea of compute_float is that it make switching 
 
-#define PARAMETERS
-#include "parameters.h"
-
+#define PARAMETERS 
+//get some macros for various sizes
+#include "parameters.h" 
+//these two get the underlying values from parameters.h and magic
+#define conductance_array_size (grid_size + 2*couplerange)
+#define couple_array_size (2*couplerange + 1)
 #endif

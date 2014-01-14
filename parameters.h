@@ -1,11 +1,8 @@
-//size section
-
+//these first few parameters actually escape into the paramheader file through magic
 #define grid_size 100
 #define couplerange 15
-#define conductance_array_size (grid_size + 2*couplerange)
-#define couple_array_size (2*couplerange + 1)
-#ifndef PARAMATERS
-#define PARAMATERS
+#ifndef PARAMATERS  //DO NOT REMOVE
+#define PARAMATERS  //DO NOT REMOVE
 //the following typedef must be before the include to get the right compute types
 #include "paramheader.h"
 
@@ -67,5 +64,5 @@ static const parameters Param = //the fact that this is static is a little messy
         
     }
 };
-#endif
+#endif //DO NOT REMOVE
 

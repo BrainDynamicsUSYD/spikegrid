@@ -64,7 +64,7 @@ void ApplySTDP(Compute_float * __restrict__ dmats,const coords* curfire,const co
 
 void doSTDP (Compute_float* dmats,const ringbuffer* const fdata , const Compute_float*constm,const STDP_parameters* const S)
 {
-    coords* curfire = fdata->data[fdata->curidx];
+    const coords* const curfire = fdata->data[fdata->curidx];
     if (S->stdp_strength==0.0) {return;} //early bail if no STDP
     for(int offset = 1;offset<fdata->count;offset++)
     {

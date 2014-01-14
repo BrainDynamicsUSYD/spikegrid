@@ -26,7 +26,7 @@ int setcap(const decay_parameters d,const Compute_float minval, const Compute_fl
     return (int)(time/dt) +1; //this keeps compatibility with the matlab - seems slightly inelegent - maybe remove
 }
 
-//compute the mexican hat function used for coupling
+//compute the mexican hat function used for coupling - should really be marked forceinline or whatever the notation is for GCC.
 Compute_float mexhat(const Compute_float rsq,const couple_parameters c){return c.WE*exp(-rsq/c.sigE)-c.WI*exp(-rsq/c.sigI);}
 
 //does what it says on the tin

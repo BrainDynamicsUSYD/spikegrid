@@ -39,8 +39,7 @@ void setcaptests()
     assert (setcap(t2,1E-6,Param.time.dt)==270);
 }
 
-//todo: make const
-Compute_float* Synapse_timecourse (const int cap, const decay_parameters D)
+Compute_float* __attribute__((const)) Synapse_timecourse (const int cap, const decay_parameters D)
 {
     Compute_float* ret = calloc(sizeof(Compute_float),cap);
     for (int i=0;i<cap;i++)
@@ -80,14 +79,12 @@ layer_t setuplayer(const parameters p)
 }
 
 layer_t glayer;
-//allocate memory - that sort of thing
 void setup()
 {
-    //compute some constants
     glayer = setuplayer(Param);
 }
 int mytime=0;
-void matlab_step(const Compute_float* const inp)
+void step(const Compute_float* const inp)
 {
     mytime++;
     memcpy(glayer.voltages,inp,sizeof(float)*grid_size*grid_size);
@@ -123,7 +120,7 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
         printf("setup started\n");setup();setup_done=1;printf("done setup\n");
     }
     const Compute_float* inputdata = mxGetData(prhs[0]);
-    matlab_step(inputdata);
+    step(inputdata);
     plhs[0]=mxCreateNumericMatrix(grid_size,grid_size,mxSINGLE_CLASS,mxREAL);
     Compute_float* pointer=(Compute_float*)mxGetPr(plhs[0]);
     for (int i=0;i<grid_size;i++)
@@ -159,8 +156,9 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
     }
 }
 #endif
-int main()
+int main() //useful for testing w/out matlab
 {
+    //simple check to stop the code running on headnode
     char* buffer = malloc(1024);
     gethostname(buffer,1023);
     if (!strcmp(buffer,"headnode.physics.usyd.edu.au")) {printf("DON'T RUN THIS CODE ON HEADNODE\n");exit(EXIT_FAILURE);}
@@ -169,7 +167,7 @@ int main()
     randinit(input);
     while (mytime<100)
     {
-        matlab_step(input);
+        step(input);
         printf("%i\n",mytime);
         for (int i=0;i<grid_size;i++)
         {

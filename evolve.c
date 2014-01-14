@@ -84,7 +84,7 @@ void fixboundary(Compute_float* __restrict gE, Compute_float* __restrict gI)
 //these gE/gI values should be static to the function - but sometimes they need to be exposed as read only
 Compute_float gE[conductance_array_size*conductance_array_size];
 Compute_float gI[conductance_array_size*conductance_array_size];
-const volatile Compute_float* const GE = &gE[0]; //the volatile here may not be required (but checking this is very hard
+const volatile Compute_float* const GE = &gE[0]; //volatile is required as the underlying data can change and we are just exposing the read only pointer
 const volatile Compute_float* const GI = &gI[0];
 //rhs_func used when integrating the neurons forward through time
 Compute_float __attribute__((const)) rhs_func  (const Compute_float V,const Compute_float ge,const Compute_float gi,const conductance_parameters p) {return -(p.glk*(V-p.Vlk) + ge*(V-p.Vex) + gi*(V-p.Vin));}
@@ -107,16 +107,7 @@ void step1 (layer_t* layer,const int time)
             Compute_float strmod=One;
             if (Param.features.STD == ON)
             {
-                const int stdidx=c.x*grid_size+c.y;
-                if (i==1)
-                {
-                    const Compute_float dt = ((Compute_float)(time-layer->std.ftimes[stdidx]))/1000.0/Param.time.dt;//calculate inter spike interval in seconds
-                    layer->std.ftimes[stdidx]=time; //update the time
-                    const Compute_float prevu=layer->std.U[stdidx]; //need the previous U value
-                    layer->std.U[stdidx] = layer->std.P->U + layer->std.U[stdidx]*(One-layer->std.P->U)*exp(-dt/layer->std.P->F);
-                    layer->std.R[stdidx] = One + (layer->std.R[stdidx] - prevu*layer->std.R[stdidx] - One)*exp(-dt/layer->std.P->D);
-                }
-                strmod = layer->std.U[stdidx] * layer->std.R[stdidx] * 2.0; //multiplication by 2 is not in the cited papers, but you could eliminate it by multiplying some other parameters by 2, but multiplying by 2 here enables easier comparison with the non-STD model.  Max has an improvement that calculates a first-order approxiamation that should be included
+                strmod=STD_str(layer->std.P,c.x,c.y,time,i,&(layer->std));
             }
             evolvept(c.x,c.y,layer->connections,Estr*strmod,Istr*strmod,gE,gI,layer->STDP_connections);
             idx++;

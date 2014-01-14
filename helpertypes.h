@@ -11,7 +11,9 @@ typedef struct ringbuffer {
 coords* ringbuffer_getoffset (const ringbuffer* const input,const int offset);
 
 typedef struct {
-    const Compute_float* volatile const data;
+    //we require volatile below as we don't want you to be able to write to an array using the pointer from the tagged array
+    //however, other parts of the code could modify the underlying array, so use volatile to force reads
+    const Compute_float* const volatile data;
     const int size;
     const int offset;
    } 
@@ -37,6 +39,8 @@ typedef struct layer
     const STDP_parameters * S;
 } layer_t;
 //these break vim syntax highlighting so move to the end
+//also - these don't look like C but are the official gcc-approved way of doing the max/min macros.  
+//The typeof are required for the case of max (a++,b) which otherwise will be weird
 #define max(a,b) \
     ({ __typeof__ (a) _a = (a);\
        __typeof__ (b) _b = (b); \

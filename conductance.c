@@ -15,7 +15,6 @@
 #include <string.h> //memcpy
 #include <unistd.h> //gethostname
 
-
 //creates a random initial condition - small fluctuations away from Vrt
 void randinit(Compute_float* input)
 {
@@ -28,7 +27,6 @@ void randinit(Compute_float* input)
         }
     }
 }
-
 
 void setcaptests()
 {   
@@ -101,8 +99,8 @@ void step(const Compute_float* const inp)
    
 }
 
-int setup_done=0;
 #ifdef MATLAB
+int setup_done=0;
 //function called by matlab
 //currently does no checking on input / output, so if you screw up your matlab expect segfaults
 void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])

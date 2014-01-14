@@ -81,6 +81,9 @@ layer_t setuplayer(const parameters p)
 layer_t glayer;
 void setup()
 {
+    char* buffer = malloc(1024);
+    gethostname(buffer,1023);
+    if (!strcmp(buffer,"headnode.physics.usyd.edu.au")) {printf("DON'T RUN THIS CODE ON HEADNODE\n");exit(EXIT_FAILURE);}
     glayer = setuplayer(Param);
 }
 int mytime=0;
@@ -97,30 +100,25 @@ void step(const Compute_float* const inp)
     if (Param.features.Movie==ON &&  mytime % Param.Movie.Delay == 0) {printVoltage(glayer.voltages_out);}
    
 }
+
 int setup_done=0;
 #ifdef MATLAB
-//some classes for returning the data to matlab
-
-
 //function called by matlab
 //currently does no checking on input / output, so if you screw up your matlab expect segfaults
 void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
 {
     output_s Outputabble[]={ //note - neat feature - missing elements initailized to 0
         {"gE",{GE,conductance_array_size,couplerange}}, //gE is a 'large' matrix - as it wraps around the edges
-        {"gI",{GI,conductance_array_size,couplerange}}, //gE is a 'large' matrix - as it wraps around the edges
+        {"gI",{GI,conductance_array_size,couplerange}}, //gI is a 'large' matrix - as it wraps around the edges
         {"R",{STD.R,grid_size}},
         {"U",{STD.R,grid_size}},
         {NULL}};         //a marker that we are at the end of the outputabbles list
     if (setup_done==0) 
     {
-        char* buffer = malloc(1024);
-        gethostname(buffer,1023);
-        if (!strcmp(buffer,"headnode.physics.usyd.edu.au")) {printf("DON'T RUN THIS CODE ON HEADNODE\n");exit(EXIT_FAILURE);}
-        printf("setup started\n");setup();setup_done=1;printf("done setup\n");
+        setup();
     }
     const Compute_float* inputdata = mxGetData(prhs[0]);
-    step(inputdata);
+    step(inputdata); //always output the voltage data
     plhs[0]=mxCreateNumericMatrix(grid_size,grid_size,mxSINGLE_CLASS,mxREAL);
     Compute_float* pointer=(Compute_float*)mxGetPr(plhs[0]);
     for (int i=0;i<grid_size;i++)
@@ -131,12 +129,12 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
         }
         printf("%f\n",glayer.voltages_out[i*grid_size]);
     }
-    if (nrhs>1)
+    if (nrhs>1) //output other stuff
     {
         int rhsidx = 1;
         while (rhsidx<nrhs)
         {
-            char* data=malloc(sizeof(char)*1024);
+            char* data=malloc(sizeof(char)*1024); //should be big enough
             mxGetString(prhs[rhsidx],data,1023);
             int outidx = 0;
             while (Outputabble[outidx].name != NULL)
@@ -158,10 +156,6 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
 #endif
 int main() //useful for testing w/out matlab
 {
-    //simple check to stop the code running on headnode
-    char* buffer = malloc(1024);
-    gethostname(buffer,1023);
-    if (!strcmp(buffer,"headnode.physics.usyd.edu.au")) {printf("DON'T RUN THIS CODE ON HEADNODE\n");exit(EXIT_FAILURE);}
     setup();
     Compute_float* input=calloc(sizeof(Compute_float),grid_size*grid_size);
     randinit(input);

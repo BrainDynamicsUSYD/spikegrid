@@ -22,6 +22,7 @@ static const parameters Param = //the fact that this is static is a little messy
         .sigI    = 42,                   //char. length for In synapses (int / float?)
         .SE      = 1.5,                  //amnt to multiply Ex conns; why not use We? (d=1.00; vary 1-1.5)
         .SI      = 2.3,                  //amnt to multiply In conns; why not use In? (d= 2.55; vary 2.3-4)
+        .norm_type = None,
     },
     .synapse =
     {

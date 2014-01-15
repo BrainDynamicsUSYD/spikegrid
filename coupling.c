@@ -2,13 +2,14 @@
 #include "coupling.h" //not actually required at the moment but should ensure that function types match
 #include <tgmath.h> //logf / exp
 #include <stdlib.h> //calloc
+#include <stdio.h>  //printf
 
 /* //This function is useful - but not used
- Compute_float __attribute__((const))exrange(const couple_parameters c)
-{
+   Compute_float __attribute__((const))exrange(const couple_parameters c)
+   {
    return -(c.sigE*c.sigI*logf(c.WE/c.WI))/(c.sigE-c.sigI); //from mathematica
-}
-*/
+   }
+   */
 //check how far back we need to keep track of histories
 int setcap(const decay_parameters d,const Compute_float minval, const Compute_float dt)
 {
@@ -25,6 +26,38 @@ int setcap(const decay_parameters d,const Compute_float minval, const Compute_fl
     }
     return (int)(time/dt) +1; //this keeps compatibility with the matlab - seems slightly inelegent - maybe remove
 }
+//normalize the coupling matrix
+Compute_float* Norm_couplematrix(const couple_parameters c, Compute_float* const unnormed)
+{
+    switch (c.norm_type)
+    {
+        case None:
+            return unnormed;
+        case TotalArea:
+            {   //Apparently we need a separate scope to declare the variables in - C is weird
+                Compute_float plusval = 0;
+                Compute_float negval = 0;
+                for (int i=0;i<couple_array_size*couple_array_size;i++)
+                {
+                    const Compute_float val = unnormed[i];
+                    if (val < 0) {negval += val;} else {plusval += val;}
+
+                }
+                const Compute_float plusnorm = c.norm.WE/plusval;
+                const Compute_float negnorm = c.norm.WI/negval;
+                for (int i=0;i<couple_array_size*couple_array_size;i++)
+                {
+                    if (unnormed[i] < 0) {unnormed[i]  *= plusnorm;} else {unnormed[i] *= negnorm;}
+
+                }
+                return unnormed;
+            }
+        default:
+            printf("unknown normalization method\n");
+            return NULL;
+    }
+}
+
 
 //compute the mexican hat function used for coupling - should really be marked forceinline or whatever the notation is for GCC.
 Compute_float mexhat(const Compute_float rsq,const couple_parameters c){return c.WE*exp(-rsq/c.sigE)-c.WI*exp(-rsq/c.sigI);}
@@ -39,12 +72,12 @@ Compute_float* CreateCouplingMatrix(const couple_parameters c)
         {
             if (x*x+y*y<=couplerange*couplerange)//if we are within coupling range
             {
-                float val = mexhat((Compute_float)(x*x+y*y),c);//compute the mexican hat function
+                Compute_float val = mexhat((Compute_float)(x*x+y*y),c);//compute the mexican hat function
                 if (val>0) {val=val*c.SE;} else {val=val*c.SI;}//and multiply by some constants
                 matrix[(x+couplerange)*couple_array_size + y + couplerange] = val;//and set the array
             }
         }
     }
-    return matrix;
+    return Norm_couplematrix(c, matrix);
 }
 

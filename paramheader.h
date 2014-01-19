@@ -12,11 +12,11 @@ typedef struct time_parameters
     const Compute_float dt   ;                   //time step (ms)
 } time_parameters;
 typedef enum NORM_TYPE {None=0,TotalArea=1} Norm_type;
-typedef struct normalization_parameters
+typedef struct
 {
     const Compute_float WE;
     const Compute_float WI;
-} normalization_parameters;
+} Total_area_parameters;
 typedef struct couple_parameters
 {
     const Compute_float WE       ;               //excitatory coupling strength
@@ -26,7 +26,10 @@ typedef struct couple_parameters
     const Compute_float SE      ;                    //amount to multiply Ex conns (question why not just use We?)
     const Compute_float SI      ;                 //amount to multiply In conns (question why not just use In?)
     const Norm_type     norm_type;
-    const normalization_parameters norm;
+    const union 
+    {
+        Total_area_parameters total_area;
+    } normalization_parameters;
 } couple_parameters;
 
 typedef struct decay_parameters{

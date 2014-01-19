@@ -8,7 +8,7 @@
 #include <stdlib.h> //random
 //add gE/gI when using STDP - untested
 //when STDP is turned off, gcc will warn about this function needing const.  It is wrong
-void evolvept_STDP  (const int x,const  int y,const Compute_float* const __restrict connections_STDP,const Compute_float Estrmod,const Compute_float Istrmod,Compute_float* __restrict gE,Compute_float* __restrict gI)
+void __attribute__((const)) evolvept_STDP  (const int x,const  int y,const Compute_float* const __restrict connections_STDP,const Compute_float Estrmod,const Compute_float Istrmod,Compute_float* __restrict gE,Compute_float* __restrict gI)
 {
     //ex coupling
     if (Param.features.STDP == OFF) {return;}

@@ -11,12 +11,16 @@ typedef struct time_parameters
 {
     const Compute_float dt   ;                   //time step (ms)
 } time_parameters;
-typedef enum NORM_TYPE {None=0,TotalArea=1} Norm_type;
+typedef enum NORM_TYPE {None=0,TotalArea=1,GlobalMultiplier=2} Norm_type;
 typedef struct
 {
     const Compute_float WE;
     const Compute_float WI;
 } Total_area_parameters;
+typedef struct
+{
+    const Compute_float GM;
+} global_multiplier_parameters;
 typedef struct couple_parameters
 {
     const Compute_float WE       ;               //excitatory coupling strength
@@ -29,7 +33,8 @@ typedef struct couple_parameters
     const union 
     {
         Total_area_parameters total_area;
-    } normalization_parameters;
+        global_multiplier_parameters glob_mult;
+    } normalization_parameters;                   //holds data for different normalization methods
 } couple_parameters;
 
 typedef struct decay_parameters{

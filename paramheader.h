@@ -23,13 +23,13 @@ typedef struct
 } global_multiplier_parameters;
 typedef struct couple_parameters
 {
-    const Compute_float WE       ;               //excitatory coupling strength
-    const Compute_float sigE   ;                   //char. length for Ex symapses (int / float?)
-    const Compute_float WI     ;                 //Inhib coupling strength
-    const Compute_float sigI   ;                   //char. length for In synapses (int / float?)
-    const Compute_float SE      ;                    //amount to multiply Ex conns (question why not just use We?)
-    const Compute_float SI      ;                 //amount to multiply In conns (question why not just use In?)
-    const Norm_type     norm_type;
+    const Compute_float WE       ;                  //excitatory coupling strength
+    const Compute_float sigE   ;                    //char. length for Ex symapses (int / float?)
+    const Compute_float WI     ;                    //Inhib coupling strength
+    const Compute_float sigI   ;                    //char. length for In synapses (int / float?)
+    const Compute_float SE      ;                   //amount to multiply Ex conns (question why not just use We?)
+    const Compute_float SI      ;                   //amount to multiply In conns (question why not just use In?)
+    const Norm_type     norm_type;                  //what normalization method to use
     const union 
     {
         Total_area_parameters total_area;

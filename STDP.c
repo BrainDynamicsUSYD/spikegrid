@@ -41,7 +41,7 @@ void ApplySTDP(Compute_float * __restrict__ dmats,const coords* curfire,const co
                 const int cdy = cy + couplerange;
                 const int rx = invertdist(cdx); //moving this into loop has no effect - each is one lea instrucion only - possibly never even calculated
                 const int ry = invertdist(cdy);
-                if((dmats[(px*grid_size+py)*couple_array_size*couple_array_size + cdx*couple_array_size + cdy]) <  fabsf(S->stdp_limit * constm[cdx*couple_array_size+cdy])  )
+                if((dmats[(px*grid_size+py)*couple_array_size*couple_array_size + cdx*couple_array_size + cdy]) <  fabs(S->stdp_limit * constm[cdx*couple_array_size+cdy])  )
                 {   
                     dmats[(px*grid_size+py)*couple_array_size*couple_array_size + cdx*couple_array_size + cdy] += str; //all the lookup code here is cached
                     dmats[(nx*grid_size+ny)*couple_array_size*couple_array_size + rx*couple_array_size + ry]   -= str;

@@ -3,6 +3,13 @@
 #define couplerange 15
 #ifndef PARAMATERS  //DO NOT REMOVE
 #define PARAMATERS  //DO NOT REMOVE
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wconversion"
+#else
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wconversion"
+#endif
 //the following typedef must be before the include to get the right compute types
 #include "paramheader.h"
 
@@ -65,5 +72,10 @@ static const parameters Param = //the fact that this is static is a little messy
         
     }
 };
+#ifdef __clang__
+#pragma clang diagnostic pop
+#else
+#pragma GCC diagnostic pop
+#endif
 #endif //DO NOT REMOVE
 

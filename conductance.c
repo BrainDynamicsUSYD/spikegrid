@@ -23,7 +23,7 @@ void randinit(Compute_float* input)
     {
         for (int y=0;y<grid_size;y++)
         {
-            input[x*grid_size + y ] = ((Compute_float)random())/((Compute_float)RAND_MAX)/20.0 + Param.potential.Vrt;
+            input[x*grid_size + y ] = ((Compute_float)random())/((Compute_float)RAND_MAX)/((Compute_float)20.0) + Param.potential.Vrt;
         }
     }
 }
@@ -33,14 +33,14 @@ void setcaptests()
     decay_parameters t1 = {.D=1.5,.R=0.5};
     decay_parameters t2 = {.D=2.0,.R=0.5};
     //todo:Get Adam to check these values - also add more tests
-    assert (setcap(t1,1E-6,Param.time.dt)==209);
-    assert (setcap(t2,1E-6,Param.time.dt)==270);
+    assert (setcap(t1,(Compute_float)1E-6,Param.time.dt)==209);
+    assert (setcap(t2,(Compute_float)1E-6,Param.time.dt)==270);
 }
 
-Compute_float* __attribute__((const)) Synapse_timecourse (const int cap, const decay_parameters D)
+Compute_float* __attribute__((const)) Synapse_timecourse (const uint cap, const decay_parameters D)
 {
     Compute_float* ret = calloc(sizeof(Compute_float),cap);
-    for (int i=0;i<cap;i++)
+    for (unsigned int i=0;i<cap;i++)
     {
         ret[i]=(One/(D.D-D.R))*(exp(-i/D.D)-exp(-i/D.R));
     }
@@ -49,7 +49,7 @@ Compute_float* __attribute__((const)) Synapse_timecourse (const int cap, const d
 
 layer_t setuplayer(const parameters p)
 {
-    const int cap = max(setcap(p.synapse.Ex,1E-6,Param.time.dt),setcap(p.synapse.In,1E-6,Param.time.dt));
+    const unsigned int cap = max(setcap(p.synapse.Ex,1E-6,Param.time.dt),setcap(p.synapse.In,1E-6,Param.time.dt));
     layer_t layer = 
         {
             .spikes=
@@ -68,7 +68,7 @@ layer_t setuplayer(const parameters p)
 
     memset(layer.voltages,0,grid_size*grid_size); //probably not required
     memset(layer.voltages_out,0,grid_size*grid_size);//probably not required
-    for (int i=0;i<cap;i++)
+    for (unsigned int i=0;i<cap;i++)
     {
         layer.spikes.data[i]=calloc(sizeof(coords),(grid_size*grid_size + 1));//assume worst case - all neurons firing.  Need to leave spae on the end for the -1 which marks the end.
         layer.spikes.data[i][0].x=-1;//need to make sure that we don't start with spikes by ending at 0
@@ -84,7 +84,7 @@ void setup()
     if (!strcmp(buffer,"headnode.physics.usyd.edu.au")) {printf("DON'T RUN THIS CODE ON HEADNODE\n");exit(EXIT_FAILURE);}
     glayer = setuplayer(Param);
 }
-int mytime=0;
+unsigned int mytime=0;
 void step(const Compute_float* const inp)
 {
     mytime++;

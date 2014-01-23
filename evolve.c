@@ -89,15 +89,15 @@ const volatile Compute_float* const GI = &gI[0];
 //rhs_func used when integrating the neurons forward through time
 Compute_float __attribute__((const)) rhs_func  (const Compute_float V,const Compute_float ge,const Compute_float gi,const conductance_parameters p) {return -(p.glk*(V-p.Vlk) + ge*(V-p.Vex) + gi*(V-p.Vin));}
 //step the model through time
-void step1 (layer_t* layer,const int time)
+void step1 (layer_t* layer,const unsigned int time)
 {
     coords* current_firestore = layer->spikes.data[layer->spikes.curidx];//get the thing for currently firing neurons
     memset(gE,0,sizeof(Compute_float)*conductance_array_size*conductance_array_size); //zero the gE/gI matrices so they can be reused
     memset(gI,0,sizeof(Compute_float)*conductance_array_size*conductance_array_size);
-    for (int i=1;i<layer->spikes.count;i++) //start at 1 so we don't get currently firing (which should be empty anyway)
+    for (unsigned int i=1;i<layer->spikes.count;i++) //start at 1 so we don't get currently firing (which should be empty anyway)
     {
-        const coords* const fire_with_this_lag = ringbuffer_getoffset(&layer->spikes,i);
-        const int delta =(int)((Compute_float)i)*Param.time.dt;//small helper constant. TODO: Question - are all these conversions necersarry?
+        const coords* const fire_with_this_lag = ringbuffer_getoffset(&layer->spikes,(int)i);
+        const int delta =(int)(((Compute_float)i)*Param.time.dt);//small helper constant. TODO: Question - are all these conversions necersarry?
         const Compute_float Estr = layer->Extimecourse[delta];
         const Compute_float Istr = layer->Intimecourse[delta]; 
         int idx=0; //iterate through all neurons firing with this lag
@@ -121,9 +121,9 @@ void step1 (layer_t* layer,const int time)
             const int idx = (x+couplerange)*conductance_array_size + y + couplerange; //index for gE/gI
             const int idx2=  x*grid_size+y;//index for voltages
             const Compute_float rhs1=rhs_func(layer->voltages[idx2],gE[idx],gI[idx],*(layer->P));
-            const Compute_float Vtemp = layer->voltages[idx2] + 0.5*Param.time.dt*rhs1;
+            const Compute_float Vtemp = layer->voltages[idx2] + Half*Param.time.dt*rhs1;
             const Compute_float rhs2=rhs_func(Vtemp,gE[idx],gI[idx],*(layer->P));
-            layer->voltages_out[idx2]=layer->voltages[idx2]+0.5*Param.time.dt*(rhs1 + rhs2);
+            layer->voltages_out[idx2]=layer->voltages[idx2]+Half*Param.time.dt*(rhs1 + rhs2);
         }
     }
     int this_fcount=0;//now find which neurons fired at the current time step
@@ -142,9 +142,9 @@ void step1 (layer_t* layer,const int time)
                     printf("%i,%i;",x,y);
                 }
             }
-            else if (((Compute_float)random())/((Compute_float)RAND_MAX) < (layer->P->rate*0.001*Param.time.dt))
+            else if (((Compute_float)random())/((Compute_float)RAND_MAX) < (layer->P->rate*((Compute_float)0.001)*Param.time.dt))
             {
-                layer->voltages_out[x*grid_size+y]=layer->P->Vth+0.1;//make sure it fires
+                layer->voltages_out[x*grid_size+y]=layer->P->Vth+(Compute_float)0.1;//make sure it fires
             }
         }
     }

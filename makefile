@@ -4,13 +4,15 @@ ifeq ($(CC),cc)
 #these warnings only work on a really modern gcc - in particular they do not work on the default silliac / headnode compiler.  However, it is probably a good idea to enable them when you can
 	extraextrawarnings=-Wsuggest-attribute=pure -Wsuggest-attribute=const -Wsuggest-attribute=noreturn -Wstrict-overflow=5 
 #Wconversion produces alot of wanrings about constants - particularly in Parameters.h - but it could be good to fix it
-	export SPEEDFLAG=-DFAST #juse something else for double instead of float
-	export CFLAGS=-g -Wall -Wextra -std=gnu99 ${optflags} ${extrawarnings} ${SPEEDFLAG} ${extraextrawarnings}
+	export CFLAGS=-g -Wall -Wextra -std=gnu99 ${optflags} ${extrawarnings} ${extraextrawarnings}
 else #clang
-	export CFLAGS= -g -Wno-missing-prototypes -Weverything -pedantic --std=gnu99 -Ofast
+	export CFLAGS= -g -Wno-padded -Wno-missing-prototypes -Wno-missing-variable-declarations -Weverything -pedantic --std=gnu99 -Ofast
+
 endif
+export SPEEDFLAG=-DFAST #juse something else for double instead of float
 export CLIBFLAGS= -fPIC -shared
 export LDFLAGS=-lm -lpng
+CFLAGS += ${SPEEDFLAG}
 SOURCES= coupling.c  STDP.c conductance.c STD.c movie.c output.c evolve.c helpertypes.c
 BINARY=a.out
 a.out: ${SOURCES}

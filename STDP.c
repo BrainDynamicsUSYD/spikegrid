@@ -66,10 +66,10 @@ void doSTDP (Compute_float* dmats,const ringbuffer* const fdata , const Compute_
 {
     const coords* const curfire = fdata->data[fdata->curidx];
     if (S->stdp_strength==0.0) {return;} //early bail if no STDP
-    for(int offset = 1;offset<fdata->count;offset++)
+    for(unsigned int offset = 1;offset<fdata->count;offset++)
     {
         Compute_float strn = S->stdp_strength* exp(-((Compute_float)offset)/S->stdp_tau);
-        const coords* const fire_with_this_lag = ringbuffer_getoffset(fdata,offset);
+        const coords* const fire_with_this_lag = ringbuffer_getoffset(fdata,(int)offset);
         ApplySTDP(dmats,curfire,fire_with_this_lag,strn,constm,S);
     }
 }

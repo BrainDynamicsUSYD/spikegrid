@@ -74,7 +74,7 @@ typedef struct STD_parameters
 } STD_parameters;
 typedef struct movie_parmeters
 {
-    const int Delay;
+    const unsigned int Delay;
 } movie_parameters;
 typedef struct model_features
 {
@@ -98,7 +98,8 @@ typedef struct parameters
 } parameters;
 
 static const Compute_float One = (Compute_float)1; //a useful constant so that you cna get a floating point 1 without needing a cast to float / double.  (the whole idea of compute_float is that it make switching 
-
+static const Compute_float Half = (Compute_float)0.5;
+static const Compute_float Two = (Compute_float)2.0;
 #define PARAMETERS 
 //get some macros for various sizes
 #include "parameters.h" 

@@ -11,7 +11,7 @@
    }
    */
 //check how far back we need to keep track of histories
-int setcap(const decay_parameters d,const Compute_float minval, const Compute_float dt)
+unsigned int setcap(const decay_parameters d,const Compute_float minval, const Compute_float dt)
 {
     Compute_float prev = -1000;//initial values
     Compute_float time=0;
@@ -24,7 +24,7 @@ int setcap(const decay_parameters d,const Compute_float minval, const Compute_fl
         if (alpha<minval && alpha<prev) {break;}
         prev=alpha;
     }
-    return (int)(time/dt) +1; //this keeps compatibility with the matlab - seems slightly inelegent - maybe remove
+    return (unsigned int)(time/dt) +1; //this keeps compatibility with the matlab - seems slightly inelegent - maybe remove
 }
 //normalize the coupling matrix
 Compute_float* Norm_couplematrix(const couple_parameters c, Compute_float* const unnormed)

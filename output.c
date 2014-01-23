@@ -1,21 +1,22 @@
 #include "pixeltypes.h"
 #include "output.h"
-int __attribute__((const)) rescalefloat (const Compute_float in,const Compute_float maxval, const Compute_float minval) //rescale to 0-255
+#include <stdint.h>
+uint8_t __attribute__((const)) rescalefloat (const Compute_float in,const Compute_float maxval, const Compute_float minval) //rescale to 0-255
 {
-    return (int)((in - minval)/(maxval-minval)*255.0);
+    return (uint8_t)((in - minval)/(maxval-minval)*255.0);
 }
 //simple function to convert comp_float 2d array to a bitmap that you can then do something with
 bitmap_t* FloattoBitmap(const tagged_array input,const Compute_float maxval, const Compute_float minval)
 {
-    const int size = input.size - (2*input.offset);
+    const unsigned int size = input.size - (2*input.offset);
     bitmap_t* bp = (bitmap_t*)malloc(sizeof(bitmap_t));
     bp->pixels = malloc(sizeof(pixel_t)*input.size*input.size);
     bp->width=input.size;
     bp->height=input.size;
 
-    for (int i=0;i<input.size;i++)
+    for (unsigned int i=0;i<input.size;i++)
     {
-        for (int j=0;j<input.size;j++)
+        for (unsigned int j=0;j<input.size;j++)
         {
             const Compute_float val =  input.data[(i+input.offset)*input.size + j + input.offset ];
             if (val > maxval) 

@@ -6,7 +6,7 @@
 #include "pixeltypes.h"
 #include "parameters.h"
 // Given "bitmap", this returns the pixel of bitmap at the point ("x", "y").
-pixel_t __attribute((const,pure)) * pixel_at (bitmap_t * bitmap, const int x, const int y)
+pixel_t __attribute((const,pure)) * pixel_at (bitmap_t * bitmap, const unsigned  int x, const unsigned int y)
 {
     return bitmap->pixels + bitmap->width * y + x;
 }
@@ -17,7 +17,7 @@ int save_png_to_file (bitmap_t *bitmap, const char *path)
     FILE * fp;
     png_structp png_ptr = NULL;
     png_infop info_ptr = NULL;
-    size_t x, y;
+    unsigned int x, y;
     png_byte ** row_pointers = NULL;
     /* "status" contains the return value of this function. At first
        it is set to a value which means 'failure'. When the routine
@@ -27,7 +27,7 @@ int save_png_to_file (bitmap_t *bitmap, const char *path)
     /* The following number is set by trial and error only. I cannot
        see where it it is documented in the libpng manual.
     */
-    int pixel_size = 3;
+    unsigned int pixel_size = 3;
     int depth = 8;
 
     fp = fopen (path, "wb");
@@ -56,8 +56,8 @@ int save_png_to_file (bitmap_t *bitmap, const char *path)
 
     png_set_IHDR (png_ptr,
                   info_ptr,
-                  bitmap->width,
-                  bitmap->height,
+                  (png_uint_32)bitmap->width,
+                  (png_uint_32)bitmap->height,
                   depth,
                   PNG_COLOR_TYPE_RGB,
                   PNG_INTERLACE_NONE,

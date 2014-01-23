@@ -4,8 +4,8 @@
 typedef struct coords {int x;int y;} coords;
 typedef struct ringbuffer {
     coords ** data;
-    int count;
-    int curidx;
+    unsigned int count;
+    unsigned int curidx;
 } ringbuffer;
 
 coords* ringbuffer_getoffset (const ringbuffer* const input,const int offset);
@@ -14,13 +14,13 @@ typedef struct {
     //we require volatile below as we don't want you to be able to write to an array using the pointer from the tagged array
     //however, other parts of the code could modify the underlying array, so use volatile to force reads
     const Compute_float* const volatile data;
-    const int size;
-    const int offset;
+    const unsigned int size;
+    const unsigned int offset;
    } 
     tagged_array;
 typedef struct STD_data
 {   //some parts of this should be const - but oh well
-    int ftimes[grid_size*grid_size];
+    unsigned int ftimes[grid_size*grid_size];
     Compute_float U[grid_size*grid_size];
     Compute_float R[grid_size*grid_size];
     const STD_parameters* P;

@@ -12,7 +12,8 @@ while time<1000
         title(time)
         figure(2)
         imagesc(gE)
-        pause(0.1)
-        sprintf('time %i, min %f,max %f',time,min(min(data)),max(max(data)))
+        drawnow
+        disp(time)
+        
     end
 end

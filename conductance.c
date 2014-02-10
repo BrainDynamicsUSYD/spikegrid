@@ -85,7 +85,8 @@ void setup()
     glayer = setuplayer(Param);
 }
 unsigned int mytime=0;
-void step(const Compute_float* const inp)
+//DO NOT CALL THIS FUNCTION "step" - this causes a weird collision in matlab that results in segfaults
+void step_(const Compute_float* const inp)
 {
     mytime++;
     memcpy(glayer.voltages,inp,sizeof(float)*grid_size*grid_size);
@@ -108,15 +109,17 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
     output_s Outputabble[]={ //note - neat feature - missing elements initailized to 0
         {"gE",{GE,conductance_array_size,couplerange}}, //gE is a 'large' matrix - as it wraps around the edges
         {"gI",{GI,conductance_array_size,couplerange}}, //gI is a 'large' matrix - as it wraps around the edges
-        {"R",{STD.R,grid_size}},
-        {"U",{STD.R,grid_size}},
+        {"R",{glayer.std.R,grid_size}},
+        {"U",{glayer.std.R,grid_size}},
         {NULL}};         //a marker that we are at the end of the outputabbles list
     if (setup_done==0) 
     {
         setup();
+        setup_done=1;
+        printf("setup done\n");
     }
-    const Compute_float* inputdata = mxGetData(prhs[0]);
-    step(inputdata); //always output the voltage data
+    const Compute_float* inputdata = (Compute_float*) mxGetData(prhs[0]);
+    step_(inputdata); //always output the voltage data
     plhs[0]=mxCreateNumericMatrix(grid_size,grid_size,mxSINGLE_CLASS,mxREAL);
     Compute_float* pointer=(Compute_float*)mxGetPr(plhs[0]);
     for (int i=0;i<grid_size;i++)
@@ -125,7 +128,6 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
         {
             pointer[i*grid_size+j]=glayer.voltages_out[i*grid_size + j];
         }
-        printf("%f\n",glayer.voltages_out[i*grid_size]);
     }
     if (nrhs>1) //output other stuff
     {
@@ -159,7 +161,7 @@ int main() //useful for testing w/out matlab
     randinit(input);
     while (mytime<100)
     {
-        step(input);
+        step_(input);
         printf("%i\n",mytime);
         for (int i=0;i<grid_size;i++)
         {

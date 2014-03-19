@@ -1,6 +1,6 @@
 #include "paramheader.h"
 #include "helpertypes.h"
-#include <tgmath.h>
+#include "mymath.h"
 STD_data STD_init(const STD_parameters* s);
 static inline Compute_float STD_str (const STD_parameters* const s, const int x, const int y,const unsigned int time,const unsigned int lag, STD_data* const d)
 {

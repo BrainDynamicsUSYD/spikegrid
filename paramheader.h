@@ -78,7 +78,7 @@ typedef struct movie_parmeters
 } movie_parameters;
 typedef struct model_features
 {
-	const on_off STDP; //enable / disable STDP (spike-timing dependent plasticity)
+	const on_off STDP;
     const on_off STD;  //enable / disable STD  (short term depression)
     const on_off Output;
     const on_off Movie;
@@ -99,7 +99,8 @@ typedef struct parameters
 
 static const Compute_float One = (Compute_float)1; //a useful constant so that you cna get a floating point 1 without needing a cast to float / double.  (the whole idea of compute_float is that it make switching 
 static const Compute_float Half = (Compute_float)0.5;
-static const Compute_float Two = (Compute_float)2.0;
+static const Compute_float Two = (Compute_float)2;
+static const Compute_float Zero = (Compute_float)0;
 #define PARAMETERS 
 //get some macros for various sizes
 #include "parameters.h" 

@@ -8,7 +8,6 @@
 #include "output.h"
 #include "assert.h"
 #include "evolve.h"
-#include <tgmath.h> //exp
 #include <stdio.h> //printf
 #include <stdlib.h> //malloc/calloc etc  random/srandom
 #include <time.h>   //time - for seeding RNG
@@ -96,7 +95,7 @@ void step_(const Compute_float* const inp)
     step1(&glayer,mytime);
     if (Param.features.STDP==ON)
     {
-        doSTDP(glayer.STDP_connections,&glayer.spikes,glayer.connections,glayer.S);
+        doSTDP(glayer.STDP_connections,&glayer.spikes,glayer.connections,glayer.S,&Param.features);
     }
     if (Param.features.Movie==ON &&  mytime % Param.Movie.Delay == 0) {printVoltage(glayer.voltages_out);}
    

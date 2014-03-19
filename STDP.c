@@ -1,6 +1,6 @@
 #include "paramheader.h"
 #include "STDP.h"
-#include <tgmath.h> //fabsf
+#include "mymath.h" //fabsf
 #define STDP_RANGE_SQUARED (couplerange*couplerange)
 //helper function for STDP.  Calculates distance between two neurons, taking into account wrapping in the network
 //interesting idea - in some cases I don't care about this wrapping and could cheat
@@ -23,7 +23,7 @@ void ApplySTDP(Compute_float * __restrict__ dmats,const coords* curfire,const co
         const int nx = curfire[cindex].x ; //switching these to use ++ slows things down
         const int ny = curfire[cindex].y;
         int pindex = 0;
-        if (nx + couplerange < grid_size && nx > couplerange) //no wrapping
+        if (nx < grid_size - couplerange && nx > couplerange) //no wrapping
         {
             if (prevfire[pindex].x > nx+couplerange) {goto loop_end;} //basically, there are no firing neurons in range, so bail out
         }
@@ -31,7 +31,7 @@ void ApplySTDP(Compute_float * __restrict__ dmats,const coords* curfire,const co
         {
             const int px = prevfire[pindex].x ; 
             const int py = prevfire[pindex].y;
-            if (px > nx + couplerange && nx - couplerange > 0) {break;} //if we go past the end we can break - but need to check we haven't gone to far
+            if (px > nx + couplerange && nx > couplerange) {break;} //if we go past the end we can break - but need to check we haven't gone to far
             //calculate distance
             const int cx = dist(nx,px);
             const int cy = dist(ny,py);
@@ -62,10 +62,10 @@ void ApplySTDP(Compute_float * __restrict__ dmats,const coords* curfire,const co
 
 //Next idea for STDP speed improvements - The Magnitude check is based on the direction from the previous to the current (increasing) - as a result, the innermost loop frequently calculates the offset - swapping curfire and prevfire
 
-void doSTDP (Compute_float* dmats,const ringbuffer* const fdata , const Compute_float*constm,const STDP_parameters* const S)
+void doSTDP (Compute_float* dmats,const ringbuffer* const fdata , const Compute_float*constm,const STDP_parameters* const S,const model_features* const F)
 {
     const coords* const curfire = fdata->data[fdata->curidx];
-    if (S->stdp_strength==0.0) {return;} //early bail if no STDP
+    if (F->STDP==OFF) {return;} //early bail if no STDP
     for(unsigned int offset = 1;offset<fdata->count;offset++)
     {
         Compute_float strn = S->stdp_strength* exp(-((Compute_float)offset)/S->stdp_tau);

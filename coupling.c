@@ -1,6 +1,6 @@
 #include "paramheader.h"
 #include "coupling.h" //not actually required at the moment but should ensure that function types match
-#include <tgmath.h> //logf / exp
+#include "mymath.h"
 #include <stdlib.h> //calloc
 #include <stdio.h>  //printf
 
@@ -11,7 +11,7 @@
    }
    */
 //check how far back we need to keep track of histories
-unsigned int setcap(const decay_parameters d,const Compute_float minval, const Compute_float dt)
+unsigned int __attribute__((pure)) setcap(const decay_parameters d,const Compute_float minval, const Compute_float dt)
 {
     Compute_float prev = -1000;//initial values
     Compute_float time=0;
@@ -68,7 +68,7 @@ Compute_float* Norm_couplematrix(const couple_parameters c, Compute_float* const
 
 
 //compute the mexican hat function used for coupling - should really be marked forceinline or whatever the notation is for GCC.
-Compute_float mexhat(const Compute_float rsq,const couple_parameters c){return c.WE*exp(-rsq/c.sigE)-c.WI*exp(-rsq/c.sigI);}
+Compute_float __attribute__((const)) mexhat(const Compute_float rsq,const couple_parameters c){return c.WE*exp(-rsq/c.sigE)-c.WI*exp(-rsq/c.sigI);}
 
 //does what it says on the tin
 Compute_float* CreateCouplingMatrix(const couple_parameters c)

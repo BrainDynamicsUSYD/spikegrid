@@ -3,7 +3,7 @@
 #include <stdint.h>
 uint8_t __attribute__((const)) rescalefloat (const Compute_float in,const Compute_float maxval, const Compute_float minval) //rescale to 0-255
 {
-    return (uint8_t)((in - minval)/(maxval-minval)*255.0);
+    return (uint8_t)((in - minval)/(maxval-minval)*(Compute_float)255.0);
 }
 //simple function to convert comp_float 2d array to a bitmap that you can then do something with
 bitmap_t* FloattoBitmap(const tagged_array input,const Compute_float maxval, const Compute_float minval)

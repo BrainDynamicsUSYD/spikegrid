@@ -8,6 +8,7 @@
 #pragma clang diagnostic ignored "-Wconversion"
 #else
 #pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wfloat-conversion"
 #pragma GCC diagnostic ignored "-Wconversion"
 #endif
 //the following typedef must be before the include to get the right compute types
@@ -65,11 +66,10 @@ static const parameters Param = //the fact that this is static is a little messy
     },
     .features =  //currently, features are global
     {
-        .STDP       = OFF,
+		.STDP		= OFF,
         .STD        = ON ,
         .Output     = OFF,
         .Movie      = OFF
-        
     }
 };
 #ifdef __clang__

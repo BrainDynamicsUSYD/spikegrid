@@ -3,7 +3,6 @@
 #include "helpertypes.h"
 #include "STD.h"
 #include <string.h> //memset
-#include <tgmath.h> //exp
 #include <stdio.h> //printf
 #include <stdlib.h> //random
 //add gE/gI when using STDP - untested

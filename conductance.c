@@ -42,14 +42,16 @@ Compute_float* __attribute__((const)) Synapse_timecourse (const uint cap, const 
     Compute_float* ret = calloc(sizeof(Compute_float),cap);
     for (unsigned int i=0;i<cap;i++)
     {
-        ret[i]=(One/(D.D-D.R))*(exp(-i/D.D)-exp(-i/D.R));
+        const Compute_float comp_i = (Compute_float)i;
+        ret[i]=(One/(D.D-D.R))*(exp(-comp_i/D.D)-exp(-comp_i/D.R));
     }
     return ret;
 }
 
 layer_t setuplayer(const parameters p)
 {
-    const unsigned int cap = max(setcap(p.synapse.Ex,1E-6,Param.time.dt),setcap(p.synapse.In,1E-6,Param.time.dt));
+    const Compute_float min_effect = (Compute_float)1E-6;
+    const unsigned int cap = max(setcap(p.synapse.Ex,min_effect,Param.time.dt),setcap(p.synapse.In,min_effect,Param.time.dt));
     layer_t layer = 
         {
             .spikes=

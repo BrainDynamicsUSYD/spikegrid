@@ -13,9 +13,18 @@ export LDFLAGS=-lm -lpng
 CFLAGS += ${SPEEDFLAG}
 SOURCES= coupling.c  STDP.c conductance.c STD.c movie.c output.c evolve.c helpertypes.c
 BINARY=a.out
-a.out: ${SOURCES}
+VERSION_HASH = $(shell git rev-parse HEAD)
+.PHONY: profile clean
+${BINARY}: ${SOURCES}
 	${CC}  ${CFLAGS} ${SOURCES} -o ${BINARY} ${LDFLAGS}
 profile:
 	${CC} ${CFLAGS} -pg ${SOURCES} -o ${BINARY} ${LDFLAGS}
+time: ${BINARY}
+	echo ${VERSION_HASH} $$( (/usr/bin/time  -f '%e' 'sh' '-c' './${BINARY} > /dev/null') 2>&1) >> times
+	echo ${VERSION_HASH} $$( (/usr/bin/time  -f '%e' 'sh' '-c' './${BINARY} > /dev/null') 2>&1) >> times
+	echo ${VERSION_HASH} $$( (/usr/bin/time  -f '%e' 'sh' '-c' './${BINARY} > /dev/null') 2>&1) >> times
+	echo ${VERSION_HASH} $$( (/usr/bin/time  -f '%e' 'sh' '-c' './${BINARY} > /dev/null') 2>&1) >> times
+	echo ${VERSION_HASH} $$( (/usr/bin/time  -f '%e' 'sh' '-c' './${BINARY} > /dev/null') 2>&1) >> times
+	echo ${VERSION_HASH} $$( (/usr/bin/time  -f '%e' 'sh' '-c' './${BINARY} > /dev/null') 2>&1) >> times
 clean:
 	rm ${BINARY}

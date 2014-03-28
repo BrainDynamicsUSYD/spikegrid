@@ -141,7 +141,8 @@ void step1 (layer_t* layer,const unsigned int time)
                     printf("%i,%i;",x,y);
                 }
             }
-            else if (((Compute_float)random())/((Compute_float)RAND_MAX) < (layer->P->rate*((Compute_float)0.001)*Param.time.dt))
+            else if (((Compute_float)random())/((Compute_float)RAND_MAX) < 
+                            (layer->P->rate*((Compute_float)0.001)*Param.time.dt))
             {
                 layer->voltages_out[x*grid_size+y]=layer->P->Vth+(Compute_float)0.1;//make sure it fires
             }

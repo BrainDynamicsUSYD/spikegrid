@@ -160,7 +160,7 @@ int main() //useful for testing w/out matlab
     setup();
     Compute_float* input=calloc(sizeof(Compute_float),grid_size*grid_size);
     randinit(input);
-    while (mytime<100)
+    while (mytime<1000)
     {
         step_(input);
         printf("%i\n",mytime);

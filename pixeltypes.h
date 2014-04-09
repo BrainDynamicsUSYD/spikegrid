@@ -2,6 +2,7 @@
 #define PIXELTYPES
 #include <stdint.h>
 #include <stdlib.h>
+//types for stroring information about pixels for converting to png
 typedef struct {
     uint8_t red;
     uint8_t green;

@@ -1,0 +1,15 @@
+* TODO More types of spike
+** TODO Delay and instantaneous spike
+   
+* TODO Error checking of input from matlab
+** TODO Most important - single versus double precision compute floats
+** TODO Secondary - any more error checking
+
+* TODO Different maximum timescales for inhib + excit
+  Currently, inhibitory and excitatory neurons share the same cap.
+  It would probably be good for perf if they were different.
+  In particular, it would be really good to reduce inhib timecourse
+  as that has more effect on perf than excit timecourse
+
+  
+* TODO Allow for saving other arrays to png files

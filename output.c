@@ -1,6 +1,8 @@
 #include "pixeltypes.h"
 #include "output.h"
 #include <stdint.h>
+//rescale a float to a unit8 from some minimum and maximum range
+//currently no error checking and so might produce UB
 uint8_t __attribute__((const)) rescalefloat (const Compute_float in,const Compute_float maxval, const Compute_float minval) //rescale to 0-255
 {
     return (uint8_t)((in - minval)/(maxval-minval)*(Compute_float)255.0);
@@ -36,10 +38,11 @@ bitmap_t* FloattoBitmap(const tagged_array input,const Compute_float maxval, con
     return bp;
 }
 #ifdef MATLAB
+//When using matlab, we want to be able to output just about any array of stuff.  This function does the work
 mxArray* outputToMxArray (const tagged_array input) 
 {
     const int size = input.size - (2*input.offset);
-    const int elemtype = sizeof(Compute_float)==sizeof(float)?mxSINGLE_CLASS:mxDOUBLE_CLASS; //We bon't support long double yet
+    const int elemtype = sizeof(Compute_float)==sizeof(float)?mxSINGLE_CLASS:mxDOUBLE_CLASS; //We don't support long double yet
     mxArray* ret = mxCreateNumericMatrix(size,size,elemtype,mxREAL);
     Compute_float* dataptr = (Compute_float*)mxGetPr(ret);
     for (int i=0;i<size;i++)

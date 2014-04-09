@@ -10,6 +10,12 @@
    return -(c.sigE*c.sigI*logf(c.WE/c.WI))/(c.sigE-c.sigI); //from mathematica
    }
    */
+//controls the shape of the synapse.
+//TODO: more different types of spikes.
+Compute_float Synapse_timecourse(const decay_parameters d,const Compute_float time)
+{
+    return (One/(D.D-D.R))*(exp(-comp_i/D.D)-exp(-comp_i/D.R));
+}
 //check how far back we need to keep track of histories
 unsigned int __attribute__((pure)) setcap(const decay_parameters d,const Compute_float minval, const Compute_float dt)
 {
@@ -19,14 +25,14 @@ unsigned int __attribute__((pure)) setcap(const decay_parameters d,const Compute
     while(1)
     {
         time+=dt;
-        Compute_float alpha=(exp(-time/d.D) - exp(-time/d.R))*norm;
+        Compute_float alpha=Synapse_timecourse(d,time); 
         // check that the spike is in the decreasing phase and that it has magnitude less than the critical value
         if (alpha<minval && alpha<prev) {break;}
         prev=alpha;
     }
     return (unsigned int)(time/dt) +1; //this keeps compatibility with the matlab - seems slightly inelegent - maybe remove
 }
-//normalize the coupling matrix
+//normalize the coupling matrix - multiple methods available
 Compute_float* Norm_couplematrix(const couple_parameters c, Compute_float* const unnormed)
 {
     switch (c.norm_type)

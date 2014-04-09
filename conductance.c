@@ -27,6 +27,8 @@ void randinit(Compute_float* input)
     }
 }
 
+//some tests that the setcap function is correct.
+//TODO: add more tests
 void setcaptests()
 {   
     decay_parameters t1 = {.D=1.5,.R=0.5};
@@ -35,18 +37,22 @@ void setcaptests()
     assert (setcap(t1,(Compute_float)1E-6,Param.time.dt)==209);
     assert (setcap(t2,(Compute_float)1E-6,Param.time.dt)==270);
 }
-
-Compute_float* __attribute__((const)) Synapse_timecourse (const uint cap, const decay_parameters D)
+//The spikes that we emit have a time course.  This function calculates the timecourse and returns an array of cached values to avoid recalculating at every timestep
+Compute_float* __attribute__((const)) Synapse_timecourse (const uint cap, const decay_parameters D,const time_parameters t)
 {
     Compute_float* ret = calloc(sizeof(Compute_float),cap);
     for (unsigned int i=0;i<cap;i++)
     {
-        const Compute_float comp_i = (Compute_float)i;
-        ret[i]=(One/(D.D-D.R))*(exp(-comp_i/D.D)-exp(-comp_i/D.R));
+        const Compute_float time = ((Compute_float)i)*t.dt;
+        ret[i]=Synapse_timecourse(d,time); 
     }
     return ret;
 }
-
+//given a parameters object, set up a layer object.
+//This function is what theoretically will allow for sweeping through parameter space.
+//The only problem is that a parameters object is immutable, so we need some way to do essentially a copy+update in C.
+//Essentially, we need to be able to do something like P = {p with A=B} (F# record syntax)
+//currently this function is only called from the setup function (but it could be called directly)
 layer_t setuplayer(const parameters p)
 {
     const Compute_float min_effect = (Compute_float)1E-6;
@@ -78,6 +84,7 @@ layer_t setuplayer(const parameters p)
 }
 
 layer_t glayer;
+//The idea here is that "one-off" setup occurs here, whilst per-layer setup occurs in setuplayer
 void setup()
 {
     char* buffer = malloc(1024);
@@ -86,7 +93,9 @@ void setup()
     glayer = setuplayer(Param);
 }
 unsigned int mytime=0;
-//DO NOT CALL THIS FUNCTION "step" - this causes a weird collision in matlab that results in segfaults
+//The step function - evolves the model through time.
+//Perf wise the memcpy is probably not ideal, but this is a simple setup and the perf loss here is pretty small as memcpy is crazy fast
+//DO NOT CALL THIS FUNCTION "step" - this causes a weird collision in matlab that results in segfaults.  Incredibly fun to debug
 void step_(const Compute_float* const inp)
 {
     mytime++;

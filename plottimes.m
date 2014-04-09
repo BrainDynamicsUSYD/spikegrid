@@ -8,9 +8,9 @@ curcount=1;
 errors=[];
 for i=2:length(times)
     if (strcmp(revs(i),revs(i-1))==0)
-        curcount=1;
         output(outcount)=mean(current);
         errors(outcount)=std(current)/sqrt(curcount-1);
+        curcount=1;
         outcount=outcount+1;
         current=[];
     end

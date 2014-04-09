@@ -1,7 +1,9 @@
 #ifndef HELPERS
 #define HELPERS
 #include "parameters.h"
+//helper type for coordinates - try to use taher than passing around x,y pairs
 typedef struct coords {int x;int y;} coords;
+//store data in a ring - used for things like firing histories
 typedef struct ringbuffer {
     coords ** data;
     unsigned int count;
@@ -10,6 +12,7 @@ typedef struct ringbuffer {
 
 coords* ringbuffer_getoffset (const ringbuffer* const input,const int offset);
 
+//used for storing arrays with their size.  Allows for the matlab_output function to take both the big and large arrays
 typedef struct {
     //we require volatile below as we don't want you to be able to write to an array using the pointer from the tagged array
     //however, other parts of the code could modify the underlying array, so use volatile to force reads
@@ -25,6 +28,7 @@ typedef struct STD_data
     Compute_float R[grid_size*grid_size];
     const STD_parameters* P;
 } STD_data;
+//hold the requisite data for a layer that enables it to be evolved through time.
 typedef struct layer
 {
     Compute_float* connections; //need some way to constify this.  Also - think up some efficient way to only add the points in a circle.

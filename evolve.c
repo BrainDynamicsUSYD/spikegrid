@@ -9,7 +9,6 @@
 //when STDP is turned off, gcc will warn about this function needing const.  It is wrong
 void __attribute__((const)) evolvept_STDP  (const int x,const  int y,const Compute_float* const __restrict connections_STDP,const Compute_float Estrmod,const Compute_float Istrmod,Compute_float* __restrict gE,Compute_float* __restrict gI)
 {
-    //ex coupling
     if (Param.features.STDP == OFF) {return;}
     for (int i = 0; i < couple_array_size;i++)
     {
@@ -33,8 +32,6 @@ void __attribute__((const)) evolvept_STDP  (const int x,const  int y,const Compu
 ////TODO: add the skip part to skip zero entries as in the threestate code
 void evolvept (const int x,const  int y,const Compute_float* const __restrict connections,const Compute_float Estrmod,const Compute_float Istrmod,Compute_float* __restrict gE,Compute_float* __restrict gI,const Compute_float* STDP_CONNS)
 {
-    //ex coupling
-    
     for (int i = 0; i < couple_array_size;i++)
     {
         const int outoff = (x +i )*conductance_array_size +y;//as gE and gI are larger than the neuron grid size, don't have to worry about wrapping
@@ -53,8 +50,19 @@ void evolvept (const int x,const  int y,const Compute_float* const __restrict co
     } 
     evolvept_STDP(x,y,STDP_CONNS,Estrmod,Istrmod,gE,gI);
 }
+//To keep the evolvept code simple we use an array like this:
+//     +––––––––––––––––+          
+//     |Extra foroverlap|          
+//     |  +––––––––––+  |          
+//     |  |          |  |          
+//     |  |Actual    |  |          
+//     |  |matrix    |  |          
+//     |  +––––––––––+  |          
+//     |                |          
+//     +––––––––––––––––+ 
+//This function adds in the overlapping bits back into the original matrix.  It is slightly opaque but using pictures you can convince yourself that it works
 void fixboundary(Compute_float* __restrict gE, Compute_float* __restrict gI)
-{
+{   //theoretically the two sets of loops could be combined but that would be incredibly confusing
     //top + bottom
     for (int i=0;i<couplerange;i++)
 	{
@@ -80,14 +88,14 @@ void fixboundary(Compute_float* __restrict gE, Compute_float* __restrict gI)
 
 }
 
-//these gE/gI values should be static to the function - but sometimes they need to be exposed as read only
+//these gE/gI values should be static to the function - but sometimes they need to be exposed as read only (for example to plot in matlab)
 Compute_float gE[conductance_array_size*conductance_array_size];
 Compute_float gI[conductance_array_size*conductance_array_size];
 const volatile Compute_float* const GE = &gE[0]; //volatile is required as the underlying data can change and we are just exposing the read only pointer
 const volatile Compute_float* const GI = &gI[0];
-//rhs_func used when integrating the neurons forward through time
+//rhs_func used when integrating the neurons forward through time.  The actual integration is done using the midpoint method
 Compute_float __attribute__((const)) rhs_func  (const Compute_float V,const Compute_float ge,const Compute_float gi,const conductance_parameters p) {return -(p.glk*(V-p.Vlk) + ge*(V-p.Vex) + gi*(V-p.Vin));}
-//step the model through time
+//actually step the model through time (1 timestep worth)
 void step1 (layer_t* layer,const unsigned int time)
 {
     coords* current_firestore = layer->spikes.data[layer->spikes.curidx];//get the thing for currently firing neurons
@@ -96,7 +104,7 @@ void step1 (layer_t* layer,const unsigned int time)
     for (unsigned int i=1;i<layer->spikes.count;i++) //start at 1 so we don't get currently firing (which should be empty anyway)
     {
         const coords* const fire_with_this_lag = ringbuffer_getoffset(&layer->spikes,(int)i);
-        const int delta =(int)(((Compute_float)i)*Param.time.dt);//small helper constant. TODO: Question - are all these conversions necersarry?
+        const int delta =(int)(((Compute_float)i)*Param.time.dt);//small helper constant.
         const Compute_float Estr = layer->Extimecourse[delta];
         const Compute_float Istr = layer->Intimecourse[delta]; 
         int idx=0; //iterate through all neurons firing with this lag

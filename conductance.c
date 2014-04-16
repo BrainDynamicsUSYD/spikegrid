@@ -38,13 +38,13 @@ void setcaptests()
     assert (setcap(t2,(Compute_float)1E-6,Param.time.dt)==270);
 }
 //The spikes that we emit have a time course.  This function calculates the timecourse and returns an array of cached values to avoid recalculating at every timestep
-Compute_float* __attribute__((const)) Synapse_timecourse (const uint cap, const decay_parameters D,const time_parameters t)
+Compute_float* __attribute__((const)) Synapse_timecourse_cache (const uint cap, const decay_parameters D,const time_parameters t)
 {
     Compute_float* ret = calloc(sizeof(Compute_float),cap);
     for (unsigned int i=0;i<cap;i++)
     {
         const Compute_float time = ((Compute_float)i)*t.dt;
-        ret[i]=Synapse_timecourse(d,time); 
+        ret[i]=Synapse_timecourse(D,time); 
     }
     return ret;
 }
@@ -67,8 +67,8 @@ layer_t setuplayer(const parameters p)
             .connections = CreateCouplingMatrix(p.couple),
             .STDP_connections = p.features.STDP==ON?calloc(sizeof(Compute_float),grid_size*grid_size*couple_array_size*couple_array_size):NULL,
             .std                = STD_init(&p.STD), //this is so fast that it doesn't matter to run in init
-            .Extimecourse       = Synapse_timecourse(cap,p.synapse.Ex),
-            .Intimecourse       = Synapse_timecourse(cap,p.synapse.In),
+            .Extimecourse       = Synapse_timecourse_cache(cap,p.synapse.Ex,p.time),
+            .Intimecourse       = Synapse_timecourse_cache(cap,p.synapse.In,p.time),
             .P                  = &(p.potential),
             .S                  = &(p.STDP)
         };

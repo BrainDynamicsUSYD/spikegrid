@@ -1,4 +1,8 @@
-#include "matlab_includes.h"
+#include <stdio.h> //printf
+#include <stdlib.h> //malloc/calloc etc  random/srandom
+#include <time.h>   //time - for seeding RNG
+#include <string.h> //memcpy
+#include <unistd.h> //gethostname#include "matlab_includes.h"
 #include "paramheader.h"
 #include "helpertypes.h"
 #include "coupling.h"
@@ -8,11 +12,7 @@
 #include "output.h"
 #include "assert.h"
 #include "evolve.h"
-#include <stdio.h> //printf
-#include <stdlib.h> //malloc/calloc etc  random/srandom
-#include <time.h>   //time - for seeding RNG
-#include <string.h> //memcpy
-#include <unistd.h> //gethostname
+#include "newparam.h"
 
 //creates a random initial condition - small fluctuations away from Vrt
 void randinit(Compute_float* input)
@@ -38,13 +38,13 @@ void setcaptests()
     assert (setcap(t2,(Compute_float)1E-6,Param.time.dt)==270);
 }
 //The spikes that we emit have a time course.  This function calculates the timecourse and returns an array of cached values to avoid recalculating at every timestep
-Compute_float* __attribute__((const)) Synapse_timecourse_cache (const uint cap, const decay_parameters D,const time_parameters t)
+Compute_float* __attribute__((const)) Synapse_timecourse_cache (const uint cap, const decay_parameters Decay,const time_parameters t)
 {
     Compute_float* ret = calloc(sizeof(Compute_float),cap);
     for (unsigned int i=0;i<cap;i++)
     {
         const Compute_float time = ((Compute_float)i)*t.dt;
-        ret[i]=Synapse_timecourse(D,time); 
+        ret[i]=Synapse_timecourse(Decay,time); 
     }
     return ret;
 }
@@ -164,8 +164,15 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
     }
 }
 #endif
+void tests()
+{
+    setcaptests();
+    testmodparam(Param);
+    printf("tests passed");
+}
 int main() //useful for testing w/out matlab
 {
+    tests();
     setup();
     Compute_float* input=calloc(sizeof(Compute_float),grid_size*grid_size);
     randinit(input);

@@ -1,9 +1,8 @@
+#include <stdlib.h> //calloc
+#include <stdio.h>  //printf
 #include "paramheader.h"
 #include "coupling.h" //not actually required at the moment but should ensure that function types match
 #include "mymath.h"
-#include <stdlib.h> //calloc
-#include <stdio.h>  //printf
-
 /* //This function is useful - but not used
    Compute_float __attribute__((const))exrange(const couple_parameters c)
    {
@@ -17,19 +16,21 @@ Compute_float __attribute__((pure)) Synapse_timecourse(const decay_parameters D,
     return (One/(D.D-D.R))*(exp(-time/D.D)-exp(-time/D.R));
 }
 //check how far back we need to keep track of histories
-unsigned int __attribute__((pure)) setcap(const decay_parameters d,const Compute_float minval, const Compute_float dt)
+unsigned int __attribute__((pure)) setcap(const decay_parameters d,const Compute_float minval, const Compute_float timestep)
 {
     Compute_float prev = -1000;//initial values
     Compute_float time=0;
+    unsigned int count = 1; //keeps compatibility with matlab
     while(1)
     {
-        time+=dt;
+        time+=timestep;
+        count++;
         Compute_float alpha=Synapse_timecourse(d,time); 
         // check that the spike is in the decreasing phase and that it has magnitude less than the critical value
         if (alpha<minval && alpha<prev) {break;}
         prev=alpha;
     }
-    return (unsigned int)(time/dt) +1; //this keeps compatibility with the matlab - seems slightly inelegent - maybe remove
+    return count;
 }
 //normalize the coupling matrix - multiple methods available
 Compute_float* Norm_couplematrix(const couple_parameters c, Compute_float* const unnormed)

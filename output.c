@@ -1,6 +1,4 @@
-#include "pixeltypes.h"
 #include "output.h"
-#include <stdint.h>
 //rescale a float to a unit8 from some minimum and maximum range
 //currently no error checking and so might produce UB
 uint8_t __attribute__((const)) rescalefloat (const Compute_float in,const Compute_float maxval, const Compute_float minval) //rescale to 0-255

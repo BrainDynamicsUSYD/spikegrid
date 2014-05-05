@@ -1,1 +1,2 @@
-void createyossarianfile (const char* const outfile);
+#include "paramheader.h"
+void createyossarianfile (const char* const outfile,const sweepable sweep);

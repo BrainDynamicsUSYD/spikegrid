@@ -1,6 +1,6 @@
 #ifndef HELPERS
 #define HELPERS
-#include "parameters.h"
+#include "paramheader.h"
 //helper type for coordinates - try to use taher than passing around x,y pairs
 typedef struct coords {int x;int y;} coords;
 //store data in a ring - used for things like firing histories

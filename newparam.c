@@ -2,7 +2,6 @@
 #include <string.h>
 #include <stdio.h>
 #include "paramheader.h"
-#include "newparam.h"
 //this macro works - somehow - you probably don't want to know
 #define TryGetVal(parent,name,paramtype,new,old) .name = name == paramtype ? new: old.parent.name
 //Works by pure magic and #defines

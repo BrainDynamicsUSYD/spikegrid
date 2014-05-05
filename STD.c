@@ -1,6 +1,4 @@
 #include "STD.h"
-#include "paramheader.h"
-#include "helpertypes.h"
 //Initialise the STD parameters to their initial values.  Failing to call this before using STD will give incorrect results initially.
 //It is possible that results will converge after some time, but best not to risk it.
 STD_data STD_init(const STD_parameters* s)

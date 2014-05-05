@@ -1,7 +1,6 @@
 #include <stdlib.h> //calloc
 #include <stdio.h>  //printf
 #include "paramheader.h"
-#include "coupling.h" //not actually required at the moment but should ensure that function types match
 #include "mymath.h"
 /* //This function is useful - but not used
    Compute_float __attribute__((const))exrange(const couple_parameters c)

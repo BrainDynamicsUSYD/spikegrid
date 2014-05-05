@@ -1,4 +1,3 @@
-#include "paramheader.h"
 #include "STDP.h"
 #include "mymath.h" //fabsf
 #define STDP_RANGE_SQUARED (couplerange*couplerange)

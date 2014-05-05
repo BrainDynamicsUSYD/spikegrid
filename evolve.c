@@ -1,6 +1,4 @@
-#include "parameters.h"
 #include "evolve.h"
-#include "helpertypes.h"
 #include "STD.h"
 #include <string.h> //memset
 #include <stdio.h> //printf

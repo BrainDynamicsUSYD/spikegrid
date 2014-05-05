@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include "parameters.h"
-void createyossarianfile (const char* const outfile)
+#include "paramheader.h"
+void createyossarianfile (const char* const outfile,const sweepable sweep)
 {
     FILE* file = fopen(outfile,"w");
     char cwd[1024];
@@ -21,7 +21,7 @@ void createyossarianfile (const char* const outfile)
 "#PBS -V\n"
 "#PBS -t 0-%i\n"
 "cd %s\n"
-"./a.out -s $PBS_ARRAYID",cwd,Sweep.count,cwd);
+"./a.out -s $PBS_ARRAYID",cwd,sweep.count,cwd);
     fclose(file);
 
 

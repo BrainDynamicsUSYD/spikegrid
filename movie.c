@@ -1,10 +1,6 @@
 #include <png.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
 #include "output.h"
-#include "pixeltypes.h"
-#include "parameters.h"
 // Given "bitmap", this returns the pixel of bitmap at the point ("x", "y").
 pixel_t __attribute((const,pure)) * pixel_at (bitmap_t * bitmap, const unsigned  int x, const unsigned int y)
 {

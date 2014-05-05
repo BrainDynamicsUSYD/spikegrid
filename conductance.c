@@ -3,6 +3,7 @@
 #include <time.h>   //time - for seeding RNG
 #include <string.h> //memcpy
 #include <unistd.h> //gethostname
+#include <getopt.h> //getopt
 #include "matlab_includes.h"
 #include "paramheader.h"
 #include "helpertypes.h"
@@ -14,7 +15,7 @@
 #include "assert.h"
 #include "evolve.h"
 #include "newparam.h"
-
+#include "yossarian.h"
 //creates a random initial condition - small fluctuations away from Vrt
 void randinit(Compute_float* input)
 {
@@ -171,19 +172,40 @@ void tests()
     testmodparam(Param);
     printf("tests passed");
 }
+struct option long_options[] = {{"help",no_argument,0,'h'},{"generate",no_argument,0,'g'},{"sweep",required_argument,0,'s'}};
 int main(int argc,char** argv) //useful for testing w/out matlab
 {
-    if (argc==1) //default method
+    int c;
+    int skiptests=0;
+    while (1)
     {
-        tests();
-        setup(Param);
+        int option_index=0;
+        c=getopt_long(argc,argv,"hgs:",long_options,&option_index);
+        if (c==-1) {break;} //end of options
+        switch (c)
+        {
+            case 'h':
+                printf("available arguments:\n"
+                        "   -h --help print this message\n"
+                        "   -g --generate generate a yossarian config file\n"
+                        "   -s --sweep N do the nth element of a sweep\n");
+                exit(EXIT_SUCCESS);
+            case 'g':
+                createyossarianfile("yossarian.csh");
+                exit(EXIT_SUCCESS);
+            case 's':
+                {
+                    const int index=atoi(optarg);
+                    printf("doing sweep index %i\n",index);
+                    const parameters newparam = GetNthParam(Param,Sweep,index);
+                    skiptests=1;
+                    setup(newparam);
+                }
+                break;
+        }
     }
-    else //running a sweep
-    {
-        const int index=atoi(argv[1]);//first index is program name
-        const parameters newparam  =GetNthParam(Param,Sweep,index);
-        setup(newparam);
-    }
+    if (skiptests==0){tests();}
+    setup(Param);
     Compute_float* input=calloc(sizeof(Compute_float),grid_size*grid_size);
     randinit(input);
     while (mytime<1000)

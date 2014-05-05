@@ -11,10 +11,10 @@ export SPEEDFLAG=-DFAST #comment out this line for double instead of float (will
 export CLIBFLAGS= -fPIC -shared
 export LDFLAGS=-lm -lpng
 CFLAGS += ${SPEEDFLAG}
-SOURCES= coupling.c  STDP.c conductance.c STD.c movie.c output.c evolve.c helpertypes.c newparam.c
-BINARY=a.out
+SOURCES= coupling.c  STDP.c conductance.c STD.c movie.c output.c evolve.c helpertypes.c newparam.c yossarian.c
+BINARY=./a.out
 VERSION_HASH = $(shell git rev-parse HEAD)
-.PHONY: profile clean
+.PHONY: profile clean submit
 ${BINARY}: ${SOURCES}
 	${CC} ${CFLAGS}     ${SOURCES} -o ${BINARY} ${LDFLAGS}
 profile:
@@ -26,5 +26,10 @@ time: ${BINARY}
 	echo ${VERSION_HASH} $$( (/usr/bin/time  -f '%e' 'sh' '-c' './${BINARY} > /dev/null') 2>&1) >> times
 	echo ${VERSION_HASH} $$( (/usr/bin/time  -f '%e' 'sh' '-c' './${BINARY} > /dev/null') 2>&1) >> times
 	echo ${VERSION_HASH} $$( (/usr/bin/time  -f '%e' 'sh' '-c' './${BINARY} > /dev/null') 2>&1) >> times
+yossarian.csh: ${BINARY}
+	${BINARY} -g
+submit: yossarian.csh
+	qsub yossarian.csh
 clean:
 	rm ${BINARY}
+

@@ -79,10 +79,10 @@ static const sweepable Sweep =
     .maxval = 2.0,
     .count = 10
 };
+//int main() {return (1);}
 #ifdef __clang__
 #pragma clang diagnostic pop
 #else
 #pragma GCC diagnostic pop
 #endif
 #endif //DO NOT REMOVE
-

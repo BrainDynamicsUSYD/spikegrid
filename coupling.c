@@ -11,9 +11,9 @@
    */
 //controls the shape of the synapse.
 //TODO: more different types of spikes.
-Compute_float __attribute__((pure)) Synapse_timecourse(const decay_parameters D,const Compute_float time)
+Compute_float __attribute__((pure)) Synapse_timecourse(const decay_parameters Decay,const Compute_float time)
 {
-    return (One/(D.D-D.R))*(exp(-time/D.D)-exp(-time/D.R));
+    return (One/(Decay.D-Decay.R))*(exp(-time/Decay.D)-exp(-time/Decay.R));
 }
 //check how far back we need to keep track of histories
 unsigned int __attribute__((pure)) setcap(const decay_parameters d,const Compute_float minval, const Compute_float timestep)

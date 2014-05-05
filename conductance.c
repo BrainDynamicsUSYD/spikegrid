@@ -2,7 +2,8 @@
 #include <stdlib.h> //malloc/calloc etc  random/srandom
 #include <time.h>   //time - for seeding RNG
 #include <string.h> //memcpy
-#include <unistd.h> //gethostname#include "matlab_includes.h"
+#include <unistd.h> //gethostname
+#include "matlab_includes.h"
 #include "paramheader.h"
 #include "helpertypes.h"
 #include "coupling.h"
@@ -85,12 +86,12 @@ layer_t setuplayer(const parameters p)
 
 layer_t glayer;
 //The idea here is that "one-off" setup occurs here, whilst per-layer setup occurs in setuplayer
-void setup()
+void setup(const parameters p)
 {
     char* buffer = malloc(1024);
     gethostname(buffer,1023);
     if (!strcmp(buffer,"headnode.physics.usyd.edu.au")) {printf("DON'T RUN THIS CODE ON HEADNODE\n");exit(EXIT_FAILURE);}
-    glayer = setuplayer(Param);
+    glayer = setuplayer(p);
 }
 unsigned int mytime=0;
 //The step function - evolves the model through time.
@@ -124,7 +125,7 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
         {NULL}};         //a marker that we are at the end of the outputabbles list
     if (setup_done==0) 
     {
-        setup();
+        setup(Param);
         setup_done=1;
         printf("setup done\n");
     }
@@ -170,10 +171,19 @@ void tests()
     testmodparam(Param);
     printf("tests passed");
 }
-int main() //useful for testing w/out matlab
+int main(int argc,char** argv) //useful for testing w/out matlab
 {
-    tests();
-    setup();
+    if (argc==1) //default method
+    {
+        tests();
+        setup(Param);
+    }
+    else //running a sweep
+    {
+        const int index=atoi(argv[1]);//first index is program name
+        const parameters newparam  =GetNthParam(Param,Sweep,index);
+        setup(newparam);
+    }
     Compute_float* input=calloc(sizeof(Compute_float),grid_size*grid_size);
     randinit(input);
     while (mytime<1000)
@@ -189,5 +199,5 @@ int main() //useful for testing w/out matlab
         }
     }
     free(input);
-    return EXIT_SUCCESS;
+    return(EXIT_SUCCESS);
 }

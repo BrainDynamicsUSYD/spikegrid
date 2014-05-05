@@ -72,6 +72,13 @@ static const parameters Param = //the fact that this is static is a little messy
         .Movie      = OFF
     }
 };
+static const sweepable Sweep =
+{
+    .type = WE,
+    .minval = 1.0,
+    .maxval = 2.0,
+    .count = 10
+};
 #ifdef __clang__
 #pragma clang diagnostic pop
 #else

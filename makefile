@@ -7,7 +7,7 @@ else #clang
 	export CFLAGS= -g -Wno-padded -Wno-missing-prototypes -Wno-missing-variable-declarations -Weverything -pedantic --std=gnu99 -Ofast
 
 endif
-export SPEEDFLAG=-DFAST #juse something else for double instead of float
+export SPEEDFLAG=-DFAST #comment out this line for double instead of float (will make code slower)
 export CLIBFLAGS= -fPIC -shared
 export LDFLAGS=-lm -lpng
 CFLAGS += ${SPEEDFLAG}
@@ -16,7 +16,7 @@ BINARY=a.out
 VERSION_HASH = $(shell git rev-parse HEAD)
 .PHONY: profile clean
 ${BINARY}: ${SOURCES}
-	${CC}  ${CFLAGS} ${SOURCES} -o ${BINARY} ${LDFLAGS}
+	${CC} ${CFLAGS}     ${SOURCES} -o ${BINARY} ${LDFLAGS}
 profile:
 	${CC} ${CFLAGS} -pg ${SOURCES} -o ${BINARY} ${LDFLAGS}
 time: ${BINARY}

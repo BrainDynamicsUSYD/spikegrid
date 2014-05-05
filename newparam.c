@@ -5,6 +5,7 @@
 #include "newparam.h"
 //this macro works - somehow - you probably don't want to know
 #define TryGetVal(parent,name,paramtype,new,old) .name = name == paramtype ? new: old.parent.name
+//Works by pure magic and #defines
 parameters __attribute__((const,pure)) modparam (const parameters input, const Compute_float newval,const sweepabletypes sweep)
 {
     return (parameters)
@@ -42,28 +43,22 @@ parameters __attribute__((const,pure)) modparam (const parameters input, const C
       //  .features = input.features,
     };
 }
-
-parameters* CreateParamlist (const parameters input, const float* list,unsigned int count,const sweepabletypes sweep)
+Compute_float __attribute__((const)) nthvalue (const Compute_float min,const Compute_float max,const unsigned int count,const unsigned int n)
 {
-    parameters* ret = calloc(sizeof(parameters),count); //need to use calloc to ensure that my test method works even when padding is present
-    for (unsigned int i=0;i<count;i++)
+    return min+(min-max)*(Compute_float)n/(Compute_float)count;
+}
+//caller needs to free
+parameters* CreateParamlist (const parameters input, const sweepable sweep)
+{
+    parameters* ret = calloc(sizeof(parameters),sweep.count); //need to use calloc to ensure that my test method works even when padding is present
+    for (unsigned int i=0;i<sweep.count;i++)
     {
-        const parameters newval = modparam(input,list[i],sweep);
+        const parameters newval = modparam(input,nthvalue(sweep.minval,sweep.maxval,sweep.count,i),sweep.type);
         memcpy(&(ret[i]),&newval,sizeof(parameters));
     }
     return ret;
+}
 
-}
-//caller needs to free memory
-Compute_float* makevalues (const Compute_float min,const Compute_float max,const unsigned int count)
-{
-    Compute_float* ret = calloc(sizeof(Compute_float),count);
-    for (unsigned int i=0;i<count;i++)
-    {
-        ret[i]=min+(min-max)*(Compute_float)i/(Compute_float)count;
-    }
-    return ret;
-}
 //This tests whether the mod param function correctly copies all fields.  Ideally, we could use random data but because of padding this is not possible.
 //As a result, failure to copy a zero value will not trigger an error.  Be very careful with such values
 void testmodparam(const parameters input)
@@ -76,9 +71,15 @@ void testmodparam(const parameters input)
     }
     else {printf ("modparam works\n");}
 }
-
+//get an array of parameters that vary according to a sweepable object
+//caller needs to free
 parameters* GetParamArray(const parameters input, const sweepable sweep)
 {
-    const float* values = makevalues(sweep.minval,sweep.maxval,sweep.count);
-    return CreateParamlist(input,values,sweep.count,sweep.type);
+    return CreateParamlist(input,sweep);
+}
+
+//Gets the nth parameter in a sweep
+parameters GetNthParam(const parameters input, const sweepable sweep,const int n)
+{
+    return GetParamArray(input,sweep)[n];
 }

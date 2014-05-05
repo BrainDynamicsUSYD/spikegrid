@@ -97,6 +97,26 @@ typedef struct parameters
     const movie_parameters Movie;
     const model_features features;
 } parameters;
+//it is crucial that these parameters have exactly the same names as the various fields in the parameters object - otherwise you will break the parameter sweep function.
+//it might also be a good idea to assign these values that never change with cross compatibilty with matlab
+typedef enum {
+                    dt,                                                         // time
+                    WE,sigE,WI,sigI,SE,SI,                                      // couple
+          //          ExR,ExD,InR,InD,tref,                                     // synapse
+                    Vrt,Vth,Vlk,Vex,Vin,glk,                               //potential
+                    stdp_limit,stdp_tau,stdp_strength,                          //STDP
+                    U,D,F,                                                      //STD
+                   // delay                                                       //movie
+                   dummy          //Used for verification that nothing has been missed - DO NOT REMOVE
+             } sweepabletypes;
+typedef struct Sweepable
+{
+    const sweepabletypes type;
+    const Compute_float minval;
+    const Compute_float maxval;
+    const unsigned int count;
+} sweepable;
+
 //some useful constants
 static const Compute_float One = (Compute_float)1; //a useful constant so that you cna get a floating point 1 without needing a cast to float / double.  (the whole idea of compute_float is that it make switching 
 static const Compute_float Half = (Compute_float)0.5;

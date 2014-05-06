@@ -34,6 +34,6 @@ yossarian.csh: ${BINARY}
 submit: yossarian.csh
 	qsub yossarian.csh
 clean:
-	rm ${BINARY}
-	rm -rf html
+	-rm -f ${BINARY}
+	-rm -rf html
 

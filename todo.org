@@ -13,3 +13,8 @@
 
   
 * TODO Allow for saving other arrays to png files
+* TODO Subthreshold wave
+** DONE global
+   CLOSED: [2014-05-06 Tue 15:41]
+** TODO travelling
+

@@ -1,8 +1,9 @@
-#include "evolve.h"
-#include "STD.h"
 #include <string.h> //memset
 #include <stdio.h> //printf
 #include <stdlib.h> //random
+#include "theta.h"
+#include "evolve.h"
+#include "STD.h"
 //add gE/gI when using STDP - untested
 //when STDP is turned off, gcc will warn about this function needing const.  It is wrong
 void __attribute__((const)) evolvept_STDP  (const int x,const  int y,const Compute_float* const __restrict connections_STDP,const Compute_float Estrmod,const Compute_float Istrmod,Compute_float* __restrict gE,Compute_float* __restrict gI)
@@ -96,6 +97,7 @@ Compute_float __attribute__((const)) rhs_func  (const Compute_float V,const Comp
 //actually step the model through time (1 timestep worth)
 void step1 (layer_t* layer,const unsigned int time)
 {
+	const Compute_float timemillis = (Compute_float)time * dt;
     coords* current_firestore = layer->spikes.data[layer->spikes.curidx];//get the thing for currently firing neurons
     memset(gE,0,sizeof(Compute_float)*conductance_array_size*conductance_array_size); //zero the gE/gI matrices so they can be reused
     memset(gI,0,sizeof(Compute_float)*conductance_array_size*conductance_array_size);
@@ -130,6 +132,10 @@ void step1 (layer_t* layer,const unsigned int time)
             const Compute_float rhs2=rhs_func(Vtemp,gE[idx],gI[idx],*(layer->P));
             layer->voltages_out[idx2]=layer->voltages[idx2]+Half*Param.time.dt*(rhs1 + rhs2);
         }
+    }
+    if (Param.features.Theta == ON)
+    {
+        dotheta(layer->voltages_out,Param.theta,timemillis);
     }
     int this_fcount=0;//now find which neurons fired at the current time step
     for (int x=0;x<grid_size;x++)

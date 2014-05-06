@@ -29,7 +29,6 @@ parameters __attribute__((const,pure)) modparam (const parameters input, const C
             TryGetVal(potential,Vex,sweep,newval,input),
             TryGetVal(potential,Vin,sweep,newval,input),
             TryGetVal(potential,glk,sweep,newval,input),
-            .rate=input.potential.rate
         },
         .STDP = 
         {
@@ -37,9 +36,10 @@ parameters __attribute__((const,pure)) modparam (const parameters input, const C
             TryGetVal(STDP,stdp_tau,sweep,newval,input),
             TryGetVal(STDP,stdp_strength,sweep,newval,input),
         },
-        .STD = input.STD,
-        .Movie = input.Movie,
-      //  .features = input.features,
+        .STD        = input.STD,
+        .Movie      = input.Movie,
+        .features   = input.features,
+        .theta      = input.theta
     };
 }
 Compute_float __attribute__((const)) nthvalue (const Compute_float min,const Compute_float max,const unsigned int count,const unsigned int n)

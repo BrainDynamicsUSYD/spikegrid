@@ -11,7 +11,7 @@ export SPEEDFLAG=-DFAST #comment out this line for double instead of float (will
 export CLIBFLAGS= -fPIC -shared
 export LDFLAGS=-lm -lpng
 CFLAGS += ${SPEEDFLAG}
-SOURCES= coupling.c  STDP.c conductance.c STD.c movie.c output.c evolve.c helpertypes.c newparam.c yossarian.c init.c
+SOURCES= coupling.c  STDP.c conductance.c STD.c movie.c output.c evolve.c helpertypes.c newparam.c yossarian.c init.c theta.c
 BINARY=./a.out
 VERSION_HASH = $(shell git rev-parse HEAD)
 .PHONY: profile clean submit docs
@@ -19,6 +19,7 @@ ${BINARY}: ${SOURCES}
 	${CC} ${CFLAGS}     ${SOURCES} -o ${BINARY} ${LDFLAGS}
 docs: html/index.html
 html/index.html: ${SOURCES}
+	echo "Suphys computers don't have dot installed, so graphs will be missing if this was run on silliac"
 	doxygen Doxyfile
 profile:
 	${CC} ${CFLAGS} -pg ${SOURCES} -o ${BINARY} ${LDFLAGS}
@@ -36,4 +37,5 @@ submit: yossarian.csh
 clean:
 	-rm -f ${BINARY}
 	-rm -rf html
-
+compile.m: makefile
+	echo "mex CFLAGS=\"${CFLAGS}  -DMATLAB -fPIC -shared\" LDFLAGS=\"${LDFLAGS} -shared\" ${SOURCES}" > compile.m

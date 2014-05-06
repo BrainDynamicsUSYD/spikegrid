@@ -1,3 +1,4 @@
+
 #ifndef PARAMHEADER
 #define PARAMHEADER
 #ifdef FAST
@@ -77,15 +78,25 @@ typedef struct movie_parmeters
 {
     const unsigned int Delay;
 } movie_parameters;
+typedef struct theta_parameters
+{
+    const Compute_float strength;
+	const Compute_float period;
+} theta_parameters;
 typedef struct model_features
 {
 	const on_off STDP;
     const on_off STD;  //enable / disable STD  (short term depression)
     const on_off Output;
     const on_off Movie;
+    const on_off Theta;
 } model_features;
 
-
+/// procedure for adding new parameters.
+/// 1. Add relevant parameter to the parameters struct
+/// 2. Add entry to the sweepabletypes enum
+/// 3. Update the modparam function in newparam.c to copy your new parameter
+/// 4. Add a new default value in parameters.h (this should probably be with the feature off)
 typedef struct parameters
 {
     const time_parameters time;
@@ -96,9 +107,10 @@ typedef struct parameters
     const STD_parameters STD;
     const movie_parameters Movie;
     const model_features features;
+    const theta_parameters theta;
 } parameters;
-//it is crucial that these parameters have exactly the same names as the various fields in the parameters object - otherwise you will break the parameter sweep function.
-//it might also be a good idea to assign these values that never change with cross compatibilty with matlab
+///it is crucial that these parameters have exactly the same names as the various fields in the parameters object.  otherwise you will break the parameter sweep function.
+///it might also be a good idea to assign these values that never change with cross compatibilty with matlab
 typedef enum {
                     dt,                                                         // time
                     WE,sigE,WI,sigI,SE,SI,                                      // couple

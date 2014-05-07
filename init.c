@@ -2,7 +2,6 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
-#include <stdio.h>
 #include <assert.h>
 #include "coupling.h"
 #include "STD.h"

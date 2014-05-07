@@ -1,5 +1,4 @@
 #include <string.h> //memset
-#include <stdio.h> //printf
 #include <stdlib.h> //random
 #include "theta.h"
 #include "evolve.h"

@@ -7,6 +7,7 @@ else #clang
 	export CFLAGS= -g -Wno-padded -Wno-missing-prototypes -Wno-missing-variable-declarations -Weverything -pedantic --std=gnu99 -Ofast
 
 endif
+export DEBUGFLAGS= -g -std=gnu99
 export SPEEDFLAG=-DFAST #comment out this line for double instead of float (will make code slower)
 export CLIBFLAGS= -fPIC -shared
 export LDFLAGS=-lm -lpng
@@ -14,9 +15,11 @@ CFLAGS += ${SPEEDFLAG}
 SOURCES= conductance.c coupling.c  STDP.c STD.c movie.c output.c evolve.c helpertypes.c newparam.c yossarian.c init.c theta.c
 BINARY=./a.out
 VERSION_HASH = $(shell git rev-parse HEAD)
-.PHONY: profile clean submit docs
+.PHONY: profile clean submit docs debug
 ${BINARY}: ${SOURCES}
 	${CC} ${CFLAGS}     ${SOURCES} -o ${BINARY} ${LDFLAGS}
+debug: ${SOURCE}
+	${CC} ${DEBUGFLAGS} ${SOURCES} -o ${BINARY} ${LDFLAGS}
 docs: html/index.html
 html/index.html: ${SOURCES}
 	echo "Suphys computers don't have dot installed, so graphs will be missing if this was run on silliac"

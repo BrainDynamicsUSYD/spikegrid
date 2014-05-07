@@ -6,7 +6,7 @@
 #include <assert.h>
 #include "coupling.h"
 #include "STD.h"
-layer_t glayer;
+#include "init.h"
 //creates a random initial condition - small fluctuations away from Vrt
 void randinit(Compute_float* input)
 {
@@ -57,12 +57,12 @@ layer_t setuplayer(const parameters p)
                 .data=calloc(sizeof(coords*), cap)
             },
             .connections = CreateCouplingMatrix(p.couple),
-            .STDP_connections = p.features.STDP==ON?calloc(sizeof(Compute_float),grid_size*grid_size*couple_array_size*couple_array_size):NULL,
-            .std                = STD_init(&p.STD), //this is so fast that it doesn't matter to run in init
+            .STDP_connections   = p.features.STDP==ON?calloc(sizeof(Compute_float),grid_size*grid_size*couple_array_size*couple_array_size):NULL,
+            .std                = STD_init(p.STD), //this is so fast that it doesn't matter to run in init
             .Extimecourse       = Synapse_timecourse_cache(cap,p.synapse.Ex,p.time),
             .Intimecourse       = Synapse_timecourse_cache(cap,p.synapse.In,p.time),
-            .P                  = &(p.potential),
-            .S                  = &(p.STDP)
+            .P                  = (conductance_parameters*)newdata(&p.potential,sizeof(p.potential)), 
+            .S                  = (STDP_parameters*)newdata(&p.STDP,sizeof(p.STDP))
         };
 
     memset(layer.voltages,0,grid_size*grid_size); //probably not required

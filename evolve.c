@@ -93,7 +93,7 @@ Compute_float gI[conductance_array_size*conductance_array_size];
 const volatile Compute_float* const GE = &gE[0]; //volatile is required as the underlying data can change and we are just exposing the read only pointer
 const volatile Compute_float* const GI = &gI[0];
 //rhs_func used when integrating the neurons forward through time.  The actual integration is done using the midpoint method
-Compute_float __attribute__((const)) rhs_func  (const Compute_float V,const Compute_float ge,const Compute_float gi,const conductance_parameters p) {return -(p.glk*(V-p.Vlk) + ge*(V-p.Vex) + gi*(V-p.Vin));}
+Compute_float __attribute__((const)) rhs_func  (const Compute_float V,const Compute_float ge,const Compute_float gi,const conductance_parameters* p) {return -(p->glk*(V-p->Vlk) + ge*(V-p->Vex) + gi*(V-p->Vin));}
 //actually step the model through time (1 timestep worth)
 void step1 (layer_t* layer,const unsigned int time)
 {
@@ -114,7 +114,7 @@ void step1 (layer_t* layer,const unsigned int time)
             Compute_float strmod=One;
             if (Param.features.STD == ON)
             {
-                strmod=STD_str(layer->std.P,c.x,c.y,time,i,&(layer->std));
+                strmod=STD_str(*(layer->std.P),c.x,c.y,time,i,&(layer->std));
             }
             evolvept(c.x,c.y,layer->connections,Estr*strmod,Istr*strmod,gE,gI,layer->STDP_connections);
             idx++;
@@ -127,9 +127,9 @@ void step1 (layer_t* layer,const unsigned int time)
         { //step all neurons through time - use midpoint method
             const int idx = (x+couplerange)*conductance_array_size + y + couplerange; //index for gE/gI
             const int idx2=  x*grid_size+y;//index for voltages
-            const Compute_float rhs1=rhs_func(layer->voltages[idx2],gE[idx],gI[idx],*(layer->P));
+            const Compute_float rhs1=rhs_func(layer->voltages[idx2],gE[idx],gI[idx],layer->P);
             const Compute_float Vtemp = layer->voltages[idx2] + Half*Param.time.dt*rhs1;
-            const Compute_float rhs2=rhs_func(Vtemp,gE[idx],gI[idx],*(layer->P));
+            const Compute_float rhs2=rhs_func(Vtemp,gE[idx],gI[idx],layer->P);
             layer->voltages_out[idx2]=layer->voltages[idx2]+Half*Param.time.dt*(rhs1 + rhs2);
         }
     }
@@ -144,8 +144,7 @@ void step1 (layer_t* layer,const unsigned int time)
         {
             if (layer->voltages[x*grid_size + y]  > layer->P->Vth)
             {
-                const coords c= {x,y}; //required to keep the compiler happy - can't do an inline constructor
-                current_firestore[this_fcount] =c;
+                current_firestore[this_fcount] =(coords){.x=x,.y=y};
                 layer->voltages_out[x*grid_size+y]=layer->P->Vrt;
                 this_fcount++;
                 if (Param.features.Output==ON)

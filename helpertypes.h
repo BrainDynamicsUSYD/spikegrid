@@ -11,7 +11,7 @@ typedef struct ringbuffer {
 } ringbuffer;
 
 coords* ringbuffer_getoffset (const ringbuffer* const input,const int offset);
-
+void* newdata(const void* const input,const unsigned int size);
 //used for storing arrays with their size.  Allows for the matlab_output function to take both the big and large arrays
 typedef struct {
     //we require volatile below as we don't want you to be able to write to an array using the pointer from the tagged array
@@ -38,8 +38,8 @@ typedef struct layer
     const Compute_float* Intimecourse;  //store time course of In synapses  - need to make const
     ringbuffer spikes;
     STD_data std;
-    const conductance_parameters* P;
-    const STDP_parameters * S;
+    const conductance_parameters* P; //these being pointers feels ugly
+    const STDP_parameters* S;
 } layer_t;
 //these break vim syntax highlighting so move to the end
 //also - these don't look like C but are the official gcc-approved way of doing the max/min macros.  

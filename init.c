@@ -6,7 +6,7 @@
 #include <assert.h>
 #include "coupling.h"
 #include "STD.h"
-static layer_t glayer;
+layer_t glayer;
 //creates a random initial condition - small fluctuations away from Vrt
 void randinit(Compute_float* input)
 {
@@ -35,11 +35,9 @@ Compute_float* __attribute__((const)) Synapse_timecourse_cache (const unsigned i
 //TODO: add more tests
 void setcaptests()
 {   
-    decay_parameters t1 = {.D=1.5,.R=0.5};
-    decay_parameters t2 = {.D=2.0,.R=0.5};
     //todo:Get Adam to check these values - also add more tests
-    assert (setcap(t1,(Compute_float)1E-6,Param.time.dt)==209);
-    assert (setcap(t2,(Compute_float)1E-6,Param.time.dt)==270);
+    assert (setcap((decay_parameters){.D=1.5,.R=0.5},(Compute_float)1E-6,Param.time.dt)==209);
+    assert (setcap((decay_parameters){.D=2.0,.R=0.5},(Compute_float)1E-6,Param.time.dt)==270);
 }
 
 //given a parameters object, set up a layer object.

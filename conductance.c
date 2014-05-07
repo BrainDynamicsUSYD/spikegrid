@@ -1,14 +1,13 @@
 #include <stdio.h> //printf
-#include <stdlib.h> //malloc/calloc etc  random/srandom
 #include <string.h> //memcpy
 #include <getopt.h> //getopt
-#include "matlab_includes.h"
 #include "STDP.h"
 #include "movie.h"
 #include "evolve.h"
 #include "newparam.h"
 #include "init.h"
 #include "yossarian.h"
+#include "output.h" //note - currently only needed when using -DMATLAB - might cause some false positives with various tools
 unsigned int mytime=0;
 //The step function - evolves the model through time.
 //Perf wise the memcpy is probably not ideal, but this is a simple setup and the perf loss here is pretty small as memcpy is crazy fast
@@ -36,8 +35,8 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
     output_s Outputabble[]={ //note - neat feature - missing elements initailized to 0
         {"gE",{GE,conductance_array_size,couplerange}}, //gE is a 'large' matrix - as it wraps around the edges
         {"gI",{GI,conductance_array_size,couplerange}}, //gI is a 'large' matrix - as it wraps around the edges
-        {"R",{glayer.std.R,grid_size}},
-        {"U",{glayer.std.R,grid_size}},
+        {"R",{glayer.std.R,grid_size,0}},
+        {"U",{glayer.std.R,grid_size,0}},
         {NULL}};         //a marker that we are at the end of the outputabbles list
     if (setup_done==0) 
     {
@@ -80,7 +79,7 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
         }
     }
 }
-#endif
+#else
 void tests()
 {
     setcaptests();
@@ -138,3 +137,4 @@ int main(int argc,char** argv) //useful for testing w/out matlab
     free(input);
     return(EXIT_SUCCESS);
 }
+#endif

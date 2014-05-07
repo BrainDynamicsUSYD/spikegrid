@@ -16,11 +16,10 @@ coords* ringbuffer_getoffset (const ringbuffer* const input,const int offset);
 typedef struct {
     //we require volatile below as we don't want you to be able to write to an array using the pointer from the tagged array
     //however, other parts of the code could modify the underlying array, so use volatile to force reads
-    const Compute_float* const volatile data;
+    const volatile Compute_float* const data;
     const unsigned int size;
     const unsigned int offset;
-   } 
-    tagged_array;
+} tagged_array;
 typedef struct STD_data
 {   //some parts of this should be const - but oh well
     unsigned int ftimes[grid_size*grid_size];

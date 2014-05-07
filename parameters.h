@@ -66,8 +66,8 @@ static const parameters Param = //the fact that this is static is a little messy
     },
     .theta = 
     {
-        .strength    = 0.1,
-        .period     = 0.1,
+        .strength    = 5.0,
+        .period     = 0.2,
     },
     .features =  //currently, features are global
     {
@@ -75,7 +75,7 @@ static const parameters Param = //the fact that this is static is a little messy
         .STD        = ON ,
         .Output     = OFF,
         .Movie      = OFF,
-        .Theta      = ON
+        .Theta      = OFF
     }
 };
 static const sweepable Sweep =

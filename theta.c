@@ -6,8 +6,8 @@ void dotheta(Compute_float* vin, const theta_parameters theta,const Compute_floa
     {
         for (int y = 0;y<grid_size;y++)
         {
-            Compute_float thetastr = theta.strength * sin(timemillis / (Two*((Compute_float)M_PI)*theta.period));
-            const int idx = (x+couplerange)*conductance_array_size + y + couplerange; //index for gE/gI
+            const Compute_float thetastr = theta.strength * sin(timemillis / (Two*((Compute_float)M_PI)*theta.period));
+            const int idx = x*grid_size + y ; //index for gE/gI
             vin[idx] += thetastr;
         }
     }

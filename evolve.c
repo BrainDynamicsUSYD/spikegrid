@@ -97,7 +97,7 @@ Compute_float __attribute__((const)) rhs_func  (const Compute_float V,const Comp
 //actually step the model through time (1 timestep worth)
 void step1 (layer_t* layer,const unsigned int time)
 {
-	const Compute_float timemillis = (Compute_float)time * dt;
+	const Compute_float timemillis = ((Compute_float)time) * Param.time.dt ;
     coords* current_firestore = layer->spikes.data[layer->spikes.curidx];//get the thing for currently firing neurons
     memset(gE,0,sizeof(Compute_float)*conductance_array_size*conductance_array_size); //zero the gE/gI matrices so they can be reused
     memset(gI,0,sizeof(Compute_float)*conductance_array_size*conductance_array_size);

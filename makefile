@@ -21,7 +21,7 @@ ${BINARY}: ${SOURCES}
 debug: ${SOURCE}
 	${CC} ${DEBUGFLAGS} ${SOURCES} -o ${BINARY} ${LDFLAGS}
 docs: html/index.html
-html/index.html: ${SOURCES}
+html/index.html: ${SOURCES} Doxyfile
 	echo "Suphys computers don't have dot installed, so graphs will be missing if this was run on silliac"
 	doxygen Doxyfile
 profile:

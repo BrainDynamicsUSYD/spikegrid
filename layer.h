@@ -6,7 +6,6 @@ typedef struct STD_data
     unsigned int ftimes[grid_size*grid_size];
     Compute_float U[grid_size*grid_size];
     Compute_float R[grid_size*grid_size];
-    const STD_parameters* P; //maybe remove this?
 } STD_data;
 //hold the requisite data for a layer that enables it to be evolved through time.
 typedef struct layer

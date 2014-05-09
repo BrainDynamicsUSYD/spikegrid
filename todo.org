@@ -12,16 +12,23 @@
   as that has more effect on perf than excit timecourse
 
   
-* TODO Allow for saving other arrays to png files - it would be good to just take in an outputtable, like matlab does
+* DONE Allow for saving other arrays to png files - it would be good to just take in an outputtable, like matlab does
+  CLOSED: [2014-05-09 Fri 17:54]
 * TODO Subthreshold wave
 ** DONE global
    CLOSED: [2014-05-06 Tue 15:41]
 ** TODO travelling
    
 * TODO Double layer structure
+** DONE Basic implementation
+   CLOSED: [2014-05-09 Fri 17:55]
+** TODO coupling between layers
+** TODO Inhib layer has lower density
+   
 * TODO Allow picking a layer to sweep over in the dual-layer model
 * DONE Fix setup for dual layer
   CLOSED: [2014-05-09 Fri 15:36]
-* TODO Create an input parameters struct to handle dual layer
-
-* TODO remove STD_parameters from STD_data
+* DONE Create an input parameters struct to handle dual layer
+  CLOSED: [2014-05-09 Fri 17:55]
+* DONE remove STD_parameters from STD_data
+  CLOSED: [2014-05-09 Fri 17:57]

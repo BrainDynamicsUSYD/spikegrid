@@ -89,12 +89,11 @@ void tests()
 struct option long_options[] = {{"help",no_argument,0,'h'},{"generate",no_argument,0,'g'},{"sweep",required_argument,0,'s'}};
 int main(int argc,char** argv) //useful for testing w/out matlab
 {
-    int c;
     int skiptests=0;
     while (1)
     {
         int option_index=0;
-        c=getopt_long(argc,argv,"hgs:",long_options,&option_index);
+        int c=getopt_long(argc,argv,"hgs:",long_options,&option_index);
         if (c==-1) {break;} //end of options
         switch (c)
         {

@@ -16,7 +16,7 @@ SOURCES= conductance.c coupling.c  STDP.c STD.c movie.c output.c evolve.c helper
 BINARY=./a.out
 VERSION_HASH = $(shell git rev-parse HEAD)
 .PHONY: profile clean submit docs debug
-${BINARY}: ${SOURCES}
+${BINARY}: ${SOURCES} *.h
 	${CC} ${CFLAGS}     ${SOURCES} -o ${BINARY} ${LDFLAGS}
 debug: ${SOURCE}
 	${CC} ${DEBUGFLAGS} ${SOURCES} -o ${BINARY} ${LDFLAGS}

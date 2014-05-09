@@ -5,7 +5,7 @@
 #include "STD.h"
 //add gE/gI when using STDP - untested
 //when STDP is turned off, gcc will warn about this function needing const.  It is wrong
-void __attribute__((const)) evolvept_STDP  (const int x,const  int y,const Compute_float* const __restrict connections_STDP,const Compute_float Estrmod,const Compute_float Istrmod,Compute_float* __restrict gE,Compute_float* __restrict gI)
+void evolvept_STDP  (const int x,const  int y,const Compute_float* const __restrict connections_STDP,const Compute_float Estrmod,const Compute_float Istrmod,Compute_float* __restrict gE,Compute_float* __restrict gI)
 {
     if (Features.STDP == OFF) {return;}
     for (int i = 0; i < couple_array_size;i++)
@@ -113,7 +113,7 @@ void step1 (layer_t* layer,const unsigned int time)
             Compute_float strmod=One;
             if (Features.STD == ON)
             {
-                strmod=STD_str(*(layer->std.P),c.x,c.y,time,i,&(layer->std));
+                strmod=STD_str(layer->P->STD,c.x,c.y,time,i,&(layer->std));
             }
             evolvept(c.x,c.y,layer->connections,Estr*strmod,Istr*strmod,gE,gI,layer->STDP_connections);
             idx++;

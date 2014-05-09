@@ -13,7 +13,7 @@ typedef struct time_parameters
 {
     const Compute_float dt   ;                   //time step (ms)
 } time_parameters;
-typedef enum NORM_TYPE {None=0,TotalArea=1,GlobalMultiplier=2} Norm_type;
+typedef enum NORM_TYPE {None=0,TotalArea=1,GlobalMultiplier=2,MultSep=3} Norm_type;
 typedef struct
 {
     const Compute_float WE;
@@ -23,33 +23,53 @@ typedef struct
 {
     const Compute_float GM;
 } global_multiplier_parameters;
-typedef struct couple_parameters
+typedef struct 
+{
+    const Compute_float Exfactor;
+    const Compute_float Infactor;
+} Multsep_parameters;
+typedef struct decay_parameters{
+    const Compute_float R;
+    const Compute_float D;
+} decay_parameters;
+typedef enum LayerNumbers {SINGLELAYER=0,DUALLAYER=1} LayerNumbers;
+typedef struct singlelayer_parameters
 {
     const Compute_float WE       ;                  //excitatory coupling strength
     const Compute_float sigE   ;                    //char. length for Ex symapses (int / float?)
     const Compute_float WI     ;                    //Inhib coupling strength
     const Compute_float sigI   ;                    //char. length for In synapses (int / float?)
-    const Compute_float SE      ;                   //amount to multiply Ex conns (question why not just use We?)
-    const Compute_float SI      ;                   //amount to multiply In conns (question why not just use In?)
+    const decay_parameters Ex;
+    const decay_parameters In;
+    const int tref     ;                    //refractory time
+} singlelayer_parameters;
+typedef struct duallayer_parameters
+{
+    const Compute_float     W; //basically as for the singlelayer_properties but with some features missing
+    const Compute_float     sigma;
+    const decay_parameters  synapse;
+    const int               tref;
+} duallayer_parameters;
+typedef struct couple_parameters
+{
+    const LayerNumbers Layertype;
+    const union
+    {
+        singlelayer_parameters single;
+        duallayer_parameters   dual;
+    } Layer_parameters;
     const Norm_type     norm_type;                  //what normalization method to use
     const union 
     {
         Total_area_parameters total_area;
         global_multiplier_parameters glob_mult;
+        Multsep_parameters mult_sep;
+
     } normalization_parameters;                   //holds data for different normalization methods
 } couple_parameters;
 
-typedef struct decay_parameters{
-    const Compute_float R;
-    const Compute_float D;
-} decay_parameters;
 
-typedef struct synapse_parameters
-{
-    const decay_parameters Ex;
-    const decay_parameters In;
-    const int tref     ;                    //refractory time
-} synapse_parameters;
+
 
 typedef struct conductance_parameters
 {
@@ -101,7 +121,6 @@ typedef struct model_features
 typedef struct parameters
 {
     const couple_parameters couple;
-    const synapse_parameters synapse;
     const conductance_parameters potential;
     const STDP_parameters STDP;
     const STD_parameters STD;
@@ -110,12 +129,14 @@ typedef struct parameters
 } parameters;
 ///it is crucial that these parameters have exactly the same names as the various fields in the parameters object.  otherwise you will break the parameter sweep function.
 ///it might also be a good idea to assign these values that never change with cross compatibilty with matlab
+///
+///Many parameters are currently not supported by this - need to improve, but basic framework is there
 typedef enum {
-                    WE,sigE,WI,sigI,SE,SI,                                      // couple
+         //           WE,sigE,WI,sigI,SE,SI,                                      // couple
           //          ExR,ExD,InR,InD,tref,                                     // synapse
                     Vrt,Vth,Vlk,Vex,Vin,glk,                               //potential
                     stdp_limit,stdp_tau,stdp_strength,                          //STDP
-                    U,D,F,                                                      //STD
+           //         U,D,F,                                                      //STD
                    // delay                                                       //movie
                    dummy          //Used for verification that nothing has been missed - DO NOT REMOVE
              } sweepabletypes;

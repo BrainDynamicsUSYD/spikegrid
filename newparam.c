@@ -2,24 +2,14 @@
 #include <string.h>
 #include <stdio.h>
 #include "paramheader.h"
-//this macro works - somehow - you probably don't want to know
+//this macro works - somehow - you probably don't want to know - essentially it reuses the name as a value of the sweepabletypes enum and the name of a property
 #define TryGetVal(parent,name,paramtype,new,old) .name = name == paramtype ? new: old.parent.name
 //Works by pure magic and #defines
 parameters __attribute__((const,pure)) modparam (const parameters input, const Compute_float newval,const sweepabletypes sweep)
 {
     return (parameters)
     {
-        .couple=
-        {
-            TryGetVal(couple,WE,sweep,newval,input),
-            TryGetVal(couple,sigE,sweep,newval,input),
-            TryGetVal(couple,WI,sweep,newval,input),
-            TryGetVal(couple,sigI,sweep,newval,input),
-            TryGetVal(couple,SE,sweep,newval,input),
-            TryGetVal(couple,SI,sweep,newval,input),
-            .norm_type=input.couple.norm_type
-        },
-        .synapse = input.synapse,
+        .couple= input.couple,
         .potential=
         {
             TryGetVal(potential,Vrt,sweep,newval,input),

@@ -37,8 +37,8 @@ typedef struct layer
     const Compute_float* Extimecourse;  //store time course of Ex synapses  - need to make const
     const Compute_float* Intimecourse;  //store time course of In synapses  - need to make const
     ringbuffer spikes;
-    STD_data std;
     parameters* P;
+    STD_data std;
 } layer_t;
 //these break vim syntax highlighting so move to the end
 //also - these don't look like C but are the official gcc-approved way of doing the max/min macros.  

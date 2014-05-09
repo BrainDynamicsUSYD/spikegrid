@@ -47,7 +47,9 @@ void setcaptests()
 layer_t setuplayer(const parameters p)
 {
     const Compute_float min_effect = (Compute_float)1E-6;
-    const unsigned int cap = max(setcap(p.synapse.Ex,min_effect,Features.Timestep),setcap(p.synapse.In,min_effect,Features.Timestep));
+    unsigned int cap;
+    if (p.couple.Layertype==SINGLELAYER) {cap=max(setcap(p.couple.Layer_parameters.single.Ex,min_effect,Features.Timestep),setcap(p.couple.Layer_parameters.single.In,min_effect,Features.Timestep));}
+    else                                 {cap=setcap(p.couple.Layer_parameters.dual.synapse,min_effect,Features.Timestep);}
     layer_t layer = 
         {
             .spikes=
@@ -58,8 +60,10 @@ layer_t setuplayer(const parameters p)
             .connections = CreateCouplingMatrix(p.couple),
             .STDP_connections   = Features.STDP==ON?calloc(sizeof(Compute_float),grid_size*grid_size*couple_array_size*couple_array_size):NULL,
             .std                = STD_init(p.STD), //this is so fast that it doesn't matter to run in init
-            .Extimecourse       = Synapse_timecourse_cache(cap,p.synapse.Ex,Features.Timestep),
-            .Intimecourse       = Synapse_timecourse_cache(cap,p.synapse.In,Features.Timestep),
+            .Extimecourse       = p.couple.Layertype==SINGLELAYER?Synapse_timecourse_cache(cap,p.couple.Layer_parameters.single.Ex,Features.Timestep):
+                            ((p.couple.Layer_parameters.dual.W>0)?Synapse_timecourse_cache(cap,p.couple.Layer_parameters.dual.synapse,Features.Timestep):NULL),
+            .Intimecourse       = p.couple.Layertype==SINGLELAYER?Synapse_timecourse_cache(cap,p.couple.Layer_parameters.single.In,Features.Timestep):
+                            ((p.couple.Layer_parameters.dual.W<0)?Synapse_timecourse_cache(cap,p.couple.Layer_parameters.dual.synapse,Features.Timestep):NULL),
             .P                  = (parameters*)newdata(&p,sizeof(p)), 
         };
 

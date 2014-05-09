@@ -21,4 +21,5 @@
 * TODO Double layer structure
 * TODO Allow picking a layer to sweep over in the dual-layer model
 * TODO Fix setup for dual layer
+* TODO Create an input parameters struct to handle dual layer
 

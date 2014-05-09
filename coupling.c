@@ -65,6 +65,15 @@ Compute_float* Norm_couplematrix(const couple_parameters c, Compute_float* const
                 }
                 return unnormed;
             }
+        case MultSep:
+            {
+                for (int i=0;i<couple_array_size*couple_array_size;i++)
+                {
+                    const Compute_float val = unnormed[i];
+                    if (val < 0) {unnormed[i] *= c.normalization_parameters.mult_sep.Infactor;} else {unnormed[i] *= c.normalization_parameters.mult_sep.Exfactor;}
+
+                }
+            }
         default:
             printf("unknown normalization method\n");
             return NULL;
@@ -73,7 +82,8 @@ Compute_float* Norm_couplematrix(const couple_parameters c, Compute_float* const
 
 
 //compute the mexican hat function used for coupling - should really be marked forceinline or whatever the notation is for GCC.
-Compute_float __attribute__((const)) mexhat(const Compute_float rsq,const couple_parameters c){return c.WE*exp(-rsq/c.sigE)-c.WI*exp(-rsq/c.sigI);}
+Compute_float __attribute__((const)) mexhat  (const Compute_float rsq,const singlelayer_parameters c){return c.WE*exp(-rsq/c.sigE)-c.WI*exp(-rsq/c.sigI);}
+Compute_float __attribute__((const)) expdecay(const Compute_float rsq,const duallayer_parameters d  ){return d.W *exp(-rsq/d.sigma);}
 
 //does what it says on the tin
 Compute_float* CreateCouplingMatrix(const couple_parameters c)
@@ -85,8 +95,15 @@ Compute_float* CreateCouplingMatrix(const couple_parameters c)
         {
             if (x*x+y*y<=couplerange*couplerange)//if we are within coupling range
             {
-                Compute_float val = mexhat((Compute_float)(x*x+y*y),c);//compute the mexican hat function
-                if (val>0) {val=val*c.SE;} else {val=val*c.SI;}//and multiply by some constants
+                Compute_float val;
+                if (c.Layertype==SINGLELAYER)
+                {
+                    val = mexhat((Compute_float)(x*x+y*y),c.Layer_parameters.single);//compute the mexican hat function
+                }
+                else
+                {
+                    val = expdecay((Compute_float)(x*x+y*y),c.Layer_parameters.dual);
+                }
                 matrix[(x+couplerange)*couple_array_size + y + couplerange] = val;//and set the array
             }
         }

@@ -83,7 +83,7 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
 void tests()
 {
     setcaptests();
-    testmodparam(Layer1);
+    testmodparam(OneLayerModel);
     printf("tests passed");
 }
 struct option long_options[] = {{"help",no_argument,0,'h'},{"generate",no_argument,0,'g'},{"sweep",required_argument,0,'s'}};
@@ -110,17 +110,22 @@ int main(int argc,char** argv) //useful for testing w/out matlab
                 {
                     const int index=atoi(optarg);
                     printf("doing sweep index %i\n",index);
-                    const parameters newparam = GetNthParam(Layer1,Sweep,index);
-                    skiptests=1;
-                    setup(newparam);
+                    if (ModelType == SINGLELAYER)
+                    {
+                        const parameters newparam = GetNthParam(OneLayerModel,Sweep,index);
+                        skiptests=1;
+                        setup(newparam);
+                    }
+                    else {printf("sweeps not currently supported in dual-layer model\n");exit(EXIT_FAILURE);}
                 }
                 break;
         }
     }
     if (skiptests==0){tests();}
-    setup(Layer1);
+    if (ModelType==SINGLELAYER) {setup(OneLayerModel);} 
+    else {setup(DualLayerModelIn);setup(DualLayerModelEx);}
     Compute_float* input=calloc(sizeof(Compute_float),grid_size*grid_size);
-    randinit(input,Layer1.potential);
+    randinit(input,OneLayerModel.potential); //need to fix for dual layer
     while (mytime<1000)
     {
         step_(input);

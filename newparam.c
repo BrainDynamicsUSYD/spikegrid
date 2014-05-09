@@ -9,7 +9,6 @@ parameters __attribute__((const,pure)) modparam (const parameters input, const C
 {
     return (parameters)
     {
-        .time={TryGetVal(time,dt,sweep,newval,input)},
         .couple=
         {
             TryGetVal(couple,WE,sweep,newval,input),
@@ -38,7 +37,6 @@ parameters __attribute__((const,pure)) modparam (const parameters input, const C
         },
         .STD        = input.STD,
         .Movie      = input.Movie,
-        .features   = input.features,
         .theta      = input.theta
     };
 }

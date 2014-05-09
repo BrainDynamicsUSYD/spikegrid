@@ -18,11 +18,11 @@ void step_(const Compute_float* const inp)
     memcpy(glayer.voltages,inp,sizeof(float)*grid_size*grid_size);
     glayer.spikes.curidx=mytime%(glayer.spikes.count);
     step1(&glayer,mytime);
-    if (Param.features.STDP==ON)
+    if (Features.STDP==ON)
     {
-        doSTDP(glayer.STDP_connections,&glayer.spikes,glayer.connections,glayer.S,&Param.features);
+        doSTDP(glayer.STDP_connections,&glayer.spikes,glayer.connections,glayer.P->STDP);
     }
-    if (Param.features.Movie==ON &&  mytime % Param.Movie.Delay == 0) {printVoltage(glayer.voltages_out);}
+    if (glayer.P->Movie.MakeMovie==ON &&  mytime % glayer.P->Movie.Delay == 0) {printVoltage(glayer.voltages_out,glayer.P->potential);}
    
 }
 
@@ -83,7 +83,7 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
 void tests()
 {
     setcaptests();
-    testmodparam(Param);
+    testmodparam(Layer1);
     printf("tests passed");
 }
 struct option long_options[] = {{"help",no_argument,0,'h'},{"generate",no_argument,0,'g'},{"sweep",required_argument,0,'s'}};
@@ -110,7 +110,7 @@ int main(int argc,char** argv) //useful for testing w/out matlab
                 {
                     const int index=atoi(optarg);
                     printf("doing sweep index %i\n",index);
-                    const parameters newparam = GetNthParam(Param,Sweep,index);
+                    const parameters newparam = GetNthParam(Layer1,Sweep,index);
                     skiptests=1;
                     setup(newparam);
                 }
@@ -118,9 +118,9 @@ int main(int argc,char** argv) //useful for testing w/out matlab
         }
     }
     if (skiptests==0){tests();}
-    setup(Param);
+    setup(Layer1);
     Compute_float* input=calloc(sizeof(Compute_float),grid_size*grid_size);
-    randinit(input);
+    randinit(input,Layer1.potential);
     while (mytime<1000)
     {
         step_(input);

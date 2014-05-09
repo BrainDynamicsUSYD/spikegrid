@@ -16,12 +16,8 @@
 
 ////TODO: compiler does not warn on missing elements - fix
 //Fun note - with the right optimisations GCC actually will pull these constants inline (for example disassemble evolvept_STDP with STDP off)
-static const parameters Param = //the fact that this is static is a little messy - in theory gcc will create a copy for each .c file.  However - in reality, this doesn't appear to happen (perhaps GCC realises that it is const so that only one copy is required.  If the const is ever removed, static will cause incredibly weird behaviour.
+static const parameters Layer1 = //the fact that this is static is a little messy - in theory gcc will create a copy for each .c file.  However - in reality, this doesn't appear to happen (perhaps GCC realises that it is const so that only one copy is required.  If the const is ever removed, static will cause incredibly weird behaviour.
 {
-    .time =
-    {
-        .dt=0.1
-    },
     .couple =
     {
         .WE      = 0.41,                 //excitatory coupling strength
@@ -62,6 +58,7 @@ static const parameters Param = //the fact that this is static is a little messy
     },
     .Movie = 
     {
+        .MakeMovie = OFF,
         .Delay = 10,
     },
     .theta = 
@@ -69,15 +66,8 @@ static const parameters Param = //the fact that this is static is a little messy
         .strength    = 5.0,
         .period     = 0.2,
     },
-    .features =  //currently, features are global
-    {
-		.STDP		= OFF,
-        .STD        = ON ,
-        .Output     = OFF,
-        .Movie      = OFF,
-        .Theta      = OFF
-    }
 };
+
 static const sweepable Sweep =
 {
     .type = WE,
@@ -85,7 +75,15 @@ static const sweepable Sweep =
     .maxval = 2.0,
     .count = 10
 };
-//int main() {return (1);}
+
+static const model_features Features = 
+{
+    .STDP		= OFF, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep - 
+    .STD        = ON , //               if we need any of these features we can make the changes then.
+    .Output     = OFF,
+    .Theta      = OFF,
+    .Timestep   = 0.1,
+};
 #ifdef __clang__
 #pragma clang diagnostic pop
 #else

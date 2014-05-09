@@ -76,6 +76,7 @@ typedef struct STD_parameters
 } STD_parameters;
 typedef struct movie_parmeters
 {
+    const on_off MakeMovie;
     const unsigned int Delay;
 } movie_parameters;
 typedef struct theta_parameters
@@ -88,8 +89,8 @@ typedef struct model_features
 	const on_off STDP;
     const on_off STD;  //enable / disable STD  (short term depression)
     const on_off Output;
-    const on_off Movie;
     const on_off Theta;
+    const Compute_float Timestep;
 } model_features;
 
 /// procedure for adding new parameters.
@@ -99,20 +100,17 @@ typedef struct model_features
 /// 4. Add a new default value in parameters.h (this should probably be with the feature off)
 typedef struct parameters
 {
-    const time_parameters time;
     const couple_parameters couple;
     const synapse_parameters synapse;
     const conductance_parameters potential;
     const STDP_parameters STDP;
     const STD_parameters STD;
     const movie_parameters Movie;
-    const model_features features;
     const theta_parameters theta;
 } parameters;
 ///it is crucial that these parameters have exactly the same names as the various fields in the parameters object.  otherwise you will break the parameter sweep function.
 ///it might also be a good idea to assign these values that never change with cross compatibilty with matlab
 typedef enum {
-                    dt,                                                         // time
                     WE,sigE,WI,sigI,SE,SI,                                      // couple
           //          ExR,ExD,InR,InD,tref,                                     // synapse
                     Vrt,Vth,Vlk,Vex,Vin,glk,                               //potential

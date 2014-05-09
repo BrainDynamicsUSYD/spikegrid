@@ -15,11 +15,6 @@ int save_png_to_file (bitmap_t *bitmap, const char *path)
     png_infop info_ptr = NULL;
     unsigned int x, y;
     png_byte ** row_pointers = NULL;
-    /* "status" contains the return value of this function. At first
-       it is set to a value which means 'failure'. When the routine
-       has finished its work, it is set to a value which means
-       'success'. */
-    int status = -1;
     /* The following number is set by trial and error only. I cannot
        see where it it is documented in the libpng manual.
     */
@@ -82,9 +77,6 @@ int save_png_to_file (bitmap_t *bitmap, const char *path)
     png_set_rows (png_ptr, info_ptr, row_pointers);
     png_write_png (png_ptr, info_ptr, PNG_TRANSFORM_IDENTITY, NULL);
 
-    /* The routine has successfully written the file, so we set
-       "status" to a value which indicates success. */
-    status = 0;
 
     for (y = 0; y < bitmap->height; y++) {
         png_free (png_ptr, row_pointers[y]);
@@ -97,17 +89,17 @@ int save_png_to_file (bitmap_t *bitmap, const char *path)
  png_create_write_struct_failed:
     fclose (fp);
  fopen_failed:
-    return status;
+    return 0;
 }
 
 int printcount=0;
 char fnamebuffer[30];
 //print voltages to a png.  Changing this to allow printing of other arrays is easy - just modify the call to FloattoBitmap with the new parameters
-void printVoltage (const Compute_float* const voltages)
+void printVoltage (const Compute_float* const voltages, const conductance_parameters V)
 {
 
     tagged_array v = {.data=voltages,.size=grid_size,.offset=0};
-    bitmap_t* b = FloattoBitmap(v,Param.potential.Vrt,Param.potential.Vin);
+    bitmap_t* b = FloattoBitmap(v,V.Vrt,V.Vin);
     sprintf(fnamebuffer,"pics/%i.png",printcount);
     printcount++;
     save_png_to_file(b,fnamebuffer);

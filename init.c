@@ -7,24 +7,24 @@
 #include "STD.h"
 #include "init.h"
 //creates a random initial condition - small fluctuations away from Vrt
-void randinit(Compute_float* input)
+void randinit(Compute_float* input,const conductance_parameters V)
 {
     srandom((unsigned)(time(0)));
     for (int x=0;x<grid_size;x++)
     {
         for (int y=0;y<grid_size;y++)
         {
-            input[x*grid_size + y ] = ((Compute_float)random())/((Compute_float)RAND_MAX)/((Compute_float)20.0) + Param.potential.Vrt;
+            input[x*grid_size + y ] = ((Compute_float)random())/((Compute_float)RAND_MAX)/((Compute_float)20.0) + V.Vrt;
         }
     }
 }
 //The spikes that we emit have a time course.  This function calculates the timecourse and returns an array of cached values to avoid recalculating at every timestep
-Compute_float* __attribute__((const)) Synapse_timecourse_cache (const unsigned int cap, const decay_parameters Decay,const time_parameters t)
+Compute_float* __attribute__((const)) Synapse_timecourse_cache (const unsigned int cap, const decay_parameters Decay,const Compute_float timestep)
 {
     Compute_float* ret = calloc(sizeof(Compute_float),cap);
     for (unsigned int i=0;i<cap;i++)
     {
-        const Compute_float time = ((Compute_float)i)*t.dt;
+        const Compute_float time = ((Compute_float)i)*timestep;
         ret[i]=Synapse_timecourse(Decay,time); 
     }
     return ret;
@@ -35,8 +35,8 @@ Compute_float* __attribute__((const)) Synapse_timecourse_cache (const unsigned i
 void setcaptests()
 {   
     //todo:Get Adam to check these values - also add more tests
-    assert (setcap((decay_parameters){.D=1.5,.R=0.5},(Compute_float)1E-6,Param.time.dt)==209);
-    assert (setcap((decay_parameters){.D=2.0,.R=0.5},(Compute_float)1E-6,Param.time.dt)==270);
+    assert (setcap((decay_parameters){.D=1.5,.R=0.5},(Compute_float)1E-6,Features.Timestep)==209);
+    assert (setcap((decay_parameters){.D=2.0,.R=0.5},(Compute_float)1E-6,Features.Timestep)==270);
 }
 
 //given a parameters object, set up a layer object.
@@ -47,7 +47,7 @@ void setcaptests()
 layer_t setuplayer(const parameters p)
 {
     const Compute_float min_effect = (Compute_float)1E-6;
-    const unsigned int cap = max(setcap(p.synapse.Ex,min_effect,Param.time.dt),setcap(p.synapse.In,min_effect,Param.time.dt));
+    const unsigned int cap = max(setcap(p.synapse.Ex,min_effect,Features.Timestep),setcap(p.synapse.In,min_effect,Features.Timestep));
     layer_t layer = 
         {
             .spikes=
@@ -56,12 +56,11 @@ layer_t setuplayer(const parameters p)
                 .data=calloc(sizeof(coords*), cap)
             },
             .connections = CreateCouplingMatrix(p.couple),
-            .STDP_connections   = p.features.STDP==ON?calloc(sizeof(Compute_float),grid_size*grid_size*couple_array_size*couple_array_size):NULL,
+            .STDP_connections   = Features.STDP==ON?calloc(sizeof(Compute_float),grid_size*grid_size*couple_array_size*couple_array_size):NULL,
             .std                = STD_init(p.STD), //this is so fast that it doesn't matter to run in init
-            .Extimecourse       = Synapse_timecourse_cache(cap,p.synapse.Ex,p.time),
-            .Intimecourse       = Synapse_timecourse_cache(cap,p.synapse.In,p.time),
-            .P                  = (conductance_parameters*)newdata(&p.potential,sizeof(p.potential)), 
-            .S                  = (STDP_parameters*)newdata(&p.STDP,sizeof(p.STDP))
+            .Extimecourse       = Synapse_timecourse_cache(cap,p.synapse.Ex,Features.Timestep),
+            .Intimecourse       = Synapse_timecourse_cache(cap,p.synapse.In,Features.Timestep),
+            .P                  = (parameters*)newdata(&p,sizeof(p)), 
         };
 
     memset(layer.voltages,0,grid_size*grid_size); //probably not required

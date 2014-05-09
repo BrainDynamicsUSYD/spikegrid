@@ -8,7 +8,7 @@ static inline Compute_float STD_str (const STD_parameters const s, const int x, 
     const int stdidx=x*grid_size+y;
     if (lag==1) //recalculate after spiking
     {
-        const Compute_float spike_interval = ((Compute_float)(time-(d->ftimes[stdidx])))/((Compute_float)1000.0)/Param.time.dt;//calculate inter spike interval in seconds
+        const Compute_float spike_interval = ((Compute_float)(time-(d->ftimes[stdidx])))/((Compute_float)1000.0)/Features.Timestep;//calculate inter spike interval in seconds
         d->ftimes[stdidx]=time; //update the time
         const Compute_float prevu=d->U[stdidx]; //need the previous U value
         d->U[stdidx] = s.U + d->U[stdidx]*(One- s.U)*exp(-spike_interval/s.F);

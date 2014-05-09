@@ -1,4 +1,4 @@
-#include "helpertypes.h"
+#include "layer.h"
 #include "mymath.h"
 #include <stdio.h>
 STD_data STD_init(const STD_parameters s);

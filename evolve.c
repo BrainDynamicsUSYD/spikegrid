@@ -92,7 +92,7 @@ Compute_float gI[conductance_array_size*conductance_array_size];
 const volatile Compute_float* const GE = &gE[0]; //volatile is required as the underlying data can change and we are just exposing the read only pointer
 const volatile Compute_float* const GI = &gI[0];
 //rhs_func used when integrating the neurons forward through time.  The actual integration is done using the midpoint method
-Compute_float __attribute__((const)) rhs_func  (const Compute_float V,const Compute_float ge,const Compute_float gi,const conductance_parameters* p) {return -(p->glk*(V-p->Vlk) + ge*(V-p->Vex) + gi*(V-p->Vin));}
+Compute_float __attribute__((const,pure)) rhs_func  (const Compute_float V,const Compute_float ge,const Compute_float gi,const conductance_parameters* p) {return -(p->glk*(V-p->Vlk) + ge*(V-p->Vex) + gi*(V-p->Vin));}
 //actually step the model through time (1 timestep worth)
 void step1 (layer_t* layer,const unsigned int time)
 {
@@ -171,6 +171,6 @@ void step1 (layer_t* layer,const unsigned int time)
         }
     }
     current_firestore[this_fcount].x=-1;
-    if (Param.features.Output==ON &&time % 10 ==0 ) {printf("\n");}
+    if (Param.features.Output==ON &&time % 10 ==0 ) {printf("\n");} //occasionaly print newlines
 
 }

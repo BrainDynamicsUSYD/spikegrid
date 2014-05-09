@@ -104,8 +104,8 @@ void step1 (layer_t* layer,const unsigned int time)
     {
         const coords* const fire_with_this_lag = ringbuffer_getoffset(&layer->spikes,(int)i);
         const int delta =(int)(((Compute_float)i)*Features.Timestep);//small helper constant.
-        const Compute_float Estr = layer->Extimecourse[delta];
-        const Compute_float Istr = layer->Intimecourse[delta]; 
+        const Compute_float Estr =layer->Extimecourse!=NULL? layer->Extimecourse[delta]:Zero;
+        const Compute_float Istr =layer->Intimecourse!=NULL? layer->Intimecourse[delta]:Zero; 
         int idx=0; //iterate through all neurons firing with this lag
         while (fire_with_this_lag[idx].x != -1)
         {

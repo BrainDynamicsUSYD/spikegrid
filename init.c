@@ -76,11 +76,13 @@ layer_t setuplayer(const parameters p)
     }
     return layer;
 }
+int setuplayerone=0;
 //The idea here is that "one-off" setup occurs here, whilst per-layer setup occurs in setuplayer
 void setup(const parameters p)
 {
     char* buffer = malloc(1024);
     gethostname(buffer,1023);
     if (!strcmp(buffer,"headnode.physics.usyd.edu.au")) {printf("DON'T RUN THIS CODE ON HEADNODE\n");exit(EXIT_FAILURE);}
-    glayer = setuplayer(p);
+    if (setuplayerone==0) {glayer = setuplayer(p);setuplayerone++;}
+    else                  {glayer2= setuplayer(p);}
 }

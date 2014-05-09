@@ -4,3 +4,4 @@ void setcaptests();
 void setup(const parameters p);
 
 layer_t glayer;
+layer_t glayer2;

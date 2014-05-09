@@ -20,5 +20,8 @@
    
 * TODO Double layer structure
 * TODO Allow picking a layer to sweep over in the dual-layer model
-* TODO Fix setup for dual layer
+* DONE Fix setup for dual layer
+  CLOSED: [2014-05-09 Fri 15:36]
+* TODO Create an input parameters struct to handle dual layer
 
+* TODO remove STD_parameters from STD_data

@@ -92,17 +92,4 @@ int save_png_to_file (bitmap_t *bitmap, const char *path)
     return 0;
 }
 
-int printcount=0;
-char fnamebuffer[30];
-//print voltages to a png.  Changing this to allow printing of other arrays is easy - just modify the call to FloattoBitmap with the new parameters
-void printVoltage (const Compute_float* const voltages, const conductance_parameters V)
-{
 
-    tagged_array v = {.data=voltages,.size=grid_size,.offset=0};
-    bitmap_t* b = FloattoBitmap(v,V.Vrt,V.Vin);
-    sprintf(fnamebuffer,"pics/%i.png",printcount);
-    printcount++;
-    save_png_to_file(b,fnamebuffer);
-    free(b->pixels);
-    free(b);
-}

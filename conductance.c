@@ -2,12 +2,10 @@
 #include <string.h> //memcpy
 #include <getopt.h> //getopt
 #include "STDP.h"
-#include "movie.h"
 #include "evolve.h"
 #include "newparam.h"
 #include "init.h"
 #include "yossarian.h"
-#include "output.h" //note - currently only needed when using -DMATLAB - might cause some false positives with various tools
 unsigned int mytime=0;
 //The step function - evolves the model through time.
 //Perf wise the memcpy is probably not ideal, but this is a simple setup and the perf loss here is pretty small as memcpy is crazy fast
@@ -18,13 +16,16 @@ void step_(const Compute_float* const inp)
     memcpy(glayer.voltages,inp,sizeof(float)*grid_size*grid_size);
     glayer.spikes.curidx=mytime%(glayer.spikes.count);
     step1(&glayer,mytime);
+    step1(&glayer2,mytime);
     if (Features.STDP==ON)
     {
         doSTDP(glayer.STDP_connections,&glayer.spikes,glayer.connections,glayer.P->STDP);
+        doSTDP(glayer2.STDP_connections,&glayer2.spikes,glayer2.connections,glayer2.P->STDP);
     }
-    if (glayer.P->Movie.MakeMovie==ON &&  mytime % glayer.P->Movie.Delay == 0) {printVoltage(glayer.voltages_out,glayer.P->potential);}
-   
+    makemovie(glayer,mytime);
+    makemovie(glayer2,mytime);
 }
+
 
 #ifdef MATLAB
 int setup_done=0;
@@ -32,13 +33,7 @@ int setup_done=0;
 //currently does no checking on input / output, so if you screw up your matlab expect segfaults
 void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
 {
-    output_s Outputabble[]={ //note - neat feature - missing elements initailized to 0
-        {"gE",{GE,conductance_array_size,couplerange}}, //gE is a 'large' matrix - as it wraps around the edges
-        {"gI",{GI,conductance_array_size,couplerange}}, //gI is a 'large' matrix - as it wraps around the edges
-        {"R",{glayer.std.R,grid_size,0}},
-        {"U",{glayer.std.R,grid_size,0}},
-        {NULL}};         //a marker that we are at the end of the outputabbles list
-    if (setup_done==0) 
+       if (setup_done==0) 
     {
         setup(Param);
         setup_done=1;

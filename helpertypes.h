@@ -12,14 +12,7 @@ typedef struct ringbuffer {
 
 coords* ringbuffer_getoffset (const ringbuffer* const input,const int offset);
 void* newdata(const void* const input,const unsigned int size);
-//used for storing arrays with their size.  Allows for the matlab_output function to take both the big and large arrays
-typedef struct {
-    //we require volatile below as we don't want you to be able to write to an array using the pointer from the tagged array
-    //however, other parts of the code could modify the underlying array, so use volatile to force reads
-    const volatile Compute_float* const data;
-    const unsigned int size;
-    const unsigned int offset;
-} tagged_array;
+
 typedef struct STD_data
 {   //some parts of this should be const - but oh well
     unsigned int ftimes[grid_size*grid_size];

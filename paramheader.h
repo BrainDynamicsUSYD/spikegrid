@@ -6,6 +6,22 @@ typedef float Compute_float ; //for speed
 #else
 typedef double Compute_float ; //for accuracy
 #endif
+//used for storing arrays with their size.  Allows for the matlab_output function to take both the big and large arrays
+typedef struct {
+    //we require volatile below as we don't want you to be able to write to an array using the pointer from the tagged array
+    //however, other parts of the code could modify the underlying array, so use volatile to force reads
+    const volatile Compute_float* const data;
+    const unsigned int size;
+    const unsigned int offset;
+} tagged_array;
+typedef struct {
+    const char* const name;
+    const tagged_array data;
+    const Compute_float minval;
+    const Compute_float maxval;
+} output_s; //used so that matlab has string identifiers that correspond to a specific tagged_array
+
+
 //making OFF 0 will turn off features by default
 typedef enum ON_OFF {OFF=0,ON=1} on_off;
 //structs to store various parameters
@@ -97,6 +113,7 @@ typedef struct STD_parameters
 typedef struct movie_parmeters
 {
     const on_off MakeMovie;
+    const output_s output;
     const unsigned int Delay;
 } movie_parameters;
 typedef struct theta_parameters

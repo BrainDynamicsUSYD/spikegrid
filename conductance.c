@@ -10,6 +10,9 @@ unsigned int mytime=0;
 //The step function - evolves the model through time.
 //Perf wise the memcpy is probably not ideal, but this is a simple setup and the perf loss here is pretty small as memcpy is crazy fast
 //DO NOT CALL THIS FUNCTION "step" - this causes a weird collision in matlab that results in segfaults.  Incredibly fun to debug
+///Function that steps the model through time (high level).
+///TODO: Currently broken for single layer model
+/// @param inp the input voltages
 void step_(const Compute_float* const inp)
 {
     mytime++;
@@ -31,6 +34,7 @@ void step_(const Compute_float* const inp)
 int setup_done=0;
 //function called by matlab
 //currently does no checking on input / output, so if you screw up your matlab expect segfaults
+//
 void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
 {
        if (setup_done==0) 

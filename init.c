@@ -1,12 +1,14 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
-#include <assert.h>
 #include "coupling.h"
 #include "STD.h"
 #include "init.h"
 #include "evolve.h"
-//creates a random initial condition - small fluctuations away from Vrt
+///creates a random initial condition
+///This is generated as small fluctuations away from Vrt
+/// @param input    The input matrix - Modified in place
+/// @param V        Used to get the Vrt 
 void randinit(Compute_float* input,const conductance_parameters V)
 {
     srandom((unsigned)(time(0)));
@@ -17,26 +19,6 @@ void randinit(Compute_float* input,const conductance_parameters V)
             input[x*grid_size + y ] = ((Compute_float)random())/((Compute_float)RAND_MAX)/((Compute_float)20.0) + V.Vrt;
         }
     }
-}
-//The spikes that we emit have a time course.  This function calculates the timecourse and returns an array of cached values to avoid recalculating at every timestep
-Compute_float* __attribute__((const)) Synapse_timecourse_cache (const unsigned int cap, const decay_parameters Decay,const Compute_float timestep)
-{
-    Compute_float* ret = calloc(sizeof(Compute_float),cap);
-    for (unsigned int i=0;i<cap;i++)
-    {
-        const Compute_float time = ((Compute_float)i)*timestep;
-        ret[i]=Synapse_timecourse(Decay,time); 
-    }
-    return ret;
-}
-
-//some tests that the setcap function is correct.
-//TODO: add more tests
-void setcaptests()
-{   
-    //todo:Get Adam to check these values - also add more tests
-    assert (setcap((decay_parameters){.D=1.5,.R=0.5},(Compute_float)1E-6,Features.Timestep)==209);
-    assert (setcap((decay_parameters){.D=2.0,.R=0.5},(Compute_float)1E-6,Features.Timestep)==270);
 }
 
 //given a parameters object, set up a layer object.

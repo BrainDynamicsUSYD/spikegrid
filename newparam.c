@@ -34,17 +34,6 @@ Compute_float __attribute__((const)) nthvalue (const Compute_float min,const Com
 {
     return min+(min-max)*(Compute_float)n/(Compute_float)count;
 }
-//caller needs to free
-parameters* CreateParamlist (const parameters input, const sweepable sweep)
-{
-    parameters* ret = calloc(sizeof(parameters),sweep.count); //need to use calloc to ensure that my test method works even when padding is present
-    for (unsigned int i=0;i<sweep.count;i++)
-    {
-        const parameters newval = modparam(input,nthvalue(sweep.minval,sweep.maxval,sweep.count,i),sweep.type);
-        memcpy(&(ret[i]),&newval,sizeof(parameters));
-    }
-    return ret;
-}
 
 //This tests whether the mod param function correctly copies all fields.  Ideally, we could use random data but because of padding this is not possible.
 //As a result, failure to copy a zero value will not trigger an error.  Be very careful with such values
@@ -59,15 +48,13 @@ void testmodparam(const parameters input)
     }
     else {printf ("modparam works\n");}
 }
-//get an array of parameters that vary according to a sweepable object
-//caller needs to free
-parameters* GetParamArray(const parameters input, const sweepable sweep)
-{
-    return CreateParamlist(input,sweep);
-}
 
-//Gets the nth parameter in a sweep
-parameters GetNthParam(const parameters input, const sweepable sweep,const int n)
+/// Gets the nth parameter in a sweep.
+/// @param input The initial parameter to modify
+/// @param sweep The thing we are sweeping over
+/// @param n Which job we are (this is used to calculate the correct parameter value in the linear spacing)
+parameters __attribute__((const)) GetNthParam(const parameters input, const sweepable sweep,const unsigned int n)
 {
-    return GetParamArray(input,sweep)[n];
+    const Compute_float value = nthvalue(sweep.minval,sweep.maxval,sweep.count,n);
+    return modparam(input,value,sweep.type);
 }

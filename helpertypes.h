@@ -1,13 +1,15 @@
 #ifndef HELPERS
 #define HELPERS
 #include "paramheader.h"
-//helper type for coordinates - try to use taher than passing around x,y pairs
-typedef struct coords {int x;int y;} coords;
-//store data in a ring - used for things like firing histories
+///helper type for coordinates/
+///try to use this than passing around x,y pairs as it is simpler to understand.
+///Computational overhead should be minimal
+typedef struct coords {int x; /**<x coord*/int y;/**<y coord*/} coords;
+///store data in a ring - used for things like firing histories
 typedef struct ringbuffer {
-    coords ** data;
-    unsigned int count;
-    unsigned int curidx;
+    coords ** data;     ///<the actual data
+    unsigned int count; ///<the total size of the ringbuffer
+    unsigned int curidx;///<were we currently are in the ringbuffer
 } ringbuffer;
 
 coords* ringbuffer_getoffset (const ringbuffer* const input,const int offset);

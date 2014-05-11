@@ -2,6 +2,10 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include "paramheader.h"
+///Creates the file for submitting the yossarian job
+/// TODO: (wishlist) maybe some calculations of estimated walltime and memory usage (memory usage is much easier
+/// @param outfile The output filename.
+/// @param sweep The parameter being swept over (only needed for the count to know how many jobs to submit)
 void createyossarianfile (const char* const outfile,const sweepable sweep)
 {
     FILE* file = fopen(outfile,"w");

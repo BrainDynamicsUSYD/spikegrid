@@ -1,5 +1,6 @@
 #include <stdlib.h> //calloc
 #include <stdio.h>  //printf
+#include <assert.h>
 #include "paramheader.h"
 #include "mymath.h"
 /* //This function is useful - but not used
@@ -110,4 +111,26 @@ Compute_float* CreateCouplingMatrix(const couple_parameters c)
     }
     return Norm_couplematrix(c, matrix);
 }
-
+///Cache the shape of the spike
+///In the conductance model, neurons emit spikes that decay gradually over time.  This function pre-calculates these strengths
+/// @param cap The maximum time to still add a spike @see setcap
+/// @param Decay used to calculate spike magnitude over time @see Synapse_timecourse
+/// @param timestep Required for various parts of the calculation
+Compute_float* __attribute__((const)) Synapse_timecourse_cache (const unsigned int cap, const decay_parameters Decay,const Compute_float timestep)
+{
+    Compute_float* ret = calloc(sizeof(Compute_float),cap);
+    for (unsigned int i=0;i<cap;i++)
+    {
+        const Compute_float time = ((Compute_float)i)*timestep;
+        ret[i]=Synapse_timecourse(Decay,time); 
+    }
+    return ret;
+}
+//some tests that the setcap function is correct.
+//TODO: add more tests
+void setcaptests()
+{   
+    //todo:Get Adam to check these values - also add more tests
+    assert (setcap((decay_parameters){.D=1.5,.R=0.5},(Compute_float)1E-6,Features.Timestep)==209);
+    assert (setcap((decay_parameters){.D=2.0,.R=0.5},(Compute_float)1E-6,Features.Timestep)==270);
+}

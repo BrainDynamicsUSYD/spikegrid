@@ -3,7 +3,7 @@
 #include "matlab_includes.h"
 #include "pixeltypes.h"
 #include "layer.h"
-void makemovie(const layer_t l,const unsigned int t);
+void makemovie(const layer l,const unsigned int t);
 #ifdef MATLAB
 mxArray* outputToMxArray (const tagged_array input); 
 #endif //matlab

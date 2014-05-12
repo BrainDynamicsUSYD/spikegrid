@@ -36,13 +36,13 @@ void* newdata(const void* const input,const unsigned int size)
 //The only problem is that a parameters object is immutable, so we need some way to do essentially a copy+update in C.
 //Essentially, we need to be able to do something like P = {p with A=B} (F# record syntax)
 //currently this function is only called from the setup function (but it could be called directly)
-layer_t setuplayer(const parameters p)
+layer setuplayer(const parameters p)
 {
     const Compute_float min_effect = (Compute_float)1E-6;
     unsigned int cap;
     if (p.couple.Layertype==SINGLELAYER) {cap=max(setcap(p.couple.Layer_parameters.single.Ex,min_effect,Features.Timestep),setcap(p.couple.Layer_parameters.single.In,min_effect,Features.Timestep));}
     else                                 {cap=setcap(p.couple.Layer_parameters.dual.synapse,min_effect,Features.Timestep);}
-    layer_t layer = 
+    layer L = 
     {
         .spikes=
         {   
@@ -59,32 +59,33 @@ layer_t setuplayer(const parameters p)
         .P                  = (parameters*)newdata(&p,sizeof(p)), 
     };
 
-    memset(layer.voltages,0,grid_size*grid_size); //probably not required
-    memset(layer.voltages_out,0,grid_size*grid_size);//probably not required
+    memset(L.voltages,0,grid_size*grid_size); //probably not required
+    memset(L.voltages_out,0,grid_size*grid_size);//probably not required
     for (unsigned int i=0;i<cap;i++)
     {
-        layer.spikes.data[i]=calloc(sizeof(coords),(grid_size*grid_size + 1));//assume worst case - all neurons firing.  Need to leave spae on the end for the -1 which marks the end.
-        layer.spikes.data[i][0].x=-1;//need to make sure that we don't start with spikes by ending at 0
+        L.spikes.data[i]=calloc(sizeof(coords),(grid_size*grid_size + 1));//assume worst case - all neurons firing.  Need to leave spae on the end for the -1 which marks the end.
+        L.spikes.data[i][0].x=-1;//need to make sure that we don't start with spikes by ending at 0
     }
-    return layer;
+    return L;
 }
 int setuplayerone=0;
 //The idea here is that "one-off" setup occurs here, whilst per-layer setup occurs in setuplayer
-void setup(const parameters p)
+model* setup(const parameters p,const parameters p2,const LayerNumbers lcount)
 {
-    if (setuplayerone==0) {glayer = setuplayer(p);setuplayerone++;}
-    else                  {glayer2= setuplayer(p);}
-}
-void init()
-{
+    const layer l1 = setuplayer(p);
+    const layer l2 = lcount==DUALLAYER?setuplayer(p2):l1;
+    const layer* layer1 = (layer*)newdata(&l1,sizeof(layer));
+    const layer* layer2 = (layer*)newdata(&l2,sizeof(layer));
+    const model m = {.layer1=*layer1,.layer2=*layer2,.NoLayers=lcount};
+    model* m2 = malloc(sizeof(m));
+    memcpy(m2,&m,sizeof(m));
     char* buffer = malloc(1024);
     gethostname(buffer,1023);
     if (!strcmp(buffer,"headnode.physics.usyd.edu.au")) {printf("DON'T RUN THIS CODE ON HEADNODE\n");exit(EXIT_FAILURE);}
     //TODO: minval/maxvals are made up - need to fix
     Outputtable=(output_s[]){ //note - neat feature - missing elements initailized to 0
-        {"gE",{GE,conductance_array_size,couplerange},0,100}, //gE is a 'large' matrix - as it wraps around the edges
-        {"gI",{GI,conductance_array_size,couplerange},0,100}, //gI is a 'large' matrix - as it wraps around the edges
-        {"R",{glayer.std.R,grid_size,0},0,100},
-        {"U",{glayer.std.R,grid_size,0},0,100},
+        {"gE",{m2->gE,conductance_array_size,couplerange},0,100}, //gE is a 'large' matrix - as it wraps around the edges
+        {"gI",{m2->gI,conductance_array_size,couplerange},0,100}, //gI is a 'large' matrix - as it wraps around the edges
         {NULL}};         //a marker that we are at the end of the outputabbles list
+    return m2;
 }

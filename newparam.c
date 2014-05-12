@@ -5,6 +5,10 @@
 //this macro works - somehow - you probably don't want to know - essentially it reuses the name as a value of the sweepabletypes enum and the name of a property
 #define TryGetVal(parent,name,paramtype,new,old) .name = name == paramtype ? new: old.parent.name
 //Works by pure magic and #defines
+/// Create a new, modified parameters object
+/// @param input    intial parameters object (to be copied)
+/// @param newval   The nbew value to insert
+/// @param sweep    The parameter to change
 parameters __attribute__((const,pure)) modparam (const parameters input, const Compute_float newval,const sweepabletypes sweep)
 {
     return (parameters)
@@ -30,6 +34,9 @@ parameters __attribute__((const,pure)) modparam (const parameters input, const C
         .theta      = input.theta
     };
 }
+
+///Does the linear interpolation for a sweep.
+///Parameters are self explanatory
 Compute_float __attribute__((const)) nthvalue (const Compute_float min,const Compute_float max,const unsigned int count,const unsigned int n)
 {
     return min+(min-max)*(Compute_float)n/(Compute_float)count;

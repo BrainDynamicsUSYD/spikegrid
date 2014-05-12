@@ -1,6 +1,5 @@
 #ifndef HELPERS
 #define HELPERS
-#include "paramheader.h"
 ///helper type for coordinates/
 ///try to use this than passing around x,y pairs as it is simpler to understand.
 ///Computational overhead should be minimal
@@ -13,8 +12,6 @@ typedef struct ringbuffer {
 } ringbuffer;
 
 coords* ringbuffer_getoffset (const ringbuffer* const input,const int offset);
-void* newdata(const void* const input,const unsigned int size);
-
 
 //these break vim syntax highlighting so move to the end
 //also - these don't look like C but are the official gcc-approved way of doing the max/min macros.  

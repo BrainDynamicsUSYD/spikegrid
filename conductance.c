@@ -6,6 +6,7 @@
 #include "newparam.h"
 #include "init.h"
 #include "yossarian.h"
+#include "coupling.h"
 unsigned int mytime=0;
 //The step function - evolves the model through time.
 //Perf wise the memcpy is probably not ideal, but this is a simple setup and the perf loss here is pretty small as memcpy is crazy fast

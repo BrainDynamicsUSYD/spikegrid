@@ -1,6 +1,7 @@
 #ifndef LAYER
 #define LAYER
-#include "helpertypes.h"
+#include "ringbuffer.h"
+#include "paramheader.h"
 typedef struct STD_data
 {   //some parts of this should be const - but oh well
     unsigned int ftimes[grid_size*grid_size];

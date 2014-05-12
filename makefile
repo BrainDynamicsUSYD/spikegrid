@@ -12,7 +12,7 @@ export SPEEDFLAG=-DFAST #comment out this line for double instead of float (will
 export CLIBFLAGS= -fPIC -shared
 export LDFLAGS=-lm -lpng
 CFLAGS += ${SPEEDFLAG}
-SOURCES= conductance.c coupling.c  STDP.c STD.c picture.c output.c evolve.c helpertypes.c newparam.c yossarian.c init.c theta.c
+SOURCES= conductance.c coupling.c  STDP.c STD.c picture.c output.c evolve.c ringbuffer.c newparam.c yossarian.c init.c theta.c
 BINARY=./a.out
 VERSION_HASH = $(shell git rev-parse HEAD)
 .PHONY: profile clean submit docs debug

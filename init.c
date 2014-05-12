@@ -21,6 +21,16 @@ void randinit(Compute_float* input,const conductance_parameters V)
     }
 }
 
+///Copies a struct using malloc - occasionally required
+/// @param input  the initial input
+/// @param size   the amount of data to copy
+void* newdata(const void* const input,const unsigned int size)   
+{
+        void* ret = malloc(size);
+            memcpy(ret,input,size);
+                return ret;
+} 
+
 //given a parameters object, set up a layer object.
 //This function is what theoretically will allow for sweeping through parameter space.
 //The only problem is that a parameters object is immutable, so we need some way to do essentially a copy+update in C.

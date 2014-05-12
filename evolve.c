@@ -87,7 +87,7 @@ void fixboundary(Compute_float* __restrict gE, Compute_float* __restrict gI)
 
 }
 
-//TODO: it would be good if this took the layer as const
+//TODO: it would be good if this took the layer as const - restriction is STD
 void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restrict__ gI,const unsigned int time)
 {
     for (unsigned int i=1;i<L.spikes.count;i++) //start at 1 so we don't get currently firing (which should be empty anyway)
@@ -174,22 +174,22 @@ void ResetVoltages(Compute_float* const __restrict Vout,const couple_parameters 
     }
 
 }
-void step1(model m,const unsigned int time)
+void step1(model* m,const unsigned int time)
 {
 	const Compute_float timemillis = ((Compute_float)time) * Features.Timestep ;
-    memset(m.gE,0,sizeof(Compute_float)*conductance_array_size*conductance_array_size); //zero the gE/gI matrices so they can be reused
-    memset(m.gI,0,sizeof(Compute_float)*conductance_array_size*conductance_array_size);
-    AddSpikes(m.layer1,m.gE,m.gI,time);
-    if (m.NoLayers==DUALLAYER) {AddSpikes(m.layer1,m.gE,m.gI,time);}
-    fixboundary(m.gE,m.gI);
-    CalcVoltages(m.layer1.voltages,m.gE,m.gI,m.layer1.P->potential,m.layer1.voltages_out);
-    if (m.NoLayers==DUALLAYER) {CalcVoltages(m.layer1.voltages,m.gE,m.gI,m.layer1.P->potential,m.layer1.voltages_out);}
+    memset(m->gE,0,sizeof(Compute_float)*conductance_array_size*conductance_array_size); //zero the gE/gI matrices so they can be reused for this timestep
+    memset(m->gI,0,sizeof(Compute_float)*conductance_array_size*conductance_array_size);
+    AddSpikes(m->layer1,m->gE,m->gI,time);
+    if (m->NoLayers==DUALLAYER) {AddSpikes(m->layer1,m->gE,m->gI,time);}
+    fixboundary(m->gE,m->gI);
+    CalcVoltages(m->layer1.voltages,m->gE,m->gI,m->layer1.P->potential,m->layer1.voltages_out);
+    if (m->NoLayers==DUALLAYER) {CalcVoltages(m->layer1.voltages,m->gE,m->gI,m->layer1.P->potential,m->layer1.voltages_out);}
     if (Features.Theta==ON)
     {
-        dotheta(m.layer1.voltages_out,m.layer1.P->theta,timemillis);
-        if (m.NoLayers==DUALLAYER) {dotheta(m.layer1.voltages_out,m.layer1.P->theta,timemillis);}
+        dotheta(m->layer1.voltages_out,m->layer1.P->theta,timemillis);
+        if (m->NoLayers==DUALLAYER) {dotheta(m->layer1.voltages_out,m->layer1.P->theta,timemillis);}
     }
-    StoreFiring(&(m.layer1));
-    if(m.NoLayers==DUALLAYER){StoreFiring(&(m.layer2));}
-    ResetVoltages(m.layer1.voltages_out,m.layer1.P->couple,&m.layer1.spikes,m.layer1.P->potential);
+    StoreFiring(&(m->layer1));
+    if(m->NoLayers==DUALLAYER){StoreFiring(&(m->layer2));}
+    ResetVoltages(m->layer1.voltages_out,m->layer1.P->couple,&m->layer1.spikes,m->layer1.P->potential);
 }

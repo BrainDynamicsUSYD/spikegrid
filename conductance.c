@@ -23,7 +23,7 @@ void step_(const Compute_float* const inp,const Compute_float* const inp2)
     if (ModelType==DUALLAYER) {memcpy(m->layer2.voltages,inp,sizeof(float)*grid_size*grid_size);}
     m->layer1.spikes.curidx=mytime%(m->layer1.spikes.count);
     if (ModelType==DUALLAYER) {m->layer2.spikes.curidx=mytime%(m->layer2.spikes.count);}
-    step1(*m,mytime);
+    step1(m,mytime);
     if (Features.STDP==ON)
     {
         doSTDP(m->layer1.STDP_connections,&m->layer1.spikes,m->layer1.connections,m->layer1.P->STDP);

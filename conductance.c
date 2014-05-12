@@ -43,26 +43,29 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
 {
     if (setup_done==0) 
     {
-        init();
-        if (ModelType==SINGLELAYER) {setup(OneLayerModel);} 
-        else {setup(DualLayerModelIn);setup(DualLayerModelEx);}
+        if (ModelType==SINGLELAYER) {m=setup(OneLayerModel,OneLayerModel,ModelType);} //pass the same layer as a double parameter
+        else {m=setup(DualLayerModelIn,DualLayerModelEx,ModelType);}
         setup_done=1;
         printf("setup done\n");
     }
     const Compute_float* inputdata = (Compute_float*) mxGetData(prhs[0]);
-    step_(inputdata); //always output the voltage data
+    const Compute_float* inputdata2 = (Compute_float*) mxGetData(prhs[1]);
+    step_(inputdata,inputdata2); //always output the voltage data
     plhs[0]=mxCreateNumericMatrix(grid_size,grid_size,mxSINGLE_CLASS,mxREAL);
+    plhs[1]=mxCreateNumericMatrix(grid_size,grid_size,mxSINGLE_CLASS,mxREAL);
     Compute_float* pointer=(Compute_float*)mxGetPr(plhs[0]);
+    Compute_float* pointer2=(Compute_float*)mxGetPr(plhs[1]);
     for (int i=0;i<grid_size;i++)
     {
         for (int j=0;j<grid_size;j++)
         {
-            pointer[i*grid_size+j]=glayer.voltages_out[i*grid_size + j];
+            pointer[i*grid_size+j]=m->layer1.voltages_out[i*grid_size + j];
+            pointer2[i*grid_size+j]=m->layer2.voltages_out[i*grid_size + j];
         }
     }
     if (nrhs>1) //output other stuff
     {
-        int rhsidx = 1;
+        int rhsidx = 2;
         while (rhsidx<nrhs)
         {
             char* data=malloc(sizeof(char)*1024); //should be big enough

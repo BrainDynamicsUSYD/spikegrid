@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include "output.h"
 #include "picture.h"
 //rescale a float to a unit8 from some minimum and maximum range
@@ -62,7 +63,7 @@ mxArray* outputToMxArray (const tagged_array input)
     mxArray* ret = mxCreateNumericMatrix((int)size,(int)size,elemtype,mxREAL); //matlab has signed ints for array sizes - really?
     Compute_float* dataptr =  (Compute_float*)mxGetPr(ret);
     Compute_float* actualdata = taggedarrayTocomputearray(input);
-    memcpy(datptr,actualdata,sizeof(Compute_float)*size*size);
+    memcpy(dataptr,actualdata,sizeof(Compute_float)*size*size);
     return ret;
 }
 #endif

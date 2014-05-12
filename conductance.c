@@ -38,9 +38,11 @@ int setup_done=0;
 //
 void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
 {
-       if (setup_done==0) 
+    if (setup_done==0) 
     {
-        setup(Param);
+        init();
+        if (ModelType==SINGLELAYER) {setup(OneLayerModel);} 
+        else {setup(DualLayerModelIn);setup(DualLayerModelEx);}
         setup_done=1;
         printf("setup done\n");
     }
@@ -63,11 +65,11 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
             char* data=malloc(sizeof(char)*1024); //should be big enough
             mxGetString(prhs[rhsidx],data,1023);
             int outidx = 0;
-            while (Outputabble[outidx].name != NULL)
+            while (Outputtable[outidx].name != NULL)
             {
-                if (!strcmp(Outputabble[outidx].name,data))
+                if (!strcmp(Outputtable[outidx].name,data))
                 {
-                    plhs[rhsidx]=outputToMxArray(Outputabble[outidx].data);
+                    plhs[rhsidx]=outputToMxArray(Outputtable[outidx].data);
                     outidx=-1;
                     break;
                 }

@@ -80,11 +80,15 @@ void init()
     char* buffer = malloc(1024);
     gethostname(buffer,1023);
     if (!strcmp(buffer,"headnode.physics.usyd.edu.au")) {printf("DON'T RUN THIS CODE ON HEADNODE\n");exit(EXIT_FAILURE);}
-    //TODO: minval/maxvals are made up - need to fix
-    Outputtable=(output_s[]){ //note - neat feature - missing elements initailized to 0
+    const int output_count = 4;
+    output_s* outdata=(output_s[]){ //note - neat feature - missing elements initailized to 0
         {"gE",{GE,conductance_array_size,couplerange},0,100}, //gE is a 'large' matrix - as it wraps around the edges
         {"gI",{GI,conductance_array_size,couplerange},0,100}, //gI is a 'large' matrix - as it wraps around the edges
         {"R",{glayer.std.R,grid_size,0},0,100},
         {"U",{glayer.std.R,grid_size,0},0,100},
         {NULL}};         //a marker that we are at the end of the outputabbles list
+    output_s* malloced = malloc(sizeof(outdata)*output_count);
+    memcpy(malloced,outdata,sizeof(outdata)*output_count);
+    //TODO: minval/maxvals are made up - need to fix
+    Outputtable=malloced;
 }

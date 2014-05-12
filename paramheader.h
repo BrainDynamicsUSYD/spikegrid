@@ -57,14 +57,12 @@ typedef struct singlelayer_parameters
     const Compute_float sigI   ;                    //char. length for In synapses (int / float?)
     const decay_parameters Ex;
     const decay_parameters In;
-    const int tref     ;                    //refractory time
 } singlelayer_parameters;
 typedef struct duallayer_parameters
 {
     const Compute_float     W; //basically as for the singlelayer_properties but with some features missing
     const Compute_float     sigma;
     const decay_parameters  synapse;
-    const int               tref;
 } duallayer_parameters;
 typedef struct couple_parameters
 {
@@ -82,6 +80,7 @@ typedef struct couple_parameters
         Multsep_parameters mult_sep;
 
     } normalization_parameters;                   //holds data for different normalization methods
+    const int tref     ;                    //refractory time
 } couple_parameters;
 
 

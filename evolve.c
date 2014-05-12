@@ -28,6 +28,7 @@ void evolvept_STDP  (const int x,const  int y,const Compute_float* const __restr
 
 //add conductance from a firing neuron the gE and gI arrays
 ////TODO: add the skip part to skip zero entries as in the threestate code
+///TODO: optimise these for the single layer case
 void evolvept (const int x,const  int y,const Compute_float* const __restrict connections,const Compute_float Estrmod,const Compute_float Istrmod,Compute_float* __restrict gE,Compute_float* __restrict gI,const Compute_float* STDP_CONNS)
 {
     for (int i = 0; i < couple_array_size;i++)
@@ -86,26 +87,15 @@ void fixboundary(Compute_float* __restrict gE, Compute_float* __restrict gI)
 
 }
 
-//these gE/gI values should be static to the function - but sometimes they need to be exposed as read only (for example to plot in matlab)
-Compute_float gE[conductance_array_size*conductance_array_size];
-Compute_float gI[conductance_array_size*conductance_array_size];
-const volatile Compute_float* const GE = &gE[0]; //volatile is required as the underlying data can change and we are just exposing the read only pointer
-const volatile Compute_float* const GI = &gI[0];
-//rhs_func used when integrating the neurons forward through time.  The actual integration is done using the midpoint method
-Compute_float __attribute__((const,pure)) rhs_func  (const Compute_float V,const Compute_float ge,const Compute_float gi,const conductance_parameters p) {return -(p.glk*(V-p.Vlk) + ge*(V-p.Vex) + gi*(V-p.Vin));}
-//actually step the model through time (1 timestep worth)
-void step1 (layer_t* layer,const unsigned int time)
+//TODO: it would be good if this took the layer as const
+void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restrict__ gI,const unsigned int time)
 {
-	const Compute_float timemillis = ((Compute_float)time) * Features.Timestep ;
-    coords* current_firestore = layer->spikes.data[layer->spikes.curidx];//get the thing for currently firing neurons
-    memset(gE,0,sizeof(Compute_float)*conductance_array_size*conductance_array_size); //zero the gE/gI matrices so they can be reused
-    memset(gI,0,sizeof(Compute_float)*conductance_array_size*conductance_array_size);
-    for (unsigned int i=1;i<layer->spikes.count;i++) //start at 1 so we don't get currently firing (which should be empty anyway)
+    for (unsigned int i=1;i<L.spikes.count;i++) //start at 1 so we don't get currently firing (which should be empty anyway)
     {
-        const coords* const fire_with_this_lag = ringbuffer_getoffset(&layer->spikes,(int)i);
+        const coords* const fire_with_this_lag = ringbuffer_getoffset(&L.spikes,(int)i);
         const int delta =(int)(((Compute_float)i)*Features.Timestep);//small helper constant.
-        const Compute_float Estr =layer->Extimecourse!=NULL? layer->Extimecourse[delta]:Zero;
-        const Compute_float Istr =layer->Intimecourse!=NULL? layer->Intimecourse[delta]:Zero; 
+        const Compute_float Estr =L.Extimecourse!=NULL? L.Extimecourse[delta]:Zero;
+        const Compute_float Istr =L.Intimecourse!=NULL? L.Intimecourse[delta]:Zero; 
         int idx=0; //iterate through all neurons firing with this lag
         while (fire_with_this_lag[idx].x != -1)
         {
@@ -113,38 +103,45 @@ void step1 (layer_t* layer,const unsigned int time)
             Compute_float strmod=One;
             if (Features.STD == ON)
             {
-                strmod=STD_str(layer->P->STD,c.x,c.y,time,i,&(layer->std));
+                strmod=STD_str(L.P->STD,c.x,c.y,time,i,&(L.std));
             }
-            evolvept(c.x,c.y,layer->connections,Estr*strmod,Istr*strmod,gE,gI,layer->STDP_connections);
+            evolvept(c.x,c.y,L.connections,Estr*strmod,Istr*strmod,gE,gI,L.STDP_connections);
             idx++;
         }
     }
-    fixboundary(gE,gI);
+}
+
+//rhs_func used when integrating the neurons forward through time.  The actual integration is done using the midpoint method
+Compute_float __attribute__((const,pure)) rhs_func  (const Compute_float V,const Compute_float ge,const Compute_float gi,const conductance_parameters p) {return -(p.glk*(V-p.Vlk) + ge*(V-p.Vex) + gi*(V-p.Vin));}
+
+void CalcVoltages(const Compute_float* const __restrict__ Vinput,const Compute_float* const __restrict__ gE, const Compute_float* const __restrict__ gI,const conductance_parameters C, Compute_float* const __restrict__ Vout)
+{
     for (int x=0;x<grid_size;x++) 
     {
         for (int y=0;y<grid_size;y++)
         { //step all neurons through time - use midpoint method
             const int idx = (x+couplerange)*conductance_array_size + y + couplerange; //index for gE/gI
             const int idx2=  x*grid_size+y;//index for voltages
-            const Compute_float rhs1=rhs_func(layer->voltages[idx2],gE[idx],gI[idx],layer->P->potential);
-            const Compute_float Vtemp = layer->voltages[idx2] + Half*Features.Timestep*rhs1;
-            const Compute_float rhs2=rhs_func(Vtemp,gE[idx],gI[idx],layer->P->potential);
-            layer->voltages_out[idx2]=layer->voltages[idx2]+Half*Features.Timestep*(rhs1 + rhs2);
+            const Compute_float rhs1=rhs_func(Vinput[idx2],gE[idx],gI[idx],C);
+            const Compute_float Vtemp = Vinput[idx2] + Half*Features.Timestep*rhs1;
+            const Compute_float rhs2=rhs_func(Vtemp,gE[idx],gI[idx],C);
+            Vout[idx2]=Vinput[idx2]+Half*Features.Timestep*(rhs1 + rhs2);
         }
     }
-    if (Features.Theta == ON)
-    {
-        dotheta(layer->voltages_out,layer->P->theta,timemillis);
-    }
-    int this_fcount=0;//now find which neurons fired at the current time step
+}
+
+void StoreFiring(layer* L)
+{
+    coords* current_firestore = L->spikes.data[L->spikes.curidx];//get the thing for currently firing neurons
+    int this_fcount=0;
     for (int x=0;x<grid_size;x++)
     {
         for (int y=0;y<grid_size;y++)
         {
-            if (layer->voltages[x*grid_size + y]  > layer->P->potential.Vth)
+            if (L->voltages[x*grid_size + y]  > L->P->potential.Vth)
             {
                 current_firestore[this_fcount] =(coords){.x=x,.y=y};
-                layer->voltages_out[x*grid_size+y]=layer->P->potential.Vrt;
+                L->voltages_out[x*grid_size+y]=L->P->potential.Vrt;
                 this_fcount++;
                 if (Features.Output==ON)
                 {
@@ -152,25 +149,47 @@ void step1 (layer_t* layer,const unsigned int time)
                 }
             }
             else if (((Compute_float)random())/((Compute_float)RAND_MAX) < 
-                            (layer->P->potential.rate*((Compute_float)0.001)*Features.Timestep))
+                    (L->P->potential.rate*((Compute_float)0.001)*Features.Timestep))
             {
-                layer->voltages_out[x*grid_size+y]=layer->P->potential.Vth+(Compute_float)0.1;//make sure it fires
+                L->voltages_out[x*grid_size+y]=L->P->potential.Vth+(Compute_float)0.1;//make sure it fires
             }
         }
     }
-    //todo: fix for time scale properly
-    for (int i=1;i<=51;i++) //start at 1 so we don't get currently firing (which should be empty anyway)
+    if (Features.Output==ON ) {printf("\n");} //occasionaly print newlines
+    current_firestore[this_fcount].x=-1;
+}
+void ResetVoltages(Compute_float* const __restrict Vout,const couple_parameters C,const ringbuffer* spikes,const conductance_parameters CP)
+{
+    const int trefrac_in_ts =(int) ((Compute_float)C.tref / Features.Timestep);
+    for (int i=1;i<=trefrac_in_ts;i++) //start at 1 so we don't get currently firing (which should be empty anyway)
     {   //put refractory neurons at reset potential
-        const coords* const fire_with_this_lag = ringbuffer_getoffset(&layer->spikes,i);
+        const coords* const fire_with_this_lag = ringbuffer_getoffset(spikes,i);
         int idx=0;
         while (fire_with_this_lag[idx].x != -1)
         {
             coords c = fire_with_this_lag[idx]; 
-            layer->voltages_out[c.x*grid_size+c.y]=layer->P->potential.Vrt;
+            Vout[c.x*grid_size+c.y]=CP.Vrt;
             idx++;
         }
     }
-    current_firestore[this_fcount].x=-1;
-    if (Features.Output==ON &&time % 10 ==0 ) {printf("\n");} //occasionaly print newlines
 
+}
+void step1(model m,const unsigned int time)
+{
+	const Compute_float timemillis = ((Compute_float)time) * Features.Timestep ;
+    memset(m.gE,0,sizeof(Compute_float)*conductance_array_size*conductance_array_size); //zero the gE/gI matrices so they can be reused
+    memset(m.gI,0,sizeof(Compute_float)*conductance_array_size*conductance_array_size);
+    AddSpikes(m.layer1,m.gE,m.gI,time);
+    if (m.NoLayers==DUALLAYER) {AddSpikes(m.layer1,m.gE,m.gI,time);}
+    fixboundary(m.gE,m.gI);
+    CalcVoltages(m.layer1.voltages,m.gE,m.gI,m.layer1.P->potential,m.layer1.voltages_out);
+    if (m.NoLayers==DUALLAYER) {CalcVoltages(m.layer1.voltages,m.gE,m.gI,m.layer1.P->potential,m.layer1.voltages_out);}
+    if (Features.Theta==ON)
+    {
+        dotheta(m.layer1.voltages_out,m.layer1.P->theta,timemillis);
+        if (m.NoLayers==DUALLAYER) {dotheta(m.layer1.voltages_out,m.layer1.P->theta,timemillis);}
+    }
+    StoreFiring(&(m.layer1));
+    if(m.NoLayers==DUALLAYER){StoreFiring(&(m.layer2));}
+    ResetVoltages(m.layer1.voltages_out,m.layer1.P->couple,&m.layer1.spikes,m.layer1.P->potential);
 }

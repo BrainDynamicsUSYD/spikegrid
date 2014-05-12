@@ -33,9 +33,9 @@ static const parameters OneLayerModel = //the fact that this is static is a litt
                 .sigI   = 42,                   //char. length for In synapses (int / float?)
                 .Ex = {.R=0.5,.D=1.5},          //excitatory rise / decay time
                 .In = {.R=0.5,.D=2.0},          //inhibitory rise / decay time
-                .tref   = 5,
             }
         },
+        .tref   = 5,
         .norm_type = None,
     },
     .potential = 
@@ -83,10 +83,10 @@ static const parameters DualLayerModelIn =
                 .W          = -0.41,
                 .sigma      = 14,
                 .synapse    = {.R=0.5,.D=1.5},
-                .tref       = 5,
             }
         },
         .norm_type = None,
+        .tref       = 5,
     },
     .potential = 
     {
@@ -133,9 +133,9 @@ static const parameters DualLayerModelEx =
                 .W          = 0.41,
                 .sigma      = 42,
                 .synapse    = {.R=0.5,.D=2},
-                .tref       = 5,
             }
         },
+        .tref       = 5,
         .norm_type = None,
     },
     .potential = 

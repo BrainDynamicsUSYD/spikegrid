@@ -20,5 +20,14 @@ typedef struct layer
     ringbuffer spikes;
     parameters* P;
     STD_data std;
-} layer_t;
+} layer;
+///Allows for having multiple layers and simulating them
+typedef struct Model
+{
+    const LayerNumbers NoLayers;
+    layer layer1; ///< First layer
+    layer layer2; ///< Second layer
+    Compute_float gE [conductance_array_size*conductance_array_size]; ///<gE matrix (large)
+    Compute_float gI [conductance_array_size*conductance_array_size]; ///<gI matrix (large)
+} model;
 #endif

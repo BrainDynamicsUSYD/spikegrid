@@ -8,26 +8,29 @@
 #include "yossarian.h"
 #include "coupling.h"
 unsigned int mytime=0;
+model* m;
 //The step function - evolves the model through time.
 //Perf wise the memcpy is probably not ideal, but this is a simple setup and the perf loss here is pretty small as memcpy is crazy fast
 //DO NOT CALL THIS FUNCTION "step" - this causes a weird collision in matlab that results in segfaults.  Incredibly fun to debug
 ///Function that steps the model through time (high level).
-///TODO: Currently broken for single layer model
 /// @param inp the input voltages
-void step_(const Compute_float* const inp)
+/// @param inp2 input voltages for layer 2.  In the single layer model a dummy argument needs to be passed.
+void step_(const Compute_float* const inp,const Compute_float* const inp2)
 {
+    if (ModelType==DUALLAYER && inp2==NULL) {printf("missing second input voltage in dual-layer model");exit(EXIT_FAILURE);}
     mytime++;
-    memcpy(glayer.voltages,inp,sizeof(float)*grid_size*grid_size);
-    glayer.spikes.curidx=mytime%(glayer.spikes.count);
-    step1(&glayer,mytime);
-    step1(&glayer2,mytime);
+    memcpy(m->layer1.voltages,inp,sizeof(float)*grid_size*grid_size);
+    if (ModelType==DUALLAYER) {memcpy(m->layer2.voltages,inp,sizeof(float)*grid_size*grid_size);}
+    m->layer1.spikes.curidx=mytime%(m->layer1.spikes.count);
+    if (ModelType==DUALLAYER) {m->layer2.spikes.curidx=mytime%(m->layer2.spikes.count);}
+    step1(*m,mytime);
     if (Features.STDP==ON)
     {
-        doSTDP(glayer.STDP_connections,&glayer.spikes,glayer.connections,glayer.P->STDP);
-        doSTDP(glayer2.STDP_connections,&glayer2.spikes,glayer2.connections,glayer2.P->STDP);
+        doSTDP(m->layer1.STDP_connections,&m->layer1.spikes,m->layer1.connections,m->layer1.P->STDP);
+        doSTDP(m->layer2.STDP_connections,&m->layer2.spikes,m->layer2.connections,m->layer2.P->STDP);
     }
-    makemovie(glayer,mytime);
-    makemovie(glayer2,mytime);
+    makemovie(m->layer1,mytime);
+    makemovie(m->layer2,mytime);
 }
 
 
@@ -114,9 +117,9 @@ int main(int argc,char** argv) //useful for testing w/out matlab
                     printf("doing sweep index %i\n",index);
                     if (ModelType == SINGLELAYER)
                     {
-                        const parameters newparam = GetNthParam(OneLayerModel,Sweep,index);
+                        //TODO: sweep currently broken
+                     //   const parameters newparam = GetNthParam(OneLayerModel,Sweep,index);
                         skiptests=1;
-                        setup(newparam);
                     }
                     else {printf("sweeps not currently supported in dual-layer model\n");exit(EXIT_FAILURE);}
                 }
@@ -124,19 +127,21 @@ int main(int argc,char** argv) //useful for testing w/out matlab
         }
     }
     if (skiptests==0){tests();}
-    if (ModelType==SINGLELAYER) {setup(OneLayerModel);} 
-    else {setup(DualLayerModelIn);setup(DualLayerModelEx);}
+    if (ModelType==SINGLELAYER) {m=setup(OneLayerModel,OneLayerModel,ModelType);} //pass the same layer as a double parameter
+    else {m=setup(DualLayerModelIn,DualLayerModelEx,ModelType);}
     Compute_float* input=calloc(sizeof(Compute_float),grid_size*grid_size);
+    Compute_float* input2=calloc(sizeof(Compute_float),grid_size*grid_size);
     randinit(input,OneLayerModel.potential); //need to fix for dual layer
     while (mytime<1000)
     {
-        step_(input);
+        step_(input,input2);//always fine to pass an extra argument here
         printf("%i\n",mytime);
         for (int i=0;i<grid_size;i++)
         {
             for (int j=0;j<grid_size;j++)
             {
-                input[i*grid_size+j]=glayer.voltages_out[i*grid_size + j];
+                input[i*grid_size+j]=m->layer1.voltages_out[i*grid_size + j];
+                if (ModelType==DUALLAYER) { input2[i*grid_size+j]=m->layer2.voltages_out[i*grid_size + j];}
             }
         }
     }

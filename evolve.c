@@ -79,7 +79,7 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
                 strmod=STD_str(L.P->STD,c.x,c.y,time,i,&(L.std));
             }
             if (Estr!= Zero && Istr != Zero) {evolvept(c.x,c.y,L.connections,Estr*strmod,Istr*strmod,gE,gI,L.STDP_connections);}
-            else                             {evolvept_singlelayer(c.x,c.y,L.connections,(Estr==Zero?Istr:Estr)*strmod,(Estr==Zero?gI:gE),L.STDP_connections);}
+            else                             {evolvept_singlelayer(c.x,c.y,L.connections,(Estr==Zero?Istr*-1:Estr)*strmod,(Estr==Zero?gI:gE),L.STDP_connections);}
             idx++;
         }
     }

@@ -18,7 +18,7 @@ hT = title('Time: 1');
 % Excitatory conductance
 [data2,datalayer22, gE] =conductance(data,datalayer2,'gE');
 figure(2);
-hG = imagesc(gE);
+hG = imagesc(datalayer2);
 
 while time<1000
     time=time+1;
@@ -28,7 +28,7 @@ while time<1000
     if (mod(time,10)==0)
         set(hV,'CData',data);
         set(hT,'String',sprintf('Time: %.1f',time));
-        set(hG,'CData',gE);  
+        set(hG,'CData',datalayer2);  
         pause(0.01);
     end
 end

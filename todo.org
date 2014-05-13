@@ -5,7 +5,7 @@
 ** TODO Most important - single versus double precision compute floats
 ** TODO Secondary - any more error checking
 
-* TODO Different maximum timescales for inhib + excit
+* TODO Different maximum timescales for inhib + excit in single-layer model
   Currently, inhibitory and excitatory neurons share the same cap.
   It would probably be good for perf if they were different.
   In particular, it would be really good to reduce inhib timecourse
@@ -21,8 +21,9 @@
    
 * TODO Double layer structure
 ** DONE Basic implementation
-   CLOSED: [2014-05-09 Fri 17:55]
-** TODO coupling between layers
+   CLOSED: [2014-05-13 Tue 12:04]
+** DONE coupling between layers
+   CLOSED: [2014-05-13 Tue 12:04]
 ** TODO Inhib layer has lower density
    
 * TODO Allow picking a layer to sweep over in the dual-layer model
@@ -32,3 +33,15 @@
   CLOSED: [2014-05-09 Fri 17:55]
 * DONE remove STD_parameters from STD_data
   CLOSED: [2014-05-09 Fri 17:57]
+
+* TODO sweep is broken - need to encode which parameter object to sweep over
+* TODO Optimise evolvept and evolvept_stdp for the case when only inhib/excite present in a layer
+* TODO Optimise evolvept and evolvept_STDP to elegantly skip over zero entries in the coupling matrix
+* TODO Addspikes should take the layer argument as const
+  currently, this is restricted by the STD function - could be improved
+  
+* TODO Figure out how te get min and max values of outputtabbles and return them to matlab
+
+* TODO estimate walltime + mem usage in yossarian.c
+  
+* TODO compiler does not warn on missing elements in parameters.h

@@ -27,8 +27,6 @@ void evolvept_STDP  (const int x,const  int y,const Compute_float* const __restr
 }
 
 //add conductance from a firing neuron the gE and gI arrays
-////TODO: add the skip part to skip zero entries as in the threestate code
-///TODO: optimise these for the single layer case
 void evolvept (const int x,const  int y,const Compute_float* const __restrict connections,const Compute_float Estrmod,const Compute_float Istrmod,Compute_float* __restrict gE,Compute_float* __restrict gI,const Compute_float* STDP_CONNS)
 {
     for (int i = 0; i < couple_array_size;i++)

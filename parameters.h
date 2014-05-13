@@ -16,7 +16,6 @@
 
 static const LayerNumbers ModelType = DUALLAYER;
 
-////TODO: compiler does not warn on missing elements - fix
 //Fun note - with the right optimisations GCC actually will pull these constants inline (for example disassemble evolvept_STDP with STDP off)
 static const parameters OneLayerModel = //the fact that this is static is a little messy - in theory gcc will create a copy for each .c file.  However - in reality, this doesn't appear to happen (perhaps GCC realises that it is const so that only one copy is required.  If the const is ever removed, static will cause incredibly weird behaviour.
 {

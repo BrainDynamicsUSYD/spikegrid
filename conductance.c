@@ -91,7 +91,6 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
 #else
 void tests()
 {
-    setcaptests();
     testmodparam(OneLayerModel);
     printf("tests passed");
 }

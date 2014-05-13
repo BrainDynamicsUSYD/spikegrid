@@ -2,6 +2,7 @@
 #include <string.h>
 #include "output.h"
 #include "picture.h"
+#include "layer.h"
 //rescale a float to a unit8 from some minimum and maximum range
 //currently no error checking and so might produce UB
 uint8_t __attribute__((const)) rescalefloat (const Compute_float in,const Compute_float maxval, const Compute_float minval) //rescale to 0-255
@@ -83,7 +84,7 @@ void OutputToPng(const tagged_array input,const Compute_float minval,const Compu
     
 }
 
-void makemovie(const layer_t l,const unsigned int t)
+void makemovie(const layer l,const unsigned int t)
 {
     if (l.P->Movie.MakeMovie==ON && t % l.P->Movie.Delay)
     {

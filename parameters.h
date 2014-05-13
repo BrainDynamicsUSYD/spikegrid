@@ -1,5 +1,5 @@
 //these first few parameters actually escape into the paramheader file through magic
-#define grid_size 100
+#define grid_size 300
 #define couplerange 15
 #ifndef PARAMATERS  //DO NOT REMOVE
 #define PARAMATERS  //DO NOT REMOVE

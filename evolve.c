@@ -47,16 +47,52 @@ void evolvept (const int x,const  int y,const Compute_float* const __restrict co
     } 
     evolvept_STDP(x,y,STDP_CONNS,Estrmod,Istrmod,gE,gI);
 }
+
+void evolvept_singlelayer (const int x,const  int y,const Compute_float* const __restrict connections,const Compute_float strmod, Compute_float* __restrict condmat,const Compute_float* STDP_CONNS)
+{
+    for (int i = 0; i < couple_array_size;i++)
+    {
+        const int outoff = (x +i )*conductance_array_size +y;//as gE and gI are larger than the neuron grid size, don't have to worry about wrapping
+        for (int j = 0 ; j<couple_array_size;j++) 
+        {
+            const int coupleidx = i*couple_array_size + j;
+            condmat[outoff+j] += connections[coupleidx]*strmod;
+        }
+    } 
+//    Need to find a way to do STDP here
+}
+void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restrict__ gI,const unsigned int time)
+{
+    for (unsigned int i=1;i<L.spikes.count;i++) //start at 1 so we don't get currently firing (which should be empty anyway)
+    {
+        const coords* const fire_with_this_lag = ringbuffer_getoffset(&L.spikes,(int)i);
+        const int delta =(int)(((Compute_float)i)*Features.Timestep);//small helper constant.
+        const Compute_float Estr =L.Extimecourse!=NULL? L.Extimecourse[delta]:Zero;
+        const Compute_float Istr =L.Intimecourse!=NULL? L.Intimecourse[delta]:Zero; 
+        int idx=0; //iterate through all neurons firing with this lag
+        while (fire_with_this_lag[idx].x != -1)
+        {
+            coords c = fire_with_this_lag[idx]; //add conductances
+            Compute_float strmod=One;
+            if (Features.STD == ON)
+            {
+                strmod=STD_str(L.P->STD,c.x,c.y,time,i,&(L.std));
+            }
+            if (Estr!= Zero && Istr != Zero) {evolvept(c.x,c.y,L.connections,Estr*strmod,Istr*strmod,gE,gI,L.STDP_connections);}
+            else                             {evolvept_singlelayer(c.x,c.y,L.connections,(Estr==Zero?Istr:Estr)*strmod,(Estr==Zero?gI:gE),L.STDP_connections);}
+            idx++;
+        }
+    }
+}
+
 //To keep the evolvept code simple we use an array like this:
-//     +––––––––––––––––+          
-//     |Extra foroverlap|          
-//     |  +––––––––––+  |          
-//     |  |          |  |          
-//     |  |Actual    |  |          
-//     |  |matrix    |  |          
-//     |  +––––––––––+  |          
-//     |                |          
-//     +––––––––––––––––+ 
+//     +––––––––––––-––––+          
+//     |Extra for overlap|          
+//     |  +––––––––––+   |          
+//     |  |Actual    |   |          
+//     |  |matrix    |   |          
+//     |  +––––––––––+   |          
+//     +–––––––––––––––-–+ 
 //This function adds in the overlapping bits back into the original matrix.  It is slightly opaque but using pictures you can convince yourself that it works
 void fixboundary(Compute_float* __restrict gE, Compute_float* __restrict gI)
 {   //theoretically the two sets of loops could be combined but that would be incredibly confusing
@@ -84,31 +120,6 @@ void fixboundary(Compute_float* __restrict gE, Compute_float* __restrict gI)
 	}
 
 }
-
-//TODO: it would be good if this took the layer as const - restriction is STD
-void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restrict__ gI,const unsigned int time)
-{
-    for (unsigned int i=1;i<L.spikes.count;i++) //start at 1 so we don't get currently firing (which should be empty anyway)
-    {
-        const coords* const fire_with_this_lag = ringbuffer_getoffset(&L.spikes,(int)i);
-        const int delta =(int)(((Compute_float)i)*Features.Timestep);//small helper constant.
-        const Compute_float Estr =L.Extimecourse!=NULL? L.Extimecourse[delta]:Zero;
-        const Compute_float Istr =L.Intimecourse!=NULL? L.Intimecourse[delta]:Zero; 
-        int idx=0; //iterate through all neurons firing with this lag
-        while (fire_with_this_lag[idx].x != -1)
-        {
-            coords c = fire_with_this_lag[idx]; //add conductances
-            Compute_float strmod=One;
-            if (Features.STD == ON)
-            {
-                strmod=STD_str(L.P->STD,c.x,c.y,time,i,&(L.std));
-            }
-            evolvept(c.x,c.y,L.connections,Estr*strmod,Istr*strmod,gE,gI,L.STDP_connections);
-            idx++;
-        }
-    }
-}
-
 //rhs_func used when integrating the neurons forward through time.  The actual integration is done using the midpoint method
 Compute_float __attribute__((const,pure)) rhs_func  (const Compute_float V,const Compute_float ge,const Compute_float gi,const conductance_parameters p) {return -(p.glk*(V-p.Vlk) + ge*(V-p.Vex) + gi*(V-p.Vin));}
 

@@ -82,6 +82,7 @@ model* setup(const parameters p,const parameters p2,const LayerNumbers lcount)
     char* buffer = malloc(1024);
     gethostname(buffer,1023);
     if (!strcmp(buffer,"headnode.physics.usyd.edu.au")) {printf("DON'T RUN THIS CODE ON HEADNODE\n");exit(EXIT_FAILURE);}
+    free(buffer);
     const unsigned int output_count = 3;
     output_s* outdata=(output_s[]){ //note - neat feature - missing elements initailized to 0
         {"gE",{m2->gE,conductance_array_size,couplerange},0,100}, //gE is a 'large' matrix - as it wraps around the edges

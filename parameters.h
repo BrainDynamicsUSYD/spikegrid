@@ -16,7 +16,6 @@
 
 static const LayerNumbers ModelType = DUALLAYER;
 
-////TODO: compiler does not warn on missing elements - fix
 //Fun note - with the right optimisations GCC actually will pull these constants inline (for example disassemble evolvept_STDP with STDP off)
 static const parameters OneLayerModel = //the fact that this is static is a little messy - in theory gcc will create a copy for each .c file.  However - in reality, this doesn't appear to happen (perhaps GCC realises that it is const so that only one copy is required.  If the const is ever removed, static will cause incredibly weird behaviour.
 {
@@ -80,8 +79,8 @@ static const parameters DualLayerModelIn =
         {
             .dual = 
             {
-                .W          = -0.19,
-                .sigma      = 14,
+                .W          = -0.49,
+                .sigma      = 42,
                 .synapse    = {.R=0.5,.D=1.5},
             }
         },
@@ -131,7 +130,7 @@ static const parameters DualLayerModelEx =
             .dual = 
             {
                 .W          = 0.41,
-                .sigma      = 42,
+                .sigma      = 14,
                 .synapse    = {.R=0.5,.D=2},
             }
         },
@@ -175,7 +174,7 @@ static const parameters DualLayerModelEx =
 static const model_features Features = 
 {
     .STDP		= OFF, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep - 
-    .STD        = OFF , //               if we need any of these features we can make the changes then.
+    .STD        = OFF, //               if we need any of these features we can make the changes then.
     .Output     = OFF,
     .Theta      = OFF,
     .Timestep   = 0.1,

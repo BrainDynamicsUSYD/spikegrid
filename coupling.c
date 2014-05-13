@@ -126,11 +126,3 @@ Compute_float* __attribute__((const)) Synapse_timecourse_cache (const unsigned i
     }
     return ret;
 }
-//some tests that the setcap function is correct.
-//TODO: add more tests
-void setcaptests()
-{   
-    //todo:Get Adam to check these values - also add more tests
-    assert (setcap((decay_parameters){.D=1.5,.R=0.5},(Compute_float)1E-6,Features.Timestep)==209);
-    assert (setcap((decay_parameters){.D=2.0,.R=0.5},(Compute_float)1E-6,Features.Timestep)==270);
-}

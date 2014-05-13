@@ -91,7 +91,6 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
 #else
 void tests()
 {
-    setcaptests();
     testmodparam(OneLayerModel);
     printf("tests passed");
 }
@@ -136,7 +135,7 @@ int main(int argc,char** argv) //useful for testing w/out matlab
     Compute_float* input=calloc(sizeof(Compute_float),grid_size*grid_size);
     Compute_float* input2=calloc(sizeof(Compute_float),grid_size*grid_size);
     randinit(input,OneLayerModel.potential); //need to fix for dual layer
-    while (mytime<1000)
+    while (mytime<500)
     {
         step_(input,input2);//always fine to pass an extra argument here
         printf("%i\n",mytime);
@@ -150,6 +149,7 @@ int main(int argc,char** argv) //useful for testing w/out matlab
         }
     }
     free(input);
+    free(input2);
     return(EXIT_SUCCESS);
 }
 #endif

@@ -57,10 +57,9 @@ layer setuplayer(const parameters p)
         .Intimecourse       = p.couple.Layertype==SINGLELAYER?Synapse_timecourse_cache(cap,p.couple.Layer_parameters.single.In,Features.Timestep):
             ((p.couple.Layer_parameters.dual.W<0)?Synapse_timecourse_cache(cap,p.couple.Layer_parameters.dual.synapse,Features.Timestep):NULL),
         .P                  = (parameters*)newdata(&p,sizeof(p)), 
+        .voltages           = calloc(sizeof(Compute_float),grid_size*grid_size),
+        .voltages_out       = calloc(sizeof(Compute_float),grid_size*grid_size),
     };
-
-    memset(L.voltages,0,grid_size*grid_size); //probably not required
-    memset(L.voltages_out,0,grid_size*grid_size);//probably not required
     for (unsigned int i=0;i<cap;i++)
     {
         L.spikes.data[i]=calloc(sizeof(coords),(grid_size*grid_size + 1));//assume worst case - all neurons firing.  Need to leave spae on the end for the -1 which marks the end.

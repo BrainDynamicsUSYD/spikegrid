@@ -15,7 +15,7 @@ typedef struct {
     const unsigned int offset;
 } tagged_array;
 typedef struct {
-    const char* const name;
+    const char const name[10];
     const tagged_array data;
     const Compute_float minval;
     const Compute_float maxval;

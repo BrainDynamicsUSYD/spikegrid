@@ -80,7 +80,7 @@ static const parameters DualLayerModelIn =
         {
             .dual = 
             {
-                .W          = -0.41,
+                .W          = -0.19,
                 .sigma      = 14,
                 .synapse    = {.R=0.5,.D=1.5},
             }
@@ -175,7 +175,7 @@ static const parameters DualLayerModelEx =
 static const model_features Features = 
 {
     .STDP		= OFF, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep - 
-    .STD        = ON , //               if we need any of these features we can make the changes then.
+    .STD        = OFF , //               if we need any of these features we can make the changes then.
     .Output     = OFF,
     .Theta      = OFF,
     .Timestep   = 0.1,

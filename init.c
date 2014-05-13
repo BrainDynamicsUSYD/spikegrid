@@ -82,13 +82,13 @@ model* setup(const parameters p,const parameters p2,const LayerNumbers lcount)
     char* buffer = malloc(1024);
     gethostname(buffer,1023);
     if (!strcmp(buffer,"headnode.physics.usyd.edu.au")) {printf("DON'T RUN THIS CODE ON HEADNODE\n");exit(EXIT_FAILURE);}
-    const int output_count = 4;
+    const int output_count = 3;
     output_s* outdata=(output_s[]){ //note - neat feature - missing elements initailized to 0
         {"gE",{m2->gE,conductance_array_size,couplerange},0,100}, //gE is a 'large' matrix - as it wraps around the edges
         {"gI",{m2->gI,conductance_array_size,couplerange},0,100}, //gI is a 'large' matrix - as it wraps around the edges
-        {NULL}};         //a marker that we are at the end of the outputabbles list
-    output_s* malloced = malloc(sizeof(outdata)*output_count);
-    memcpy(malloced,outdata,sizeof(outdata)*output_count);
+        {.minval= -INFINITY}};         //a marker that we are at the end of the outputabbles list
+    output_s* malloced = malloc(sizeof(output_s)*output_count);
+    memcpy(malloced,outdata,sizeof(output_s)*output_count);
     //TODO: minval/maxvals are made up - need to fix
     Outputtable=malloced;
     return m2;

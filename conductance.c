@@ -1,6 +1,7 @@
 #include <stdio.h> //printf
 #include <string.h> //memcpy
 #include <getopt.h> //getopt
+#include "mymath.h"
 #include "STDP.h"
 #include "evolve.h"
 #include "newparam.h"
@@ -71,7 +72,7 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
             char* data=malloc(sizeof(char)*1024); //should be big enough
             mxGetString(prhs[rhsidx],data,1023);
             int outidx = 0;
-            while (Outputtable[outidx].name != NULL)
+            while (Outputtable[outidx].minval != -INFINITY)
             {
                 if (!strcmp(Outputtable[outidx].name,data))
                 {

@@ -180,7 +180,7 @@ void step1(model* m,const unsigned int time)
     memset(m->gE,0,sizeof(Compute_float)*conductance_array_size*conductance_array_size); //zero the gE/gI matrices so they can be reused for this timestep
     memset(m->gI,0,sizeof(Compute_float)*conductance_array_size*conductance_array_size);
     AddSpikes(m->layer1,m->gE,m->gI,time);
-    if (m->NoLayers==DUALLAYER) {AddSpikes(m->layer1,m->gE,m->gI,time);}
+    if (m->NoLayers==DUALLAYER) {AddSpikes(m->layer2,m->gE,m->gI,time);}
     fixboundary(m->gE,m->gI);
     CalcVoltages(m->layer1.voltages,m->gE,m->gI,m->layer1.P->potential,m->layer1.voltages_out);
     if (m->NoLayers==DUALLAYER) {CalcVoltages(m->layer1.voltages,m->gE,m->gI,m->layer1.P->potential,m->layer1.voltages_out);}

@@ -26,6 +26,6 @@ while time<1000
         set(hV,'CData',data);
         set(hT,'String',sprintf('Time: %.1f',time));
         set(hG,'CData',gE);  
-        pause(0.01);
+        drawnow;
     end
 end

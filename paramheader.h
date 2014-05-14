@@ -1,4 +1,3 @@
-
 #ifndef PARAMHEADER
 #define PARAMHEADER
 #ifdef FAST
@@ -63,6 +62,7 @@ typedef struct duallayer_parameters
     const Compute_float     W; //basically as for the singlelayer_properties but with some features missing
     const Compute_float     sigma;
     const decay_parameters  synapse;
+    const unsigned int      skip;
 } duallayer_parameters;
 typedef struct couple_parameters
 {

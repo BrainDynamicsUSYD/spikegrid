@@ -201,4 +201,5 @@ void step1(model* m,const unsigned int time)
     StoreFiring(&(m->layer1));
     if(m->NoLayers==DUALLAYER){StoreFiring(&(m->layer2));}
     ResetVoltages(m->layer1.voltages_out,m->layer1.P->couple,&m->layer1.spikes,m->layer1.P->potential);
+    if(m->NoLayers==DUALLAYER){ResetVoltages(m->layer2.voltages_out,m->layer2.P->couple,&m->layer2.spikes,m->layer2.P->potential);}
 }

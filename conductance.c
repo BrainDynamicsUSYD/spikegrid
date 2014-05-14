@@ -51,6 +51,7 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
     }
     //error checking
     if (nrhs!=nlhs) {printf("We need the same number of parameters on the left and right hand side\n");goto error;}
+    if (nrhs < 2)   {printf("At least input the voltage for both neuron populations\n");goto error;}
     if (mxGetClassID(prhs[0]) != MatlabDataType()) {printf("rhs parameter 1 is not of the correct data type (single/double)\n");goto error;}
     if (mxGetClassID(prhs[1]) != MatlabDataType()) {printf("rhs parameter 2 is not of the correct data type (single/double)\n");goto error;}
     if (mxGetM(prhs[0]) != grid_size || mxGetN(prhs[0]) != grid_size || mxGetNumberOfDimensions(prhs[0]) != 2) {printf("rhs parameter 1 has the wrong shape\n");goto error;}

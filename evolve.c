@@ -143,9 +143,10 @@ void StoreFiring(layer* L)
 {
     coords* current_firestore = L->spikes.data[L->spikes.curidx];//get the thing for currently firing neurons
     int this_fcount=0;
-    for (int x=0;x<grid_size;x++)
+    int step = L->skip
+    for (int x=0;x<grid_size;x+= skip)
     {
-        for (int y=0;y<grid_size;y++)
+        for (int y=0;y<grid_size;y+=skip)
         {
             if (L->voltages[x*grid_size + y]  > L->P->potential.Vth)
             {

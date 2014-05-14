@@ -62,7 +62,6 @@ typedef struct duallayer_parameters
     const Compute_float     W; //basically as for the singlelayer_properties but with some features missing
     const Compute_float     sigma;
     const decay_parameters  synapse;
-    const unsigned int      skip;
 } duallayer_parameters;
 typedef struct couple_parameters
 {
@@ -142,6 +141,7 @@ typedef struct parameters
     const STD_parameters STD;
     const movie_parameters Movie;
     const theta_parameters theta;
+    const int skip;
 } parameters;
 ///it is crucial that these parameters have exactly the same names as the various fields in the parameters object.  otherwise you will break the parameter sweep function.
 ///it might also be a good idea to assign these values that never change with cross compatibilty with matlab

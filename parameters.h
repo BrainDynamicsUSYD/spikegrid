@@ -69,6 +69,7 @@ static const parameters OneLayerModel = //the fact that this is static is a litt
         .strength    = 5.0,
         .period     = 0.2,
     },
+    .skip=1,
 };
 static const parameters DualLayerModelIn =
 {
@@ -119,6 +120,7 @@ static const parameters DualLayerModelIn =
         .strength    = 5.0,
         .period     = 0.2,
     },
+    .skip=2,
 };
 static const parameters DualLayerModelEx =
 {
@@ -169,6 +171,7 @@ static const parameters DualLayerModelEx =
         .strength    = 5.0,
         .period     = 0.2,
     },
+    .skip=1,
 };
 
 static const model_features Features = 

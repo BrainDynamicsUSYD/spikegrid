@@ -138,12 +138,11 @@ void CalcVoltages(const Compute_float* const __restrict__ Vinput,const Compute_f
         }
     }
 }
-
 void StoreFiring(layer* L)
 {
     coords* current_firestore = L->spikes.data[L->spikes.curidx];//get the thing for currently firing neurons
     int this_fcount=0;
-    int step = L->P->skip;
+    int step =  L->P->skip;
     for (int x=0;x<grid_size;x+= step)
     {
         for (int y=0;y<grid_size;y+=step)

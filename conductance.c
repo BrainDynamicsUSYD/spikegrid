@@ -45,7 +45,7 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
     if (setup_done==0) 
     {
         if (ModelType==SINGLELAYER) {m=setup(OneLayerModel,OneLayerModel,ModelType);} //pass the same layer as a double parameter
-        else {m=setup(DualLayerModelIn,DualLayerModelEx,ModelType);}
+        else {m=setup(DualLayerModelEx,DualLayerModelIn,ModelType);}
         setup_done=1;
         printf("setup done\n");
     }

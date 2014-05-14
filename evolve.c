@@ -143,7 +143,7 @@ void StoreFiring(layer* L)
 {
     coords* current_firestore = L->spikes.data[L->spikes.curidx];//get the thing for currently firing neurons
     int this_fcount=0;
-    int step = L->skip
+    int step = L->skip;
     for (int x=0;x<grid_size;x+= skip)
     {
         for (int y=0;y<grid_size;y+=skip)

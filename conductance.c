@@ -49,11 +49,22 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
         setup_done=1;
         printf("setup done\n");
     }
+    //error checking
+    if (nrhs!=nlhs) {printf("We need the same number of parameters on the left and right hand side\n");goto error;}
+    if (mxGetClassID(prhs[0]) != MatlabDataType()) {printf("rhs parameter 1 is not of the correct data type (single/double)\n");goto error;}
+    if (mxGetClassID(prhs[1]) != MatlabDataType()) {printf("rhs parameter 2 is not of the correct data type (single/double)\n");goto error;}
+    if (mxGetM(prhs[0]) != grid_size || mxGetN(prhs[0]) != grid_size || mxGetNumberofDimensions(prhs[0]) != 2) {printf("rhs parameter 1 has the wrong shape\n");goto error;}
+    if (mxGetM(prhs[1]) != grid_size || mxGetN(prhs[1]) != grid_size || mxGetNumberofDimensions(prhs[1]) != 2) {printf("rhs parameter 2 has the wrong shape\n");goto error;}
+    for (int i = 2;i<nrhs;i++)
+    {
+        if (mxGetClassID(prhs[i]) != mxCHAR_CLASS) {printf("rhs parameter %i needs to be a char string\n");goto error;}
+    }
+        
     const Compute_float* inputdata = (Compute_float*) mxGetData(prhs[0]);
     const Compute_float* inputdata2 = (Compute_float*) mxGetData(prhs[1]);
     step_(inputdata,inputdata2); //always output the voltage data
-    plhs[0]=mxCreateNumericMatrix(grid_size,grid_size,mxSINGLE_CLASS,mxREAL);
-    plhs[1]=mxCreateNumericMatrix(grid_size,grid_size,mxSINGLE_CLASS,mxREAL);
+    plhs[0]=mxCreateNumericMatrix(grid_size,grid_size,MatlabDataType(),mxREAL);
+    plhs[1]=mxCreateNumericMatrix(grid_size,grid_size,MatlabDataType(),mxREAL);
     Compute_float* pointer=(Compute_float*)mxGetPr(plhs[0]);
     Compute_float* pointer2=(Compute_float*)mxGetPr(plhs[1]);
     for (int i=0;i<grid_size;i++)
@@ -82,11 +93,15 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
                 }
                 outidx++;
             }
-            if (outidx != -1) {printf("UNKNOWN THING TO OUTPUT\n");}
+            if (outidx != -1) {printf("Unknown thing to output\n");goto error;}
             free(data);
             rhsidx++;
         }
     }
+    return;
+error: //this could be useful for printing a generic error message and if we need to do any cleanup
+    printf("error in the mex function\n");
+    return;
 }
 #else
 void tests()

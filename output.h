@@ -5,6 +5,7 @@
 #include "layer.h"
 void makemovie(const layer l,const unsigned int t);
 #ifdef MATLAB
+mxClassID __attribute__((pure,const)) MatlabDataType();
 mxArray* outputToMxArray (const tagged_array input); 
 #endif //matlab
 #endif //OUTPUT

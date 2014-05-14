@@ -87,6 +87,7 @@ Compute_float __attribute__((const)) mexhat  (const Compute_float rsq,const sing
 Compute_float __attribute__((const)) expdecay(const Compute_float rsq,const duallayer_parameters d  ){return d.W *exp(-rsq/d.sigma);}
 
 //does what it says on the tin
+//I tried changing this function so that it precomputes the multiplication by the spike shape.  However - it turns out that this actually made the code slower as it significantly increased the number of cache misses as well as memory bandwidth.
 Compute_float* CreateCouplingMatrix(const couple_parameters c)
 {
     Compute_float* matrix = calloc(sizeof(Compute_float),couple_array_size*couple_array_size); //matrix of coupling values

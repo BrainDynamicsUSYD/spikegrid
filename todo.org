@@ -11,6 +11,8 @@
 * TODO [#A] sweep is broken - need to encode which parameter object to sweep over
 * TODO [#A] Figure out how te get min and max values of outputtabbles and return them to matlab
 
+* TODO [#A] Pretty printing of parameters object
+* TODO [#A] 4-1 ratio of ex to in neurons  
 * TODO [#B] Different maximum timescales for inhib + excit in single-layer model
   Currently, inhibitory and excitatory neurons share the same cap.
   It would probably be good for perf if they were different.

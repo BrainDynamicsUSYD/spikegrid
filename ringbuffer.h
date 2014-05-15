@@ -1,3 +1,4 @@
+/// \file
 #ifndef HELPERS
 #define HELPERS
 ///helper type for coordinates/

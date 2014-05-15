@@ -1,3 +1,4 @@
+/// \file
 #include "paramheader.h"
 #include "mymath.h"
 ///Add in theta wave changes to voltages

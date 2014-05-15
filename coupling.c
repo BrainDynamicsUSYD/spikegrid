@@ -1,3 +1,4 @@
+/// \file
 #include <stdlib.h> //calloc
 #include <stdio.h>  //printf
 #include <assert.h>

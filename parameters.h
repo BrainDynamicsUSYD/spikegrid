@@ -1,3 +1,4 @@
+/// \file
 //these first few parameters actually escape into the paramheader file through magic
 #define grid_size 300
 #define couplerange 15

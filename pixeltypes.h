@@ -1,3 +1,4 @@
+/// \file
 #ifndef PIXELTYPES
 #define PIXELTYPES
 #include <stdint.h>

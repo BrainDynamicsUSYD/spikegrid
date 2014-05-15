@@ -1,3 +1,4 @@
+/// \file
 #include <string.h> //memset
 #include <stdlib.h> //random
 #include "theta.h"

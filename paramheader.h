@@ -1,3 +1,4 @@
+/// \file
 #ifndef PARAMHEADER
 #define PARAMHEADER
 #ifdef FAST
@@ -82,18 +83,16 @@ typedef struct couple_parameters
     const int tref     ;                    //refractory time
 } couple_parameters;
 
-
-
-
+///Contains parameters which control the Voltage dynamics of neurons
 typedef struct conductance_parameters
 {
-    const Compute_float Vrt    ;                  //reset potential
-    const Compute_float Vth    ;                  //Threshold potential
-    const Compute_float Vlk     ;                  //leak reversal potential
-    const Compute_float Vex    ;                    //Ex reversal potential
-    const Compute_float Vin     ;                  //In reversal potential
-    const Compute_float glk    ;                 //leak conductance (ms^-1)
-    const Compute_float rate   ;                    //Rate of external input (spikes/neuron/s)
+    const Compute_float Vrt    ;  ///< reset potential.
+    const Compute_float Vth    ;  ///< Threshold potential
+    const Compute_float Vlk    ;  ///<leak reversal potential
+    const Compute_float Vex    ;  ///<Ex reversal potential
+    const Compute_float Vin    ;  ///<In reversal potential
+    const Compute_float glk    ;  ///<leak conductance (ms^-1)
+    const Compute_float rate   ;  ///<Rate of external input (spikes/neuron/s)
 } conductance_parameters;
 
 typedef struct STDP_parameters

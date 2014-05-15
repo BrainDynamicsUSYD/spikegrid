@@ -1,3 +1,4 @@
+/// \file
 #ifndef LAYER
 #define LAYER
 #include "ringbuffer.h"

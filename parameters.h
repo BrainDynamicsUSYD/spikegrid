@@ -81,7 +81,7 @@ static const parameters DualLayerModelIn =
         {
             .dual = 
             {
-                .W          = -0.49,
+                .W          = -2.5,
                 .sigma      = 42,
                 .synapse    = {.R=0.5,.D=1.5},
             }

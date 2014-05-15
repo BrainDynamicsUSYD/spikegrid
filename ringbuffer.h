@@ -1,7 +1,7 @@
 /// \file
 #ifndef HELPERS
 #define HELPERS
-///helper type for coordinates/
+///helper type for coordinates.
 ///try to use this than passing around x,y pairs as it is simpler to understand.
 ///Computational overhead should be minimal
 typedef struct coords {int x; /**<x coord*/int y;/**<y coord*/} coords;

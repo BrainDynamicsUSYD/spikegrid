@@ -1,7 +1,8 @@
 compile;
-precision = 'single';
-data =((rand(300)*25)-80);
-datalayer2 =((rand(300)*25)-80);
+gridsize = 100;
+precision = 'double';
+data =((rand(gridsize)*25)-80);
+datalayer2 =((rand(gridsize)*25)-80);
 time=1;
 
 if strcmp(precision,'single')==1
@@ -16,13 +17,13 @@ hV = imagesc(data ,[-80 -55]); colorbar;
 hT = title('Time: 1');
 
 % Excitatory conductance
-[data2,datalayer22, gE] =conductance(data,datalayer2,'gI');
+[data2,datalayer22, gE] =conductance(data,datalayer2,'gE'); % Was gI before. Why?
 figure(2);
 hG = imagesc(gE);
 
-while time<1000
+while time<20000
     time=time+1;
-    [data2, datalayer22,gE] =conductance(data,datalayer2,'gI');
+    [data2, datalayer22,gE] =conductance(data,datalayer2,'gE');
     data=data2;
     datalayer2=datalayer22;
     if (mod(time,10)==0)

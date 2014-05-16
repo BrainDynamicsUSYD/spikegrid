@@ -1,7 +1,7 @@
 /// \file
 //these first few parameters actually escape into the paramheader file through magic
+#define grid_size 100
 ///Total size of the gird
-#define grid_size 300
 ///Coupling range
 #define couplerange 15
 #ifndef PARAMATERS  //DO NOT REMOVE
@@ -86,9 +86,9 @@ static const parameters DualLayerModelIn =
         {
             .dual = 
             {
-                .W          = -2.5,
-                .sigma      = 42,
-                .synapse    = {.R=0.5,.D=1.5},
+                .W          =  -0.46, //-2.5,
+                .sigma      = 90, //42,
+                .synapse    = {.R=0.5,.D=2.0},
             }
         },
         .norm_type = None,
@@ -138,9 +138,9 @@ static const parameters DualLayerModelEx =
         {
             .dual = 
             {
-                .W          = 0.41,
-                .sigma      = 14,
-                .synapse    = {.R=0.5,.D=2},
+                .W          = 0.23, //0.41,
+                .sigma      = 10, //14,
+                .synapse    = {.R=0.5,.D=2.0},
             }
         },
         .tref       = 5,

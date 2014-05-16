@@ -66,7 +66,7 @@ mxArray* outputToMxArray (const tagged_array input)
 {
     const unsigned int size = input.size - (2*input.offset);
     mxArray* ret = mxCreateNumericMatrix((int)size,(int)size,MatlabDataType(),mxREAL); //matlab has signed ints for array sizes - really?
-    Compute_float* dataptr =  (Compute_float*)mxGetPr(ret);
+    Compute_float* dataptr =  (Compute_float*)mxGetData(ret);
     Compute_float* actualdata = taggedarrayTocomputearray(input);
     memcpy(dataptr,actualdata,sizeof(Compute_float)*size*size);
     return ret;

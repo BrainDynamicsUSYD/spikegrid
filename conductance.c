@@ -21,8 +21,8 @@ void step_(const Compute_float* const inp,const Compute_float* const inp2)
 {
     if (ModelType==DUALLAYER && inp2==NULL) {printf("missing second input voltage in dual-layer model");exit(EXIT_FAILURE);}
     mytime++;
-    memcpy(m->layer1.voltages,inp,sizeof(float)*grid_size*grid_size);
-    if (ModelType==DUALLAYER) {memcpy(m->layer2.voltages,inp,sizeof(float)*grid_size*grid_size);}
+    memcpy(m->layer1.voltages,inp,sizeof(Compute_float)*grid_size*grid_size);
+    if (ModelType==DUALLAYER) {memcpy(m->layer2.voltages,inp,sizeof(Compute_float)*grid_size*grid_size);}
     m->layer1.spikes.curidx=mytime%(m->layer1.spikes.count);
     if (ModelType==DUALLAYER) {m->layer2.spikes.curidx=mytime%(m->layer2.spikes.count);}
     step1(m,mytime);
@@ -51,15 +51,15 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
         printf("setup done\n");
     }
     //error checking
-    if (nrhs!=nlhs) {printf("We need the same number of parameters on the left and right hand side\n");goto error;}
-    if (nrhs < 2)   {printf("At least input the voltage for both neuron populations\n");goto error;}
-    if (mxGetClassID(prhs[0]) != MatlabDataType()) {printf("rhs parameter 1 is not of the correct data type (single/double)\n");goto error;}
-    if (mxGetClassID(prhs[1]) != MatlabDataType()) {printf("rhs parameter 2 is not of the correct data type (single/double)\n");goto error;}
-    if (mxGetM(prhs[0]) != grid_size || mxGetN(prhs[0]) != grid_size || mxGetNumberOfDimensions(prhs[0]) != 2) {printf("rhs parameter 1 has the wrong shape\n");goto error;}
-    if (mxGetM(prhs[1]) != grid_size || mxGetN(prhs[1]) != grid_size || mxGetNumberOfDimensions(prhs[1]) != 2) {printf("rhs parameter 2 has the wrong shape\n");goto error;}
+    if (nrhs!=nlhs) {printf("We need the same number of parameters on the left and right hand side\n");return;}
+    if (nrhs < 2)   {printf("At least input the voltage for both neuron populations\n");return;}
+    if (mxGetClassID(prhs[0]) != MatlabDataType()) {printf("rhs parameter 1 is not of the correct data type (single/double)\n");return;}
+    if (mxGetClassID(prhs[1]) != MatlabDataType()) {printf("rhs parameter 2 is not of the correct data type (single/double)\n");return;}
+    if (mxGetM(prhs[0]) != grid_size || mxGetN(prhs[0]) != grid_size || mxGetNumberOfDimensions(prhs[0]) != 2) {printf("rhs parameter 1 has the wrong shape\n");return;}
+    if (mxGetM(prhs[1]) != grid_size || mxGetN(prhs[1]) != grid_size || mxGetNumberOfDimensions(prhs[1]) != 2) {printf("rhs parameter 2 has the wrong shape\n");return;}
     for (int i = 2;i<nrhs;i++)
     {
-        if (mxGetClassID(prhs[i]) != mxCHAR_CLASS) {printf("rhs parameter %i needs to be a char string\n");goto error;}
+        if (mxGetClassID(prhs[i]) != mxCHAR_CLASS) {printf("rhs parameter %i needs to be a char string\n");return;}
     }
         
     const Compute_float* inputdata = (Compute_float*) mxGetData(prhs[0]);
@@ -67,16 +67,18 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
     step_(inputdata,inputdata2); //always output the voltage data
     plhs[0]=mxCreateNumericMatrix(grid_size,grid_size,MatlabDataType(),mxREAL);
     plhs[1]=mxCreateNumericMatrix(grid_size,grid_size,MatlabDataType(),mxREAL);
-    Compute_float* pointer=(Compute_float*)mxGetPr(plhs[0]);
-    Compute_float* pointer2=(Compute_float*)mxGetPr(plhs[1]);
+    Compute_float* pointer1 = mxCalloc(grid_size*grid_size,sizeof(Compute_float));
+    Compute_float* pointer2 = mxCalloc(grid_size*grid_size,sizeof(Compute_float));
     for (int i=0;i<grid_size;i++)
     {
         for (int j=0;j<grid_size;j++)
         {
-            pointer[i*grid_size+j]=m->layer1.voltages_out[i*grid_size + j];
+            pointer1[i*grid_size+j]=m->layer1.voltages_out[i*grid_size + j];
             pointer2[i*grid_size+j]=m->layer2.voltages_out[i*grid_size + j];
         }
     }
+    mxSetData(plhs[0],pointer1);
+    mxSetData(plhs[1],pointer2);
     if (nrhs>1) //output other stuff
     {
         int rhsidx = 2;
@@ -95,14 +97,11 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
                 }
                 outidx++;
             }
-            if (outidx != -1) {printf("Unknown thing to output\n");goto error;}
+            if (outidx != -1) {printf("Unknown thing to output\n");return;}
             free(data);
             rhsidx++;
         }
     }
-    return;
-error: //this could be useful for printing a generic error message and if we need to do any cleanup
-    printf("error in the mex function\n");
     return;
 }
 #else

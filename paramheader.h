@@ -12,9 +12,9 @@ typedef double Compute_float ; //for accuracy
 typedef struct {
     //we require volatile below as we don't want you to be able to write to an array using the pointer from the tagged array
     //however, other parts of the code could modify the underlying array, so use volatile to force reads
-    const volatile Compute_float* const data;
-    const unsigned int size;
-    const unsigned int offset;
+    const volatile Compute_float* const data; ///< the actual data
+    const unsigned int size;                  ///< the total dimensions
+    const unsigned int offset;                ///< offset (used by the gE and gI matrices
 } tagged_array;
 ///Holds data for sending back to matlab
 typedef struct {

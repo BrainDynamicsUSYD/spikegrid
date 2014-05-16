@@ -5,6 +5,7 @@
 ///Coupling range
 #define couplerange 15
 #ifndef PARAMATERS  //DO NOT REMOVE
+///include guard
 #define PARAMATERS  //DO NOT REMOVE
 #ifdef __clang__
 #pragma clang diagnostic push
@@ -16,11 +17,12 @@
 #endif
 //the following typedef must be before the include to get the right compute types
 #include "paramheader.h"
-
+///Whether we are using the single or double layer model
 static const LayerNumbers ModelType = DUALLAYER;
 
 //Fun note - with the right optimisations GCC actually will pull these constants inline (for example disassemble evolvept_STDP with STDP off)
-static const parameters OneLayerModel = //the fact that this is static is a little messy - in theory gcc will create a copy for each .c file.  However - in reality, this doesn't appear to happen (perhaps GCC realises that it is const so that only one copy is required.  If the const is ever removed, static will cause incredibly weird behaviour.
+///Parameters for the single layer model
+static const parameters OneLayerModel = 
 {
     .couple =
     {
@@ -74,6 +76,7 @@ static const parameters OneLayerModel = //the fact that this is static is a litt
     },
     .skip=1,
 };
+///parameters for the inhibitory layer of the double layer model
 static const parameters DualLayerModelIn =
 {
     .couple =
@@ -125,6 +128,7 @@ static const parameters DualLayerModelIn =
     },
     .skip=2,
 };
+///parameters for the excitatory layer of the double layer model
 static const parameters DualLayerModelEx =
 {
     .couple =
@@ -176,7 +180,7 @@ static const parameters DualLayerModelEx =
     },
     .skip=1,
 };
-
+///Some global features that can be turned on and off
 static const model_features Features = 
 {
     .STDP		= OFF, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep - 
@@ -185,7 +189,7 @@ static const model_features Features =
     .Theta      = OFF,
     .Timestep   = 0.1,
 };
-
+///Parameters for conducting a parameter sweep.
 static const sweepable Sweep =
 {
     .type = Vrt,

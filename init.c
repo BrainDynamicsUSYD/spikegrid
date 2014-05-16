@@ -68,13 +68,12 @@ layer setuplayer(const parameters p)
     }
     return L;
 }
-int setuplayerone=0;
-//The idea here is that "one-off" setup occurs here, whilst per-layer setup occurs in setuplayer
+///The idea here is that "one-off" setup occurs here, whilst per-layer setup occurs in setuplayer
 model* setup(const parameters p,const parameters p2,const LayerNumbers lcount)
 {
     const layer l1 = setuplayer(p);
     const layer l2 = lcount==DUALLAYER?setuplayer(p2):l1;
-    const layer* layer1 = (layer*)newdata(&l1,sizeof(layer));
+    const layer* layer1 = (layer*)newdata(&l1,sizeof(layer));//this is required to ensure that we get heap allocated layers
     const layer* layer2 = (layer*)newdata(&l2,sizeof(layer));
     const model m = {.layer1=*layer1,.layer2=*layer2,.NoLayers=lcount};
     model* m2 = malloc(sizeof(m));

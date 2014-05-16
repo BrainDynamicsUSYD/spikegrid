@@ -1,6 +1,7 @@
 /// \file
 #include "STDP.h"
 #include "mymath.h" //fabsf
+///Use this macro to change how far we apply STDP.  Maximum is couplerange^2, but anything smaller will improve performance
 #define STDP_RANGE_SQUARED (couplerange*couplerange)
 ///helper function for STDP.  Calculates distance between two neurons, taking into account wrapping in the network
 ///interesting idea - in some cases I don't care about this wrapping and could cheat
@@ -11,9 +12,10 @@ inline static int dist(int cur,int prev)
     else if (dx < -(grid_size/2)) {return (dx + grid_size);}
     else {return dx;}
 }
-//invert the distances
+///invert a vector joining 2 points (not really - applied after there has been some additions and also does some tidying up)
 inline static int invertdist(int v) {return ((2*couplerange) - v);}
-//this method is incredibly hard to understand.  Many weird things are driven by speed.  But basically, implement STDP.
+///Does most of the work of changing coupling matrices using STDP
+///this method is incredibly hard to understand.  Many weird things are driven by speed.  But basically, implement STDP.
 void ApplySTDP(Compute_float * __restrict__ dmats,const coords* curfire,const coords* prevfire,const Compute_float str,const Compute_float* constm,const STDP_parameters S)
 {
     int cindex = 0;
@@ -53,14 +55,12 @@ void ApplySTDP(Compute_float * __restrict__ dmats,const coords* curfire,const co
     }
 }
 
-
-//How STDP works:
-//We have an array of (int,int) tuples which store locations which are firing at some time step (firestore / flocstore).  
-//However, as we only need to know when nearby points are firing, we also have flocdex - this stores were each x-coord starts
-//      as a result, we can skip through large parts of the array preemptively, makeing things significantly faster
-
+///Actually does STDP
+///How STDP works:
+///We have an array of (int,int) tuples which store locations which are firing at some time step (firestore / flocstore).  
+///However, as we only need to know when nearby points are firing, we also have flocdex - this stores were each x-coord starts
+///      as a result, we can skip through large parts of the array preemptively, makeing things significantly faster
 //Next idea for STDP speed improvements - The Magnitude check is based on the direction from the previous to the current (increasing) - as a result, the innermost loop frequently calculates the offset - swapping curfire and prevfire
-
 void doSTDP (Compute_float* dmats,const ringbuffer* const fdata , const Compute_float*constm,const STDP_parameters S)
 {
     const coords* const curfire = fdata->data[fdata->curidx];

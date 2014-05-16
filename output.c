@@ -4,12 +4,13 @@
 #include "output.h"
 #include "picture.h"
 #include "layer.h"
-//rescale a float to a unit8 from some minimum and maximum range
-//currently no error checking and so might produce UB
+///rescale a float to a unit8 from some minimum and maximum range.
+///currently no error checking and so might produce weird behaviour outside the desired range.  I also don't know how thi swould interact with MATLAB
 uint8_t __attribute__((const)) rescalefloat (const Compute_float in,const Compute_float maxval, const Compute_float minval) //rescale to 0-255
 {
     return (uint8_t)((in - minval)/(maxval-minval)*(Compute_float)255.0);
 }
+///Extracts the actual information out of a tagged array and converts it to a simple square matrix
 Compute_float* taggedarrayTocomputearray(const tagged_array input)
 {
     const unsigned int size = input.size - (2*input.offset);
@@ -24,7 +25,7 @@ Compute_float* taggedarrayTocomputearray(const tagged_array input)
     }
     return ret;
 }
-//simple function to convert comp_float 2d array to a bitmap that you can then do something with
+///simple function to convert comp_float 2d array to a bitmap that you can then do something with (like save)
 bitmap_t* FloattoBitmap(const Compute_float* const input,const unsigned int size,const Compute_float maxval, const Compute_float minval)
 {
     bitmap_t* bp = (bitmap_t*)malloc(sizeof(bitmap_t));
@@ -72,10 +73,12 @@ mxArray* outputToMxArray (const tagged_array input)
     return ret;
 }
 #endif
+/// number of PNG's outputted.  Used to keep track of the next filename to use
 int printcount=0;
-char fnamebuffer[30];
+///convert a tagged array to a PNG.  Paths are auto-calculated
 void OutputToPng(const tagged_array input,const Compute_float minval,const Compute_float maxval)
 {
+    char fnamebuffer[30];
     const unsigned int size = input.size - (2*input.offset);
     Compute_float* actualdata=taggedarrayTocomputearray(input);
     bitmap_t* b = FloattoBitmap(actualdata,size,minval,maxval);
@@ -87,7 +90,7 @@ void OutputToPng(const tagged_array input,const Compute_float minval,const Compu
     free(actualdata);
     
 }
-
+///High level function to create a series of PNG images which can be then turned into a movie
 void makemovie(const layer l,const unsigned int t)
 {
     if (l.P->Movie.MakeMovie==ON && t % l.P->Movie.Delay)

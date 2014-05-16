@@ -2,13 +2,13 @@
 #include <png.h>
 #include <stdio.h>
 #include "pixeltypes.h"
-// Given "bitmap", this returns the pixel of bitmap at the point ("x", "y").
-pixel_t __attribute((const,pure)) * pixel_at (bitmap_t * bitmap, const unsigned  int x, const unsigned int y)
+/// Given "bitmap", this returns the pixel of bitmap at the point ("x", "y").
+pixel_t __attribute__((const,pure)) * pixel_at (bitmap_t * bitmap, const unsigned  int x, const unsigned int y)
 {
     return bitmap->pixels + bitmap->width * y + x;
 }
 
-// Write "bitmap" to a PNG file specified by "path"; returns 0 on success, non-zero on error.
+/// Write "bitmap" to a PNG file specified by "path"
 int save_png_to_file (bitmap_t *bitmap, const char *path)
 {
     FILE * fp;

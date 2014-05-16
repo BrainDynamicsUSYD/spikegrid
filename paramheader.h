@@ -2,8 +2,10 @@
 #ifndef PARAMHEADER
 #define PARAMHEADER
 #ifdef FAST
+///Used to enable simple switching between float and double
 typedef float Compute_float ; //for speed
 #else
+///Used to enable simple switching between float and double
 typedef double Compute_float ; //for accuracy
 #endif
 ///used for storing arrays with their size.  Allows for the matlab_output (and other) function to take both the big and large arrays
@@ -23,9 +25,9 @@ typedef struct {
 } output_s; //used so that matlab has string identifiers that correspond to a specific tagged_array
 
 
-//making OFF 0 will turn off features by default
+///Simple enum for things that are on or off to make their state more obvious
 typedef enum ON_OFF {OFF=0,ON=1} on_off;
-
+///Normalization method to use when creating a coupling matrix
 typedef enum NORM_TYPE {None=0,TotalArea=1,GlobalMultiplier=2,MultSep=3} Norm_type;
 /// The normalization method used in the 2009 paper.  This method normalizes by the total area of Ex and In connections
 typedef struct
@@ -49,6 +51,7 @@ typedef struct decay_parameters{
     const Compute_float R;  ///<rise time constant (units?)
     const Compute_float D;  ///<decay time constant (units?)
 } decay_parameters;
+///Enum to determine how many layers are in use
 typedef enum LayerNumbers {SINGLELAYER=0,DUALLAYER=1} LayerNumbers;
 ///Parameters for a layer when it is the only one
 typedef struct singlelayer_parameters
@@ -63,9 +66,9 @@ typedef struct singlelayer_parameters
 ///Layer parameters for when there are two layers
 typedef struct duallayer_parameters
 {
-    const Compute_float     W; //basically as for the singlelayer_properties but with some features missing
-    const Compute_float     sigma;
-    const decay_parameters  synapse;
+    const Compute_float     W;          ///<Maximum connectivity strength
+    const Compute_float     sigma;      ///<Connectivity decay length scale
+    const decay_parameters  synapse;    ///<Parameters of spike
 } duallayer_parameters;
 /// Contains parameters about coupling within either a single or dual layer
 typedef struct couple_parameters
@@ -76,15 +79,15 @@ typedef struct couple_parameters
         singlelayer_parameters single;  ///<single layer
         duallayer_parameters   dual;    ///<double layer
     } Layer_parameters;                 
-    const Norm_type     norm_type;                  //what normalization method to use
+    const Norm_type     norm_type;      ///<what normalization method to use
     const union 
     {
         Total_area_parameters total_area;
         global_multiplier_parameters glob_mult;
         Multsep_parameters mult_sep;
 
-    } normalization_parameters;                   //holds data for different normalization methods
-    const int tref     ;                    //refractory time
+    } normalization_parameters;         ///<holds data for different normalization methods
+    const int tref     ;                ///<refractory time
 } couple_parameters;
 
 ///Contains parameters which control the Voltage dynamics of neurons
@@ -171,16 +174,20 @@ typedef struct Sweepable
     const Compute_float maxval;
     const unsigned int count;
 } sweepable;
-
-//some useful constants
-static const Compute_float One = (Compute_float)1; //a useful constant so that you cna get a floating point 1 without needing a cast to float / double.  (the whole idea of compute_float is that it make switching 
+///Useful constant to avoid messy conversions
+static const Compute_float One = (Compute_float)1; 
+///Useful constant to avoid messy conversions
 static const Compute_float Half = (Compute_float)0.5;
+///Useful constant to avoid messy conversions
 static const Compute_float Two = (Compute_float)2;
+///Useful constant to avoid messy conversions
 static const Compute_float Zero = (Compute_float)0;
+///ugly hack for recursive inclusion
 #define PARAMETERS 
 //get some macros for various sizes
 #include "parameters.h" 
-//these two get the underlying values from parameters.h and magic
+///Size of the "large" arrays (notable examples are gE and gI)
 #define conductance_array_size (grid_size + 2*couplerange)
+///Size of a coupling matrix
 #define couple_array_size (2*couplerange + 1)
 #endif

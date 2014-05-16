@@ -13,24 +13,24 @@ typedef struct STD_data
 ///hold the requisite data for a layer that enables it to be evolved through time.
 typedef struct layer
 {
-    Compute_float* connections; //need some way to constify this.  Also - think up some efficient way to only add the points in a circle.
-    Compute_float* STDP_connections;
+    const Compute_float* const connections;     ///<Matrix of connections coming from a single point
+    Compute_float* STDP_connections;            ///<Dynamic connections from STDP
     //problem here - these voltages aren't copied
-    Compute_float* voltages; //possibly these should be pointers so that things can be copied in/out a bit faster.  Even better would probably be to move the v_out to somewhere else
-    Compute_float* voltages_out; //return value - probably shouldn't be here
-    const Compute_float* Extimecourse;  //store time course of Ex synapses  - need to make const
-    const Compute_float* Intimecourse;  //store time course of In synapses  - need to make const
-    ringbuffer spikes;
-    parameters* P;
-    STD_data std;
+    Compute_float* voltages;                    ///<Input voltages
+    Compute_float* voltages_out;                ///<return value 
+    const Compute_float* const Extimecourse;    ///<store time course of Ex synapses  
+    const Compute_float* const Intimecourse;    ///<store time course of In synapses  
+    ringbuffer spikes;                          ///<stores spiking history
+    parameters* P;                              ///<The parameters that we used to make the layer
+    STD_data std;                               ///<Some info that is needed for STD
 } layer;
 ///Allows for having multiple layers and simulating them
 typedef struct Model
 {
-    const LayerNumbers NoLayers;
-    layer layer1; ///< First layer
-    layer layer2; ///< Second layer
-    Compute_float gE [conductance_array_size*conductance_array_size]; ///<gE matrix (large)
-    Compute_float gI [conductance_array_size*conductance_array_size]; ///<gI matrix (large)
+    const LayerNumbers NoLayers;                                        ///<Whether this is a single or double layer model
+    layer layer1;                                                       ///< First layer
+    layer layer2;                                                       ///< Second layer
+    Compute_float gE [conductance_array_size*conductance_array_size];   ///<gE matrix (large)
+    Compute_float gI [conductance_array_size*conductance_array_size];   ///<gI matrix (large)
 } model;
 #endif

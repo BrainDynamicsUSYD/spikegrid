@@ -10,7 +10,7 @@
    return -(c.sigE*c.sigI*logf(c.WE/c.WI))/(c.sigE-c.sigI); //from mathematica
    }
    */
-//controls the shape of the synapse.
+///Calculates the magnitude of a spike a certain number of milliseconds since the spike was emitted
 Compute_float __attribute__((pure)) Synapse_timecourse(const decay_parameters Decay,const Compute_float time)
 {
     return (One/(Decay.D-Decay.R))*(exp(-time/Decay.D)-exp(-time/Decay.R));

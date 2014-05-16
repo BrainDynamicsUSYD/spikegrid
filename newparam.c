@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "paramheader.h"
-//this macro works - somehow - you probably don't want to know - essentially it reuses the name as a value of the sweepabletypes enum and the name of a property
+///this macro works - somehow - you probably don't want to know - essentially it reuses the name as a value of the sweepabletypes enum and the name of a property
 #define TryGetVal(parent,name,paramtype,new,old) .name = name == paramtype ? new: old.parent.name
 //Works by pure magic and #defines
 /// Create a new, modified parameters object
@@ -43,8 +43,8 @@ Compute_float __attribute__((const)) nthvalue (const Compute_float min,const Com
     return min+(min-max)*(Compute_float)n/(Compute_float)count;
 }
 
-//This tests whether the mod param function correctly copies all fields.  Ideally, we could use random data but because of padding this is not possible.
-//As a result, failure to copy a zero value will not trigger an error.  Be very careful with such values
+///This tests whether the mod param function correctly copies all fields.  Ideally, we could use random data but because of padding this is not possible.
+///As a result, failure to copy a zero value will not trigger an error.  Be very careful with such values
 void testmodparam(const parameters input)
 {
     parameters paramnew = modparam(input,One,dummy);

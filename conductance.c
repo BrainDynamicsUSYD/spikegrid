@@ -106,11 +106,13 @@ error: //this could be useful for printing a generic error message and if we nee
     return;
 }
 #else
+///Runs some simple tests - currently broken
 void tests()
 {
     testmodparam(OneLayerModel);
     printf("tests passed");
 }
+///Structure which holds the command line options that the program recognises
 struct option long_options[] = {{"help",no_argument,0,'h'},{"generate",no_argument,0,'g'},{"sweep",required_argument,0,'s'}};
 ///Main function for the entire program
 /// @param argc number of cmdline args

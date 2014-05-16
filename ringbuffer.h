@@ -14,13 +14,12 @@ typedef struct ringbuffer {
 
 coords* ringbuffer_getoffset (const ringbuffer* const input,const int offset);
 
-//these break vim syntax highlighting so move to the end
-//also - these don't look like C but are the official gcc-approved way of doing the max/min macros.  
-//The typeof are required for the case of max (a++,b) which otherwise will be weird
+///Gcc approved type safe max definition
 #define max(a,b) \
     ({ __typeof__ (a) _a = (a);\
        __typeof__ (b) _b = (b); \
         _a>_b?_a:_b;})
+///Gcc approved type safe min definition
 #define min(a,b) \
     ({ __typeof__ (a) _a = (a);\
        __typeof__ (b) _b = (b); \

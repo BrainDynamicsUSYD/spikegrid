@@ -1,6 +1,8 @@
 /// \file
 //these first few parameters actually escape into the paramheader file through magic
+///Total size of the gird
 #define grid_size 300
+///Coupling range
 #define couplerange 15
 #ifndef PARAMATERS  //DO NOT REMOVE
 #define PARAMATERS  //DO NOT REMOVE

@@ -1,3 +1,4 @@
+/// \file
 #ifndef OUTPUT
 #define OUTPUT
 #include "matlab_includes.h"

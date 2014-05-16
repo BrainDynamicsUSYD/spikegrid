@@ -1,3 +1,4 @@
+/// \file
 #include "paramheader.h"
 Compute_float* CreateCouplingMatrix(const couple_parameters c);
 unsigned int __attribute__((pure)) setcap(const decay_parameters d,const Compute_float minval, const Compute_float timestep);

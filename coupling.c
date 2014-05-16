@@ -1,3 +1,4 @@
+/// \file
 #include <stdlib.h> //calloc
 #include <stdio.h>  //printf
 #include <assert.h>
@@ -10,12 +11,11 @@
    }
    */
 //controls the shape of the synapse.
-//TODO: more different types of spikes.
 Compute_float __attribute__((pure)) Synapse_timecourse(const decay_parameters Decay,const Compute_float time)
 {
     return (One/(Decay.D-Decay.R))*(exp(-time/Decay.D)-exp(-time/Decay.R));
 }
-//check how far back we need to keep track of histories
+///Calculate how long we need to track spike histories.  This is done by seeing how long it takes the spike magnitude to decrease below a critical value
 unsigned int __attribute__((pure)) setcap(const decay_parameters d,const Compute_float minval, const Compute_float timestep)
 {
     Compute_float prev = -1000;//initial values
@@ -32,7 +32,7 @@ unsigned int __attribute__((pure)) setcap(const decay_parameters d,const Compute
     }
     return count;
 }
-//normalize the coupling matrix - multiple methods available
+///normalize the coupling matrix - multiple methods available
 Compute_float* Norm_couplematrix(const couple_parameters c, Compute_float* const unnormed)
 {
     switch (c.norm_type)
@@ -82,12 +82,13 @@ Compute_float* Norm_couplematrix(const couple_parameters c, Compute_float* const
 }
 
 
-//compute the mexican hat function used for coupling - should really be marked forceinline or whatever the notation is for GCC.
+/// Computes the mexican-hat based coupling function - used in single layer model
 Compute_float __attribute__((const)) mexhat  (const Compute_float rsq,const singlelayer_parameters c){return c.WE*exp(-rsq/c.sigE)-c.WI*exp(-rsq/c.sigI);}
+/// Computes the exponentially decaying coupling function used in the double layer model
 Compute_float __attribute__((const)) expdecay(const Compute_float rsq,const duallayer_parameters d  ){return d.W *exp(-rsq/d.sigma);}
 
-//does what it says on the tin
 //I tried changing this function so that it precomputes the multiplication by the spike shape.  However - it turns out that this actually made the code slower as it significantly increased the number of cache misses as well as memory bandwidth.
+///Creates the coupling matrix for a layer.
 Compute_float* CreateCouplingMatrix(const couple_parameters c)
 {
     Compute_float* matrix = calloc(sizeof(Compute_float),couple_array_size*couple_array_size); //matrix of coupling values

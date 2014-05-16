@@ -1,14 +1,16 @@
+/// \file
 #ifndef LAYER
 #define LAYER
 #include "ringbuffer.h"
 #include "paramheader.h"
+///Holds data for STD on a per-neuon basis
 typedef struct STD_data
 {   //some parts of this should be const - but oh well
-    unsigned int* ftimes;
-    Compute_float* U;
-    Compute_float* R;
+    unsigned int* ftimes;   ///< time of previous firing
+    Compute_float* U;       ///< U STD parameter
+    Compute_float* R;       ///< R STD parameter
 } STD_data;
-//hold the requisite data for a layer that enables it to be evolved through time.
+///hold the requisite data for a layer that enables it to be evolved through time.
 typedef struct layer
 {
     Compute_float* connections; //need some way to constify this.  Also - think up some efficient way to only add the points in a circle.

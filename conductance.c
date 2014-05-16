@@ -1,3 +1,4 @@
+/// \file
 #include <stdio.h> //printf
 #include <string.h> //memcpy
 #include <getopt.h> //getopt
@@ -8,8 +9,8 @@
 #include "init.h"
 #include "yossarian.h"
 #include "coupling.h"
-unsigned int mytime=0;
-model* m;
+unsigned int mytime=0;  ///<< The current time step
+model* m;               ///< The model we are evolving through time
 //The step function - evolves the model through time.
 //Perf wise the memcpy is probably not ideal, but this is a simple setup and the perf loss here is pretty small as memcpy is crazy fast
 //DO NOT CALL THIS FUNCTION "step" - this causes a weird collision in matlab that results in segfaults.  Incredibly fun to debug
@@ -105,12 +106,17 @@ error: //this could be useful for printing a generic error message and if we nee
     return;
 }
 #else
+///Runs some simple tests - currently broken
 void tests()
 {
     testmodparam(OneLayerModel);
     printf("tests passed");
 }
+///Structure which holds the command line options that the program recognises
 struct option long_options[] = {{"help",no_argument,0,'h'},{"generate",no_argument,0,'g'},{"sweep",required_argument,0,'s'}};
+///Main function for the entire program
+/// @param argc number of cmdline args
+/// @param argv what the parameters actually are
 int main(int argc,char** argv) //useful for testing w/out matlab
 {
     int skiptests=0;

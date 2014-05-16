@@ -1,3 +1,4 @@
+/// \file
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
@@ -31,11 +32,11 @@ void* newdata(const void* const input,const unsigned int size)
                 return ret;
 } 
 
-//given a parameters object, set up a layer object.
-//This function is what theoretically will allow for sweeping through parameter space.
-//The only problem is that a parameters object is immutable, so we need some way to do essentially a copy+update in C.
-//Essentially, we need to be able to do something like P = {p with A=B} (F# record syntax)
-//currently this function is only called from the setup function (but it could be called directly)
+///given a parameters object, set up a layer object.
+///This function is what theoretically will allow for sweeping through parameter space.
+///The only problem is that a parameters object is immutable, so we need some way to do essentially a copy+update in C.
+///Essentially, we need to be able to do something like P = {p with A=B} (F# record syntax)
+///currently this function is only called from the setup function (but it could be called directly)
 layer setuplayer(const parameters p)
 {
     const Compute_float min_effect = (Compute_float)1E-6;

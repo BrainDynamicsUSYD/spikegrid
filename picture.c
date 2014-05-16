@@ -1,3 +1,4 @@
+/// \file
 #include <png.h>
 #include <stdio.h>
 #include "pixeltypes.h"

@@ -10,12 +10,15 @@
    return -(c.sigE*c.sigI*logf(c.WE/c.WI))/(c.sigE-c.sigI); //from mathematica
    }
    */
-///Calculates the magnitude of a spike a certain number of milliseconds since the spike was emitted
-Compute_float __attribute__((pure)) Synapse_timecourse(const decay_parameters Decay,const Compute_float time)
+/// Calculates the magnitude of a spike a certain number of milliseconds since the spike was emitted.  The spike shapes should be the same as the matlab version
+/// @param time time in milliseconds
+/// @param Decay the parameters of the spike
+Compute_float  __attribute__((pure)) Synapse_timecourse(const decay_parameters Decay,const Compute_float time)
 {
     return (One/(Decay.D-Decay.R))*(exp(-time/Decay.D)-exp(-time/Decay.R));
 }
 ///Calculate how long we need to track spike histories.  This is done by seeing how long it takes the spike magnitude to decrease below a critical value
+///@param minval The minimum spike size that we care about.  This is not affected by the coupling matrix at all.  As a result, if your coupling strengths are very high, this might need to be reduced
 unsigned int __attribute__((pure)) setcap(const decay_parameters d,const Compute_float minval, const Compute_float timestep)
 {
     Compute_float prev = -1000;//initial values

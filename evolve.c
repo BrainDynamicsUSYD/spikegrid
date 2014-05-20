@@ -201,11 +201,11 @@ void step1(model* m,const unsigned int time)
     if (m->NoLayers==DUALLAYER) {AddSpikes(m->layer2,m->gE,m->gI,time);}
     fixboundary(m->gE,m->gI);
     CalcVoltages(m->layer1.voltages,m->gE,m->gI,m->layer1.P->potential,m->layer1.voltages_out);
-    if (m->NoLayers==DUALLAYER) {CalcVoltages(m->layer1.voltages,m->gE,m->gI,m->layer1.P->potential,m->layer1.voltages_out);}
+    if (m->NoLayers==DUALLAYER) {CalcVoltages(m->layer2.voltages,m->gE,m->gI,m->layer2.P->potential,m->layer2.voltages_out);}
     if (Features.Theta==ON)
     {
         dotheta(m->layer1.voltages_out,m->layer1.P->theta,timemillis);
-        if (m->NoLayers==DUALLAYER) {dotheta(m->layer1.voltages_out,m->layer1.P->theta,timemillis);}
+        if (m->NoLayers==DUALLAYER) {dotheta(m->layer2.voltages_out,m->layer2.P->theta,timemillis);}
     }
     StoreFiring(&(m->layer1));
     if(m->NoLayers==DUALLAYER){StoreFiring(&(m->layer2));}

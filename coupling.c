@@ -101,16 +101,19 @@ Compute_float* CreateCouplingMatrix(const couple_parameters c)
         {
             if (x*x+y*y<=couplerange*couplerange)//if we are within coupling range
             {
-                Compute_float val;
-                if (c.Layertype==SINGLELAYER)
+                if (x!= 0 || y!= 0) //remove self-coupling
                 {
-                    val = mexhat((Compute_float)(x*x+y*y),c.Layer_parameters.single);//compute the mexican hat function
+                    Compute_float val;
+                    if (c.Layertype==SINGLELAYER)
+                    {
+                        val = mexhat((Compute_float)(x*x+y*y),c.Layer_parameters.single);//compute the mexican hat function
+                    }
+                    else
+                    {
+                        val = expdecay((Compute_float)(x*x+y*y),c.Layer_parameters.dual);
+                    }
+                    matrix[(x+couplerange)*couple_array_size + y + couplerange] = val;//and set the array
                 }
-                else
-                {
-                    val = expdecay((Compute_float)(x*x+y*y),c.Layer_parameters.dual);
-                }
-                matrix[(x+couplerange)*couple_array_size + y + couplerange] = val;//and set the array
             }
         }
     }

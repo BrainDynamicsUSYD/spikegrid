@@ -86,6 +86,8 @@ model* setup(const parameters p,const parameters p2,const LayerNumbers lcount)
     output_s* outdata=(output_s[]){ //note - neat feature - missing elements initailized to 0
         {"gE",{m2->gE,conductance_array_size,couplerange},0,100}, //gE is a 'large' matrix - as it wraps around the edges
         {"gI",{m2->gI,conductance_array_size,couplerange},0,100}, //gI is a 'large' matrix - as it wraps around the edges
+        {"Coupling1",{m2->layer1.connections,couple_array_size,0},0,100}, //return the coupling matrix of layer 1
+        {"Coupling2",{m2->layer2.connections,couple_array_size,0},0,100}, //return the coupling matrix of layer 2
         {.minval= -INFINITY}};         //a marker that we are at the end of the outputabbles list
     output_s* malloced = malloc(sizeof(output_s)*output_count);
     memcpy(malloced,outdata,sizeof(output_s)*output_count);

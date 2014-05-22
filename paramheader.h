@@ -18,7 +18,7 @@ typedef struct {
 } tagged_array;
 ///Holds data for sending back to matlab
 typedef struct {
-    const char const name[10];      ///< a string identifier that is used to identify the output
+    const char name[10];      ///< a string identifier that is used to identify the output
     const tagged_array data;        ///< the data to return
     const Compute_float minval;     ///< minimum value in array (for a colorbar - currently unused)
     const Compute_float maxval;     ///< maximum value in array (for a colorbar - currently unused)

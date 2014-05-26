@@ -1,7 +1,6 @@
 /// \file
 #include <stdlib.h> //calloc
 #include <stdio.h>  //printf
-#include <assert.h>
 #include "paramheader.h"
 #include "mymath.h"
 /* //This function is useful - but not used

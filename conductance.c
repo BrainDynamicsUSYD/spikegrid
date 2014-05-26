@@ -6,7 +6,7 @@
 #include "newparam.h"
 #include "init.h"
 #include "yossarian.h"
-#include "coupling.h"
+#include "output.h"
 unsigned int mytime=0;  ///<< The current time step
 model* m;               ///< The model we are evolving through time
 //The step function - evolves the model through time.
@@ -43,8 +43,8 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
 {
     if (setup_done==0) 
     {
-        if (ModelType==SINGLELAYER) {m=setup(OneLayerModel,OneLayerModel,ModelType);} //pass the same layer as a double parameter
-        else {m=setup(DualLayerModelEx,DualLayerModelIn,ModelType);}
+        if (ModelType==SINGLELAYER) {m=setup(OneLayerModel,OneLayerModel,ModelType,&Outputtable);} //pass the same layer as a double parameter
+        else {m=setup(DualLayerModelEx,DualLayerModelIn,ModelType,&Outputtable);}
         setup_done=1;
         printf("setup done\n");
     }
@@ -149,8 +149,8 @@ int main(int argc,char** argv) //useful for testing w/out matlab
         }
     }
     if (skiptests==0){tests();}
-    if (ModelType==SINGLELAYER) {m=setup(OneLayerModel,OneLayerModel,ModelType);} //pass the same layer as a double parameter
-    else {m=setup(DualLayerModelIn,DualLayerModelEx,ModelType);}
+    if (ModelType==SINGLELAYER) {m=setup(OneLayerModel,OneLayerModel,ModelType,&Outputtable);} //pass the same layer as a double parameter
+    else {m=setup(DualLayerModelIn,DualLayerModelEx,ModelType,&Outputtable);}
     Compute_float* input=calloc(sizeof(Compute_float),grid_size*grid_size);
     Compute_float* input2=calloc(sizeof(Compute_float),grid_size*grid_size);
     randinit(input,OneLayerModel.potential); //need to fix for dual layer

@@ -2,7 +2,7 @@
 #include <string.h> //memset
 #include <stdlib.h> //random
 #include "theta.h"
-#include "evolve.h"
+#include "layer.h"
 //when STDP is turned off, gcc will warn about this function needing const.  It is wrong
 ///Adds in the component of connection matrices due to STDP effected dynamic synapses
 void evolvept_STDP  (const int x,const  int y,const Compute_float* const __restrict connections_STDP,const Compute_float Estrmod,const Compute_float Istrmod,Compute_float* __restrict gE,Compute_float* __restrict gI)

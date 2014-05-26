@@ -1,10 +1,10 @@
 /// \file
+#include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include <unistd.h>
+#include <unistd.h> //gethostname
 #include "coupling.h"
-#include "init.h"
-#include "evolve.h"
+#include "layer.h"
 ///creates a random initial condition
 ///This is generated as small fluctuations away from Vrt
 /// @param input    The input matrix - Modified in place
@@ -68,7 +68,7 @@ layer setuplayer(const parameters p)
     return L;
 }
 ///The idea here is that "one-off" setup occurs here, whilst per-layer setup occurs in setuplayer
-model* setup(const parameters p,const parameters p2,const LayerNumbers lcount)
+model* setup(const parameters p,const parameters p2,const LayerNumbers lcount, output_s** outputtables)
 {
     const layer l1 = setuplayer(p);
     const layer l2 = lcount==DUALLAYER?setuplayer(p2):l1;
@@ -90,6 +90,6 @@ model* setup(const parameters p,const parameters p2,const LayerNumbers lcount)
         {.minval= -INFINITY}};         //a marker that we are at the end of the outputabbles list
     output_s* malloced = malloc(sizeof(output_s)*output_count);
     memcpy(malloced,outdata,sizeof(output_s)*output_count);
-    Outputtable=malloced;
+    *outputtables=malloced;
     return m2;
 }

@@ -2,7 +2,7 @@
 #ifndef PIXELTYPES
 #define PIXELTYPES
 #include <stdint.h>
-#include <stdlib.h>
+#include <stdlib.h> //size_t
 ///structure to represent a single pixel.
 typedef struct { 
     uint8_t red;    ///<red value

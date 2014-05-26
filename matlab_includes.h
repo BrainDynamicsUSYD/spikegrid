@@ -1,6 +1,7 @@
 /// \file
 #ifdef MATLAB
-    #undef __STDC_UTF_16__ //This fixes a bug when trying to use a vaguely modern version of GCC with matlab.  Unfortunately it produces a warning
+    #include <stdint.h>
+    typedef uint16_t char16_t; //hack because mex.h is broken
     #include "mex.h" //matlab
     #include "matrix.h"  //matlab
 #endif

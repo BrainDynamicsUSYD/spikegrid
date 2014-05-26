@@ -10,6 +10,7 @@ STD_data __attribute__((const)) STD_init(const STD_parameters s)
     STD_data ret ;
     ret.U=malloc(sizeof(Compute_float)*grid_size*grid_size);
     ret.R=malloc(sizeof(Compute_float)*grid_size*grid_size);
+    ret.ftimes=malloc(sizeof(unsigned int)*grid_size*grid_size);
     for(int i=0;i < grid_size*grid_size;i++)
     {
         ret.ftimes[i]=0; //probably not required as you can gurantee that the memory is set to 0 by default

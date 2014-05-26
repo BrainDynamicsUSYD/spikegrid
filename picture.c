@@ -23,7 +23,7 @@ int save_png_to_file (bitmap_t *bitmap, const char *path)
     int depth = 8;
 
     fp = fopen (path, "wb");
-    if (! fp) {
+    if (! fp) {	
         goto fopen_failed;
     }
 

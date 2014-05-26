@@ -31,11 +31,11 @@ static const parameters OneLayerModel =
         {
             .single = 
             {
-                .WE     = 0.41,                 //excitatory coupling strength
+                .WE     = 0.42,                 //excitatory coupling strength
                 .sigE   = 14,                   //char. length for Ex symapses (int / float?)
                 .WI     = 0.19,                 //Inhib coupling strength
-                .sigI   = 42,                   //char. length for In synapses (int / float?)
-                .Ex = {.R=0.5,.D=1.5},          //excitatory rise / decay time
+                .sigI   = 1000,                   //char. length for In synapses (int / float?)
+                .Ex = {.R=0.5,.D=2.0},          //excitatory rise / decay time
                 .In = {.R=0.5,.D=2.0},          //inhibitory rise / decay time
             }
         },
@@ -66,7 +66,7 @@ static const parameters OneLayerModel =
     },
     .Movie = 
     {
-        .MakeMovie = OFF,
+        .MakeMovie = ON,
         .Delay = 10,
     },
     .theta = 
@@ -86,9 +86,9 @@ static const parameters DualLayerModelIn =
         {
             .dual = 
             {
-                .W          =  -0.46, //-2.5,
-                .sigma      = 90, //42,
-                .synapse    = {.R=0.5,.D=2.0},
+                .W          = -1.25, //-0.40 //-0.57 //-0.70 //-1.25, 
+                .sigma      = 42, 
+                .synapse    = {.R=0.5,.D=7.0},
             }
         },
         .norm_type = None,
@@ -119,6 +119,7 @@ static const parameters DualLayerModelIn =
     .Movie = 
     {
         .MakeMovie = OFF,
+        .Output = 0,
         .Delay = 10,
     },
     .theta = 
@@ -138,9 +139,9 @@ static const parameters DualLayerModelEx =
         {
             .dual = 
             {
-                .W          = 0.23, //0.41,
-                .sigma      = 10, //14,
-                .synapse    = {.R=0.5,.D=2.0},
+                .W          =  0.23, //0.09 //0.12 //0.14  //0.23
+                .sigma      = 14,
+                .synapse    = {.R=0.5,.D=3.0},
             }
         },
         .tref       = 5,
@@ -170,7 +171,8 @@ static const parameters DualLayerModelEx =
     },
     .Movie = 
     {
-        .MakeMovie = OFF,
+        .MakeMovie = ON,
+        .Output = 0,
         .Delay = 10,
     },
     .theta = 

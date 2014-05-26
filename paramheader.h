@@ -105,7 +105,7 @@ typedef struct conductance_parameters
 typedef struct STDP_parameters
 {
     const Compute_float stdp_limit;
-    const Compute_float  stdp_tau;
+    const Compute_float stdp_tau;
     const Compute_float stdp_strength;
 } STDP_parameters;
 ///Parameters controlling the shape of the STD recovery
@@ -116,12 +116,13 @@ typedef struct STD_parameters
     const Compute_float F;
 } STD_parameters;
 ///Parameters for outputting movies
-typedef struct movie_parmeters
+typedef struct movie_parameters
 {
     const on_off MakeMovie;     ///< Are we making a movie?
-    const output_s output;      ///< What will be outputted in the movie
+    const unsigned int Output;  ///< What will be outputted in the movie
     const unsigned int Delay;   ///< how often to output it
 } movie_parameters;
+
 ///Parameters for a subthreshold wave (not necersarrily theta)
 typedef struct theta_parameters
 {

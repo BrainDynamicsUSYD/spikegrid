@@ -93,8 +93,8 @@ void OutputToPng(const tagged_array input,const Compute_float minval,const Compu
 ///High level function to create a series of PNG images which can be then turned into a movie
 void makemovie(const layer l,const unsigned int t)
 {
-    if (l.P->Movie.MakeMovie==ON && t % l.P->Movie.Delay)
+    if (l.P->Movie.MakeMovie==ON && t % l.P->Movie.Delay==0)
     {
-        OutputToPng(l.P->Movie.output.data,l.P->Movie.output.minval,l.P->Movie.output.maxval);
+        OutputToPng(Outputtable[l.P->Movie.Output].data,Outputtable[l.P->Movie.Output].minval,Outputtable[l.P->Movie.Output].maxval);
     }
 }

@@ -81,7 +81,7 @@ void OutputToPng(const tagged_array input,const Compute_float minval,const Compu
     char fnamebuffer[30];
     const unsigned int size = input.size - (2*input.offset);
     Compute_float* actualdata=taggedarrayTocomputearray(input);
-    bitmap_t* b = FloattoBitmap(actualdata,size,minval,maxval);
+    bitmap_t* b = FloattoBitmap(actualdata,size,maxval,minval);
     sprintf(fnamebuffer,"pics/%i.png",printcount);
     printcount++;
     save_png_to_file(b,fnamebuffer);

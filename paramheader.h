@@ -104,9 +104,9 @@ typedef struct conductance_parameters
 ///Parameters for STDP
 typedef struct STDP_parameters
 {
-    const Compute_float stdp_limit;
-    const Compute_float stdp_tau;
-    const Compute_float stdp_strength;
+    const Compute_float stdp_limit;     ///<maximum STDP that can be applied to a synapse as a fraction of its original value
+    const Compute_float stdp_tau;       ///<tau for STDP (controls timescale of window function)
+    const Compute_float stdp_strength;  ///< controls the amount of STDP
 } STDP_parameters;
 ///Parameters controlling the shape of the STD recovery
 typedef struct STD_parameters

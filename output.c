@@ -3,7 +3,6 @@
 #include <string.h>
 #include "output.h"
 #include "picture.h"
-#include "layer.h"
 ///rescale a float to a unit8 from some minimum and maximum range.
 ///currently no error checking and so might produce weird behaviour outside the desired range.  I also don't know how thi swould interact with MATLAB
 uint8_t __attribute__((const)) rescalefloat (const Compute_float in,const Compute_float maxval, const Compute_float minval) //rescale to 0-255

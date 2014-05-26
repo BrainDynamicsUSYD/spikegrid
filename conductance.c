@@ -1,8 +1,6 @@
 /// \file
-#include <stdio.h> //printf
 #include <string.h> //memcpy
 #include <getopt.h> //getopt
-#include "mymath.h"
 #include "STDP.h"
 #include "evolve.h"
 #include "newparam.h"

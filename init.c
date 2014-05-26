@@ -3,7 +3,6 @@
 #include <time.h>
 #include <unistd.h>
 #include "coupling.h"
-#include "STD.h"
 #include "init.h"
 #include "evolve.h"
 ///creates a random initial condition

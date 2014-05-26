@@ -68,11 +68,11 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
     for (unsigned int i=1;i<L.spikes.count;i++) //start at 1 so we don't get currently firing (which should be empty anyway)
     {
         const coords* const fire_with_this_lag = ringbuffer_getoffset(&L.spikes,(int)i);
-        const int delta =(int)(((Compute_float)i)*Features.Timestep);//small helper constant.
+        //const int delta =(int)(((Compute_float)i)*Features.Timestep);//small helper constant.
         const int Eon = L.Extimecourse!=NULL; //does this layer have excitation
         const int Ion = L.Intimecourse!=NULL; //and inhibition
-        const Compute_float Estr =Eon? L.Extimecourse[delta]:Zero;
-        const Compute_float Istr =Ion? L.Intimecourse[delta]:Zero; 
+        const Compute_float Estr =Eon? L.Extimecourse[i]:Zero;
+        const Compute_float Istr =Ion? L.Intimecourse[i]:Zero; 
         int idx=0; //iterate through all neurons firing with this lag
         while (fire_with_this_lag[idx].x != -1)
         {

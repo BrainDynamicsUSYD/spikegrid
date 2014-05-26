@@ -8,7 +8,7 @@ else #clang
 
 endif
 export DEBUGFLAGS= -g -std=gnu99
-export SPEEDFLAG=-DFAST #comment out this line for double instead of float (will make code slower)
+#export SPEEDFLAG=-DFAST #comment out this line for double instead of float (will make code slower)
 export CLIBFLAGS= -fPIC -shared
 export LDFLAGS=-lm -lpng
 CFLAGS += ${SPEEDFLAG}

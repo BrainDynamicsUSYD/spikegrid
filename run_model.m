@@ -1,33 +1,37 @@
 compile;
 gridsize = 100;
 precision = 'double';
-data =((rand(gridsize)*25)-80);
-datalayer2 =((rand(gridsize)*25)-80);
+V =((rand(gridsize)*25)-80);
+V2 =((rand(gridsize)*25)-80);
 time=1;
 
 if strcmp(precision,'single')==1
-    data = single(data);
-    datalayer2 = single(datalayer2);
+    V = single(V);
+    V2 = single(V2);
     time = single(time);
 end
 
 % Membrane potential
 figure(1);
-hV = imagesc(data ,[-80 -55]); colorbar;
+hV = imagesc(V ,[-80 -55]);
+set(gca,'XLim',[0.5 gridsize+0.5],'YLim',[0.5 gridsize+0.5],'XTick',[],'YTick',[],...
+    'XTickLabel',[],'YTickLabel',[],'XGrid','off','YGrid','off');
+colormap('default');
+colorbar;
 hT = title('Time: 1');
 
 % Excitatory conductance
-[data2,datalayer22, gE] =conductance(data,datalayer2,'gE'); % Was gI before. Why?
+[V_,V2_, gE] =conductance(V,V2,'gE'); % Was gI before. Why?
 figure(2);
 hG = imagesc(gE);
+set(gca,'XLim',[0.5 gridsize+0.5],'YLim',[0.5 gridsize+0.5],'XTick',[],'YTick',[],...
+    'XTickLabel',[],'YTickLabel',[],'XGrid','off','YGrid','off');
 
 while time<20000
     time=time+1;
-    [data2, datalayer22,gE] =conductance(data,datalayer2,'gE');
-    data=data2;
-    datalayer2=datalayer22;
+    [V, V2,gE] =conductance(V,V2,'gE');
     if (mod(time,10)==0)
-        set(hV,'CData',data);
+        set(hV,'CData',V);
         set(hT,'String',sprintf('Time: %.1f',time));
         set(hG,'CData',gE);  
         drawnow;

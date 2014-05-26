@@ -4,6 +4,7 @@
 #include "matlab_includes.h"
 #include "pixeltypes.h"
 #include "layer.h"
+output_s* Outputtable;
 void makemovie(const layer l,const unsigned int t);
 #ifdef MATLAB
 mxClassID __attribute__((pure,const)) MatlabDataType();

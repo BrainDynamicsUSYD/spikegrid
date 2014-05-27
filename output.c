@@ -94,6 +94,7 @@ mxArray* outputToMxArray (const tagged_array input)
     Compute_float* dataptr =  (Compute_float*)mxGetData(ret);
     Compute_float* actualdata = taggedarrayTocomputearray(input);
     memcpy(dataptr,actualdata,sizeof(Compute_float)*size*size);
+    free(actualdata);
     return ret;
 }
 #endif

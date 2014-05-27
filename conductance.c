@@ -37,8 +37,6 @@ void step_(const Compute_float* const inp,const Compute_float* const inp2)
 #ifdef MATLAB
 int setup_done=0;
 //function called by matlab
-//currently does no checking on input / output, so if you screw up your matlab expect segfaults
-//
 void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
 {
     if (setup_done==0) 
@@ -57,12 +55,12 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
     if (mxGetM(prhs[1]) != grid_size || mxGetN(prhs[1]) != grid_size || mxGetNumberOfDimensions(prhs[1]) != 2) {printf("rhs parameter 2 has the wrong shape\n");return;}
     for (int i = 2;i<nrhs;i++)
     {
-        if (mxGetClassID(prhs[i]) != mxCHAR_CLASS) {printf("rhs parameter %i needs to be a char string\n");return;}
+        if (mxGetClassID(prhs[i]) != mxCHAR_CLASS) {printf("rhs parameter %i needs to be a char string\n",i);return;}
     }
         
     const Compute_float* inputdata = (Compute_float*) mxGetData(prhs[0]);
     const Compute_float* inputdata2 = (Compute_float*) mxGetData(prhs[1]);
-    step_(inputdata,inputdata2); //always output the voltage data
+    step_(inputdata,inputdata2); 
     plhs[0]=mxCreateNumericMatrix(grid_size,grid_size,MatlabDataType(),mxREAL);
     plhs[1]=mxCreateNumericMatrix(grid_size,grid_size,MatlabDataType(),mxREAL);
     Compute_float* pointer1 = mxCalloc(grid_size*grid_size,sizeof(Compute_float));

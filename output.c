@@ -20,37 +20,37 @@ Compute_float* taggedarrayTocomputearray(const tagged_array input)
 }
 
 /// This generates the jet MATLAB colormap. We multiply by 255 because the map distinguishes colors over a range of 0 to 255 integer values inclusive (see http://stackoverflow.com/questions/7706339/grayscale-to-red-green-blue-matlab-jet-color-scale for a full explanation)
-/// @param sval a float between 0 and 1
+/// @param scaledval a float between 0 and 1
 /// @param pixel the pixel to modify
-void JetCmap(const Compute_float sval, pixel_t * pixel)
+void JetCmap(const Compute_float scaledval, pixel_t * pixel)
 {
-    if (sval < 0.125)
+    if (scaledval < 0.125)
     {
         pixel->red = 0;
         pixel->green = 0;
-        pixel->blue = (uint8_t)(255*(4*sval + 0.5));
+        pixel->blue = (uint8_t)(255*(4*scaledval + 0.5));
     }
-    else if (sval < 0.375)
+    else if (scaledval < 0.375)
     {
         pixel->red = 0;
-        pixel->green = (uint8_t)(255*(4*sval - 0.5));
+        pixel->green = (uint8_t)(255*(4*scaledval - 0.5));
         pixel->blue = 255; 
     }
-    else if (sval < 0.625)
+    else if (scaledval < 0.625)
     {
-        pixel->red = (uint8_t)(255*(4*sval - 1.5));
+        pixel->red = (uint8_t)(255*(4*scaledval - 1.5));
         pixel->green = 255;
-        pixel->blue = (uint8_t)(255*(-4*sval + 2.5));
+        pixel->blue = (uint8_t)(255*(-4*scaledval + 2.5));
     }
-    else if (sval < 0.875)
+    else if (scaledval < 0.875)
     {
         pixel->red = 255;
-        pixel->green = (uint8_t)(255*(-4*sval + 3.5));
+        pixel->green = (uint8_t)(255*(-4*scaledval + 3.5));
         pixel->blue = 0;
     }
     else
     {
-        pixel->red = (uint8_t)(255*(-4*sval + 4.5));
+        pixel->red = (uint8_t)(255*(-4*scaledval + 4.5));
         pixel->green = 0;
         pixel->blue = 0;
     }
@@ -71,11 +71,10 @@ bitmap_t* FloattoBitmap(const Compute_float* const input,const unsigned int size
             // Clamp values which fall outside the specified range
             if (val < minval) {val = minval;}
             if (val > maxval) {val = maxval;}
-            // Total range of values
-            const Compute_float dval =  maxval-minval;
             // Scaled value (between 0 and 1)
-            const Compute_float sval = (val - minval)/dval;
-            JetCmap(sval,&(bp->pixels[i*size+j]));
+            const Compute_float scaledval = (val - minval)/(maxval - minval);
+            // Uses Jet colormap as used in MATLAB
+            JetCmap(scaledval,&(bp->pixels[i*size+j]));
         }
     }
     return bp;

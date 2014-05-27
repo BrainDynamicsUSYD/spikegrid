@@ -136,7 +136,7 @@ Compute_float __attribute__((const,pure)) rhs_func  (const Compute_float V,const
         case QIF:
             return -(p.glk*(V-p.Vlk)*(p.extra.QIF.Vth-V) + ge*(V-p.Vex) + gi*(V-p.Vin));
         case EIF:
-            return -(p.glk*(V-p.Vlk) - p.extra.EIF.Dpk*exp((V-p.extra.QIF.Vth)/p.extra.EIF.Dpk) + ge*(V-p.Vex) + gi*(V-p.Vin));
+            return -(p.glk*(V-p.Vlk) - p.extra.EIF.Dpk*exp((V-p.extra.EIF.Vth)/p.extra.EIF.Dpk) + ge*(V-p.Vex) + gi*(V-p.Vin));
         default: return One; //avoid -Wreturn-type error which is probably wrong anyway
     }
 }

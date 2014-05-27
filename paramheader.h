@@ -53,6 +53,8 @@ typedef struct decay_parameters{
 } decay_parameters;
 ///Enum to determine how many layers are in use
 typedef enum LayerNumbers {SINGLELAYER=0,DUALLAYER=1} LayerNumbers;
+// Manner in which model neuron integrates input
+typedef enum NEURON_TYPE {LIF=0,QIF=1,EIF=2} neuron_type;
 ///Parameters for a layer when it is the only one
 typedef struct singlelayer_parameters
 {
@@ -93,8 +95,11 @@ typedef struct couple_parameters
 ///Contains parameters which control the Voltage dynamics of neurons
 typedef struct conductance_parameters
 {
-    const Compute_float Vrt    ;  ///< reset potential.
-    const Compute_float Vth    ;  ///< Threshold potential
+    const neuron_type type     ;  ///<Type of neuron, i.e. how it integrates input
+    const Compute_float Vrt    ;  ///<Reset potential.
+    const Compute_float Vth    ;  ///<Threshold potential
+    const Compute_float Vpk    ;  ///<Peak potential 
+    const Compute_float Dpk    ;  ///<Slope of spiking (EIF only)
     const Compute_float Vlk    ;  ///<leak reversal potential
     const Compute_float Vex    ;  ///<Ex reversal potential
     const Compute_float Vin    ;  ///<In reversal potential

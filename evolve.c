@@ -125,17 +125,34 @@ void fixboundary(Compute_float* __restrict gE, Compute_float* __restrict gI)
 	}
 
 }
+
 ///rhs_func used when integrating the neurons forward through time.  The actual integration is done using the midpoint method
-Compute_float __attribute__((const,pure)) rhs_func  (const Compute_float V,const Compute_float ge,const Compute_float gi,const conductance_parameters p) {return -(p.glk*(V-p.Vlk) + ge*(V-p.Vex) + gi*(V-p.Vin));}
+Compute_float __attribute__((const,pure)) rhs_func  (const Compute_float V,const Compute_float ge,const Compute_float gi,const conductance_parameters p)
+{
+    switch (p.type) 
+    {   
+    //leaky integrate-and-fire neuron
+        case LIF:
+        return -(p.glk*(V-p.Vlk) + ge*(V-p.Vex) + gi*(V-p.Vin));
+     //quadratic integrate-and-fire neuron
+        case QIF:
+        return -(p.glk*(V-p.Vlk)*(p.Vth-V) + ge*(V-p.Vex) + gi*(V-p.Vin));
+     //exponential integrate-and-fire neuron
+        case EIF:
+        return -(p.glk*(V-p.Vlk) - p.Dpk*exp((V-p.Vth)/p.Dpk) + ge*(V-p.Vex) + gi*(V-p.Vin));
+    }
+}
+
 ///Uses precalculated gE and gI to integrate the voltages forward through time.
 void CalcVoltages(const Compute_float* const __restrict__ Vinput,const Compute_float* const __restrict__ gE, const Compute_float* const __restrict__ gI,const conductance_parameters C, Compute_float* const __restrict__ Vout)
 {
     for (int x=0;x<grid_size;x++) 
     {
         for (int y=0;y<grid_size;y++)
-        { //step all neurons through time - use midpoint method
+        { //step all neurons through time 
             const int idx = (x+couplerange)*conductance_array_size + y + couplerange; //index for gE/gI
-            const int idx2=  x*grid_size+y;//index for voltages
+            const int idx2=  x*grid_size+y;
+            // apply midpoint method
             const Compute_float rhs1=rhs_func(Vinput[idx2],gE[idx],gI[idx],C);
             const Compute_float Vtemp = Vinput[idx2] + Half*Features.Timestep*rhs1;
             const Compute_float rhs2=rhs_func(Vtemp,gE[idx],gI[idx],C);
@@ -143,6 +160,7 @@ void CalcVoltages(const Compute_float* const __restrict__ Vinput,const Compute_f
         }
     }
 }
+
 ///Store current firing spikes also apply random spikes
 void StoreFiring(layer* L)
 {
@@ -153,7 +171,7 @@ void StoreFiring(layer* L)
     {
         for (int y=0;y<grid_size;y+=step)
         {
-            if (L->voltages[x*grid_size + y]  > L->P->potential.Vth)
+            if (L->voltages[x*grid_size + y]  > L->P->potential.Vpk)
             {
                 current_firestore[this_fcount] =(coords){.x=x,.y=y};
                 L->voltages_out[x*grid_size+y]=L->P->potential.Vrt;

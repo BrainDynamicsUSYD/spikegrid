@@ -1,7 +1,7 @@
 /// \file
 //these first few parameters actually escape into the paramheader file through magic
 #define grid_size 100
-///Total size of the gird
+///Total size of the grid
 ///Coupling range
 #define couplerange 15
 #ifndef PARAMATERS  //DO NOT REMOVE
@@ -66,7 +66,7 @@ static const parameters OneLayerModel =
     },
     .Movie = 
     {
-        .MakeMovie = ON,
+        .MakeMovie = OFF,
         .Delay = 10,
     },
     .theta = 

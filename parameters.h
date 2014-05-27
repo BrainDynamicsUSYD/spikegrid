@@ -44,13 +44,16 @@ static const parameters OneLayerModel =
     },
     .potential = 
     {
-        .type    = QIF,                  //how the neuron adds input - LIF (leaky integrate-and-fire), QIF (quadratic integrate-and-fire), or EIF (exponential integrate-and-fire)
+        .type    = 
+        {
+            .type = EIF,
+            .extra = 
+            {
+                .EIF={.Vth=-55,.Dpk=1}
+            }
+        },
         .Vrt     = -70,                  //reset potential
         .Vpk    = -55,                   //peak potential (at which membrane potential is reset -- must match Vth for LIF neurons)
-        .extra =
-        {
-            .EIF={.Dpk = 1,.QIF.Vth=-55},//slope of spike (EIE only)
-        },
         .Vlk     = -70,                  //leak reversal potential
         .Vex     = 0,                    //Ex reversal potential
         .Vin     = -80,                  //In reversal potential
@@ -101,13 +104,16 @@ static const parameters DualLayerModelIn =
     },
     .potential = 
     {
-        .type    = QIF,                  //how the neuron adds input - LIF (leaky integrate-and-fire), QIF (quadratic integrate-and-fire), or EIF (exponential integrate-and-fire)
+        .type    = 
+        {
+            .type = EIF,
+            .extra = 
+            {
+                .EIF={.Vth=-55,.Dpk=1}
+            }
+        },
         .Vrt     = -70,                  //reset potential
         .Vpk    = -55,                   //peak potential (at which membrane potential is reset -- must match Vth for LIF neurons)
-        .extra =
-        {
-            .EIF={.Dpk = 1,.QIF.Vth=-55},//slope of spike (EIE only)
-        },
         .Vlk     = -70,                  //leak reversal potential
         .Vex     = 0,                    //Ex reversal potential
         .Vin     = -80,                  //In reversal potential
@@ -159,13 +165,16 @@ static const parameters DualLayerModelEx =
     },
     .potential = 
     {
-        .type    = QIF,                  //how the neuron adds input - LIF (leaky integrate-and-fire), QIF (quadratic integrate-and-fire), or EIF (exponential integrate-and-fire)
+        .type    = 
+        {
+            .type = EIF,
+            .extra = 
+            {
+                .EIF={.Vth=-55,.Dpk=1}
+            }
+        },
         .Vrt     = -70,                  //reset potential
         .Vpk    = -55,                   //peak potential (at which membrane potential is reset -- must match Vth for LIF neurons)
-        .extra =
-        {
-            .EIF={.Dpk = 1,.QIF.Vth=-55},//slope of spike (EIE only)
-        },
         .Vlk     = -70,                  //leak reversal potential
         .Vex     = 0,                    //Ex reversal potential
         .Vin     = -80,                  //In reversal potential

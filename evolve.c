@@ -129,14 +129,14 @@ void fixboundary(Compute_float* __restrict gE, Compute_float* __restrict gI)
 ///rhs_func used when integrating the neurons forward through time.  The actual integration is done using the midpoint method
 Compute_float __attribute__((const,pure)) rhs_func  (const Compute_float V,const Compute_float ge,const Compute_float gi,const conductance_parameters p)
 {
-    switch (p.type) 
+    switch (p.type.type) 
     {   
         case LIF:
             return -(p.glk*(V-p.Vlk) + ge*(V-p.Vex) + gi*(V-p.Vin));
         case QIF:
-            return -(p.glk*(V-p.Vlk)*(p.extra.QIF.Vth-V) + ge*(V-p.Vex) + gi*(V-p.Vin));
+            return -(p.glk*(V-p.Vlk)*(p.type.extra.QIF.Vth-V) + ge*(V-p.Vex) + gi*(V-p.Vin));
         case EIF:
-            return -(p.glk*(V-p.Vlk) - p.extra.EIF.Dpk*exp((V-p.extra.QIF.Vth)/p.extra.EIF.Dpk) + ge*(V-p.Vex) + gi*(V-p.Vin));
+            return -(p.glk*(V-p.Vlk) - p.type.extra.EIF.Dpk*exp((V-p.type.extra.EIF.Vth)/p.type.extra.EIF.Dpk) + ge*(V-p.Vex) + gi*(V-p.Vin));
         default: return One; //avoid -Wreturn-type error which is probably wrong anyway
     }
 }

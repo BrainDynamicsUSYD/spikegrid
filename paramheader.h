@@ -94,7 +94,15 @@ typedef struct couple_parameters
 ///Contains parameters which control the Voltage dynamics of neurons
 typedef struct conductance_parameters
 {
-    const neuron_type type     ;  ///<Type of neuron, i.e. how it integrates input
+    const struct 
+    {
+        const neuron_type type ; ///< type of neuron - how it integrates input
+        const union
+        {   
+            const struct {const Compute_float Vth;} QIF;
+            const struct {const Compute_float Vth; const Compute_float Dpk;} EIF;
+        } extra;
+    } type                     ;  ///< holds parameters for how to integrate neuron
     const Compute_float Vrt    ;  ///<Reset potential.
     const Compute_float Vpk    ;  ///<Peak potential 
     const Compute_float Vlk    ;  ///<leak reversal potential
@@ -102,11 +110,6 @@ typedef struct conductance_parameters
     const Compute_float Vin    ;  ///<In reversal potential
     const Compute_float glk    ;  ///<leak conductance (ms^-1)
     const Compute_float rate   ;  ///<Rate of external input (spikes/neuron/s)
-    const union
-    {
-        const struct QIF_parameters { const Compute_float Vth;} QIF;  ///< threshold potential
-        const struct EIF_parameters { const struct QIF_parameters QIF; const Compute_float Dpk;} EIF;  ///<Slope of spiking (EIF only)
-    } extra;                      ///<extra parameters for QIF and EIF neurons
 } conductance_parameters;
 ///Parameters for STDP
 typedef struct STDP_parameters

@@ -19,6 +19,43 @@ Compute_float* taggedarrayTocomputearray(const tagged_array input)
     return ret;
 }
 
+/// This generates the jet MATLAB colormap. We multiply by 255 because the map distinguishes colors over a range of 0 to 255 integer values inclusive (see http://stackoverflow.com/questions/7706339/grayscale-to-red-green-blue-matlab-jet-color-scale for a full explanation)
+/// @param sval a float between 0 and 1
+/// @param pixel the pixel to modify
+void JetCmap(const Compute_float sval, pixel_t * pixel)
+{
+    if (sval < 0.125)
+    {
+        pixel->red = 0;
+        pixel->green = 0;
+        pixel->blue = (uint8_t)(255*(4*sval + 0.5));
+    }
+    else if (sval < 0.375)
+    {
+        pixel->red = 0;
+        pixel->green = (uint8_t)(255*(4*sval - 0.5));
+        pixel->blue = 255; 
+    }
+    else if (sval < 0.625)
+    {
+        pixel->red = (uint8_t)(255*(4*sval - 1.5));
+        pixel->green = 255;
+        pixel->blue = (uint8_t)(255*(-4*sval + 2.5));
+    }
+    else if (sval < 0.875)
+    {
+        pixel->red = 255;
+        pixel->green = (uint8_t)(255*(-4*sval + 3.5));
+        pixel->blue = 0;
+    }
+    else
+    {
+        pixel->red = (uint8_t)(255*(-4*sval + 4.5));
+        pixel->green = 0;
+        pixel->blue = 0;
+    }
+}
+
 ///simple function to convert comp_float 2d array to a bitmap that you can then do something with (like save)
 bitmap_t* FloattoBitmap(const Compute_float* const input,const unsigned int size,const Compute_float minval, const Compute_float maxval)
 {
@@ -26,56 +63,19 @@ bitmap_t* FloattoBitmap(const Compute_float* const input,const unsigned int size
     bp->pixels = malloc(sizeof(pixel_t)*size*size);
     bp->width=size;
     bp->height=size;
-
     for (unsigned int i=0;i<size;i++)
     {
         for (unsigned int j=0;j<size;j++)
         {
             Compute_float val =input[i*size+j];
-
-            // Cap values which fall outside the specified range
-            if (val < minval)
-                val = minval;
-            if (val > maxval)
-                val = maxval;
-
+            // Clamp values which fall outside the specified range
+            if (val < minval) {val = minval;}
+            if (val > maxval) {val = maxval;}
             // Total range of values
             const Compute_float dval =  maxval-minval;
-
             // Scaled value (between 0 and 1)
             const Compute_float sval = (val - minval)/dval;
-
-            // This generates the jet MATLAB colormap. We multiply by 255 because the map distinguishes colors over a range of 0 to 255 integer values inclusive (see http://stackoverflow.com/questions/7706339/grayscale-to-red-green-blue-matlab-jet-color-scale for a full explanation)
-            if (val < (minval + 0.125*dval))
-            {
-                bp->pixels[i*size+j].red = 0;
-                bp->pixels[i*size+j].green = 0;
-                bp->pixels[i*size+j].blue = (uint8_t)(255*(4*sval + 0.5));
-            }
-            else if (val < (minval + 0.375*dval))
-            {
-                bp->pixels[i*size+j].red = 0;
-                bp->pixels[i*size+j].green = (uint8_t)(255*(4*sval - 0.5));
-                bp->pixels[i*size+j].blue = 255; 
-            }
-            else if (val < (minval + 0.625*dval))
-            {
-                bp->pixels[i*size+j].red = (uint8_t)(255*(4*sval - 1.5));
-                bp->pixels[i*size+j].green = 255;
-                bp->pixels[i*size+j].blue = (uint8_t)(255*(-4*sval + 2.5));
-            }
-            else if (val < (minval + 0.875*dval))
-            {
-                bp->pixels[i*size+j].red = 255;
-                bp->pixels[i*size+j].green = (uint8_t)(255*(-4*sval + 3.5));
-                bp->pixels[i*size+j].blue = 0;
-            }
-            else
-            {
-                bp->pixels[i*size+j].red = (uint8_t)(255*(-4*sval + 4.5));
-                bp->pixels[i*size+j].green = 0;
-                bp->pixels[i*size+j].blue = 0;
-            }
+            JetCmap(sval,&(bp->pixels[i*size+j]));
         }
     }
     return bp;

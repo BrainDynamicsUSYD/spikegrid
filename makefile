@@ -15,7 +15,7 @@ CFLAGS += ${SPEEDFLAG}
 SOURCES= conductance.c coupling.c  STDP.c STD.c picture.c output.c evolve.c ringbuffer.c newparam.c yossarian.c init.c theta.c
 BINARY=./a.out
 VERSION_HASH = $(shell git rev-parse HEAD)
-.PHONY: profile clean submit docs debug
+.PHONY: profile clean submit docs debug params matlabparams
 ${BINARY}: ${SOURCES} *.h
 	${CC} ${CFLAGS}     ${SOURCES} -o ${BINARY} ${LDFLAGS}
 debug: ${SOURCE}
@@ -41,4 +41,8 @@ clean:
 	-rm -f ${BINARY}
 	-rm -rf html
 compile.m: makefile
-	echo "mex CFLAGS=\"-fPIC -shared ${CFLAGS}  -DMATLAB  -U__STDC_UTF_16__ \" LDFLAGS=\"${LDFLAGS} -shared\" ${SOURCES}" > compile.m
+	echo "mex CFLAGS=\"-fPIC -shared ${CFLAGS}  -DMATLAB \" LDFLAGS=\"${LDFLAGS} -shared\" ${SOURCES}" > compile.m
+params: ${BINARY}
+	gdb -ex "set print pretty on" -ex "echo OneLayerModel = " -ex "output OneLayerModel" -ex "echo DualLayerModelIn =" -ex "output DualLayerModelIn" -ex "echo DualLayerModelEx" -ex "output DualLayerModelEx" -ex "echo Sweep" -ex "output Sweep" --batch ${BINARY}
+matlabparams: ${BINARY}
+	gdb -ex "set print pretty on" -ex "echo OneLayerModel = " -ex "output OneLayerModel" -ex "echo DualLayerModelIn =" -ex "output DualLayerModelIn" -ex "echo DualLayerModelEx" -ex "output DualLayerModelEx" -ex "echo Sweep" -ex "output Sweep" --batch conductance.mexa64

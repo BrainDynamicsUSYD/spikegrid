@@ -1,14 +1,12 @@
 /// \file
-#include <stdio.h> //printf
 #include <string.h> //memcpy
 #include <getopt.h> //getopt
-#include "mymath.h"
 #include "STDP.h"
 #include "evolve.h"
 #include "newparam.h"
 #include "init.h"
 #include "yossarian.h"
-#include "coupling.h"
+#include "output.h"
 unsigned int mytime=0;  ///<< The current time step
 model* m;               ///< The model we are evolving through time
 //The step function - evolves the model through time.
@@ -45,8 +43,8 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
 {
     if (setup_done==0) 
     {
-        if (ModelType==SINGLELAYER) {m=setup(OneLayerModel,OneLayerModel,ModelType);} //pass the same layer as a double parameter
-        else {m=setup(DualLayerModelEx,DualLayerModelIn,ModelType);}
+        if (ModelType==SINGLELAYER) {m=setup(OneLayerModel,OneLayerModel,ModelType,&Outputtable);} //pass the same layer as a double parameter
+        else {m=setup(DualLayerModelEx,DualLayerModelIn,ModelType,&Outputtable);}
         setup_done=1;
         printf("setup done\n");
     }
@@ -87,17 +85,18 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
             char* data=malloc(sizeof(char)*1024); //should be big enough
             mxGetString(prhs[rhsidx],data,1023);
             int outidx = 0;
-            while (Outputtable[outidx].minval != -INFINITY)
+            int worked = 0;
+            while (strlen(Outputtable[outidx].name) != 0)
             {
                 if (!strcmp(Outputtable[outidx].name,data))
                 {
                     plhs[rhsidx]=outputToMxArray(Outputtable[outidx].data);
-                    outidx=-1;
+                    worked = 1;
                     break;
                 }
                 outidx++;
-            }
-            if (outidx != -1) {printf("Unknown thing to output\n");return;}
+            } 
+            if (worked != 1) {printf("Unknown thing to output\n");return;}
             free(data);
             rhsidx++;
         }
@@ -151,8 +150,8 @@ int main(int argc,char** argv) //useful for testing w/out matlab
         }
     }
     if (skiptests==0){tests();}
-    if (ModelType==SINGLELAYER) {m=setup(OneLayerModel,OneLayerModel,ModelType);} //pass the same layer as a double parameter
-    else {m=setup(DualLayerModelIn,DualLayerModelEx,ModelType);}
+    if (ModelType==SINGLELAYER) {m=setup(OneLayerModel,OneLayerModel,ModelType,&Outputtable);} //pass the same layer as a double parameter
+    else {m=setup(DualLayerModelIn,DualLayerModelEx,ModelType,&Outputtable);}
     Compute_float* input=calloc(sizeof(Compute_float),grid_size*grid_size);
     Compute_float* input2=calloc(sizeof(Compute_float),grid_size*grid_size);
     randinit(input,OneLayerModel.potential); //need to fix for dual layer

@@ -1,7 +1,5 @@
 /// \file
 #include "ringbuffer.h"
-#include <stdlib.h>
-#include <string.h>
 ///get an element from the ringbuffer with a given offset
 /// @param input  input ringbuffer
 /// @param offset offset from current index (i.e. how many elements backward in time to go)

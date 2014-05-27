@@ -1,7 +1,16 @@
 /// \file
-#include "layer.h"
-#include "mymath.h"
+#ifndef STDH
+#define STDH
 #include <stdio.h>
+#include "mymath.h"
+#include "paramheader.h"
+///Holds data for STD on a per-neuon basis
+typedef struct 
+{   //some parts of this should be const - but oh well
+    unsigned int* ftimes;   ///< time of previous firing
+    Compute_float* U;       ///< U STD parameter
+    Compute_float* R;       ///< R STD parameter
+} STD_data;
 STD_data STD_init(const STD_parameters s);
 ///calculation of STD strength.  In .h file for inlining (might not be required)
 static inline Compute_float STD_str (const STD_parameters s, const int x, const int y,const unsigned int time,const unsigned int lag, STD_data* const d)
@@ -20,3 +29,4 @@ static inline Compute_float STD_str (const STD_parameters s, const int x, const 
     return d->U[stdidx] * d->R[stdidx] * Two; //multiplication by 2 is not in the cited papers, but you could eliminate it by multiplying some other parameters by 2, but multiplying by 2 here enables easier comparison with the non-STD model.  Max has an improvement that calculates a first-order approxiamation that should be included
 
 }
+#endif

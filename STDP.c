@@ -1,5 +1,6 @@
 /// \file
-#include "STDP.h"
+#include "paramheader.h"
+#include "ringbuffer.h"
 #include "mymath.h" //fabsf
 ///Use this macro to change how far we apply STDP.  Maximum is couplerange^2, but anything smaller will improve performance
 #define STDP_RANGE_SQUARED (couplerange*couplerange)

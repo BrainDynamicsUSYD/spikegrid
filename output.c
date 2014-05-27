@@ -1,9 +1,7 @@
 /// \file
-#include <stdio.h>
 #include <string.h>
 #include "output.h"
 #include "picture.h"
-#include "layer.h"
 
 ///Extracts the actual information out of a tagged array and converts it to a simple square matrix
 Compute_float* taggedarrayTocomputearray(const tagged_array input)

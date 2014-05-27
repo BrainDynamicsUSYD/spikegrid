@@ -85,17 +85,18 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
             char* data=malloc(sizeof(char)*1024); //should be big enough
             mxGetString(prhs[rhsidx],data,1023);
             int outidx = 0;
-            while (Outputtable[outidx].minval != -INFINITY)
+            int worked = 0;
+            while (strlen(Outputtable[outidx].name) != 0)
             {
                 if (!strcmp(Outputtable[outidx].name,data))
                 {
                     plhs[rhsidx]=outputToMxArray(Outputtable[outidx].data);
-                    outidx=-1;
+                    worked = 1;
                     break;
                 }
                 outidx++;
-            }
-            if (outidx != -1) {printf("Unknown thing to output\n");return;}
+            } 
+            if (worked != 1) {printf("Unknown thing to output\n");return;}
             free(data);
             rhsidx++;
         }

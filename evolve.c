@@ -131,15 +131,13 @@ Compute_float __attribute__((const,pure)) rhs_func  (const Compute_float V,const
 {
     switch (p.type) 
     {   
-    //leaky integrate-and-fire neuron
         case LIF:
-        return -(p.glk*(V-p.Vlk) + ge*(V-p.Vex) + gi*(V-p.Vin));
-     //quadratic integrate-and-fire neuron
+            return -(p.glk*(V-p.Vlk) + ge*(V-p.Vex) + gi*(V-p.Vin));
         case QIF:
-        return -(p.glk*(V-p.Vlk)*(p.Vth-V) + ge*(V-p.Vex) + gi*(V-p.Vin));
-     //exponential integrate-and-fire neuron
+            return -(p.glk*(V-p.Vlk)*(p.extra.QIF.Vth-V) + ge*(V-p.Vex) + gi*(V-p.Vin));
         case EIF:
-        return -(p.glk*(V-p.Vlk) - p.Dpk*exp((V-p.Vth)/p.Dpk) + ge*(V-p.Vex) + gi*(V-p.Vin));
+            return -(p.glk*(V-p.Vlk) - p.extra.EIF.Dpk*exp((V-p.extra.QIF.Vth)/p.extra.EIF.Dpk) + ge*(V-p.Vex) + gi*(V-p.Vin));
+        default: return One; //avoid -Wreturn-type error which is probably wrong anyway
     }
 }
 
@@ -184,7 +182,7 @@ void StoreFiring(layer* L)
             else if (((Compute_float)random())/((Compute_float)RAND_MAX) < 
                     (L->P->potential.rate*((Compute_float)0.001)*Features.Timestep))
             {
-                L->voltages_out[x*grid_size+y]=L->P->potential.Vth+(Compute_float)0.1;//make sure it fires
+                L->voltages_out[x*grid_size+y]=L->P->potential.Vpk+(Compute_float)0.1;//make sure it fires
             }
         }
     }

@@ -18,7 +18,6 @@ parameters __attribute__((const,pure)) modparam (const parameters input, const C
         .potential=
         {
             TryGetVal(potential,Vrt,sweep,newval,input),
-            TryGetVal(potential,Vth,sweep,newval,input),
             TryGetVal(potential,Vlk,sweep,newval,input),
             TryGetVal(potential,Vex,sweep,newval,input),
             TryGetVal(potential,Vin,sweep,newval,input),

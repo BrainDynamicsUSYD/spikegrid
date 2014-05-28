@@ -102,12 +102,6 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
     return;
 }
 #else
-///Runs some simple tests - currently broken
-void tests()
-{
-    testmodparam(OneLayerModel);
-    printf("tests passed");
-}
 ///Structure which holds the command line options that the program recognises
 struct option long_options[] = {{"help",no_argument,0,'h'},{"generate",no_argument,0,'g'},{"sweep",required_argument,0,'s'}};
 ///Main function for the entire program
@@ -115,7 +109,7 @@ struct option long_options[] = {{"help",no_argument,0,'h'},{"generate",no_argume
 /// @param argv what the parameters actually are
 int main(int argc,char** argv) //useful for testing w/out matlab
 {
-    int skiptests=0;
+    parameters* newparam = NULL;
     while (1)
     {
         int option_index=0;
@@ -138,18 +132,18 @@ int main(int argc,char** argv) //useful for testing w/out matlab
                     printf("doing sweep index %i\n",index);
                     if (ModelType == SINGLELAYER)
                     {
-                        //TODO: sweep currently broken
-                     //   const parameters newparam = GetNthParam(OneLayerModel,Sweep,index);
-                        skiptests=1;
+                           newparam = GetNthParam(OneLayerModel,Sweep,(unsigned int)index);
                     }
-                    else {printf("sweeps not currently supported in dual-layer model\n");exit(EXIT_FAILURE);}
+                    else 
+                    {
+                           newparam = GetNthParam(DualLayerModelEx,Sweep,(unsigned int)index);
+                    }
                 }
                 break;
         }
     }
-    if (skiptests==0){tests();}
-    if (ModelType==SINGLELAYER) {m=setup(OneLayerModel,OneLayerModel,ModelType,&Outputtable);} //pass the same layer as a double parameter
-    else {m=setup(DualLayerModelIn,DualLayerModelEx,ModelType,&Outputtable);}
+    if (ModelType==SINGLELAYER) {m=setup(newparam!=NULL? (*newparam):OneLayerModel,newparam!=NULL? (*newparam):OneLayerModel,ModelType,&Outputtable);} //pass the same layer as a double parameter
+    else {m=setup(DualLayerModelIn,newparam!=NULL?*newparam:DualLayerModelEx,ModelType,&Outputtable);}
     Compute_float* input=calloc(sizeof(Compute_float),grid_size*grid_size);
     Compute_float* input2=calloc(sizeof(Compute_float),grid_size*grid_size);
     randinit(input,OneLayerModel.potential); //need to fix for dual layer

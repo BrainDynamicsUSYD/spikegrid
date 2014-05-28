@@ -148,12 +148,12 @@ static const parameters DualLayerModelIn =
 ///parameters for the excitatory layer of the double layer model
 static const parameters DualLayerModelEx =
 {
-    .couple =
+    .couple =   
     {
         .Layertype = DUALLAYER,
         .Layer_parameters = 
         {
-            .dual = 
+            .dual =     
             {
                 .W          =  0.23, //0.09 //0.12 //0.14  //0.23
                 .sigma      = 14,
@@ -218,7 +218,7 @@ static const model_features Features =
 ///Parameters for conducting a parameter sweep.
 static const sweepable Sweep =
 {
-    .type = Vrt,
+    .offset=offsetof(parameters,couple)+offsetof(couple_parameters,Layer_parameters) +0+ /*offset in the union is always 0*/  + offsetof(duallayer_parameters,W),
     .minval = 1.0,
     .maxval = 2.0,
     .count = 10

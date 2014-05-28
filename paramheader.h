@@ -68,7 +68,7 @@ typedef struct singlelayer_parameters
 ///Layer parameters for when there are two layers
 typedef struct duallayer_parameters
 {
-    const Compute_float     W;          ///<Maximum connectivity strength
+    const Compute_float     W;              ///<Maximum connectivity strength
     const Compute_float     sigma;      ///<Connectivity decay length scale
     const decay_parameters  synapse;    ///<Parameters of spike
 } duallayer_parameters;
@@ -148,13 +148,10 @@ typedef struct model_features
     const on_off Theta;
     const Compute_float Timestep; ///< The timestep in the model
 } model_features;
+ 
 
-/// procedure for adding new parameters.
-/// 1. Add relevant parameter to the parameters struct
-/// 2. Add entry to the sweepabletypes enum
-/// 3. Update the modparam function in newparam.c to copy your new parameter
-/// 4. Add a new default value in parameters.h (this should probably be with the feature off)
-typedef struct parameters
+///Structure that holds all the parameters for a layer
+typedef struct 
 {
     const couple_parameters couple;
     const conductance_parameters potential;
@@ -164,25 +161,14 @@ typedef struct parameters
     const theta_parameters theta;
     const int skip;
 } parameters;
-///it is crucial that these parameters have exactly the same names as the various fields in the parameters object.  otherwise you will break the parameter sweep function.
-///it might also be a good idea to assign these values that never change with cross compatibilty with matlab
-///
-///Many parameters are currently not supported by this - need to improve, but basic framework is there
-typedef enum {
-         //           WE,sigE,WI,sigI,SE,SI,                                      // couple
-          //          ExR,ExD,InR,InD,tref,                                     // synapse
-                    Vrt,Vth,Vlk,Vex,Vin,glk,                               //potential
-                    stdp_limit,stdp_tau,stdp_strength,                          //STDP
-           //         U,D,F,                                                      //STD
-                   // delay                                                       //movie
-                   dummy          //Used for verification that nothing has been missed - DO NOT REMOVE
-             } sweepabletypes;
-///A struct to specify an attribute to change for a yossarian run
+///from GCC manual
+#define offsetof(type, member)  __builtin_offsetof (type, member)
+// to specify an attribute to change for a yossarian run
 typedef struct Sweepable
 {
-    const sweepabletypes type;
     const Compute_float minval;
     const Compute_float maxval;
+    const int offset;
     const unsigned int count;
 } sweepable;
 ///Useful constant to avoid messy conversions

@@ -48,7 +48,7 @@ void evolvept (const int x,const  int y,const Compute_float* const __restrict co
     evolvept_STDP(x,y,STDP_CONNS,Estrmod,Istrmod,gE,gI);
 }
 ///add conductance from a firing neuron to either gE or gI as appropriate (used in dual layer model)
-void evolvept_duallayer (const int x,const  int y,const Compute_float* const __restrict connections,const Compute_float strmod, Compute_float* __restrict condmat,const Compute_float* STDP_CONNS)
+void evolvept_duallayer (const int x,const  int y,const Compute_float* const __restrict connections,const Compute_float strmod, Compute_float* __restrict condmat)
 {
     for (int i = 0; i < couple_array_size;i++)
     {
@@ -82,7 +82,7 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
                 strmod=STD_str(L.P->STD,c.x,c.y,time,i,&(L.std));
             }
             if (Eon && Ion) {evolvept(c.x,c.y,L.connections,Estr*strmod,Istr*strmod,gE,gI,L.STDP_connections);}
-            else            {evolvept_duallayer(c.x,c.y,L.connections,(Ion?Istr*-1:Estr)*strmod,(Ion?gI:gE),L.STDP_connections);}
+            else            {evolvept_duallayer(c.x,c.y,L.connections,(Ion?Istr*-1:Estr)*strmod,(Ion?gI:gE));}
             idx++;
         }
     }

@@ -1,6 +1,7 @@
 /// \file
 #include <string.h> //memcpy
 #include <getopt.h> //getopt
+#include <stdlib.h> //exit
 #include "STDP.h"
 #include "evolve.h"
 #include "newparam.h"
@@ -32,7 +33,6 @@ void step_(const Compute_float* const inp,const Compute_float* const inp2)
     makemovie(m->layer1,mytime);
     makemovie(m->layer2,mytime);
 }
-
 
 #ifdef MATLAB
 int setup_done=0;

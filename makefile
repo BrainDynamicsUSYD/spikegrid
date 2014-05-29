@@ -11,8 +11,7 @@ export DEBUGFLAGS= -g -std=gnu99
 #export SPEEDFLAG=-DFAST #comment out this line for double instead of float (will make code slower)
 export CLIBFLAGS= -fPIC -shared
 export LDFLAGS=-lm -lpng
-PARAMFLAG= -DPARAMPATH=\""parametersJOHN.h\""
-CFLAGS += ${SPEEDFLAG} ${PARAMFLAG}
+CFLAGS += ${SPEEDFLAG}
 SOURCES= conductance.c coupling.c  STDP.c STD.c picture.c output.c evolve.c ringbuffer.c newparam.c yossarian.c init.c theta.c
 BINARY=./a.out
 VERSION_HASH = $(shell git rev-parse HEAD)

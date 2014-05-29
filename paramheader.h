@@ -181,7 +181,7 @@ static const Compute_float Zero = (Compute_float)0;
 ///ugly hack for recursive inclusion
 #define PARAMETERS 
 //get some macros for various sizes
-#include PARAMPATH  
+#include "whichparam.h"  
 ///Size of the "large" arrays (notable examples are gE and gI)
 #define conductance_array_size (grid_size + 2*couplerange)
 ///Size of a coupling matrix

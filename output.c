@@ -125,7 +125,7 @@ void OutputToPng(const tagged_array input,const Compute_float minval,const Compu
     bitmap_t* b = FloattoBitmap(actualdata,size,minval,maxval);
     sprintf(dnamebuffer,"pics-%i",jobnumber);
     mkdir(dnamebuffer,S_IRWXU);//irwxu is full permissions for owner - see man sys_stat.h
-    sprintf(fnamebuffer,"%s/%i.png",dnamebuffer,jobnumber,printcount);
+    sprintf(fnamebuffer,"%s/%i.png",dnamebuffer,printcount);
     printcount++;
     save_png_to_file(b,fnamebuffer);
     free(b->pixels);

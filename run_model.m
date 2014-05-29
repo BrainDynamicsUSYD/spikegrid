@@ -23,7 +23,7 @@ hT = title('Time: 1');
 % Excitatory conductance
 [V_,V2_, gE] =conductance(V,V2,'gE'); % Was gI before. Why?
 figure(2);
-hG = imagesc(gE);
+hG = imagesc(gE.data,[gE.min gE.max]);
 set(gca,'XLim',[0.5 gridsize+0.5],'YLim',[0.5 gridsize+0.5],'XTick',[],'YTick',[],...
     'XTickLabel',[],'YTickLabel',[],'XGrid','off','YGrid','off');
 
@@ -33,7 +33,7 @@ while time<20000
     if (mod(time,10)==0)
         set(hV,'CData',V);
         set(hT,'String',sprintf('Time: %.1f',time));
-        set(hG,'CData',gE);  
+        set(hG,'CData',gE.data);  
         drawnow;
     end
 end

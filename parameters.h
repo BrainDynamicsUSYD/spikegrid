@@ -1,4 +1,5 @@
 /// \file
+#include <stddef.h> //offsetof
 //these first few parameters actually escape into the paramheader file through magic
 #define grid_size 100
 ///Total size of the grid

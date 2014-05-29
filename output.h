@@ -7,6 +7,7 @@ output_s* Outputtable;
 void makemovie(const layer l,const unsigned int t);
 #ifdef MATLAB
 mxClassID __attribute__((pure,const)) MatlabDataType();
-mxArray* outputToMxArray (const tagged_array input); 
+mxArray* outputToMxStruct(const output_s input);
+mxArray* outputToMxArray(const tagged_array input);
 #endif //matlab
 #endif //OUTPUT

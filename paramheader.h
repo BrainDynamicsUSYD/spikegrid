@@ -161,8 +161,7 @@ typedef struct
     const theta_parameters theta;
     const int skip;
 } parameters;
-///from GCC manual
-#define offsetof(type, member)  __builtin_offsetof (type, member)
+
 // to specify an attribute to change for a yossarian run
 typedef struct Sweepable
 {

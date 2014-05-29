@@ -88,7 +88,7 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
             {
                 if (!strcmp(Outputtable[outidx].name,data))
                 {
-                    plhs[rhsidx]=outputToMxArray(Outputtable[outidx].data);
+                    plhs[rhsidx]=outputToMxStruct(Outputtable[outidx]);
                     worked = 1;
                     break;
                 }

@@ -97,6 +97,21 @@ mxArray* outputToMxArray (const tagged_array input)
     free(actualdata);
     return ret;
 }
+mxArray* outputToMxStruct(const output_s input)
+{
+    const char** const fieldnames = (const char*[] ){"data","min","max"};
+    mxArray* output = mxCreateStructMatrix(1,1,3,fieldnames);
+    mxArray* minarr = mxCreateNumericMatrix(1,1,MatlabDataType(),mxREAL);
+    Compute_float* minptr = (Compute_float*)mxGetData(minarr);
+    minptr[0]=input.minval;
+    mxArray* maxarr = mxCreateNumericMatrix(1,1,MatlabDataType(),mxREAL);
+    Compute_float* maxptr = (Compute_float*)mxGetData(maxarr);
+    maxptr[0]=input.maxval;
+    mxSetField(output,0,"data",outputToMxArray(input.data));
+    mxSetField(output,0,"min",minarr);
+    mxSetField(output,0,"max",maxarr);
+    return output;
+}
 #endif
 /// number of PNG's outputted.  Used to keep track of the next filename to use
 int printcount=0;

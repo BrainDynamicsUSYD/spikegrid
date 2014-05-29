@@ -10,6 +10,7 @@
 #include "output.h"
 unsigned int mytime=0;  ///<< The current time step
 model* m;               ///< The model we are evolving through time
+int jobnumber=0;        ///< The current job number - used for pics directory etc
 //The step function - evolves the model through time.
 //Perf wise the memcpy is probably not ideal, but this is a simple setup and the perf loss here is pretty small as memcpy is crazy fast
 //DO NOT CALL THIS FUNCTION "step" - this causes a weird collision in matlab that results in segfaults.  Incredibly fun to debug
@@ -30,8 +31,8 @@ void step_(const Compute_float* const inp,const Compute_float* const inp2)
         doSTDP(m->layer1.STDP_connections,&m->layer1.spikes,m->layer1.connections,m->layer1.P->STDP);
         doSTDP(m->layer2.STDP_connections,&m->layer2.spikes,m->layer2.connections,m->layer2.P->STDP);
     }
-    makemovie(m->layer1,mytime);
-    makemovie(m->layer2,mytime);
+    makemovie(m->layer1,mytime,jobnumber);
+    makemovie(m->layer2,mytime,jobnumber);
 }
 
 #ifdef MATLAB
@@ -128,15 +129,15 @@ int main(int argc,char** argv) //useful for testing w/out matlab
                 exit(EXIT_SUCCESS);
             case 's':
                 {
-                    const int index=atoi(optarg);
-                    printf("doing sweep index %i\n",index);
+                    jobnumber=atoi(optarg);
+                    printf("doing sweep index %i\n",jobnumber);
                     if (ModelType == SINGLELAYER)
                     {
-                           newparam = GetNthParam(OneLayerModel,Sweep,(unsigned int)index);
+                           newparam = GetNthParam(OneLayerModel,Sweep,(unsigned int)jobnumber);
                     }
                     else 
                     {
-                           newparam = GetNthParam(DualLayerModelEx,Sweep,(unsigned int)index);
+                           newparam = GetNthParam(DualLayerModelEx,Sweep,(unsigned int)jobnumber);
                     }
                 }
                 break;
@@ -147,7 +148,7 @@ int main(int argc,char** argv) //useful for testing w/out matlab
     Compute_float* input=calloc(sizeof(Compute_float),grid_size*grid_size);
     Compute_float* input2=calloc(sizeof(Compute_float),grid_size*grid_size);
     randinit(input,OneLayerModel.potential); //need to fix for dual layer
-    while (mytime<1000)
+    while (mytime<5000)
     {
         step_(input,input2);//always fine to pass an extra argument here
         printf("%i\n",mytime);

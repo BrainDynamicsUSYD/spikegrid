@@ -63,8 +63,8 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
     step_(inputdata,inputdata2); 
     plhs[0]=mxCreateNumericMatrix(grid_size,grid_size,MatlabDataType(),mxREAL);
     plhs[1]=mxCreateNumericMatrix(grid_size,grid_size,MatlabDataType(),mxREAL);
-    Compute_float* pointer1 = mxCalloc(grid_size*grid_size,sizeof(Compute_float));
-    Compute_float* pointer2 = mxCalloc(grid_size*grid_size,sizeof(Compute_float));
+    Compute_float* pointer1 = (Compute_float*)mxGetData(plhs[0]);
+    Compute_float* pointer2 = (Compute_float*)mxGetData(plhs[1]);
     for (int i=0;i<grid_size;i++)
     {
         for (int j=0;j<grid_size;j++)

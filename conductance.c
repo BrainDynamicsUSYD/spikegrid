@@ -37,48 +37,22 @@ void step_(const Compute_float* const inp,const Compute_float* const inp2)
 
 #ifdef MATLAB
 int setup_done=0;
-//function called by matlab
-void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
+mxArray* CreateInitialVoltage(conductance_parameters c)
 {
-    if (setup_done==0) 
-    {
-        if (ModelType==SINGLELAYER) {m=setup(OneLayerModel,OneLayerModel,ModelType,&Outputtable);} //pass the same layer as a double parameter
-        else {m=setup(DualLayerModelEx,DualLayerModelIn,ModelType,&Outputtable);}
-        setup_done=1;
-        printf("setup done\n");
-    }
-    //error checking
-    if (nrhs!=nlhs) {printf("We need the same number of parameters on the left and right hand side\n");return;}
-    if (nrhs < 2)   {printf("At least input the voltage for both neuron populations\n");return;}
-    if (mxGetClassID(prhs[0]) != MatlabDataType()) {printf("rhs parameter 1 is not of the correct data type (single/double)\n");return;}
-    if (mxGetClassID(prhs[1]) != MatlabDataType()) {printf("rhs parameter 2 is not of the correct data type (single/double)\n");return;}
-    if (mxGetM(prhs[0]) != grid_size || mxGetN(prhs[0]) != grid_size || mxGetNumberOfDimensions(prhs[0]) != 2) {printf("rhs parameter 1 has the wrong shape\n");return;}
-    if (mxGetM(prhs[1]) != grid_size || mxGetN(prhs[1]) != grid_size || mxGetNumberOfDimensions(prhs[1]) != 2) {printf("rhs parameter 2 has the wrong shape\n");return;}
-    for (int i = 2;i<nrhs;i++)
+    mxArray* volts =mxCreateNumericMatrix(grid_size,grid_size,MatlabDataType(),mxREAL);
+    Compute_float* voltdata = (Compute_float*)mxGetData(volts);
+    randinit(voltdata,c);
+    return volts;
+}
+void outputExtraThings(mxArray* plhs[],int nrhs,const mxArray* prhs[])
+{
+    for (int i = 1;i<nrhs;i++)
     {
         if (mxGetClassID(prhs[i]) != mxCHAR_CLASS) {printf("rhs parameter %i needs to be a char string\n",i);return;}
     }
-        
-    const Compute_float* inputdata = (Compute_float*) mxGetData(prhs[0]);
-    const Compute_float* inputdata2 = (Compute_float*) mxGetData(prhs[1]);
-    step_(inputdata,inputdata2); 
-    plhs[0]=mxCreateNumericMatrix(grid_size,grid_size,MatlabDataType(),mxREAL);
-    plhs[1]=mxCreateNumericMatrix(grid_size,grid_size,MatlabDataType(),mxREAL);
-    Compute_float* pointer1 = (Compute_float*)mxGetData(plhs[0]);
-    Compute_float* pointer2 = (Compute_float*)mxGetData(plhs[1]);
-    for (int i=0;i<grid_size;i++)
-    {
-        for (int j=0;j<grid_size;j++)
-        {
-            pointer1[i*grid_size+j]=m->layer1.voltages_out[i*grid_size + j];
-            pointer2[i*grid_size+j]=m->layer2.voltages_out[i*grid_size + j];
-        }
-    }
-    mxSetData(plhs[0],pointer1);
-    mxSetData(plhs[1],pointer2);
     if (nrhs>1) //output other stuff
     {
-        int rhsidx = 2;
+        int rhsidx = 1;
         while (rhsidx<nrhs)
         {
             char* data=malloc(sizeof(char)*1024); //should be big enough
@@ -100,6 +74,68 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
             rhsidx++;
         }
     }
+}
+
+mxArray* FirstMatlabCall(int nlhs, mxArray* plhs[])
+{
+    if (ModelType==SINGLELAYER) {m=setup(OneLayerModel,OneLayerModel,ModelType,&Outputtable);} //pass the same layer as a double parameter
+    else {m=setup(DualLayerModelEx,DualLayerModelIn,ModelType,&Outputtable);}
+    //set up initial voltage matrix - we need a different number if we are in single or double layer model - so encase the voltages in a struct
+    mxArray* voltages = mxCreateStructMatrix(1,1,3,(const char*[]){"Vin","Vex","Vsingle_layer"});
+    if (ModelType==SINGLELAYER)
+    {
+        mxSetField(voltages,0,"Vsingle_layer",CreateInitialVoltage(OneLayerModel.potential));
+    }
+    else
+    {
+        mxSetField(voltages,0,"Vin",CreateInitialVoltage(DualLayerModelIn.potential));
+        mxSetField(voltages,0,"Vex",CreateInitialVoltage(DualLayerModelEx.potential));
+    }
+    ///Now - do some dummy outputs of the other elements so that the graphs can be set up.
+    printf("setup done\n");
+    return voltages;
+}
+///Matlab entry point. The pointers give access to the left and right hand sides of the function call.
+///Note that it is required to assign a value to all entries on the left hand side of the equation.
+///Dailing to do so will produce an error in matlab.
+void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
+{
+    if (nrhs!=nlhs) {printf("We need the same number of parameters on the left and right hand side\n");return;}
+    if (setup_done==0) 
+    {
+        plhs[0]=FirstMatlabCall(nlhs,plhs);
+        outputExtraThings(plhs,nrhs,prhs);
+        setup_done=1;
+        return;
+    }
+    //error checking
+    if (nrhs < 1)   {printf("At least input the voltage(s)\n");return;}
+   // if (mxGetClassID(prhs[0]) != MatlabDataType()) {printf("rhs parameter 1 is not of the correct data type (single/double)\n");return;}
+  //  if (mxGetClassID(prhs[1]) != MatlabDataType()) {printf("rhs parameter 2 is not of the correct data type (single/double)\n");return;}
+  //  if (mxGetM(prhs[0]) != grid_size || mxGetN(prhs[0]) != grid_size || mxGetNumberOfDimensions(prhs[0]) != 2) {printf("rhs parameter 1 has the wrong shape\n");return;}
+  //  if (mxGetM(prhs[1]) != grid_size || mxGetN(prhs[1]) != grid_size || mxGetNumberOfDimensions(prhs[1]) != 2) {printf("rhs parameter 2 has the wrong shape\n");return;}
+    //step the model through time
+    mxArray* voltages = mxCreateStructMatrix(1,1,3,(const char*[]){"Vin","Vex","Vsingle_layer"});
+    if (ModelType == SINGLELAYER)
+    {
+        step_((Compute_float*) mxGetData(mxGetField(prhs[0],0,"Vsingle_layer")),NULL /*no second layer*/);
+        mxArray* out = mxCreateNumericMatrix(grid_size,grid_size,MatlabDataType(),mxREAL);
+        memcpy((Compute_float*)mxGetData(out),m->layer1.voltages_out,sizeof(Compute_float)*grid_size*grid_size);
+        mxSetField(voltages,0,"Vsingle_layer",out);
+    }
+    else
+    {
+        step_((Compute_float*) mxGetData(mxGetField(prhs[0],0,"Vin")),
+                (Compute_float*) mxGetData(mxGetField(prhs[0],0,"Vex")));
+        mxArray* out1 = mxCreateNumericMatrix(grid_size,grid_size,MatlabDataType(),mxREAL);
+        mxArray* out2 = mxCreateNumericMatrix(grid_size,grid_size,MatlabDataType(),mxREAL);
+        memcpy((Compute_float*)mxGetData(out1),m->layer1.voltages_out,sizeof(Compute_float)*grid_size*grid_size);
+        memcpy((Compute_float*)mxGetData(out2),m->layer2.voltages_out,sizeof(Compute_float)*grid_size*grid_size);
+        mxSetField(voltages,0,"Vin",out1);
+        mxSetField(voltages,0,"Vex",out2);
+    }
+    plhs[0] = voltages;
+    outputExtraThings(plhs,nrhs,prhs);
     return;
 }
 #else

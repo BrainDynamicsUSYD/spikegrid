@@ -7,7 +7,6 @@ char outdir [100];
 output_s* Outputtable;
 void makemovie(const layer l,const unsigned int t);
 #ifdef MATLAB
-mxClassID __attribute__((pure,const)) MatlabDataType();
 mxArray* outputToMxArray(const tagged_array input);
 void outputExtraThings(mxArray* plhs[],int nrhs,const mxArray* prhs[])
 #endif //matlab

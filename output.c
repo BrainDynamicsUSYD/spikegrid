@@ -82,10 +82,6 @@ bitmap_t* FloattoBitmap(const Compute_float* const input,const unsigned int size
 }
 
 #ifdef MATLAB
-mxClassID __attribute__((pure,const)) MatlabDataType()
-{
-    return sizeof(Compute_float)==sizeof(float)?mxSINGLE_CLASS:mxDOUBLE_CLASS;
-}
 //When using matlab, we want to be able to output just about any array of stuff.  This function does the work
 mxArray* outputToMxArray (const tagged_array input) 
 {

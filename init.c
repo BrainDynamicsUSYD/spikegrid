@@ -5,7 +5,6 @@
 #include <unistd.h> //gethostname
 #include <sys/stat.h>
 #include "coupling.h"
-#include "layer.h"
 #include "output.h"
 #include "printstruct.h"
 ///creates a random initial condition
@@ -71,7 +70,7 @@ layer setuplayer(const parameters p)
     return L;
 }
 ///The idea here is that "one-off" setup occurs here, whilst per-layer setup occurs in setuplayer
-model* setup(const parameters p,const parameters p2,const LayerNumbers lcount, output_s** outputtables,int jobnumber)
+model* setup(const parameters p,const parameters p2,const LayerNumbers lcount, int jobnumber)
 {
     if (jobnumber <0)
     {
@@ -106,6 +105,6 @@ model* setup(const parameters p,const parameters p2,const LayerNumbers lcount, o
         {.name={0}}};         //a marker that we are at the end of the outputabbles list
     output_s* malloced = malloc(sizeof(output_s)*output_count);
     memcpy(malloced,outdata,sizeof(output_s)*output_count);
-    *outputtables=malloced;
+    Outputtable = malloced;
     return m2;
 }

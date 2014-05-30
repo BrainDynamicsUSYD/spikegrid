@@ -112,6 +112,38 @@ mxArray* outputToMxStruct(const output_s input)
     mxSetField(output,0,"max",maxarr);
     return output;
 }
+void outputExtraThings(mxArray* plhs[],int nrhs,const mxArray* prhs[])
+{
+    for (int i = 1;i<nrhs;i++)
+    {
+        if (mxGetClassID(prhs[i]) != mxCHAR_CLASS) {printf("rhs parameter %i needs to be a char string\n",i);return;}
+    }
+    if (nrhs>1) //output other stuff
+    {
+        int rhsidx = 1;
+        while (rhsidx<nrhs)
+        {
+            char* data=malloc(sizeof(char)*1024); //should be big enough
+            mxGetString(prhs[rhsidx],data,1023);
+            int outidx = 0;
+            int worked = 0;
+            while (strlen(Outputtable[outidx].name) != 0)
+            {
+                if (!strcmp(Outputtable[outidx].name,data))
+                {
+                    plhs[rhsidx]=outputToMxStruct(Outputtable[outidx]);
+                    worked = 1;
+                    break;
+                }
+                outidx++;
+            } 
+            if (worked != 1) {printf("Unknown thing to output\n");return;}
+            free(data);
+            rhsidx++;
+        }
+    }
+}
+
 #endif
 /// number of PNG's outputted.  Used to keep track of the next filename to use
 int printcount=0;

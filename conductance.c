@@ -41,42 +41,11 @@ mxArray* CreateInitialVoltage(conductance_parameters c)
     randinit(voltdata,c);
     return volts;
 }
-void outputExtraThings(mxArray* plhs[],int nrhs,const mxArray* prhs[])
-{
-    for (int i = 1;i<nrhs;i++)
-    {
-        if (mxGetClassID(prhs[i]) != mxCHAR_CLASS) {printf("rhs parameter %i needs to be a char string\n",i);return;}
-    }
-    if (nrhs>1) //output other stuff
-    {
-        int rhsidx = 1;
-        while (rhsidx<nrhs)
-        {
-            char* data=malloc(sizeof(char)*1024); //should be big enough
-            mxGetString(prhs[rhsidx],data,1023);
-            int outidx = 0;
-            int worked = 0;
-            while (strlen(Outputtable[outidx].name) != 0)
-            {
-                if (!strcmp(Outputtable[outidx].name,data))
-                {
-                    plhs[rhsidx]=outputToMxStruct(Outputtable[outidx]);
-                    worked = 1;
-                    break;
-                }
-                outidx++;
-            } 
-            if (worked != 1) {printf("Unknown thing to output\n");return;}
-            free(data);
-            rhsidx++;
-        }
-    }
-}
 
 mxArray* FirstMatlabCall(int nlhs, mxArray* plhs[])
 {
-    if (ModelType==SINGLELAYER) {m=setup(OneLayerModel,OneLayerModel,ModelType,&Outputtable,jobnumber);} //pass the same layer as a double parameter
-    else {m=setup(DualLayerModelEx,DualLayerModelIn,ModelType,&Outputtable,jobnumber);}
+    if (ModelType==SINGLELAYER) {m=setup(OneLayerModel,OneLayerModel,ModelType,jobnumber);} //pass the same layer as a double parameter
+    else {m=setup(DualLayerModelEx,DualLayerModelIn,ModelType,jobnumber);}
     //set up initial voltage matrix - we need a different number if we are in single or double layer model - so encase the voltages in a struct
     mxArray* voltages = mxCreateStructMatrix(1,1,3,(const char*[]){"Vin","Vex","Vsingle_layer"});
     if (ModelType==SINGLELAYER)
@@ -176,9 +145,8 @@ int main(int argc,char** argv) //useful for testing w/out matlab
                 break;
         }
     }
-    printout_struct(&OneLayerModel,"parameters");
-    if (ModelType==SINGLELAYER) {m=setup(newparam!=NULL? (*newparam):OneLayerModel,newparam!=NULL? (*newparam):OneLayerModel,ModelType,&Outputtable,jobnumber);} //pass the same layer as a double parameter
-    else {m=setup(DualLayerModelIn,newparam!=NULL?*newparam:DualLayerModelEx,ModelType,&Outputtable,jobnumber);}
+    if (ModelType==SINGLELAYER) {m=setup(newparam!=NULL? (*newparam):OneLayerModel,newparam!=NULL? (*newparam):OneLayerModel,ModelType,jobnumber);} //pass the same layer as a double parameter
+    else {m=setup(DualLayerModelIn,newparam!=NULL?*newparam:DualLayerModelEx,ModelType,jobnumber);}
     Compute_float* input=calloc(sizeof(Compute_float),grid_size*grid_size);
     Compute_float* input2=calloc(sizeof(Compute_float),grid_size*grid_size);
     randinit(input,OneLayerModel.potential); //need to fix for dual layer

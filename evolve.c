@@ -2,7 +2,6 @@
 #include <string.h> //memset
 #include <stdlib.h> //random
 #include "theta.h"
-#include "layer.h"
 #include "output.h"
 //when STDP is turned off, gcc will warn about this function needing const.  It is wrong
 ///Adds in the component of connection matrices due to STDP effected dynamic synapses

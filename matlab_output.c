@@ -1,3 +1,7 @@
+///\file
+#include <string.h>
+#include "matlab_includes.h"
+#include "output.h"
 #ifdef MATLAB
 //When using matlab, we want to be able to output just about any array of stuff.  This function does the work
 mxArray* outputToMxArray (const tagged_array input) 

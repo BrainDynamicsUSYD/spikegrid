@@ -6,6 +6,7 @@ time=1;
 % Membrane potential
 figure(1);
 hV = imagesc(V.Vex ,[-80 -55]);
+gridsize=length(V.Vex(:,1));
 set(gca,'XLim',[0.5 gridsize+0.5],'YLim',[0.5 gridsize+0.5],'XTick',[],'YTick',[],...
     'XTickLabel',[],'YTickLabel',[],'XGrid','off','YGrid','off');
 colormap('default');

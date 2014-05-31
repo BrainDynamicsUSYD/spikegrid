@@ -8,6 +8,7 @@
 #include "init.h"
 #include "yossarian.h"
 #include "output.h"
+#include "printstruct.h"
 unsigned int mytime=0;  ///<< The current time step
 model* m;               ///< The model we are evolving through time
 int jobnumber=0;        ///< The current job number - used for pics directory etc
@@ -179,6 +180,7 @@ int main(int argc,char** argv) //useful for testing w/out matlab
                 break;
         }
     }
+    printout_struct(&OneLayerModel,"parameters");
     if (ModelType==SINGLELAYER) {m=setup(newparam!=NULL? (*newparam):OneLayerModel,newparam!=NULL? (*newparam):OneLayerModel,ModelType,&Outputtable);} //pass the same layer as a double parameter
     else {m=setup(DualLayerModelIn,newparam!=NULL?*newparam:DualLayerModelEx,ModelType,&Outputtable);}
     Compute_float* input=calloc(sizeof(Compute_float),grid_size*grid_size);

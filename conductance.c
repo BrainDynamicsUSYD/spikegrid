@@ -7,6 +7,8 @@
 #include "newparam.h"
 #include "init.h"
 #include "yossarian.h"
+#include "matlab_includes.h"
+#include "matlab_output.h"
 unsigned int mytime=0;  ///<< The current time step
 model* m;               ///< The model we are evolving through time
 int jobnumber=-1;        ///< The current job number - used for pics directory etc
@@ -42,7 +44,7 @@ mxArray* CreateInitialVoltage(conductance_parameters c)
     return volts;
 }
 
-mxArray* FirstMatlabCall(int nlhs, mxArray* plhs[])
+mxArray* FirstMatlabCall( )
 {
     if (ModelType==SINGLELAYER) {m=setup(OneLayerModel,OneLayerModel,ModelType,jobnumber);} //pass the same layer as a double parameter
     else {m=setup(DualLayerModelEx,DualLayerModelIn,ModelType,jobnumber);}
@@ -69,13 +71,12 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
     if (nrhs!=nlhs) {printf("We need the same number of parameters on the left and right hand side\n");return;}
     if (setup_done==0) 
     {
-        plhs[0]=FirstMatlabCall(nlhs,plhs);
+        plhs[0]=FirstMatlabCall();
         outputExtraThings(plhs,nrhs,prhs);
         setup_done=1;
         return;
     }
     //error checking
-    if (nrhs < 1)   {printf("At least input the voltage(s)\n");return;}
    // if (mxGetClassID(prhs[0]) != MatlabDataType()) {printf("rhs parameter 1 is not of the correct data type (single/double)\n");return;}
   //  if (mxGetClassID(prhs[1]) != MatlabDataType()) {printf("rhs parameter 2 is not of the correct data type (single/double)\n");return;}
   //  if (mxGetM(prhs[0]) != grid_size || mxGetN(prhs[0]) != grid_size || mxGetNumberOfDimensions(prhs[0]) != 2) {printf("rhs parameter 1 has the wrong shape\n");return;}

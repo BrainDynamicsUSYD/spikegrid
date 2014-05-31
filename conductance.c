@@ -7,11 +7,9 @@
 #include "newparam.h"
 #include "init.h"
 #include "yossarian.h"
-#include "output.h"
-#include "printstruct.h"
 unsigned int mytime=0;  ///<< The current time step
 model* m;               ///< The model we are evolving through time
-int jobnumber=0;        ///< The current job number - used for pics directory etc
+int jobnumber=-1;        ///< The current job number - used for pics directory etc
 //The step function - evolves the model through time.
 //Perf wise the memcpy is probably not ideal, but this is a simple setup and the perf loss here is pretty small as memcpy is crazy fast
 //DO NOT CALL THIS FUNCTION "step" - this causes a weird collision in matlab that results in segfaults.  Incredibly fun to debug
@@ -32,8 +30,6 @@ void step_(const Compute_float* const inp,const Compute_float* const inp2)
         doSTDP(m->layer1.STDP_connections,&m->layer1.spikes,m->layer1.connections,m->layer1.P->STDP);
         doSTDP(m->layer2.STDP_connections,&m->layer2.spikes,m->layer2.connections,m->layer2.P->STDP);
     }
-    makemovie(m->layer1,mytime,jobnumber);
-    makemovie(m->layer2,mytime,jobnumber);
 }
 
 #ifdef MATLAB
@@ -79,8 +75,8 @@ void outputExtraThings(mxArray* plhs[],int nrhs,const mxArray* prhs[])
 
 mxArray* FirstMatlabCall(int nlhs, mxArray* plhs[])
 {
-    if (ModelType==SINGLELAYER) {m=setup(OneLayerModel,OneLayerModel,ModelType,&Outputtable);} //pass the same layer as a double parameter
-    else {m=setup(DualLayerModelEx,DualLayerModelIn,ModelType,&Outputtable);}
+    if (ModelType==SINGLELAYER) {m=setup(OneLayerModel,OneLayerModel,ModelType,&Outputtable,jobnumber);} //pass the same layer as a double parameter
+    else {m=setup(DualLayerModelEx,DualLayerModelIn,ModelType,&Outputtable,jobnumber);}
     //set up initial voltage matrix - we need a different number if we are in single or double layer model - so encase the voltages in a struct
     mxArray* voltages = mxCreateStructMatrix(1,1,3,(const char*[]){"Vin","Vex","Vsingle_layer"});
     if (ModelType==SINGLELAYER)
@@ -181,8 +177,8 @@ int main(int argc,char** argv) //useful for testing w/out matlab
         }
     }
     printout_struct(&OneLayerModel,"parameters");
-    if (ModelType==SINGLELAYER) {m=setup(newparam!=NULL? (*newparam):OneLayerModel,newparam!=NULL? (*newparam):OneLayerModel,ModelType,&Outputtable);} //pass the same layer as a double parameter
-    else {m=setup(DualLayerModelIn,newparam!=NULL?*newparam:DualLayerModelEx,ModelType,&Outputtable);}
+    if (ModelType==SINGLELAYER) {m=setup(newparam!=NULL? (*newparam):OneLayerModel,newparam!=NULL? (*newparam):OneLayerModel,ModelType,&Outputtable,jobnumber);} //pass the same layer as a double parameter
+    else {m=setup(DualLayerModelIn,newparam!=NULL?*newparam:DualLayerModelEx,ModelType,&Outputtable,jobnumber);}
     Compute_float* input=calloc(sizeof(Compute_float),grid_size*grid_size);
     Compute_float* input2=calloc(sizeof(Compute_float),grid_size*grid_size);
     randinit(input,OneLayerModel.potential); //need to fix for dual layer

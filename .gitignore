@@ -30,3 +30,4 @@ compile.m
 whichparam.h
 pics*
 gdbcmds
+output/*

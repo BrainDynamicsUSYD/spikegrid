@@ -3,8 +3,9 @@
 #define OUTPUT
 #include "matlab_includes.h"
 #include "layer.h"
+char outdir [100];
 output_s* Outputtable;
-void makemovie(const layer l,const unsigned int t,const int jobnumber);
+void makemovie(const layer l,const unsigned int t);
 #ifdef MATLAB
 mxClassID __attribute__((pure,const)) MatlabDataType();
 mxArray* outputToMxStruct(const output_s input);

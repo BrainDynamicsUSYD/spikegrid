@@ -3,6 +3,7 @@
 #include <stdlib.h> //random
 #include "theta.h"
 #include "layer.h"
+#include "output.h"
 //when STDP is turned off, gcc will warn about this function needing const.  It is wrong
 ///Adds in the component of connection matrices due to STDP effected dynamic synapses
 void evolvept_STDP  (const int x,const  int y,const Compute_float* const __restrict connections_STDP,const Compute_float Estrmod,const Compute_float Istrmod,Compute_float* __restrict gE,Compute_float* __restrict gI)
@@ -226,4 +227,6 @@ void step1(model* m,const unsigned int time)
     if(m->NoLayers==DUALLAYER){StoreFiring(&(m->layer2));}
     ResetVoltages(m->layer1.voltages_out,m->layer1.P->couple,&m->layer1.spikes,m->layer1.P->potential);
     if(m->NoLayers==DUALLAYER){ResetVoltages(m->layer2.voltages_out,m->layer2.P->couple,&m->layer2.spikes,m->layer2.P->potential);}
+    makemovie(m->layer1,time);
+    if (m->NoLayers==DUALLAYER){makemovie(m->layer2,time);}
 }

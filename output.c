@@ -116,16 +116,13 @@ mxArray* outputToMxStruct(const output_s input)
 /// number of PNG's outputted.  Used to keep track of the next filename to use
 int printcount=0;
 ///convert a tagged array to a PNG.  Paths are auto-calculated
-void OutputToPng(const tagged_array input,const Compute_float minval,const Compute_float maxval,const int jobnumber)
+void OutputToPng(const tagged_array input,const Compute_float minval,const Compute_float maxval)
 {
     char fnamebuffer[30];
-    char dnamebuffer[30];
     const unsigned int size = input.size - (2*input.offset);
     Compute_float* actualdata=taggedarrayTocomputearray(input);
     bitmap_t* b = FloattoBitmap(actualdata,size,minval,maxval);
-    sprintf(dnamebuffer,"pics-%i",jobnumber);
-    mkdir(dnamebuffer,S_IRWXU);//irwxu is full permissions for owner - see man sys_stat.h
-    sprintf(fnamebuffer,"%s/%i.png",dnamebuffer,printcount);
+    sprintf(fnamebuffer,"%s/%i.png",outdir,printcount);
     printcount++;
     save_png_to_file(b,fnamebuffer);
     free(b->pixels);
@@ -134,10 +131,10 @@ void OutputToPng(const tagged_array input,const Compute_float minval,const Compu
     
 }
 ///High level function to create a series of PNG images which can be then turned into a movie
-void makemovie(const layer l,const unsigned int t,const int jobnumber)
+void makemovie(const layer l,const unsigned int t)
 {
     if (l.P->Movie.MakeMovie==ON && t % l.P->Movie.Delay==0)
     {
-        OutputToPng(Outputtable[l.P->Movie.Output].data,Outputtable[l.P->Movie.Output].minval,Outputtable[l.P->Movie.Output].maxval,jobnumber);
+        OutputToPng(Outputtable[l.P->Movie.Output].data,Outputtable[l.P->Movie.Output].minval,Outputtable[l.P->Movie.Output].maxval);
     }
 }

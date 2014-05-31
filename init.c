@@ -3,8 +3,11 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h> //gethostname
+#include <sys/stat.h>
 #include "coupling.h"
 #include "layer.h"
+#include "output.h"
+#include "printstruct.h"
 ///creates a random initial condition
 ///This is generated as small fluctuations away from Vrt
 /// @param input    The input matrix - Modified in place
@@ -68,8 +71,21 @@ layer setuplayer(const parameters p)
     return L;
 }
 ///The idea here is that "one-off" setup occurs here, whilst per-layer setup occurs in setuplayer
-model* setup(const parameters p,const parameters p2,const LayerNumbers lcount, output_s** outputtables)
+model* setup(const parameters p,const parameters p2,const LayerNumbers lcount, output_s** outputtables,int jobnumber)
 {
+    if (jobnumber <0)
+    {
+        sprintf(outdir,"output/");
+        mkdir(outdir,S_IRWXU);
+    }
+    else
+    {
+        sprintf(outdir,"job-%i/",jobnumber);
+        mkdir(outdir,S_IRWXU);
+    }
+    remove("struct.dump");//cleanup the old struct file
+    printout_struct(&p,"parameters",outdir,0);     //save the first parameters object
+    printout_struct(&p2,"parameters",outdir,1);    //save the second parameters object and display everything
     const layer l1 = setuplayer(p);
     const layer l2 = lcount==DUALLAYER?setuplayer(p2):l1;
     const layer* layer1 = (layer*)newdata(&l1,sizeof(layer));//this is required to ensure that we get heap allocated layers

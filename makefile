@@ -35,6 +35,7 @@ time: ${BINARY}
 	echo ${VERSION_HASH} $$( (/usr/bin/time  -f '%e' 'sh' '-c' './${BINARY} > /dev/null') 2>&1) >> times
 yossarian.csh: ${BINARY}
 	${BINARY} -g
+	chmod +x yossarian.csh
 submit: yossarian.csh
 	qsub yossarian.csh
 clean:

@@ -25,7 +25,7 @@ void createyossarianfile (const char* const outfile,const sweepable sweep)
 "#PBS -V\n"
 "#PBS -t 0-%i\n"
 "cd %s\n"
-"./a.out -s $PBS_ARRAYID",cwd,sweep.count,cwd);
+"./a.out -s $PBS_ARRAYID\n",cwd,sweep.count,cwd);
     fclose(file);
 
 

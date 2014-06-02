@@ -1,4 +1,6 @@
-compile;
+dbmex on
+compileslow;
+
 time=1;
 %initial call
 [V, gE] = conductance('dummy','gE');

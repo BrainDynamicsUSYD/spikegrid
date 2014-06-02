@@ -129,7 +129,7 @@ static const parameters DualLayerModelIn =
     }, 
     .STD =
     {
-        .U  = 0.5,
+        .U  = 0.03,
         .D  = 0.2,
         .F  = 0.45
     },
@@ -144,7 +144,7 @@ static const parameters DualLayerModelIn =
         .strength    = 5.0,
         .period     = 0.2,
     },
-    .skip=1,
+    .skip=2,
 };
 ///parameters for the excitatory layer of the double layer model
 static const parameters DualLayerModelEx =
@@ -156,7 +156,7 @@ static const parameters DualLayerModelEx =
         {
             .dual =     
             {
-                .W          =  0.43, //0.09 //0.12 //0.14  //0.23
+                .W          =  2.0, //0.09 //0.12 //0.14  //0.23
                 .sigma      = 20,
                 .synapse    = {.R=0.5,.D=3.0},
             }
@@ -190,7 +190,7 @@ static const parameters DualLayerModelEx =
     }, 
     .STD =
     {
-        .U  = 0.5,
+        .U  = 0.03,
         .D  = 0.2,
         .F  = 0.45
     },

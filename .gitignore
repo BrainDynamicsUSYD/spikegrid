@@ -31,3 +31,4 @@ whichparam.h
 pics*
 gdbcmds
 output/*
+compileslow.m

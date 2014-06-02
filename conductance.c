@@ -1,7 +1,10 @@
 /// \file
+//for debugging
+#define _GNU_SOURCE
 #include <string.h> //memcpy
 #include <getopt.h> //getopt
 #include <stdlib.h> //exit
+#include <fenv.h>   //for some debugging
 #include "STDP.h"
 #include "evolve.h"
 #include "newparam.h"
@@ -46,6 +49,7 @@ mxArray* CreateInitialVoltage(conductance_parameters c)
 
 mxArray* FirstMatlabCall( )
 {
+    feenableexcept(FE_INVALID | FE_OVERFLOW);
     if (ModelType==SINGLELAYER) {m=setup(OneLayerModel,OneLayerModel,ModelType,jobnumber);} //pass the same layer as a double parameter
     else {m=setup(DualLayerModelEx,DualLayerModelIn,ModelType,jobnumber);}
     //set up initial voltage matrix - we need a different number if we are in single or double layer model - so encase the voltages in a struct
@@ -98,8 +102,8 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
         mxArray* out2 = mxCreateNumericMatrix(grid_size,grid_size,MatlabDataType(),mxREAL);
         memcpy((Compute_float*)mxGetData(out1),m->layer1.voltages_out,sizeof(Compute_float)*grid_size*grid_size);
         memcpy((Compute_float*)mxGetData(out2),m->layer2.voltages_out,sizeof(Compute_float)*grid_size*grid_size);
-        mxSetField(voltages,0,"Vin",out1);
-        mxSetField(voltages,0,"Vex",out2);
+        mxSetField(voltages,0,"Vex",out1);
+        mxSetField(voltages,0,"Vin",out2);
     }
     plhs[0] = voltages;
     outputExtraThings(plhs,nrhs,prhs);
@@ -151,7 +155,7 @@ int main(int argc,char** argv) //useful for testing w/out matlab
     Compute_float* input=calloc(sizeof(Compute_float),grid_size*grid_size);
     Compute_float* input2=calloc(sizeof(Compute_float),grid_size*grid_size);
     randinit(input,OneLayerModel.potential); //need to fix for dual layer
-    while (mytime<5000)
+    while (mytime<1000)
     {
         step_(input,input2);//always fine to pass an extra argument here
         printf("%i\n",mytime);

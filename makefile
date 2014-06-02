@@ -44,7 +44,3 @@ clean:
 	-rm -rf html
 compile.m: makefile
 	echo "mex CFLAGS=\"-fPIC -shared ${CFLAGS}  -DMATLAB \" LDFLAGS=\"${LDFLAGS} -shared\" ${SOURCES}" > compile.m
-params: ${BINARY}
-	gdb -ex "set print pretty on" -ex "echo OneLayerModel = " -ex "output OneLayerModel" -ex "echo DualLayerModelIn =" -ex "output DualLayerModelIn" -ex "echo DualLayerModelEx" -ex "output DualLayerModelEx" -ex "echo Sweep" -ex "output Sweep" --batch ${BINARY}
-matlabparams: ${BINARY}
-	gdb -ex "set print pretty on" -ex "echo OneLayerModel = " -ex "output OneLayerModel" -ex "echo DualLayerModelIn =" -ex "output DualLayerModelIn" -ex "echo DualLayerModelEx" -ex "output DualLayerModelEx" -ex "echo Sweep" -ex "output Sweep" --batch conductance.mexa64

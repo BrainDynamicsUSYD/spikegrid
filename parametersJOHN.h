@@ -47,11 +47,7 @@ static const parameters OneLayerModel =
     {
         .type    = 
         {
-            .type = EIF,
-            .extra = 
-            {
-                .EIF={.Vth=-55,.Dpk=1}
-            }
+            .type = LIF,
         },
         .Vrt     = -70,                  //reset potential
         .Vpk    = -55,                   //peak potential (at which membrane potential is reset -- must match Vth for LIF neurons)
@@ -107,11 +103,7 @@ static const parameters DualLayerModelIn =
     {
         .type    = 
         {
-            .type = EIF,
-            .extra = 
-            {
-                .EIF={.Vth=-55,.Dpk=1}
-            }
+            .type = LIF,
         },
         .Vrt     = -70,                  //reset potential
         .Vpk    = -55,                   //peak potential (at which membrane potential is reset -- must match Vth for LIF neurons)
@@ -168,11 +160,7 @@ static const parameters DualLayerModelEx =
     {
         .type    = 
         {
-            .type = EIF,
-            .extra = 
-            {
-                .EIF={.Vth=-55,.Dpk=1}
-            }
+            .type = LIF,
         },
         .Vrt     = -70,                  //reset potential
         .Vpk    = -55,                   //peak potential (at which membrane potential is reset -- must match Vth for LIF neurons)

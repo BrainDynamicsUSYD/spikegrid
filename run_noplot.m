@@ -1,5 +1,5 @@
 dbmex on
-compileslow;
+compile;
 
 time=1;
 %initial call

@@ -49,7 +49,7 @@ mxArray* CreateInitialVoltage(conductance_parameters c)
 
 mxArray* FirstMatlabCall( )
 {
-    feenableexcept(FE_INVALID | FE_OVERFLOW);
+ //   feenableexcept(FE_INVALID | FE_OVERFLOW);
     if (ModelType==SINGLELAYER) {m=setup(OneLayerModel,OneLayerModel,ModelType,jobnumber);} //pass the same layer as a double parameter
     else {m=setup(DualLayerModelEx,DualLayerModelIn,ModelType,jobnumber);}
     //set up initial voltage matrix - we need a different number if we are in single or double layer model - so encase the voltages in a struct
@@ -96,8 +96,8 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
     }
     else
     {
-        step_((Compute_float*) mxGetData(mxGetField(prhs[0],0,"Vin")),
-                (Compute_float*) mxGetData(mxGetField(prhs[0],0,"Vex")));
+        step_((Compute_float*) mxGetData(mxGetField(prhs[0],0,"Vex")),
+                (Compute_float*) mxGetData(mxGetField(prhs[0],0,"Vin")));
         mxArray* out1 = mxCreateNumericMatrix(grid_size,grid_size,MatlabDataType(),mxREAL);
         mxArray* out2 = mxCreateNumericMatrix(grid_size,grid_size,MatlabDataType(),mxREAL);
         memcpy((Compute_float*)mxGetData(out1),m->layer1.voltages_out,sizeof(Compute_float)*grid_size*grid_size);

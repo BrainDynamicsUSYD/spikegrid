@@ -67,7 +67,6 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
     for (unsigned int i=1;i<L.spikes.count;i++) //start at 1 so we don't get currently firing (which should be empty anyway)
     {
         const coords* const fire_with_this_lag = ringbuffer_getoffset(&L.spikes,(int)i);
-        //const int delta =(int)(((Compute_float)i)*Features.Timestep);//small helper constant.
         const int Eon = L.Extimecourse!=NULL; //does this layer have excitation
         const int Ion = L.Intimecourse!=NULL; //and inhibition
         const Compute_float Estr =Eon? L.Extimecourse[i]:Zero;
@@ -123,7 +122,6 @@ void fixboundary(Compute_float* __restrict gE, Compute_float* __restrict gI)
              gI[i*conductance_array_size +couplerange+j] += gI [i*conductance_array_size + grid_size+couplerange+j];//right
 		}
 	}
-
 }
 
 ///rhs_func used when integrating the neurons forward through time.  The actual integration is done using the midpoint method
@@ -164,33 +162,37 @@ void StoreFiring(layer* L)
 {
     coords* current_firestore = L->spikes.data[L->spikes.curidx];//get the thing for currently firing neurons
     int this_fcount=0;
-    int step =  L->P->skip;
-    for (int x=0;x<grid_size;x+= step)
+    const int step =  L->P->skip;
+    for (int x=0;x<grid_size;x+= 1)
     {
-        for (int y=0;y<grid_size;y+=step)
+        for (int y=0;y<grid_size;y+=1)
         {
-            if (L->voltages[x*grid_size + y]  > L->P->potential.Vpk)
+            if (x % step ==0 && y% step ==0)
             {
-                current_firestore[this_fcount] =(coords){.x=x,.y=y};
-                L->voltages_out[x*grid_size+y]=L->P->potential.Vrt;
-                this_fcount++;
-                if (Features.Output==ON)
+                if (L->voltages[x*grid_size + y]  > L->P->potential.Vpk)
                 {
-                    printf("%i,%i;",x,y);
+                    current_firestore[this_fcount] =(coords){.x=x,.y=y};
+                    L->voltages_out[x*grid_size+y]=L->P->potential.Vrt;
+                    this_fcount++;
+                    if (Features.Output==ON)
+                    {
+                        printf("%i,%i;",x,y);
+                    }
+                }
+                else if (((Compute_float)random())/((Compute_float)RAND_MAX) < 
+                        (L->P->potential.rate*((Compute_float)0.001)*Features.Timestep))
+                {
+                    L->voltages_out[x*grid_size+y]=L->P->potential.Vpk+(Compute_float)0.1;//make sure it fires
                 }
             }
-            else if (((Compute_float)random())/((Compute_float)RAND_MAX) < 
-                    (L->P->potential.rate*((Compute_float)0.001)*Features.Timestep))
-            {
-                L->voltages_out[x*grid_size+y]=L->P->potential.Vpk+(Compute_float)0.1;//make sure it fires
-            }
+            else {L->voltages_out[x*grid_size+y]=Zero;}
         }
     }
     if (Features.Output==ON ) {printf("\n");} //occasionaly print newlines
     current_firestore[this_fcount].x=-1;
 }
 ///Cleans up voltages for neurons that are in the refractory state
-void ResetVoltages(Compute_float* const __restrict Vout,const couple_parameters C,const ringbuffer* spikes,const conductance_parameters CP)
+void ResetVoltages(Compute_float* const __restrict Vout,const couple_parameters C,const ringbuffer* const spikes,const conductance_parameters CP)
 {
     const int trefrac_in_ts =(int) ((Compute_float)C.tref / Features.Timestep);
     for (int i=1;i<=trefrac_in_ts;i++) //start at 1 so we don't get currently firing (which should be empty anyway)

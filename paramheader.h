@@ -140,13 +140,14 @@ typedef struct theta_parameters
 	const Compute_float period;
 } theta_parameters;
 ///Global switches to enable/disable features.  Also holds some model-independent parameters
-typedef struct model_features
+typedef struct 
 {
 	const on_off STDP;
     const on_off STD;
     const on_off Output;
     const on_off Theta;
     const Compute_float Timestep; ///< The timestep in the model
+    const unsigned int   Simlength; ///< total number of timesteps to run
 } model_features;
  
 

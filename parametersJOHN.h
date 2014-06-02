@@ -92,7 +92,7 @@ static const parameters DualLayerModelIn =
             .dual = 
             {
                 .W          = -1.06, //-0.40 //-0.57 //-0.70 //-1.25, 
-                .sigma      = 20, 
+                .sigma      = 40, 
                 .synapse    = {.R=0.5,.D=3.0},
             }
         },
@@ -148,8 +148,8 @@ static const parameters DualLayerModelEx =
         {
             .dual =     
             {
-                .W          =  2.0, //0.09 //0.12 //0.14  //0.23
-                .sigma      = 20,
+                .W          =  0.8, //0.09 //0.12 //0.14  //0.23
+                .sigma      = 40,
                 .synapse    = {.R=0.5,.D=3.0},
             }
         },
@@ -203,13 +203,14 @@ static const model_features Features =
     .Output     = OFF,
     .Theta      = OFF,
     .Timestep   = 0.1,
+    .Simlength  = 5000
 };
 ///Parameters for conducting a parameter sweep.
 static const sweepable Sweep =
 {
     .offset=offsetof(parameters,couple)+offsetof(couple_parameters,Layer_parameters) +0+ /*offset in the union is always 0*/  + offsetof(duallayer_parameters,W),
     .minval = 0.0,
-    .maxval = 1.0,
+    .maxval = 2.0,
     .count = 100
 };
 

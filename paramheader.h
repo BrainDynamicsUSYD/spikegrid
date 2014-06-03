@@ -53,7 +53,7 @@ typedef struct decay_parameters{
 } decay_parameters;
 ///Enum to determine how many layers are in use
 typedef enum LayerNumbers {SINGLELAYER=0,DUALLAYER=1} LayerNumbers;
-// Manner in which model neuron integrates input
+///Enum to determine whether there is a recovery variable
 typedef enum NEURON_TYPE {LIF=0,QIF=1,EIF=2} neuron_type;
 ///Parameters for a layer when it is the only one
 typedef struct singlelayer_parameters
@@ -111,6 +111,13 @@ typedef struct conductance_parameters
     const Compute_float glk    ;  ///<leak conductance (ms^-1)
     const Compute_float rate   ;  ///<Rate of external input (spikes/neuron/s)
 } conductance_parameters;
+/// Contains parameters which control the Recovery dynamics of neurons
+typedef struct recovery_parameters
+{
+    const Compute_float Wrt; /// reset of recovery variable
+    const Compute_float Wir; /// determines if resonator or integrator
+    const Compute_float Wcv; /// coupling with the voltage?
+} recovery_parameters;
 ///Parameters for STDP
 typedef struct STDP_parameters
 {
@@ -142,6 +149,7 @@ typedef struct theta_parameters
 ///Global switches to enable/disable features.  Also holds some model-independent parameters
 typedef struct 
 {
+    const on_off Recovery;
 	const on_off STDP;
     const on_off STD;
     const on_off Output;
@@ -150,7 +158,6 @@ typedef struct
     const unsigned int   Simlength; ///< total number of timesteps to run
 } model_features;
  
-
 ///Structure that holds all the parameters for a layer
 typedef struct 
 {
@@ -160,6 +167,7 @@ typedef struct
     const STD_parameters STD;
     const movie_parameters Movie;
     const theta_parameters theta;
+    const recovery_parameters recovery;
     const int skip;
 } parameters;
 

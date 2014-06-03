@@ -61,6 +61,8 @@ layer setuplayer(const parameters p)
         .P                  = (parameters*)newdata(&p,sizeof(p)), 
         .voltages           = calloc(sizeof(Compute_float),grid_size*grid_size),
         .voltages_out       = calloc(sizeof(Compute_float),grid_size*grid_size),
+        .recoverys       = Features.Recovery==ON?calloc(sizeof(Compute_float),grid_size*grid_size):NULL,
+        .recoverys_out   = Features.Recovery==ON?calloc(sizeof(Compute_float),grid_size*grid_size):NULL
     };
     for (unsigned int i=0;i<cap;i++)
     {
@@ -70,6 +72,7 @@ layer setuplayer(const parameters p)
     return L;
 }
 ///The idea here is that "one-off" setup occurs here, whilst per-layer setup occurs in setuplayer
+// No idea wtf this function is doing - Adam.
 model* setup(const parameters p,const parameters p2,const LayerNumbers lcount, int jobnumber)
 {
     if (jobnumber <0)

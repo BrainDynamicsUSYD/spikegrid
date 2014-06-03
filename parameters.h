@@ -20,7 +20,6 @@
 #include "paramheader.h"
 ///Whether we are using the single or double layer model
 static const LayerNumbers ModelType = DUALLAYER;
-
 //Fun note - with the right optimisations GCC actually will pull these constants inline (for example disassemble evolvept_STDP with STDP off)
 ///Parameters for the single layer model
 static const parameters OneLayerModel = 
@@ -61,6 +60,12 @@ static const parameters OneLayerModel =
         .glk     = 0.05,                 //leak current
         .rate = 1,
     },
+    .recovery = 
+    {
+        .Wrt = 2,
+        .Wir = -1,
+        .Wcv = 0.08
+    }
     .STDP = 
     {
         .stdp_limit     = 0.1,
@@ -120,7 +125,13 @@ static const parameters DualLayerModelIn =
         .Vin     = -80,                  //In reversal potential
         .glk     = 0.05,                 //leak current
         .rate = 1,
-    },    
+    },  
+    .recovery = 
+    {
+        .Wrt = 2,
+        .Wir = -1,
+        .Wcv = 0.08
+    }  
     .STDP = 
     {
         .stdp_limit     = 0.1,
@@ -182,6 +193,12 @@ static const parameters DualLayerModelEx =
         .glk     = 0.05,                 //leak current
         .rate = 1,
     },
+    .recovery = 
+    {
+        .Wrt = 2,                   
+        .Wir = -1,
+        .Wcv = 0.08
+    }
     .STDP = 
     {
         .stdp_limit     = 0.1,
@@ -210,6 +227,7 @@ static const parameters DualLayerModelEx =
 ///Some global features that can be turned on and off
 static const model_features Features = 
 {
+    .Recovery   = ON,
     .STDP		= OFF, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep - 
     .STD        = OFF, //               if we need any of these features we can make the changes then.
     .Output     = OFF,

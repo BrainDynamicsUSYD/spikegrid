@@ -3,6 +3,7 @@
 #include <stdlib.h> //random
 #include "theta.h"
 #include "output.h"
+#include "STDP.h"
 //when STDP is turned off, gcc will warn about this function needing const.  It is wrong
 ///Adds in the component of connection matrices due to STDP effected dynamic synapses
 void evolvept_STDP  (const int x,const  int y,const Compute_float* const __restrict connections_STDP,const Compute_float Estrmod,const Compute_float Istrmod,Compute_float* __restrict gE,Compute_float* __restrict gI)
@@ -140,7 +141,11 @@ Compute_float __attribute__((const,pure)) rhs_func  (const Compute_float V,const
 }
 
 ///Uses precalculated gE and gI to integrate the voltages forward through time.
-void CalcVoltages(const Compute_float* const __restrict__ Vinput,const Compute_float* const __restrict__ gE, const Compute_float* const __restrict__ gI,const conductance_parameters C, Compute_float* const __restrict__ Vout)
+void CalcVoltages(const Compute_float* const __restrict__ Vinput,
+        const Compute_float* const __restrict__ gE, 
+        const Compute_float* const __restrict__ gI,
+        const conductance_parameters C, 
+        Compute_float* const __restrict__ Vout)
 {
     for (int x=0;x<grid_size;x++) 
     {
@@ -157,7 +162,14 @@ void CalcVoltages(const Compute_float* const __restrict__ Vinput,const Compute_f
     }
 }
 ///Uses precalculated gE and gI to integrate the voltages and recoverys forward through time. This uses the Euler method
-void CalcRecoverys(const Compute_float* const __restrict__ Vinput, const Compute_float* const __restrict__ Winput, const Compute_float* const __restrict__ gE, const Compute_float* const __restrict__ gI,const conductance_parameters C, const recovery_parameters R, Compute_float* const __restrict__ Vout, Compute_float* const __restrict__ Wout)
+void CalcRecoverys(const Compute_float* const __restrict__ Vinput, 
+        const Compute_float* const __restrict__ Winput, 
+        const Compute_float* const __restrict__ gE, 
+        const Compute_float* const __restrict__ gI,
+        const conductance_parameters C, 
+        const recovery_parameters R, 
+        Compute_float* const __restrict__ Vout, 
+        Compute_float* const __restrict__ Wout)
 {    // Adaptive quadratic integrate-and-fire
     for (int x=0;x<grid_size;x++) 
     {
@@ -267,5 +279,10 @@ void step1(model* m,const unsigned int time)
     {
         dotheta(m->layer1.voltages_out,m->layer1.P->theta,timemillis);
         if (m->NoLayers==DUALLAYER) {dotheta(m->layer2.voltages_out,m->layer2.P->theta,timemillis);}
+    }
+    if (Features.STDP==ON)
+    {
+        doSTDP(m->layer1.STDP_connections,&m->layer1.spikes,m->layer1.connections,m->layer1.P->STDP);
+        if (m->NoLayers==DUALLAYER) {doSTDP(m->layer2.STDP_connections,&m->layer2.spikes,m->layer2.connections,m->layer2.P->STDP);}
     }
 }

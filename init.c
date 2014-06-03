@@ -7,18 +7,23 @@
 #include "coupling.h"
 #include "output.h"
 #include "printstruct.h"
+int randinit_done = 0;
 ///creates a random initial condition
 ///This is generated as small fluctuations away from Vrt
 /// @param input    The input matrix - Modified in place
 /// @param V        Used to get the Vrt 
-void randinit(Compute_float* input,const conductance_parameters V)
+void randinit(Compute_float* input,const Compute_float minval,const Compute_float maxval)
 {
-    srandom((unsigned)(time(0)));
+    if (randinit_done==0)
+    {
+        srandom((unsigned)(time(0))); 
+        randinit_done=1;
+    }
     for (int x=0;x<grid_size;x++)
     {
         for (int y=0;y<grid_size;y++)
         {
-            input[x*grid_size + y ] = ((Compute_float)random())/((Compute_float)RAND_MAX)/((Compute_float)20.0) + V.Vrt;
+            input[x*grid_size + y ] = ((Compute_float)random())/((Compute_float)RAND_MAX)*(maxval-minval)+minval;///((Compute_float)20.0) + V.Vrt;
         }
     }
 }

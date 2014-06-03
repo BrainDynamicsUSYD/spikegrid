@@ -6,14 +6,17 @@
 
 // initialize global variables
 const int maxjobs = 1000;
-const int rows = 2;
-const int cols = 2;
+const int rows = 9;
+const int cols = 9;
 char* winname = "viewer0";
 char** dirnames;
 void mousecb(int event, int x,int y,int dummy,void* dummy2) 
 {
-    int idx = x*cols+y;
-    printf("%s\n",dirnames[idx]);
+    if (event==CV_EVENT_LBUTTONDOWN)
+    {
+        int idx = (x/100)*cols+(y/100);
+        printf("%s\n",dirnames[idx]);
+    }
 }
 int main() {
     //scan directory
@@ -35,6 +38,7 @@ int main() {
     }
     //set up video inputs
     cvNamedWindow(winname,CV_WINDOW_AUTOSIZE);
+    cvMoveWindow(winname,0,0);
     cvSetMouseCallback(winname,mousecb,0);
     int size;
     CvCapture* caps[rows*cols];
@@ -42,7 +46,6 @@ int main() {
     int iterations = 0;
     while (vididx < dirno)
     {
-        printf("starting new batch");
         int vcount=0;
         for (int i=0;i<rows*cols && vididx< dirno ;i++)
         {
@@ -66,6 +69,8 @@ int main() {
                 cvResetImageROI(dispimage);
             }
             cvShowImage(winname,dispimage);
+                int c = cvWaitKey(33);
+                if (c==27) break;
         }
 done:
         // free memory

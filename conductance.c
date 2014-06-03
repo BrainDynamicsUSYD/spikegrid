@@ -36,7 +36,6 @@ void step_(const Compute_float* const inp,const Compute_float* const inp2)
         doSTDP(m->layer2.STDP_connections,&m->layer2.spikes,m->layer2.connections,m->layer2.P->STDP);
     }
 }
-
 #ifdef MATLAB
 int setup_done=0;
 mxArray* CreateInitialVoltage(conductance_parameters c)
@@ -154,10 +153,11 @@ int main(int argc,char** argv) //useful for testing w/out matlab
     else {m=setup(DualLayerModelIn,newparam!=NULL?*newparam:DualLayerModelEx,ModelType,jobnumber);}
     Compute_float* input=calloc(sizeof(Compute_float),grid_size*grid_size);
     Compute_float* input2=calloc(sizeof(Compute_float),grid_size*grid_size);
-    randinit(input,OneLayerModel.potential); //need to fix for dual layer
+    randinit(input,DualLayerModelEx.potential); //need to fix for single layer
+    randinit(input2,DualLayerModelIn.potential); 
     while (mytime<Features.Simlength)
     {
-        step_(input,input2);//always fine to pass an extra argument here
+        step_(input2,input);//always fine to pass an extra argument here
         printf("%i\n",mytime);
         for (int i=0;i<grid_size;i++)
         {

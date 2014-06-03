@@ -16,7 +16,8 @@ CFLAGS += ${SPEEDFLAG}
 SOURCES= conductance.c coupling.c  STDP.c STD.c picture.c output.c evolve.c ringbuffer.c newparam.c yossarian.c init.c theta.c printstruct.c matlab_output.c
 BINARY=./a.out
 VERSION_HASH = $(shell git rev-parse HEAD)
-.PHONY: profile clean submit docs debug params matlabparams
+export VIEWERBIN=$(shell pwd)/watch
+.PHONY: profile clean submit docs debug params matlabparams viewer ${VIEWERBIN}
 ${BINARY}: ${SOURCES} *.h
 	${CC} ${CFLAGS}     ${SOURCES} -o ${BINARY} ${LDFLAGS}
 debug: ${SOURCE}
@@ -46,3 +47,6 @@ compile.m: makefile
 	echo "mex CFLAGS=\"-fPIC -shared ${CFLAGS}  -DMATLAB \" LDFLAGS=\"${LDFLAGS} -shared\" ${SOURCES}" > compile.m
 compileslow.m: makefile
 	echo "mex CFLAGS=\"-fPIC -shared ${DEBUGFLAGS}  -DMATLAB \" LDFLAGS=\"${LDFLAGS} -shared\" ${SOURCES}" > compileslow.m
+viewer: ${VIEWERBIN}
+${VIEWERBIN} :
+	cd viewer && $(MAKE) ${VIEWERBIN}

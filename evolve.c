@@ -232,31 +232,40 @@ void ResetVoltages(Compute_float* const __restrict Vout,const couple_parameters 
 ///Steps a model through 1 timestep - quite high-level function
 void step1(model* m,const unsigned int time)
 {
-	const Compute_float timemillis = ((Compute_float)time) * Features.Timestep ;
+    const Compute_float timemillis = ((Compute_float)time) * Features.Timestep ;
     memset(m->gE,0,sizeof(Compute_float)*conductance_array_size*conductance_array_size); //zero the gE/gI matrices so they can be reused for this timestep
     memset(m->gI,0,sizeof(Compute_float)*conductance_array_size*conductance_array_size);
     AddSpikes(m->layer1,m->gE,m->gI,time);
     if (m->NoLayers==DUALLAYER) {AddSpikes(m->layer2,m->gE,m->gI,time);}
     fixboundary(m->gE,m->gI);
+    //from this point the GE and GI are actually fixed - as a result there is no more layer interaction - so do things sequentially to each layer
     // without recovery variable
-    if (Features.Recovery==OFF) {
+    if (Features.Recovery==OFF) 
+    {
         CalcVoltages(m->layer1.voltages,m->gE,m->gI,m->layer1.P->potential,m->layer1.voltages_out);
-        if (m->NoLayers==DUALLAYER) {CalcVoltages(m->layer2.voltages,m->gE,m->gI,m->layer2.P->potential,m->layer2.voltages_out);}
         ResetVoltages(m->layer1.voltages_out,m->layer1.P->couple,&m->layer1.spikes,m->layer1.P->potential);
-        if(m->NoLayers==DUALLAYER){ResetVoltages(m->layer2.voltages_out,m->layer2.P->couple,&m->layer2.spikes,m->layer2.P->potential);}
-        if (Features.Theta==ON)
+        if(m->NoLayers==DUALLAYER)
         {
-            dotheta(m->layer1.voltages_out,m->layer1.P->theta,timemillis);
-            if (m->NoLayers==DUALLAYER) {dotheta(m->layer2.voltages_out,m->layer2.P->theta,timemillis);}
+            ResetVoltages(m->layer2.voltages_out,m->layer2.P->couple,&m->layer2.spikes,m->layer2.P->potential);
+            CalcVoltages(m->layer2.voltages,m->gE,m->gI,m->layer2.P->potential,m->layer2.voltages_out);
         }
     }
     // with recovery variable (note no support for theta - no idea if they work together)
-    else {
+    else 
+    {
         CalcRecoverys(m->layer1.voltages,m->layer1.recoverys,m->gE,m->gI,m->layer1.P->potential,m->layer1.P->recovery,m->layer1.voltages_out,m->layer1.recoverys_out);
         if (m->NoLayers==DUALLAYER) {CalcRecoverys(m->layer2.voltages,m->layer2.recoverys,m->gE,m->gI,m->layer2.P->potential,m->layer2.P->recovery,m->layer2.voltages_out,m->layer2.recoverys_out);}
     }
     StoreFiring(&(m->layer1));
-    if(m->NoLayers==DUALLAYER){StoreFiring(&(m->layer2));}
     makemovie(m->layer1,time);
-    if (m->NoLayers==DUALLAYER){makemovie(m->layer2,time);}
+    if (m->NoLayers==DUALLAYER)
+    {
+        makemovie(m->layer2,time);
+        StoreFiring(&(m->layer2));
+    }
+    if (Features.Theta==ON)
+    {
+        dotheta(m->layer1.voltages_out,m->layer1.P->theta,timemillis);
+        if (m->NoLayers==DUALLAYER) {dotheta(m->layer2.voltages_out,m->layer2.P->theta,timemillis);}
+    }
 }

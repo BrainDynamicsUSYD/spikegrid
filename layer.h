@@ -12,6 +12,8 @@ typedef struct layer
     //problem here - these voltages aren't copied
     Compute_float* voltages;                    ///<Input voltages
     Compute_float* voltages_out;                ///<return value 
+    Compute_float* recoverys;
+    Compute_float* recoverys_out;
     const Compute_float* const Extimecourse;    ///<store time course of Ex synapses  
     const Compute_float* const Intimecourse;    ///<store time course of In synapses  
     ringbuffer spikes;                          ///<stores spiking history

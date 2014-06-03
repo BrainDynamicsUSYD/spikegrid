@@ -21,31 +21,42 @@ int jobnumber=-1;        ///< The current job number - used for pics directory e
 ///Function that steps the model through time (high level).
 /// @param inp the input voltages
 /// @param inp2 input voltages for layer 2.  In the single layer model a dummy argument needs to be passed.
-void step_(const Compute_float* const inp,const Compute_float* const inp2)
+void step_(const Compute_float* const inpV,const Compute_float* const inpV2, const Compute_float* inpW, const Compute_float* inpW2)
 {
-    if (ModelType==DUALLAYER && inp2==NULL) {printf("missing second input voltage in dual-layer model");exit(EXIT_FAILURE);}
-    mytime++;
-    memcpy(m->layer1.voltages,inp,sizeof(Compute_float)*grid_size*grid_size);
-    if (ModelType==DUALLAYER) {memcpy(m->layer2.voltages,inp,sizeof(Compute_float)*grid_size*grid_size);}
-    m->layer1.spikes.curidx=mytime%(m->layer1.spikes.count);
-    if (ModelType==DUALLAYER) {m->layer2.spikes.curidx=mytime%(m->layer2.spikes.count);}
-    step1(m,mytime);
-    if (Features.STDP==ON)
-    {
-        doSTDP(m->layer1.STDP_connections,&m->layer1.spikes,m->layer1.connections,m->layer1.P->STDP);
-        doSTDP(m->layer2.STDP_connections,&m->layer2.spikes,m->layer2.connections,m->layer2.P->STDP);
+    if (Features.Recovery==ON && inpW==NULL){printf("missing first recovery input");exit(EXIT_FAILURE);}
+    if (ModelType==DUALLAYER){
+        if (inpV2==NULL){printf("missing second input voltage in dual-layer model");exit(EXIT_FAILURE);}
+        if (Features.Recovery==ON && inpW2==NULL){printf("missing second recovery input in dual-layer model");exit(EXIT_FAILURE);}
+        }       
+mytime++;
+memcpy(m->layer1.voltages,inpV,sizeof(Compute_float)*grid_size*grid_size);
+if (Features.Recovery==ON) {memcpy(m->layer1.recoverys,inpW,sizeof(Compute_float)*grid_size*grid_size);}
+if (ModelType==DUALLAYER) {
+    memcpy(m->layer2.voltages,inpV,sizeof(Compute_float)*grid_size*grid_size);
+    if (Features.Recovery==ON) {memcpy(m->layer2.recoverys,inpW,sizeof(Compute_float)*grid_size*grid_size);}
     }
+m->layer1.spikes.curidx=mytime%(m->layer1.spikes.count);
+if (ModelType==DUALLAYER) {m->layer2.spikes.curidx=mytime%(m->layer2.spikes.count);}
+step1(m,mytime);
+if (Features.STDP==ON)
+{
+    doSTDP(m->layer1.STDP_connections,&m->layer1.spikes,m->layer1.connections,m->layer1.P->STDP);
+    doSTDP(m->layer2.STDP_connections,&m->layer2.spikes,m->layer2.connections,m->layer2.P->STDP);
+}
 }
 
 #ifdef MATLAB
 int setup_done=0;
-mxArray* CreateInitialVoltage(conductance_parameters c)
+//TODO: this should just take a min and a max value
+mxArray* CreateInitialValues(conductance_parameters c, unsigned int rndinit)
 {
-    mxArray* volts =mxCreateNumericMatrix(grid_size,grid_size,MatlabDataType(),mxREAL);
-    Compute_float* voltdata = (Compute_float*)mxGetData(volts);
-    randinit(voltdata,c);
-    return volts;
+    mxArray* vals =mxCreateNumericMatrix(grid_size,grid_size,MatlabDataType(),mxREAL);
+    Compute_float* datavals = (Compute_float*)mxGetData(vals);
+    if (rndinit==1)
+        {randinit(datavals,c);}
+    return vals;
 }
+
 
 mxArray* FirstMatlabCall( )
 {
@@ -53,19 +64,24 @@ mxArray* FirstMatlabCall( )
     if (ModelType==SINGLELAYER) {m=setup(OneLayerModel,OneLayerModel,ModelType,jobnumber);} //pass the same layer as a double parameter
     else {m=setup(DualLayerModelEx,DualLayerModelIn,ModelType,jobnumber);}
     //set up initial voltage matrix - we need a different number if we are in single or double layer model - so encase the voltages in a struct
-    mxArray* voltages = mxCreateStructMatrix(1,1,3,(const char*[]){"Vin","Vex","Vsingle_layer"});
+    mxArray* variables = mxCreateStructMatrix(1,1,3,(const char*[]){"Vin","Vex","Win","Wex","Vsingle_layer","Wsingle_layer"});
     if (ModelType==SINGLELAYER)
+        {mxSetField(variables,0,"Vsingle_layer",CreateInitialValues(OneLayerModel.potential,1));}
+    if (Features.Recovery==ON)
+        {mxSetField(variables,0,"Wsingle_layer",CreateInitialValues(OneLayerModel.potential,0));}
+    else if (ModelType==DUALLAYER) 
     {
-        mxSetField(voltages,0,"Vsingle_layer",CreateInitialVoltage(OneLayerModel.potential));
-    }
-    else
-    {
-        mxSetField(voltages,0,"Vin",CreateInitialVoltage(DualLayerModelIn.potential));
-        mxSetField(voltages,0,"Vex",CreateInitialVoltage(DualLayerModelEx.potential));
+        mxSetField(variables,0,"Vin",CreateInitialValues(DualLayerModelIn.potential,1));
+        mxSetField(variables,0,"Vex",CreateInitialValues(DualLayerModelEx.potential,1));
+        if (Features.Recovery==ON) 
+        {
+            mxSetField(variables,0,"Win",CreateInitialValues(DualLayerModelIn.potential,0));
+            mxSetField(variables,0,"Wex",CreateInitialValues(DualLayerModelEx.potential,1));
+        }
     }
     ///Now - do some dummy outputs of the other elements so that the graphs can be set up.
     printf("setup done\n");
-    return voltages;
+    return variables;
 }
 ///Matlab entry point. The pointers give access to the left and right hand sides of the function call.
 ///Note that it is required to assign a value to all entries on the left hand side of the equation.
@@ -76,7 +92,7 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
     if (setup_done==0) 
     {
         plhs[0]=FirstMatlabCall();
-        outputExtraThings(plhs,nrhs,prhs);
+        outputExtraThings(plhs,nrhs,prhs); //what is this and where does it come from?
         setup_done=1;
         return;
     }
@@ -89,21 +105,58 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
     mxArray* voltages = mxCreateStructMatrix(1,1,3,(const char*[]){"Vin","Vex","Vsingle_layer"});
     if (ModelType == SINGLELAYER)
     {
-        step_((Compute_float*) mxGetData(mxGetField(prhs[0],0,"Vsingle_layer")),NULL /*no second layer*/);
-        mxArray* out = mxCreateNumericMatrix(grid_size,grid_size,MatlabDataType(),mxREAL);
-        memcpy((Compute_float*)mxGetData(out),m->layer1.voltages_out,sizeof(Compute_float)*grid_size*grid_size);
-        mxSetField(voltages,0,"Vsingle_layer",out);
+        if (Features.Recovery==OFF) 
+        {
+            step_((Compute_float*) mxGetData(mxGetField(prhs[0],0,"Vsingle_layer")),NULL,NULL,NULL);
+            mxArray* out = mxCreateNumericMatrix(grid_size,grid_size,MatlabDataType(),mxREAL);
+            memcpy((Compute_float*)mxGetData(out),m->layer1.voltages_out,sizeof(Compute_float)*grid_size*grid_size);
+            mxSetField(voltages,0,"Vsingle_layer",out);
+        }
+        else if (Features.Recovery==ON) 
+        {
+            step_((Compute_float*) mxGetData(mxGetField(prhs[0],0,"Vsingle_layer")),NULL,
+                (Compute_float*) mxGetData(mxGetField(prhs[0],0,"Wsingle_layer")),NULL);
+            mxArray* out1 = mxCreateNumericMatrix(grid_size,grid_size,MatlabDataType(),mxREAL);
+            mxArray* out2 = mxCreateNumericMatrix(grid_size,grid_size,MatlabDataType(),mxREAL);
+            memcpy((Compute_float*)mxGetData(out1),m->layer1.voltages_out,sizeof(Compute_float)*grid_size*grid_size);
+            memcpy((Compute_float*)mxGetData(out2),m->layer1.recoverys_out,sizeof(Compute_float)*grid_size*grid_size);
+            mxSetField(voltages,0,"Vsingle_layer",out1);
+            mxSetField(voltages,0,"Wsingle_layer",out2);
+        }
     }
-    else
+    else if (ModelType == DUALLAYER) 
     {
-        step_((Compute_float*) mxGetData(mxGetField(prhs[0],0,"Vex")),
-                (Compute_float*) mxGetData(mxGetField(prhs[0],0,"Vin")));
-        mxArray* out1 = mxCreateNumericMatrix(grid_size,grid_size,MatlabDataType(),mxREAL);
-        mxArray* out2 = mxCreateNumericMatrix(grid_size,grid_size,MatlabDataType(),mxREAL);
-        memcpy((Compute_float*)mxGetData(out1),m->layer1.voltages_out,sizeof(Compute_float)*grid_size*grid_size);
-        memcpy((Compute_float*)mxGetData(out2),m->layer2.voltages_out,sizeof(Compute_float)*grid_size*grid_size);
-        mxSetField(voltages,0,"Vex",out1);
-        mxSetField(voltages,0,"Vin",out2);
+        if (Features.Recovery==OFF)
+        {
+            step_((Compute_float*) mxGetData(mxGetField(prhs[0],0,"Vex")),
+                (Compute_float*) mxGetData(mxGetField(prhs[0],0,"Vin")),
+                NULL,NULL);
+            mxArray* out1 = mxCreateNumericMatrix(grid_size,grid_size,MatlabDataType(),mxREAL);
+            mxArray* out2 = mxCreateNumericMatrix(grid_size,grid_size,MatlabDataType(),mxREAL);
+            memcpy((Compute_float*)mxGetData(out1),m->layer1.voltages_out,sizeof(Compute_float)*grid_size*grid_size);
+            memcpy((Compute_float*)mxGetData(out2),m->layer2.voltages_out,sizeof(Compute_float)*grid_size*grid_size);
+            mxSetField(voltages,0,"Vex",out1);
+            mxSetField(voltages,0,"Vin",out2);
+        }
+        else if (Features.Recovery==ON)
+        {
+         step_((Compute_float*) mxGetData(mxGetField(prhs[0],0,"Vex")),
+            (Compute_float*) mxGetData(mxGetField(prhs[0],0,"Vin")),
+            (Compute_float*) mxGetData(mxGetField(prhs[0],0,"Wex")),
+            (Compute_float*) mxGetData(mxGetField(prhs[0],0,"Win")));
+         mxArray* out1 = mxCreateNumericMatrix(grid_size,grid_size,MatlabDataType(),mxREAL);
+         mxArray* out2 = mxCreateNumericMatrix(grid_size,grid_size,MatlabDataType(),mxREAL);
+         mxArray* out3 = mxCreateNumericMatrix(grid_size,grid_size,MatlabDataType(),mxREAL);
+         mxArray* out4 = mxCreateNumericMatrix(grid_size,grid_size,MatlabDataType(),mxREAL);
+         memcpy((Compute_float*)mxGetData(out1),m->layer1.voltages_out,sizeof(Compute_float)*grid_size*grid_size);
+         memcpy((Compute_float*)mxGetData(out2),m->layer2.voltages_out,sizeof(Compute_float)*grid_size*grid_size);
+         memcpy((Compute_float*)mxGetData(out3),m->layer1.recoverys_out,sizeof(Compute_float)*grid_size*grid_size);
+         memcpy((Compute_float*)mxGetData(out4),m->layer2.recoverys_out,sizeof(Compute_float)*grid_size*grid_size);
+         mxSetField(voltages,0,"Vex",out1);
+         mxSetField(voltages,0,"Vin",out2);
+         mxSetField(voltages,0,"Wex",out3);
+         mxSetField(voltages,0,"Win",out4);
+        }
     }
     plhs[0] = voltages;
     outputExtraThings(plhs,nrhs,prhs);

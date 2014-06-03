@@ -104,12 +104,16 @@ model* setup(const parameters p,const parameters p2,const LayerNumbers lcount, i
     gethostname(buffer,1023);
     if (!strcmp(buffer,"headnode.physics.usyd.edu.au")) {printf("DON'T RUN THIS CODE ON HEADNODE\n");exit(EXIT_FAILURE);}
     free(buffer);
-    const unsigned int output_count = 5;
+    const unsigned int output_count = 9;
     output_s* outdata=(output_s[]){ //note - neat feature - missing elements initailized to 0
         {.name="gE",.data={m2->gE,conductance_array_size,couplerange},.minval=0,.maxval=0.05}, //gE is a 'large' matrix - as it wraps around the edges
         {"gI",{m2->gI,conductance_array_size,couplerange},0,2}, //gI is a 'large' matrix - as it wraps around the edges
-        {"Coupling1",{m2->layer1.connections,couple_array_size,0},0,100}, //return the coupling matrix of layer 1
+        {"Coupling1",{m2->layer1.connections,couple_array_size,0},0,100}, //return the coupling matrix of layer 1 //TODO: fix min and max values
         {"Coupling2",{m2->layer2.connections,couple_array_size,0},0,100}, //return the coupling matrix of layer 2
+        {"V1",       {m2->layer1.voltages_out,grid_size,0}       ,m2->layer1.P->potential.Vin,m2->layer1.P->potential.Vpk},
+        {"V2",       {m2->layer2.voltages_out,grid_size,0}       ,m2->layer2.P->potential.Vin,m2->layer2.P->potential.Vpk},
+        {"Recovery1",{m2->layer1.recoverys_out,grid_size,0}      ,0,100}, //TODO: ask adam for max and min recovery values
+        {"Recovery2",{m2->layer2.recoverys_out,grid_size,0}      ,0,100}, //TODO: ask adam for max and min recovery values
         {.name={0}}};         //a marker that we are at the end of the outputabbles list
     output_s* malloced = malloc(sizeof(output_s)*output_count);
     memcpy(malloced,outdata,sizeof(output_s)*output_count);

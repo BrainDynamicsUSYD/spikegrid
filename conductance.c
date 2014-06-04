@@ -11,6 +11,7 @@
 #include "yossarian.h"
 #include "matlab_includes.h"
 #include "matlab_output.h"
+#include "output.h"
 unsigned int mytime=0;  ///<< The current time step
 model* m;               ///< The model we are evolving through time
 int jobnumber=-1;        ///< The current job number - used for pics directory etc
@@ -58,19 +59,20 @@ mxArray* FirstMatlabCall( )
     if (ModelType==SINGLELAYER) {m=setup(OneLayerModel,OneLayerModel,ModelType,jobnumber);} //pass the same layer as a double parameter
     else {m=setup(DualLayerModelEx,DualLayerModelIn,ModelType,jobnumber);}
     //set up initial voltage matrix - we need a different number if we are in single or double layer model - so encase the voltages in a struct
-    mxArray* variables = mxCreateStructMatrix(1,1,3,(const char*[]){"Vin","Vex","Win","Wex","Vsingle_layer","Wsingle_layer"});
+    mxArray* variables = mxCreateStructMatrix(1,1,6,(const char*[]){"Vin","Vex","Win","Wex","Vsingle_layer","Wsingle_layer"});
     if (ModelType==SINGLELAYER)
-        {mxSetField(variables,0,"Vsingle_layer",CreateInitialValues(OneLayerModel.potential,1));}
+        {mxSetField(variables,0,"Vsingle_layer",CreateInitialValues(OneLayerModel.potential.Vrt,OneLayerModel.potential.Vrt+(1.0/20.0)));}
+
     if (Features.Recovery==ON)
-        {mxSetField(variables,0,"Wsingle_layer",CreateInitialValues(OneLayerModel.potential,0));}
+        {mxSetField(variables,0,"Wsingle_layer",CreateInitialValues(Zero,Zero));}
     else if (ModelType==DUALLAYER) 
     {
-        mxSetField(variables,0,"Vin",CreateInitialValues(DualLayerModelIn.potential,1));
-        mxSetField(variables,0,"Vex",CreateInitialValues(DualLayerModelEx.potential,1));
+        mxSetField(variables,0,"Vin",CreateInitialValues(DualLayerModelIn.potential.Vrt,DualLayerModelIn.potential.Vrt + (1.0/20.0)));
+        mxSetField(variables,0,"Vin",CreateInitialValues(DualLayerModelEx.potential.Vrt,DualLayerModelEx.potential.Vrt + (1.0/20.0)));
         if (Features.Recovery==ON) 
         {
-            mxSetField(variables,0,"Win",CreateInitialValues(DualLayerModelIn.potential,0));
-            mxSetField(variables,0,"Wex",CreateInitialValues(DualLayerModelEx.potential,1));
+            mxSetField(variables,0,"Win",CreateInitialValues(Zero,Zero));
+            mxSetField(variables,0,"Wex",CreateInitialValues(Zero,Zero));
         }
     }
     ///Now - do some dummy outputs of the other elements so that the graphs can be set up.
@@ -96,20 +98,20 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
   //  if (mxGetM(prhs[0]) != grid_size || mxGetN(prhs[0]) != grid_size || mxGetNumberOfDimensions(prhs[0]) != 2) {printf("rhs parameter 1 has the wrong shape\n");return;}
   //  if (mxGetM(prhs[1]) != grid_size || mxGetN(prhs[1]) != grid_size || mxGetNumberOfDimensions(prhs[1]) != 2) {printf("rhs parameter 2 has the wrong shape\n");return;}
     //step the model through time
-    mxArray* voltages = mxCreateStructMatrix(1,1,3,(const char*[]){"Vin","Vex","Vsingle_layer"});
+    mxArray* variables = mxCreateStructMatrix(1,1,6,(const char*[]){"Vin","Vex","Win","Wex","Vsingle_layer","Wsingle_layer"});
     if (ModelType == SINGLELAYER)
     {
         if (Features.Recovery==OFF) 
         {
             step_((Compute_float*) mxGetData(mxGetField(prhs[0],0,"Vsingle_layer")),NULL,NULL,NULL);
-            mxSetField(voltages,0,"Vsingle_layer",outputToMxArray((tagged_array){.data=m->layer1.voltages_out,.size=grid_size,.offset=0}));
+            mxSetField(variables,0,"Vsingle_layer",outputToMxArray(getOutputByName("V1").data));
         }
         else if (Features.Recovery==ON) 
         {
             step_((Compute_float*) mxGetData(mxGetField(prhs[0],0,"Vsingle_layer")),NULL,
                 (Compute_float*) mxGetData(mxGetField(prhs[0],0,"Wsingle_layer")),NULL);
-            mxSetField(voltages,0,"Vex",outputToMxArray((tagged_array){.data=m->layer1.voltages_out,.size=grid_size,.offset=0}));
-            mxSetField(voltages,0,"Wex",outputToMxArray((tagged_array){.data=m->layer1.recoverys_out,.size=grid_size,.offset=0}));
+            mxSetField(variables,0,"Vsingle_layer",outputToMxArray(getOutputByName("V1").data));
+            mxSetField(variables,0,"Wsingle_layer",outputToMxArray(getOutputByName("Recovery1").data));
         }
     }
     else if (ModelType == DUALLAYER) 
@@ -119,8 +121,8 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
             step_((Compute_float*) mxGetData(mxGetField(prhs[0],0,"Vex")),
                     (Compute_float*) mxGetData(mxGetField(prhs[0],0,"Vin")),
                     NULL,NULL);
-            mxSetField(voltages,0,"Vex",outputToMxArray((tagged_array){.data=m->layer1.voltages_out,.size=grid_size,.offset=0}));
-            mxSetField(voltages,0,"Vin",outputToMxArray((tagged_array){.data=m->layer2.voltages_out,.size=grid_size,.offset=0}));
+            mxSetField(variables,0,"Vex",outputToMxArray(getOutputByName("V1").data));
+            mxSetField(variables,0,"Vin",outputToMxArray(getOutputByName("V2").data));
         }
         else if (Features.Recovery==ON)
         {
@@ -129,13 +131,13 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
                     (Compute_float*) mxGetData(mxGetField(prhs[0],0,"Wex")),
                     (Compute_float*) mxGetData(mxGetField(prhs[0],0,"Win")));
             //put data into matlab struct
-            mxSetField(voltages,0,"Vex",outputToMxArray((tagged_array){.data=m->layer1.voltages_out,.size=grid_size,.offset=0}));
-            mxSetField(voltages,0,"Vin",outputToMxArray((tagged_array){.data=m->layer2.voltages_out,.size=grid_size,.offset=0}));
-            mxSetField(voltages,0,"Wex",outputToMxArray((tagged_array){.data=m->layer1.recoverys_out,.size=grid_size,.offset=0}));
-            mxSetField(voltages,0,"Win",outputToMxArray((tagged_array){.data=m->layer2.recoverys_out,.size=grid_size,.offset=0}));
+            mxSetField(variables,0,"Vex",outputToMxArray(getOutputByName("V1").data));
+            mxSetField(variables,0,"Vin",outputToMxArray(getOutputByName("V2").data));
+            mxSetField(variables,0,"Wex",outputToMxArray(getOutputByName("Recovery1").data));
+            mxSetField(variables,0,"Wex",outputToMxArray(getOutputByName("Recovery2").data));
         }
     }
-    plhs[0] = voltages;
+    plhs[0] = variables;
     outputExtraThings(plhs,nrhs,prhs);
     return;
 }

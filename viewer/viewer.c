@@ -6,17 +6,26 @@
 
 // initialize global variables
 const int maxjobs = 1000;
-const int rows = 2;
-const int cols = 2;
+const int rows = 10;
+const int cols = 10;
 char* winname = "viewer0";
 char** dirnames;
+int upto=0;
 void mousecb(int event, int x,int y,int dummy,void* dummy2) 
 {
     if (event==CV_EVENT_LBUTTONDOWN)
     {
         int idx = (x/100)*cols+(y/100);
-        printf("%s\n",dirnames[idx]);
+        printf("%s\n",dirnames[idx+upto]);
     }
+}
+int compare(const void* a, const void* b)
+{
+    char * ca = *(const char**)a;
+    char * cb = *(const char**)b;
+    int ia = atoi(ca+4);
+    int ib = atoi(cb+4);
+    return ia-ib;
 }
 int main() {
     //scan directory
@@ -36,6 +45,7 @@ int main() {
             }
         }
     }
+    qsort(dirnames,dirno,sizeof(char*),compare);
     //set up video inputs
     cvNamedWindow(winname,CV_WINDOW_AUTOSIZE);
     cvMoveWindow(winname,0,0);
@@ -47,12 +57,13 @@ int main() {
     while (vididx < dirno)
     {
         int vcount=0;
+        upto = vididx;
         for (int i=0;i<rows*cols && vididx< dirno ;i++)
         {
             char buf[100];
             sprintf(buf,"%s/test.avi",dirnames[vididx]);
             caps[i] = cvCreateFileCapture(buf);
-            if (caps[i]){printf("setting size on %i",i);size = (int)cvGetCaptureProperty(caps[i],CV_CAP_PROP_FRAME_HEIGHT);}
+            if (caps[i]){size = (int)cvGetCaptureProperty(caps[i],CV_CAP_PROP_FRAME_HEIGHT);}
             vididx++;
             vcount++;
         }
@@ -60,12 +71,17 @@ int main() {
         IplImage* frame;
         IplImage* dispimage = cvCreateImage(cvSize(size*rows,size*cols),8,3);
         // display video frame by frame
-        while(1) {
-            for (int i=0;i<rows*cols && i<vcount;i++)
+        while(1) 
+        {
+            for (int i=0; i<vcount;i++)
             {
                 frame=cvQueryFrame(caps[i]);
+                if (!frame) 
+                {
+                    if (i==0) goto done;
+                    else continue;
+                }
                 cvSetImageROI(dispimage,cvRect((i/cols)*size,(i%cols)*size,size,size));
-                if (!frame) goto done;
                 cvResize(frame,dispimage,CV_INTER_LINEAR);
                 cvResetImageROI(dispimage);
             }
@@ -75,7 +91,7 @@ int main() {
         }
 done:
         // free memory
-        for (int i=0;i<rows*cols && i < vididx;i++)
+        for (int i=0; i < vcount;i++)
         {
             cvReleaseCapture( &caps[i] );
         }

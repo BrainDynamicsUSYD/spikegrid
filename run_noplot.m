@@ -1,5 +1,4 @@
-dbmex on
-compile;
+compileslow;
 
 time=1;
 %initial call

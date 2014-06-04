@@ -117,6 +117,6 @@ output_s __attribute__((pure)) getOutputByName(const char* const name)
         }
         outidx++;
     } 
-    printf("tried to get unknown thing to output");
+    printf("tried to get unknown thing to output\n");
     exit(EXIT_FAILURE);
 }

@@ -186,7 +186,7 @@ static const parameters DualLayerModelEx =
     {
         .MakeMovie = ON,
         .Output = 5,
-        .Delay = 1,
+        .Delay = 10,
     },
     .theta = 
     {

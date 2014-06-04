@@ -6,8 +6,8 @@
 
 // initialize global variables
 const int maxjobs = 1000;
-const int rows = 9;
-const int cols = 9;
+const int rows = 2;
+const int cols = 2;
 char* winname = "viewer0";
 char** dirnames;
 void mousecb(int event, int x,int y,int dummy,void* dummy2) 
@@ -52,10 +52,11 @@ int main() {
             char buf[100];
             sprintf(buf,"%s/test.avi",dirnames[vididx]);
             caps[i] = cvCreateFileCapture(buf);
-            size = (int)cvGetCaptureProperty(caps[i],CV_CAP_PROP_FRAME_HEIGHT);
+            if (caps[i]){printf("setting size on %i",i);size = (int)cvGetCaptureProperty(caps[i],CV_CAP_PROP_FRAME_HEIGHT);}
             vididx++;
             vcount++;
         }
+        if (size==0) {printf("No videos found\n");return(0);}
         IplImage* frame;
         IplImage* dispimage = cvCreateImage(cvSize(size*rows,size*cols),8,3);
         // display video frame by frame

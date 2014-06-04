@@ -88,7 +88,7 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
     if (setup_done==0) 
     {
         plhs[0]=FirstMatlabCall();
-        outputExtraThings(plhs,nrhs,prhs); //what is this and where does it come from?
+        outputExtraThings(plhs,nrhs,prhs); 
         setup_done=1;
         return;
     }
@@ -99,40 +99,45 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
   //  if (mxGetM(prhs[1]) != grid_size || mxGetN(prhs[1]) != grid_size || mxGetNumberOfDimensions(prhs[1]) != 2) {printf("rhs parameter 2 has the wrong shape\n");return;}
     //step the model through time
     mxArray* variables = mxCreateStructMatrix(1,1,6,(const char*[]){"Vin","Vex","Win","Wex","Vsingle_layer","Wsingle_layer"});
+    Compute_float *FirstV,*SecondV,*FirstW,*SecondW;
+    //First - get inputs
+    if (ModelType==SINGLELAYER)
+    {
+        FirstV = (Compute_float*) mxGetData(mxGetField(prhs[0],0,"Vsingle_layer"));
+        SecondV = NULL;
+        if (Features.Recovery==ON)
+        {
+            FirstW = (Compute_float*) mxGetData(mxGetField(prhs[0],0,"Wsingle_layer"));
+            SecondW = NULL;
+        }
+    }
+    else
+    {
+        FirstV =  (Compute_float*) mxGetData(mxGetField(prhs[0],0,"Vex"));
+        SecondV = (Compute_float*) mxGetData(mxGetField(prhs[0],0,"Vin"));
+        if (Features.Recovery==ON)
+        {
+            FirstW  = (Compute_float*) mxGetData(mxGetField(prhs[0],0,"Wex"));
+            SecondW = (Compute_float*) mxGetData(mxGetField(prhs[0],0,"Win"));
+        }
+    }
+    //Actually step the model
+    step_(FirstV,SecondV,FirstW,SecondW);
+    //Now assign the outputs
     if (ModelType == SINGLELAYER)
     {
-        if (Features.Recovery==OFF) 
+        mxSetField(variables,0,"Vsingle_layer",outputToMxArray(getOutputByName("V1").data));
+        if (Features.Recovery == ON) 
         {
-            step_((Compute_float*) mxGetData(mxGetField(prhs[0],0,"Vsingle_layer")),NULL,NULL,NULL);
-            mxSetField(variables,0,"Vsingle_layer",outputToMxArray(getOutputByName("V1").data));
-        }
-        else if (Features.Recovery==ON) 
-        {
-            step_((Compute_float*) mxGetData(mxGetField(prhs[0],0,"Vsingle_layer")),NULL,
-                (Compute_float*) mxGetData(mxGetField(prhs[0],0,"Wsingle_layer")),NULL);
-            mxSetField(variables,0,"Vsingle_layer",outputToMxArray(getOutputByName("V1").data));
             mxSetField(variables,0,"Wsingle_layer",outputToMxArray(getOutputByName("Recovery1").data));
         }
     }
-    else if (ModelType == DUALLAYER) 
+    else
     {
-        if (Features.Recovery==OFF)
+        mxSetField(variables,0,"Vex",outputToMxArray(getOutputByName("V1").data));
+        mxSetField(variables,0,"Vin",outputToMxArray(getOutputByName("V2").data));
+        if (Features.Recovery == ON)
         {
-            step_((Compute_float*) mxGetData(mxGetField(prhs[0],0,"Vex")),
-                    (Compute_float*) mxGetData(mxGetField(prhs[0],0,"Vin")),
-                    NULL,NULL);
-            mxSetField(variables,0,"Vex",outputToMxArray(getOutputByName("V1").data));
-            mxSetField(variables,0,"Vin",outputToMxArray(getOutputByName("V2").data));
-        }
-        else if (Features.Recovery==ON)
-        {
-            step_((Compute_float*) mxGetData(mxGetField(prhs[0],0,"Vex")),
-                    (Compute_float*) mxGetData(mxGetField(prhs[0],0,"Vin")),
-                    (Compute_float*) mxGetData(mxGetField(prhs[0],0,"Wex")),
-                    (Compute_float*) mxGetData(mxGetField(prhs[0],0,"Win")));
-            //put data into matlab struct
-            mxSetField(variables,0,"Vex",outputToMxArray(getOutputByName("V1").data));
-            mxSetField(variables,0,"Vin",outputToMxArray(getOutputByName("V2").data));
             mxSetField(variables,0,"Wex",outputToMxArray(getOutputByName("Recovery1").data));
             mxSetField(variables,0,"Wex",outputToMxArray(getOutputByName("Recovery2").data));
         }

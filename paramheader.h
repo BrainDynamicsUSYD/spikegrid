@@ -146,6 +146,14 @@ typedef struct theta_parameters
     const Compute_float strength;
 	const Compute_float period;
 } theta_parameters;
+
+/// External input
+typedef struct extinput
+{
+    const Compute_float gE0;
+    const Compute_float gI0;
+} extinput;
+
 ///Global switches to enable/disable features.  Also holds some model-independent parameters
 typedef struct 
 {

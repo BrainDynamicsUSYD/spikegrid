@@ -247,9 +247,16 @@ void step1(model* m,const unsigned int time)
     const Compute_float timemillis = ((Compute_float)time) * Features.Timestep ;
     memset(m->gE,0,sizeof(Compute_float)*conductance_array_size*conductance_array_size); //zero the gE/gI matrices so they can be reused for this timestep
     memset(m->gI,0,sizeof(Compute_float)*conductance_array_size*conductance_array_size);
+    // Add spiking input to the conductances
     AddSpikes(m->layer1,m->gE,m->gI,time);
     if (m->NoLayers==DUALLAYER) {AddSpikes(m->layer2,m->gE,m->gI,time);}
     fixboundary(m->gE,m->gI);
+    // Add constant input to the conductances
+    for (int i = 0;i < conductance_array_size*conductance_array_size;i++)
+    {
+        m->gE[i] += Extinput.gE0;
+        m->gI[i] += Extinput.gI0;
+    } 
     //from this point the GE and GI are actually fixed - as a result there is no more layer interaction - so do things sequentially to each layer
     // without recovery variable
     if (Features.Recovery==OFF) 

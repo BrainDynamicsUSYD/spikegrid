@@ -61,14 +61,15 @@ mxArray* FirstMatlabCall( )
     //set up initial voltage matrix - we need a different number if we are in single or double layer model - so encase the voltages in a struct
     mxArray* variables = mxCreateStructMatrix(1,1,6,(const char*[]){"Vin","Vex","Win","Wex","Vsingle_layer","Wsingle_layer"});
     if (ModelType==SINGLELAYER)
-        {mxSetField(variables,0,"Vsingle_layer",CreateInitialValues(OneLayerModel.potential.Vrt,OneLayerModel.potential.Vrt+(1.0/20.0)));}
-
-    if (Features.Recovery==ON)
-        {mxSetField(variables,0,"Wsingle_layer",CreateInitialValues(Zero,Zero));}
+    {
+        mxSetField(variables,0,"Vsingle_layer",CreateInitialValues(OneLayerModel.potential.Vrt,OneLayerModel.potential.Vrt+(1.0/20.0)));
+        if (Features.Recovery==ON)
+            {mxSetField(variables,0,"Wsingle_layer",CreateInitialValues(Zero,Zero));}
+    }
     else if (ModelType==DUALLAYER) 
     {
         mxSetField(variables,0,"Vin",CreateInitialValues(DualLayerModelIn.potential.Vrt,DualLayerModelIn.potential.Vrt + (1.0/20.0)));
-        mxSetField(variables,0,"Vin",CreateInitialValues(DualLayerModelEx.potential.Vrt,DualLayerModelEx.potential.Vrt + (1.0/20.0)));
+        mxSetField(variables,0,"Vex",CreateInitialValues(DualLayerModelEx.potential.Vrt,DualLayerModelEx.potential.Vrt + (1.0/20.0)));
         if (Features.Recovery==ON) 
         {
             mxSetField(variables,0,"Win",CreateInitialValues(Zero,Zero));
@@ -139,7 +140,7 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
         if (Features.Recovery == ON)
         {
             mxSetField(variables,0,"Wex",outputToMxArray(getOutputByName("Recovery1").data));
-            mxSetField(variables,0,"Wex",outputToMxArray(getOutputByName("Recovery2").data));
+            mxSetField(variables,0,"Win",outputToMxArray(getOutputByName("Recovery2").data));
         }
     }
     plhs[0] = variables;

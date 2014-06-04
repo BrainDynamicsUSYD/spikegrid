@@ -66,7 +66,7 @@ static const parameters OneLayerModel =
         .Wrt = 2,
         .Wir = -1,
         .Wcv = 0.08
-    }
+    },
     .STDP = 
     {
         .stdp_limit     = 0.1,
@@ -132,7 +132,7 @@ static const parameters DualLayerModelIn =
         .Wrt = 2,
         .Wir = -1,
         .Wcv = 0.08
-    }
+    },
     .STDP = 
     {
         .stdp_limit     = 0.1,
@@ -199,7 +199,7 @@ static const parameters DualLayerModelEx =
         .Wrt = 2,
         .Wir = -1,
         .Wcv = 0.08
-    }
+    },
     .STDP = 
     {
         .stdp_limit     = 0.1,
@@ -225,9 +225,16 @@ static const parameters DualLayerModelEx =
     },
     .skip=1,
 };
+///Constant external input to conductances
+static const extinput Extinput =
+{
+    .gE0 = 0.015,
+    .gI0 = 0,
+};
 ///Some global features that can be turned on and off
 static const model_features Features = 
 {
+    .Recovery   = ON,
     .STDP		= OFF, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep - 
     .STD        = ON, //               if we need any of these features we can make the changes then.
     .Output     = OFF,

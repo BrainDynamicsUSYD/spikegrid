@@ -4,6 +4,7 @@
 #include <time.h>
 #include <unistd.h> //gethostname
 #include <sys/stat.h>
+#include <sys/types.h>
 #include "coupling.h"
 #include "output.h"
 #include "printstruct.h"

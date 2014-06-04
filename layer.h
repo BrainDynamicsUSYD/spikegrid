@@ -9,16 +9,15 @@ typedef struct layer
 {
     const Compute_float* const connections;     ///<Matrix of connections coming from a single point
     Compute_float* STDP_connections;            ///<Dynamic connections from STDP
-    //problem here - these voltages aren't copied
     Compute_float* voltages;                    ///<Input voltages
     Compute_float* voltages_out;                ///<return value 
-    Compute_float* recoverys;
-    Compute_float* recoverys_out;
+    Compute_float* recoverys;                   ///<Recovery variable
+    Compute_float* recoverys_out;               ///<Return value for recovery variable
     const Compute_float* const Extimecourse;    ///<store time course of Ex synapses  
     const Compute_float* const Intimecourse;    ///<store time course of In synapses  
     ringbuffer spikes;                          ///<stores spiking history
     parameters* P;                              ///<The parameters that we used to make the layer
-    STD_data std;                               ///<Some info that is needed for STD
+    STD_data std;                               ///<Some info that is needed for STD - TODO - I really don't like that layer.h needs to inlude STD.h - feels messy
 } layer;
 ///Allows for having multiple layers and simulating them
 typedef struct Model

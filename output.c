@@ -1,6 +1,5 @@
 /// \file
 #include <string.h>
-#include <sys/stat.h>
 #include "output.h"
 #include "picture.h"
 

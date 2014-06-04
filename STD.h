@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include "mymath.h"
 #include "paramheader.h"
-///Holds data for STD on a per-neuon basis
+///Holds data for STD on a per-neuron basis
 typedef struct 
 {   //some parts of this should be const - but oh well
     unsigned int* ftimes;   ///< time of previous firing

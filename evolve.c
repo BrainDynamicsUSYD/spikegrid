@@ -3,6 +3,7 @@
 #include <stdlib.h> //random
 #include "theta.h"
 #include "output.h"
+#include "STDP.h"
 //when STDP is turned off, gcc will warn about this function needing const.  It is wrong
 ///Adds in the component of connection matrices due to STDP effected dynamic synapses
 void evolvept_STDP  (const int x,const  int y,const Compute_float* const __restrict connections_STDP,const Compute_float Estrmod,const Compute_float Istrmod,Compute_float* __restrict gE,Compute_float* __restrict gI)
@@ -27,7 +28,7 @@ void evolvept_STDP  (const int x,const  int y,const Compute_float* const __restr
 }
 
 ///add conductance from a firing neuron to the gE and gI arrays (used in single layer model)
-void evolvept (const int x,const  int y,const Compute_float* const __restrict connections,const Compute_float Estrmod,const Compute_float Istrmod,Compute_float* __restrict gE,Compute_float* __restrict gI,const Compute_float* STDP_CONNS)
+void evolvept (const int x,const int y,const Compute_float* const __restrict connections,const Compute_float Estrmod,const Compute_float Istrmod,Compute_float* __restrict gE,Compute_float* __restrict gI,const Compute_float* STDP_CONNS)
 {
     for (int i = 0; i < couple_array_size;i++)
     {
@@ -134,13 +135,17 @@ Compute_float __attribute__((const,pure)) rhs_func  (const Compute_float V,const
         case QIF:
             return -(p.glk*(V-p.Vlk)*(p.type.extra.QIF.Vth-V) + ge*(V-p.Vex) + gi*(V-p.Vin));
         case EIF: //TODO: this doesn't work correctly
-            return -(p.glk*(V-p.Vlk) - p.type.extra.EIF.Dpk*exp((V-p.type.extra.EIF.Vth)/p.type.extra.EIF.Dpk) + ge*(V-p.Vex) + gi*(V-p.Vin));
+            return -(p.glk*(V-p.Vlk) - p.glk*p.type.extra.EIF.Dpk*exp((V-p.type.extra.EIF.Vth)/p.type.extra.EIF.Dpk) + ge*(V-p.Vex) + gi*(V-p.Vin));
         default: return One; //avoid -Wreturn-type error which is probably wrong anyway
     }
 }
 
 ///Uses precalculated gE and gI to integrate the voltages forward through time.
-void CalcVoltages(const Compute_float* const __restrict__ Vinput,const Compute_float* const __restrict__ gE, const Compute_float* const __restrict__ gI,const conductance_parameters C, Compute_float* const __restrict__ Vout)
+void CalcVoltages(const Compute_float* const __restrict__ Vinput,
+        const Compute_float* const __restrict__ gE, 
+        const Compute_float* const __restrict__ gI,
+        const conductance_parameters C, 
+        Compute_float* const __restrict__ Vout)
 {
     for (int x=0;x<grid_size;x++) 
     {
@@ -153,6 +158,29 @@ void CalcVoltages(const Compute_float* const __restrict__ Vinput,const Compute_f
             const Compute_float Vtemp = Vinput[idx2] + Half*Features.Timestep*rhs1;
             const Compute_float rhs2=rhs_func(Vtemp,gE[idx],gI[idx],C);
             Vout[idx2]=Vinput[idx2]+Half*Features.Timestep*(rhs1 + rhs2);
+        }
+    }
+}
+///Uses precalculated gE and gI to integrate the voltages and recoverys forward through time. This uses the Euler method
+void CalcRecoverys(const Compute_float* const __restrict__ Vinput, 
+        const Compute_float* const __restrict__ Winput, 
+        const Compute_float* const __restrict__ gE, 
+        const Compute_float* const __restrict__ gI,
+        const conductance_parameters C, 
+        const recovery_parameters R, 
+        Compute_float* const __restrict__ Vout, 
+        Compute_float* const __restrict__ Wout)
+{    // Adaptive quadratic integrate-and-fire
+    for (int x=0;x<grid_size;x++) 
+    {
+        for (int y=0;y<grid_size;y++)
+        {   //step all neurons through time - use Euler method
+            const int idx = (x+couplerange)*conductance_array_size + y + couplerange; //index for gE/gI
+            const int idx2 = x*grid_size+y;       //index for voltage/recovery
+            const Compute_float rhsV=rhs_func(Vinput[idx2],gE[idx],gI[idx],C)-Winput[idx2];
+            const Compute_float rhsW=R.Wcv*(R.Wir*(Vinput[idx2]-R.Wrt) - Winput[idx2]);
+            Vout[idx2] = Vinput[idx2] + Features.Timestep*rhsV;
+            Wout[idx2] = Winput[idx2] + Features.Timestep*rhsW;
         }
     }
 }
@@ -173,6 +201,11 @@ void StoreFiring(layer* L)
                 {
                     current_firestore[this_fcount] =(coords){.x=x,.y=y};
                     L->voltages_out[x*grid_size+y]=L->P->potential.Vrt;
+                    // Reset recovery variable if applicable
+                    if (Features.Recovery==ON)
+                    {
+                    L->recoverys_out[x*grid_size+y]+=L->P->recovery.Wrt;
+                    }
                     this_fcount++;
                     if (Features.Output==ON)
                     {
@@ -211,23 +244,45 @@ void ResetVoltages(Compute_float* const __restrict Vout,const couple_parameters 
 ///Steps a model through 1 timestep - quite high-level function
 void step1(model* m,const unsigned int time)
 {
-	const Compute_float timemillis = ((Compute_float)time) * Features.Timestep ;
+    const Compute_float timemillis = ((Compute_float)time) * Features.Timestep ;
     memset(m->gE,0,sizeof(Compute_float)*conductance_array_size*conductance_array_size); //zero the gE/gI matrices so they can be reused for this timestep
     memset(m->gI,0,sizeof(Compute_float)*conductance_array_size*conductance_array_size);
     AddSpikes(m->layer1,m->gE,m->gI,time);
     if (m->NoLayers==DUALLAYER) {AddSpikes(m->layer2,m->gE,m->gI,time);}
     fixboundary(m->gE,m->gI);
-    CalcVoltages(m->layer1.voltages,m->gE,m->gI,m->layer1.P->potential,m->layer1.voltages_out);
-    if (m->NoLayers==DUALLAYER) {CalcVoltages(m->layer2.voltages,m->gE,m->gI,m->layer2.P->potential,m->layer2.voltages_out);}
+    //from this point the GE and GI are actually fixed - as a result there is no more layer interaction - so do things sequentially to each layer
+    // without recovery variable
+    if (Features.Recovery==OFF) 
+    {
+        CalcVoltages(m->layer1.voltages,m->gE,m->gI,m->layer1.P->potential,m->layer1.voltages_out);
+        ResetVoltages(m->layer1.voltages_out,m->layer1.P->couple,&m->layer1.spikes,m->layer1.P->potential);
+        if(m->NoLayers==DUALLAYER)
+        {
+            ResetVoltages(m->layer2.voltages_out,m->layer2.P->couple,&m->layer2.spikes,m->layer2.P->potential);
+            CalcVoltages(m->layer2.voltages,m->gE,m->gI,m->layer2.P->potential,m->layer2.voltages_out);
+        }
+    }
+    // with recovery variable (note no support for theta - no idea if they work together)
+    else 
+    {
+        CalcRecoverys(m->layer1.voltages,m->layer1.recoverys,m->gE,m->gI,m->layer1.P->potential,m->layer1.P->recovery,m->layer1.voltages_out,m->layer1.recoverys_out);
+        if (m->NoLayers==DUALLAYER) {CalcRecoverys(m->layer2.voltages,m->layer2.recoverys,m->gE,m->gI,m->layer2.P->potential,m->layer2.P->recovery,m->layer2.voltages_out,m->layer2.recoverys_out);}
+    }
+    StoreFiring(&(m->layer1));
+    makemovie(m->layer1,time);
+    if (m->NoLayers==DUALLAYER)
+    {
+        makemovie(m->layer2,time);
+        StoreFiring(&(m->layer2));
+    }
     if (Features.Theta==ON)
     {
         dotheta(m->layer1.voltages_out,m->layer1.P->theta,timemillis);
         if (m->NoLayers==DUALLAYER) {dotheta(m->layer2.voltages_out,m->layer2.P->theta,timemillis);}
     }
-    StoreFiring(&(m->layer1));
-    if(m->NoLayers==DUALLAYER){StoreFiring(&(m->layer2));}
-    ResetVoltages(m->layer1.voltages_out,m->layer1.P->couple,&m->layer1.spikes,m->layer1.P->potential);
-    if(m->NoLayers==DUALLAYER){ResetVoltages(m->layer2.voltages_out,m->layer2.P->couple,&m->layer2.spikes,m->layer2.P->potential);}
-    makemovie(m->layer1,time);
-    if (m->NoLayers==DUALLAYER){makemovie(m->layer2,time);}
+    if (Features.STDP==ON)
+    {
+        doSTDP(m->layer1.STDP_connections,&m->layer1.spikes,m->layer1.connections,m->layer1.P->STDP);
+        if (m->NoLayers==DUALLAYER) {doSTDP(m->layer2.STDP_connections,&m->layer2.spikes,m->layer2.connections,m->layer2.P->STDP);}
+    }
 }

@@ -33,3 +33,5 @@ gdbcmds
 output/*
 compileslow.m
 perf.data
+*~
+watch

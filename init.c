@@ -7,18 +7,23 @@
 #include "coupling.h"
 #include "output.h"
 #include "printstruct.h"
+int randinit_done = 0;
 ///creates a random initial condition
 ///This is generated as small fluctuations away from Vrt
 /// @param input    The input matrix - Modified in place
 /// @param V        Used to get the Vrt 
-void randinit(Compute_float* input,const conductance_parameters V)
+void randinit(Compute_float* input,const Compute_float minval,const Compute_float maxval)
 {
-    srandom((unsigned)(time(0)));
+    if (randinit_done==0)
+    {
+        srandom((unsigned)(time(0))); 
+        randinit_done=1;
+    }
     for (int x=0;x<grid_size;x++)
     {
         for (int y=0;y<grid_size;y++)
         {
-            input[x*grid_size + y ] = ((Compute_float)random())/((Compute_float)RAND_MAX)/((Compute_float)20.0) + V.Vrt;
+            input[x*grid_size + y ] = ((Compute_float)random())/((Compute_float)RAND_MAX)*(maxval-minval)+minval;///((Compute_float)20.0) + V.Vrt;
         }
     }
 }
@@ -61,6 +66,8 @@ layer setuplayer(const parameters p)
         .P                  = (parameters*)newdata(&p,sizeof(p)), 
         .voltages           = calloc(sizeof(Compute_float),grid_size*grid_size),
         .voltages_out       = calloc(sizeof(Compute_float),grid_size*grid_size),
+        .recoverys       = Features.Recovery==ON?calloc(sizeof(Compute_float),grid_size*grid_size):NULL,
+        .recoverys_out   = Features.Recovery==ON?calloc(sizeof(Compute_float),grid_size*grid_size):NULL
     };
     for (unsigned int i=0;i<cap;i++)
     {
@@ -70,6 +77,7 @@ layer setuplayer(const parameters p)
     return L;
 }
 ///The idea here is that "one-off" setup occurs here, whilst per-layer setup occurs in setuplayer
+// No idea wtf this function is doing - Adam.
 model* setup(const parameters p,const parameters p2,const LayerNumbers lcount, int jobnumber)
 {
     if (jobnumber <0)
@@ -96,12 +104,16 @@ model* setup(const parameters p,const parameters p2,const LayerNumbers lcount, i
     gethostname(buffer,1023);
     if (!strcmp(buffer,"headnode.physics.usyd.edu.au")) {printf("DON'T RUN THIS CODE ON HEADNODE\n");exit(EXIT_FAILURE);}
     free(buffer);
-    const unsigned int output_count = 5;
+    const unsigned int output_count = 9;
     output_s* outdata=(output_s[]){ //note - neat feature - missing elements initailized to 0
         {.name="gE",.data={m2->gE,conductance_array_size,couplerange},.minval=0,.maxval=0.05}, //gE is a 'large' matrix - as it wraps around the edges
         {"gI",{m2->gI,conductance_array_size,couplerange},0,2}, //gI is a 'large' matrix - as it wraps around the edges
-        {"Coupling1",{m2->layer1.connections,couple_array_size,0},0,100}, //return the coupling matrix of layer 1
+        {"Coupling1",{m2->layer1.connections,couple_array_size,0},0,100}, //return the coupling matrix of layer 1 //TODO: fix min and max values
         {"Coupling2",{m2->layer2.connections,couple_array_size,0},0,100}, //return the coupling matrix of layer 2
+        {"V1",       {m2->layer1.voltages_out,grid_size,0}       ,m2->layer1.P->potential.Vin,m2->layer1.P->potential.Vpk},
+        {"V2",       {m2->layer2.voltages_out,grid_size,0}       ,m2->layer2.P->potential.Vin,m2->layer2.P->potential.Vpk},
+        {"Recovery1",{m2->layer1.recoverys_out,grid_size,0}      ,0,100}, //TODO: ask adam for max and min recovery values
+        {"Recovery2",{m2->layer2.recoverys_out,grid_size,0}      ,0,100}, //TODO: ask adam for max and min recovery values
         {.name={0}}};         //a marker that we are at the end of the outputabbles list
     output_s* malloced = malloc(sizeof(output_s)*output_count);
     memcpy(malloced,outdata,sizeof(output_s)*output_count);

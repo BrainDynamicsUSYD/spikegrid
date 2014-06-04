@@ -106,3 +106,18 @@ void makemovie(const layer l,const unsigned int t)
         OutputToPng(Outputtable[l.P->Movie.Output].data,Outputtable[l.P->Movie.Output].minval,Outputtable[l.P->Movie.Output].maxval);
     }
 }
+
+output_s __attribute__((pure)) getOutputByName(const char* const name)
+{
+    int outidx=0;
+    while (strlen(Outputtable[outidx].name) != 0)
+    {
+        if (!strcmp(Outputtable[outidx].name,name))
+        {
+            return Outputtable[outidx];
+        }
+        outidx++;
+    } 
+    printf("tried to get unknown thing to output");
+    exit(EXIT_FAILURE);
+}

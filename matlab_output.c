@@ -42,24 +42,10 @@ void outputExtraThings(mxArray* plhs[],int nrhs,const mxArray* prhs[])
         {
             char* data=malloc(sizeof(char)*1024); //should be big enough
             mxGetString(prhs[rhsidx],data,1023);
-            int outidx = 0;
-            int worked = 0;
-            while (strlen(Outputtable[outidx].name) != 0)
-            {
-                if (!strcmp(Outputtable[outidx].name,data))
-                {
-                    plhs[rhsidx]=outputToMxStruct(Outputtable[outidx]);
-                    worked = 1;
-                    break;
-                }
-                outidx++;
-            } 
-            if (worked != 1) {printf("Unknown thing to output\n");return;}
+            plhs[rhsidx] = outputToMxStruct(getOutputByName(data));
             free(data);
             rhsidx++;
         }
     }
 }
-
 #endif
-

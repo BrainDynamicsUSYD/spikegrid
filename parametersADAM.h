@@ -61,6 +61,12 @@ static const parameters OneLayerModel =
         .glk     = 0.05,                 //leak current
         .rate = 1,
     },
+    .recovery = 
+    {
+        .Wrt = 2,
+        .Wir = -1,
+        .Wcv = 0.08
+    }
     .STDP = 
     {
         .stdp_limit     = 0.1,
@@ -121,6 +127,12 @@ static const parameters DualLayerModelIn =
         .glk     = 0.05,                 //leak current
         .rate = 1,
     },    
+    .recovery = 
+    {
+        .Wrt = 2,
+        .Wir = -1,
+        .Wcv = 0.08
+    }
     .STDP = 
     {
         .stdp_limit     = 0.1,
@@ -182,6 +194,12 @@ static const parameters DualLayerModelEx =
         .glk     = 0.05,                 //leak current
         .rate = 1,
     },
+    .recovery = 
+    {
+        .Wrt = 2,
+        .Wir = -1,
+        .Wcv = 0.08
+    }
     .STDP = 
     {
         .stdp_limit     = 0.1,

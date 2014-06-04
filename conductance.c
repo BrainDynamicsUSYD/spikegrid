@@ -35,7 +35,7 @@ void step_(const Compute_float* const inpV,const Compute_float* const inpV2, con
     m->layer1.spikes.curidx=mytime%(m->layer1.spikes.count);
     if (ModelType==DUALLAYER) 
     {
-        memcpy(m->layer2.voltages,inpV,sizeof(Compute_float)*grid_size*grid_size);
+        memcpy(m->layer2.voltages,inpV2,sizeof(Compute_float)*grid_size*grid_size);
         if (Features.Recovery==ON) {memcpy(m->layer2.recoverys,inpW,sizeof(Compute_float)*grid_size*grid_size);}
         m->layer2.spikes.curidx=mytime%(m->layer2.spikes.count);
     }
@@ -57,7 +57,7 @@ mxArray* FirstMatlabCall( )
 {
  //   feenableexcept(FE_INVALID | FE_OVERFLOW);
     if (ModelType==SINGLELAYER) {m=setup(OneLayerModel,OneLayerModel,ModelType,jobnumber);} //pass the same layer as a double parameter
-    else {m=setup(DualLayerModelEx,DualLayerModelIn,ModelType,jobnumber);}
+    else {m=setup(DualLayerModelIn,DualLayerModelEx,ModelType,jobnumber);}
     //set up initial voltage matrix - we need a different number if we are in single or double layer model - so encase the voltages in a struct
     mxArray* variables = mxCreateStructMatrix(1,1,6,(const char*[]){"Vin","Vex","Win","Wex","Vsingle_layer","Wsingle_layer"});
     if (ModelType==SINGLELAYER)
@@ -114,12 +114,12 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
     }
     else
     {
-        FirstV =  (Compute_float*) mxGetData(mxGetField(prhs[0],0,"Vex"));
-        SecondV = (Compute_float*) mxGetData(mxGetField(prhs[0],0,"Vin"));
+        FirstV =  (Compute_float*) mxGetData(mxGetField(prhs[0],0,"Vin"));
+        SecondV = (Compute_float*) mxGetData(mxGetField(prhs[0],0,"Vex"));
         if (Features.Recovery==ON)
         {
-            FirstW  = (Compute_float*) mxGetData(mxGetField(prhs[0],0,"Wex"));
-            SecondW = (Compute_float*) mxGetData(mxGetField(prhs[0],0,"Win"));
+            FirstW  = (Compute_float*) mxGetData(mxGetField(prhs[0],0,"Win"));
+            SecondW = (Compute_float*) mxGetData(mxGetField(prhs[0],0,"Wex"));
         }
     }
     //Actually step the model
@@ -135,12 +135,12 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
     }
     else
     {
-        mxSetField(variables,0,"Vex",outputToMxArray(getOutputByName("V1").data));
-        mxSetField(variables,0,"Vin",outputToMxArray(getOutputByName("V2").data));
+        mxSetField(variables,0,"Vex",outputToMxArray(getOutputByName("V2").data));
+        mxSetField(variables,0,"Vin",outputToMxArray(getOutputByName("V1").data));
         if (Features.Recovery == ON)
         {
-            mxSetField(variables,0,"Wex",outputToMxArray(getOutputByName("Recovery1").data));
-            mxSetField(variables,0,"Win",outputToMxArray(getOutputByName("Recovery2").data));
+            mxSetField(variables,0,"Wex",outputToMxArray(getOutputByName("Recovery2").data));
+            mxSetField(variables,0,"Win",outputToMxArray(getOutputByName("Recovery1").data));
         }
     }
     plhs[0] = variables;
@@ -189,26 +189,49 @@ int main(int argc,char** argv) //useful for testing w/out matlab
         }
     }
     if (ModelType==SINGLELAYER) {m=setup(newparam!=NULL? (*newparam):OneLayerModel,newparam!=NULL? (*newparam):OneLayerModel,ModelType,jobnumber);} //pass the same layer as a double parameter
+    //else {m=setup(newparam!=NULL?*newparam:DualLayerModelEx,DualLayerModelIn,ModelType,jobnumber);}
     else {m=setup(DualLayerModelIn,newparam!=NULL?*newparam:DualLayerModelEx,ModelType,jobnumber);}
-    Compute_float* input=calloc(sizeof(Compute_float),grid_size*grid_size);
-    Compute_float* input2=calloc(sizeof(Compute_float),grid_size*grid_size);
-    randinit(input,DualLayerModelEx.potential.Vrt,DualLayerModelEx.potential.Vrt+(1/20.0)); //need to fix for single layer
-    randinit(input2,DualLayerModelIn.potential.Vrt,DualLayerModelIn.potential.Vrt+(1/20.0)); 
+
+    Compute_float *FirstV,*SecondV,*FirstW,*SecondW;
+    if (ModelType==SINGLELAYER)
+    {
+        FirstV = calloc(sizeof(Compute_float),grid_size*grid_size);
+        SecondV = NULL;
+        randinit(FirstV,OneLayerModel.potential.Vrt,OneLayerModel.potential.Vrt+(1.0/20.0));
+        if (Features.Recovery==ON)
+        {
+            FirstW = calloc(sizeof(Compute_float),grid_size*grid_size);
+            SecondW = NULL;
+        } else {FirstW=NULL;SecondW=NULL;}
+    }
+    else if (ModelType==DUALLAYER) 
+    {
+        FirstV = malloc(sizeof(Compute_float)*grid_size*grid_size);
+        SecondV = malloc(sizeof(Compute_float)*grid_size*grid_size);
+        randinit(FirstV, DualLayerModelIn.potential.Vrt,DualLayerModelIn.potential.Vrt + (1.0/20.0));
+        randinit(SecondV,DualLayerModelEx.potential.Vrt,DualLayerModelEx.potential.Vrt + (1.0/20.0));
+        if (Features.Recovery==ON) 
+        {
+            FirstW = calloc(sizeof(Compute_float),grid_size*grid_size);
+            SecondW = calloc(sizeof(Compute_float),grid_size*grid_size);
+        } else {FirstW=NULL;SecondW=NULL;}
+    }
     while (mytime<Features.Simlength)
     {
-        //step_(input2,input);//always fine to pass an extra argument here
+        step_(FirstV,SecondV,FirstW,SecondW);//always fine to pass an extra argument here
         printf("%i\n",mytime);
         for (int i=0;i<grid_size;i++)
         {
             for (int j=0;j<grid_size;j++)
             {
-                input[i*grid_size+j]=m->layer1.voltages_out[i*grid_size + j];
-                if (ModelType==DUALLAYER) { input2[i*grid_size+j]=m->layer2.voltages_out[i*grid_size + j];}
+                FirstV                       [i*grid_size+j] = m->layer1.voltages_out[i*grid_size + j]; //always fine to copy
+                //check before copying other data
+                if (SecondV != NULL) {SecondV[i*grid_size+j] = m->layer2.voltages_out [i*grid_size+j];}
+                if (FirstW != NULL)  {FirstW [i*grid_size+j] = m->layer1.recoverys_out[i*grid_size+j];}
+                if (SecondW != NULL) {SecondW[i*grid_size+j] = m->layer2.recoverys_out[i*grid_size+j];}
             }
         }
     }
-    free(input);
-    free(input2);
     return(EXIT_SUCCESS);
 }
 #endif

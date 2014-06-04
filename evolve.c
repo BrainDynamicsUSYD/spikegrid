@@ -265,8 +265,8 @@ void step1(model* m,const unsigned int time)
         ResetVoltages(m->layer1.voltages_out,m->layer1.P->couple,&m->layer1.spikes,m->layer1.P->potential);
         if(m->NoLayers==DUALLAYER)
         {
-            ResetVoltages(m->layer2.voltages_out,m->layer2.P->couple,&m->layer2.spikes,m->layer2.P->potential);
             CalcVoltages(m->layer2.voltages,m->gE,m->gI,m->layer2.P->potential,m->layer2.voltages_out);
+            ResetVoltages(m->layer2.voltages_out,m->layer2.P->couple,&m->layer2.spikes,m->layer2.P->potential);
         }
     }
     // with recovery variable (note no support for theta - no idea if they work together)
@@ -279,8 +279,8 @@ void step1(model* m,const unsigned int time)
     makemovie(m->layer1,time);
     if (m->NoLayers==DUALLAYER)
     {
-        makemovie(m->layer2,time);
         StoreFiring(&(m->layer2));
+        makemovie(m->layer2,time);
     }
     if (Features.Theta==ON)
     {

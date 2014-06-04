@@ -195,6 +195,12 @@ static const parameters DualLayerModelEx =
     },
     .skip=1,
 };
+///Constant external input to conductances
+static const extinput Extinput =
+{
+    .gE0 = 0.0,
+    .gI0 = 0,
+};
 ///Some global features that can be turned on and off
 static const model_features Features = 
 {

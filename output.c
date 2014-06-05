@@ -1,5 +1,6 @@
 /// \file
 #include <string.h>
+#include <unistd.h>
 #include "output.h"
 #include "picture.h"
 
@@ -97,6 +98,7 @@ void OutputToPng(const tagged_array input,const Compute_float minval,const Compu
     free(actualdata);
     
 }
+///TODO: Need to get a better way of detecting when rendering has finished
 void outputToConsole(const tagged_array input, const Compute_float minval,const Compute_float maxval)
 {
     char* buf = malloc(sizeof(char)*1000*1000);//should be plenty
@@ -104,6 +106,7 @@ void outputToConsole(const tagged_array input, const Compute_float minval,const 
     const unsigned int size = input.size - (2*input.offset);
     Compute_float* actualdata=taggedarrayTocomputearray(input);
     bitmap_t* b = FloattoBitmap(actualdata,size,minval,maxval);
+    printf("\x1b[2J");
     for (unsigned int i=0;i<size;i++)
     {
         for (unsigned int j=0;j<size;j++)
@@ -112,9 +115,12 @@ void outputToConsole(const tagged_array input, const Compute_float minval,const 
             int r = sprintf(upto,"\x1b[48;2;%i;%i;%im ",pix.red,pix.green,pix.blue);
             upto += (r);
         }
-        printf("%s\x1b[0m\n",buf);
-        upto=buf;
+        int q = sprintf(upto,"\x1b[0m\n");
+        upto += q;
     }
+    puts(buf);
+    usleep(50000);
+    upto=buf;
     free(buf);
 
 }
@@ -124,7 +130,7 @@ void makemovie(const layer l,const unsigned int t)
     if (l.P->Movie.MakeMovie==ON && t % l.P->Movie.Delay==0)
     {
         OutputToPng(Outputtable[l.P->Movie.Output].data,Outputtable[l.P->Movie.Output].minval,Outputtable[l.P->Movie.Output].maxval);
-        outputToConsole(Outputtable[l.P->Movie.Output].data,Outputtable[l.P->Movie.Output].minval,Outputtable[l.P->Movie.Output].maxval);
+       // outputToConsole(Outputtable[l.P->Movie.Output].data,Outputtable[l.P->Movie.Output].minval,Outputtable[l.P->Movie.Output].maxval);
     }
 }
 

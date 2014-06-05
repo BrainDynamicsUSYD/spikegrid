@@ -156,6 +156,7 @@ struct option long_options[] = {{"help",no_argument,0,'h'},{"generate",no_argume
 int main(int argc,char** argv) //useful for testing w/out matlab
 {
     parameters* newparam = NULL;
+    setvbuf(stdout,NULL,_IONBF,0);
     while (1)
     {
         int option_index=0;

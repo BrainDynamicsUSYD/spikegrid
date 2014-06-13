@@ -90,6 +90,11 @@ static const parameters OneLayerModel =
         .period     = 0.2,
     },
     .skip=1,
+    .output = 
+    {   
+        .Switch   = OFF,
+        .Filename = "one_spikes.txt"
+    },
 };
 ///parameters for the inhibitory layer of the double layer model
 static const parameters DualLayerModelIn =
@@ -101,8 +106,8 @@ static const parameters DualLayerModelIn =
         {
             .dual = 
             {
-                .W          = -1.06, //-0.40 //-0.57 //-0.70 //-1.25, 
-                .sigma      = 20, 
+                .W          = -0.30, //-0.40 //-0.57 //-0.70 //-1.25, 
+                .sigma      = 70, 
                 .synapse    = {.R=0.5,.D=3.0},
             }
         },
@@ -113,7 +118,7 @@ static const parameters DualLayerModelIn =
     {
         .type    = 
         {
-            .type = EIF,
+            .type = LIF,
             .extra = 
             {
                 .EIF={.Vth=-55,.Dpk=1}
@@ -157,6 +162,11 @@ static const parameters DualLayerModelIn =
         .period     = 0.2,
     },
     .skip=1,
+    .output = 
+    { 
+        .Switch   = OFF,
+        .Filename = "inh_spikes.txt"
+    },
 };
 ///parameters for the excitatory layer of the double layer model
 static const parameters DualLayerModelEx =
@@ -168,8 +178,8 @@ static const parameters DualLayerModelEx =
         {
             .dual =     
             {
-                .W          =  0.43, //0.09 //0.12 //0.14  //0.23
-                .sigma      = 20,
+                .W          =  0.23, //0.09 //0.12 //0.14  //0.23
+                .sigma      = 14,
                 .synapse    = {.R=0.5,.D=3.0},
             }
         },
@@ -180,7 +190,7 @@ static const parameters DualLayerModelEx =
     {
         .type    = 
         {
-            .type = EIF,
+            .type = LIF,
             .extra = 
             {
                 .EIF={.Vth=-55,.Dpk=1}
@@ -224,6 +234,11 @@ static const parameters DualLayerModelEx =
         .period     = 0.2,
     },
     .skip=1,
+    .output = 
+    {
+        .Switch    = ON,
+        .Filename  = "exc_spikes.txt"
+    },
 };
 ///Constant external input to conductances
 static const extinput Extinput =
@@ -234,12 +249,13 @@ static const extinput Extinput =
 ///Some global features that can be turned on and off
 static const model_features Features = 
 {
-    .Recovery   = ON,
+    .Recovery   = OFF,
     .STDP		= OFF, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep - 
     .STD        = ON, //               if we need any of these features we can make the changes then.
     .Output     = OFF,
     .Theta      = OFF,
     .Timestep   = 0.1,
+    .Simlength  = 10000
 };
 ///Parameters for conducting a parameter sweep.
 static const sweepable Sweep =

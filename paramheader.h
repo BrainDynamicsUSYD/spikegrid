@@ -131,7 +131,12 @@ typedef struct movie_parameters
     const unsigned int Output;  ///< What will be outputted in the movie
     const unsigned int Delay;   ///< how often to output it
 } movie_parameters;
-
+//Parameters for outputting spiking data
+typedef struct output_parameters
+{
+    const on_off Switch;
+    const char Filename[100];
+} output_parameters;
 ///Parameters for a subthreshold wave (not necersarrily theta)
 typedef struct theta_parameters
 {
@@ -169,6 +174,7 @@ typedef struct
     const theta_parameters theta;
     const recovery_parameters recovery;
     const int skip;
+    const output_parameters output;
 } parameters;
 
 // to specify an attribute to change for a yossarian run

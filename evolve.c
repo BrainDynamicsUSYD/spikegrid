@@ -207,9 +207,9 @@ void StoreFiring(layer* L)
                     L->recoverys_out[x*grid_size+y]+=L->P->recovery.Wrt;
                     }
                     this_fcount++;
-                    if (Features.Output==ON)
+                    if (L->P->output.Switch==ON)
                     {
-                        printf("%i,%i;",x,y);
+                        fprintf(L->outfile,"%i,%i;",x,y); // save coordinates of spiking neurons to text file
                     }
                 }
                 else if (((Compute_float)random())/((Compute_float)RAND_MAX) < 
@@ -221,7 +221,7 @@ void StoreFiring(layer* L)
             else {L->voltages_out[x*grid_size+y]=Zero;}
         }
     }
-    if (Features.Output==ON ) {printf("\n");} //occasionaly print newlines
+    if (L->P->output.Switch==ON) {fprintf(L->outfile,"\n");} //print new line for each time step
     current_firestore[this_fcount].x=-1;
 }
 ///Cleans up voltages for neurons that are in the refractory state

@@ -161,6 +161,7 @@ typedef struct
     const on_off Theta;
     const Compute_float Timestep; ///< The timestep in the model
     const unsigned int   Simlength; ///< total number of timesteps to run
+    const unsigned int Trial;
 } model_features;
  
 ///Structure that holds all the parameters for a layer

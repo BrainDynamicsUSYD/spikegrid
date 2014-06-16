@@ -225,7 +225,7 @@ static const parameters DualLayerModelEx =
     .Movie = 
     {
         .MakeMovie = ON,
-        .Output = 0,
+        .Output = 4,
         .Delay = 10,
     },
     .theta = 
@@ -251,11 +251,12 @@ static const model_features Features =
 {
     .Recovery   = OFF,
     .STDP		= OFF, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep - 
-    .STD        = ON, //               if we need any of these features we can make the changes then.
+    .STD        = OFF,  //if we need any of these features we can make the changes then.
     .Output     = OFF,
     .Theta      = OFF,
     .Timestep   = 0.1,
-    .Simlength  = 10000
+    .Simlength  = 1000,
+    .Trial      = 1, //if you want to run multiple trials for the same set of variables, can sweep this
 };
 ///Parameters for conducting a parameter sweep.
 static const sweepable Sweep =

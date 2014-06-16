@@ -4,31 +4,9 @@
 #include "theta.h"
 #include "output.h"
 #include "STDP.h"
-//when STDP is turned off, gcc will warn about this function needing const.  It is wrong
-///Adds in the component of connection matrices due to STDP effected dynamic synapses
-void evolvept_STDP  (const int x,const  int y,const Compute_float* const __restrict connections_STDP,const Compute_float Estrmod,const Compute_float Istrmod,Compute_float* __restrict gE,Compute_float* __restrict gI)
-{
-    if (Features.STDP == OFF) {return;}
-    for (int i = 0; i < couple_array_size;i++)
-    {
-        const int outoff = (x +i )*conductance_array_size +y;//as gE and gI are larger than the neuron grid size, don't have to worry about wrapping
-        for (int j = 0 ; j<couple_array_size;j++) 
-        {
-            const int coupleidx =(x*grid_size +y)*couple_array_size*couple_array_size + i*couple_array_size + j;
-            if (connections_STDP[coupleidx] > 0) //add either to gE or gI
-            {
-                gE[outoff+j] += connections_STDP[coupleidx]*Estrmod;
-            }
-            else
-            {
-                gI[outoff+j] += -(connections_STDP[coupleidx]*Istrmod);
-            }
-        }
-    } 
-}
 
 ///add conductance from a firing neuron to the gE and gI arrays (used in single layer model)
-void evolvept (const int x,const int y,const Compute_float* const __restrict connections,const Compute_float Estrmod,const Compute_float Istrmod,Compute_float* __restrict gE,Compute_float* __restrict gI,const Compute_float* STDP_CONNS)
+void evolvept (const int x,const int y,const Compute_float* const __restrict connections,const Compute_float Estrmod,const Compute_float Istrmod,Compute_float* __restrict gE,Compute_float* __restrict gI)
 {
     for (int i = 0; i < couple_array_size;i++)
     {
@@ -46,7 +24,13 @@ void evolvept (const int x,const int y,const Compute_float* const __restrict con
             }
         }
     } 
-    evolvept_STDP(x,y,STDP_CONNS,Estrmod,Istrmod,gE,gI);
+}
+
+//when STDP is turned off, gcc will warn about this function needing const.  It is wrong
+void evolvept_STDP  (const int x,const  int y,const Compute_float* const __restrict connections_STDP,const Compute_float Estrmod,const Compute_float Istrmod,Compute_float* __restrict gE,Compute_float* __restrict gI)
+{
+    if (Features.STDP == OFF) {return;}
+    evolvept(x,y,&(connections_STDP[(x*grid_size +y)*couple_array_size*couple_array_size]),Estrmod,Istrmod,gE,gI);
 }
 ///add conductance from a firing neuron to either gE or gI as appropriate (used in dual layer model)
 void evolvept_duallayer (const int x,const  int y,const Compute_float* const __restrict connections,const Compute_float strmod, Compute_float* __restrict condmat)
@@ -81,8 +65,12 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
             {
                 strmod=STD_str(L.P->STD,c.x,c.y,time,i,&(L.std));
             }
-            if (Eon && Ion) {evolvept(c.x,c.y,L.connections,Estr*strmod,Istr*strmod,gE,gI,L.STDP_connections);}
-            else            {evolvept_duallayer(c.x,c.y,L.connections,(Ion?Istr*-1:Estr)*strmod,(Ion?gI:gE));}
+            if (Eon && Ion) 
+            {
+                evolvept(c.x,c.y,L.connections,Estr*strmod,Istr*strmod,gE,gI);
+                evolvept_STDP(c.x,c.y,L.STDP_connections,Estr*strmod,Istr*strmod,gE,gI);
+            }
+            else            {evolvept_duallayer(c.x,c.y,L.connections,(Ion?Istr*-1:Estr)*strmod,(Ion?gI:gE));} //TODO: STDP not implemented in dual-layer
             idx++;
         }
     }

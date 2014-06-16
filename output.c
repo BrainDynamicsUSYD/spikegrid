@@ -1,10 +1,10 @@
 /// \file
 #include <string.h>
 #include <unistd.h>
-#include <stdio.h>
 #include "output.h"
 #include "picture.h"
 
+output_s* Outputtable;
 ///Extracts the actual information out of a tagged array and converts it to a simple square matrix
 Compute_float* taggedarrayTocomputearray(const tagged_array input)
 {
@@ -102,6 +102,7 @@ void OutputToPng(const tagged_array input,const Compute_float minval,const Compu
 ///TODO: Need to get a better way of detecting when rendering has finished
 void outputToConsole(const tagged_array input, const Compute_float minval,const Compute_float maxval)
 {
+    if (!isatty(fileno(stdout))) {return;} //if we are not outputting to a terminal - dont show pictures on console
     char* buf = malloc(sizeof(char)*1000*1000);//should be plenty
     char* upto = buf;
     const unsigned int size = input.size - (2*input.offset);
@@ -125,13 +126,30 @@ void outputToConsole(const tagged_array input, const Compute_float minval,const 
     free(buf);
 
 }
-///High level function to create a series of PNG images which can be then turned into a movie
-void makemovie(const movie_parameters m,const unsigned int t)
+///High level function to do output
+void dooutput(const output_parameters* const m,const unsigned int t)
 {
-    if (m.MakeMovie==ON && t % m.Delay==0)
+    int i = 0;
+    while (m[i].output_method != NO_OUTPUT)
     {
-        OutputToPng(Outputtable[m.Output].data,Outputtable[m.Output].minval,Outputtable[m.Output].maxval);
-        outputToConsole(Outputtable[m.Output].data,Outputtable[m.Output].minval,Outputtable[m.Output].maxval);
+        if (t % m[i].Delay==0)
+        {
+            switch (m[i].output_method)
+            {
+                case PICTURE:
+                    OutputToPng(Outputtable[m[i].Output].data,Outputtable[m[i].Output].minval,Outputtable[m[i].Output].maxval);
+                    break;
+                case TEXT:
+                    //                OutputToText;
+                    break;
+                case CONSOLE:
+                    outputToConsole(Outputtable[m[i].Output].data,Outputtable[m[i].Output].minval,Outputtable[m[i].Output].maxval);
+                    break;
+                default:
+                    printf("unknown output method\n");
+            }
+        }
+        i++;
     }
 }
 
@@ -148,4 +166,21 @@ output_s __attribute__((pure)) getOutputByName(const char* const name)
     } 
     printf("tried to get unknown thing to output\n");
     exit(EXIT_FAILURE);
+}
+void output_init(const model* const m)
+{
+    const unsigned int output_count = 9;
+    output_s* outdata=(output_s[]){ //note - neat feature - missing elements initailized to 0
+        {.name="gE",.data={m->gE,conductance_array_size,couplerange},.minval=0,.maxval=0.05}, //gE is a 'large' matrix - as it wraps around the edges
+        {"gI",{m->gI,conductance_array_size,couplerange},0,2}, //gI is a 'large' matrix - as it wraps around the edges
+        {"Coupling1",{m->layer1.connections,couple_array_size,0},0,100}, //return the coupling matrix of layer 1 //TODO: fix min and max values
+        {"Coupling2",{m->layer2.connections,couple_array_size,0},0,100}, //return the coupling matrix of layer 2
+        {"V1",       {m->layer1.voltages_out,grid_size,0}       ,m->layer1.P->potential.Vin,m->layer1.P->potential.Vpk},
+        {"V2",       {m->layer2.voltages_out,grid_size,0}       ,m->layer2.P->potential.Vin,m->layer2.P->potential.Vpk},
+        {"Recovery1",{m->layer1.recoverys_out,grid_size,0}      ,0,100}, //TODO: ask adam for max and min recovery values
+        {"Recovery2",{m->layer2.recoverys_out,grid_size,0}      ,0,100}, //TODO: ask adam for max and min recovery values
+        {.name={0}}};         //a marker that we are at the end of the outputabbles list
+    output_s* malloced = malloc(sizeof(output_s)*output_count);
+    memcpy(malloced,outdata,sizeof(output_s)*output_count);
+    Outputtable = malloced;
 }

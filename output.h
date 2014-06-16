@@ -1,7 +1,7 @@
 /// \file
 #ifndef OUTPUT
 #define OUTPUT
-#include "paramheader.h"
+#include "layer.h"
 char outdir [100];
 ///Holds data for outputtting in various ways
 typedef struct {
@@ -10,8 +10,8 @@ typedef struct {
     const Compute_float minval;     ///< minimum value in array (for a colorbar - currently unused)
     const Compute_float maxval;     ///< maximum value in array (for a colorbar - currently unused)
 } output_s; //used so that matlab has string identifiers that correspond to a specific tagged_array
-output_s* Outputtable;
 Compute_float* taggedarrayTocomputearray(const tagged_array input);
-void makemovie(const movie_parameters m,const unsigned int t);
+void dooutput(const output_parameters* const m,const unsigned int t);
 output_s __attribute__((pure)) getOutputByName(const char* const name);
+void output_init(const model* const m);
 #endif //OUTPUT

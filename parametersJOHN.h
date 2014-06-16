@@ -69,11 +69,10 @@ static const parameters OneLayerModel =
         .D  = 0.11,
         .F  = 0.005
     },
-    .Movie = 
-    {
-        .MakeMovie = OFF,
-        .Delay = 10,
-    },
+    .output = 
+    {{
+        .output_method = NO_OUTPUT,
+    }},
     .theta = 
     {
         .strength    = 5.0,
@@ -125,12 +124,17 @@ static const parameters DualLayerModelIn =
         .D  = 0.2,
         .F  = 0.45
     },
-    .Movie = 
-    {
-        .MakeMovie = OFF,
+    .output = 
+    {{
+        .output_method = PICTURE,
         .Output = 0,
         .Delay = 10,
     },
+    {
+        .output_method = CONSOLE,
+        .Output = 0,
+        .Delay = 10,
+    }},
     .theta = 
     {
         .strength    = 5.0,
@@ -182,12 +186,10 @@ static const parameters DualLayerModelEx =
         .D  = 0.2,
         .F  = 0.45
     },
-    .Movie = 
-    {
-        .MakeMovie = ON,
-        .Output = 5,
-        .Delay = 10,
-    },
+    .output = 
+    {{
+        .output_method = NO_OUTPUT,
+    }},
     .theta = 
     {
         .strength    = 5.0,

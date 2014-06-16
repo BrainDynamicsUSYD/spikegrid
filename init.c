@@ -8,6 +8,7 @@
 #include "coupling.h"
 #include "output.h"
 #include "printstruct.h"
+#include "layer.h"
 int randinit_done = 0;
 ///creates a random initial condition
 ///This is generated as small fluctuations away from Vrt

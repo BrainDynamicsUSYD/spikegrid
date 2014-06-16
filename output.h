@@ -1,7 +1,7 @@
 /// \file
 #ifndef OUTPUT
 #define OUTPUT
-#include "layer.h"
+#include "paramheader.h"
 char outdir [100];
 ///Holds data for outputtting in various ways
 typedef struct {
@@ -12,6 +12,6 @@ typedef struct {
 } output_s; //used so that matlab has string identifiers that correspond to a specific tagged_array
 output_s* Outputtable;
 Compute_float* taggedarrayTocomputearray(const tagged_array input);
-void makemovie(const layer l,const unsigned int t);
+void makemovie(const movie_parameters m,const unsigned int t);
 output_s __attribute__((pure)) getOutputByName(const char* const name);
 #endif //OUTPUT

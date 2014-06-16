@@ -1,6 +1,7 @@
 /// \file
 #include <string.h>
 #include <unistd.h>
+#include <stdio.h>
 #include "output.h"
 #include "picture.h"
 
@@ -125,12 +126,12 @@ void outputToConsole(const tagged_array input, const Compute_float minval,const 
 
 }
 ///High level function to create a series of PNG images which can be then turned into a movie
-void makemovie(const layer l,const unsigned int t)
+void makemovie(const movie_parameters m,const unsigned int t)
 {
-    if (l.P->Movie.MakeMovie==ON && t % l.P->Movie.Delay==0)
+    if (m.MakeMovie==ON && t % m.Delay==0)
     {
-        OutputToPng(Outputtable[l.P->Movie.Output].data,Outputtable[l.P->Movie.Output].minval,Outputtable[l.P->Movie.Output].maxval);
-       // outputToConsole(Outputtable[l.P->Movie.Output].data,Outputtable[l.P->Movie.Output].minval,Outputtable[l.P->Movie.Output].maxval);
+        OutputToPng(Outputtable[m.Output].data,Outputtable[m.Output].minval,Outputtable[m.Output].maxval);
+        outputToConsole(Outputtable[m.Output].data,Outputtable[m.Output].minval,Outputtable[m.Output].maxval);
     }
 }
 

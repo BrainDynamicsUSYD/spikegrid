@@ -4,6 +4,7 @@
 #include "theta.h"
 #include "output.h"
 #include "STDP.h"
+#include "layer.h"
 
 ///add conductance from a firing neuron to the gE and gI arrays (used in single layer model)
 void evolvept (const int x,const int y,const Compute_float* const __restrict connections,const Compute_float Estrmod,const Compute_float Istrmod,Compute_float* __restrict gE,Compute_float* __restrict gI)
@@ -192,13 +193,13 @@ void StoreFiring(layer* L)
                     // Reset recovery variable if applicable
                     if (Features.Recovery==ON)
                     {
-                    L->recoverys_out[x*grid_size+y]+=L->P->recovery.Wrt;
+                        L->recoverys_out[x*grid_size+y]+=L->P->recovery.Wrt;
                     }
-                    this_fcount++;
                     if (Features.Output==ON)
                     {
                         printf("%i,%i;",x,y);
                     }
+                    this_fcount++;
                 }
                 else if (((Compute_float)random())/((Compute_float)RAND_MAX) < 
                         (L->P->potential.rate*((Compute_float)0.001)*Features.Timestep))
@@ -264,11 +265,11 @@ void step1(model* m,const unsigned int time)
         if (m->NoLayers==DUALLAYER) {CalcRecoverys(m->layer2.voltages,m->layer2.recoverys,m->gE,m->gI,m->layer2.P->potential,m->layer2.P->recovery,m->layer2.voltages_out,m->layer2.recoverys_out);}
     }
     StoreFiring(&(m->layer1));
-    makemovie(m->layer1,time);
+    makemovie(m->layer1.P->Movie,time);
     if (m->NoLayers==DUALLAYER)
     {
-        StoreFiring(&(m->layer2));
-        makemovie(m->layer2,time);
+        StoreFiring(&(m->layer2 ));
+        makemovie(m->layer2.P->Movie,time);
     }
     if (Features.Theta==ON)
     {

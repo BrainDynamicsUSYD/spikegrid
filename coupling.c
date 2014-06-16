@@ -49,7 +49,6 @@ Compute_float* Norm_couplematrix(const couple_parameters c, Compute_float* const
                 {
                     const Compute_float val = unnormed[i];
                     if (val < 0) {negval += val;} else {plusval += val;}
-
                 }
                 const Compute_float plusnorm = c.normalization_parameters.total_area.WE/plusval;
                 const Compute_float negnorm = c.normalization_parameters.total_area.WI/negval;

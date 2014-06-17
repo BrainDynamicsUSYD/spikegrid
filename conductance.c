@@ -9,9 +9,7 @@
 #include "newparam.h"
 #include "init.h"
 #include "yossarian.h"
-#include "matlab_includes.h"
 #include "matlab_output.h"
-#include "output.h"
 unsigned int mytime=0;  ///<< The current time step
 model* m;               ///< The model we are evolving through time
 int jobnumber=-1;        ///< The current job number - used for pics directory etc
@@ -110,7 +108,7 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
         {
             FirstW = (Compute_float*) mxGetData(mxGetField(prhs[0],0,"Wsingle_layer"));
             SecondW = NULL;
-        }
+        } else {FirstW=NULL;SecondW=NULL;}
     }
     else
     {
@@ -120,27 +118,27 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
         {
             FirstW  = (Compute_float*) mxGetData(mxGetField(prhs[0],0,"Win"));
             SecondW = (Compute_float*) mxGetData(mxGetField(prhs[0],0,"Wex"));
-        }
+        } else {FirstW=NULL;SecondW=NULL;}
     }
     //Actually step the model
     step_(FirstV,SecondV,FirstW,SecondW);
     //Now assign the outputs
     if (ModelType == SINGLELAYER)
     {
-        mxSetField(variables,0,"Vsingle_layer",outputToMxArray(getOutputByName("V1").data));
+        mxSetField(variables,0,"Vsingle_layer",outputToMxArray(getOutputByName("V1")));
         if (Features.Recovery == ON) 
         {
-            mxSetField(variables,0,"Wsingle_layer",outputToMxArray(getOutputByName("Recovery1").data));
+            mxSetField(variables,0,"Wsingle_layer",outputToMxArray(getOutputByName("Recovery1")));
         }
     }
     else
     {
-        mxSetField(variables,0,"Vex",outputToMxArray(getOutputByName("V2").data));
-        mxSetField(variables,0,"Vin",outputToMxArray(getOutputByName("V1").data));
+        mxSetField(variables,0,"Vex",outputToMxArray(getOutputByName("V2")));
+        mxSetField(variables,0,"Vin",outputToMxArray(getOutputByName("V1")));
         if (Features.Recovery == ON)
         {
-            mxSetField(variables,0,"Wex",outputToMxArray(getOutputByName("Recovery2").data));
-            mxSetField(variables,0,"Win",outputToMxArray(getOutputByName("Recovery1").data));
+            mxSetField(variables,0,"Wex",outputToMxArray(getOutputByName("Recovery2")));
+            mxSetField(variables,0,"Win",outputToMxArray(getOutputByName("Recovery1")));
         }
     }
     plhs[0] = variables;

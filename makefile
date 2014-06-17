@@ -10,7 +10,7 @@ endif
 export DEBUGFLAGS= -g -std=gnu99
 #export SPEEDFLAG=-DFAST #comment out this line for double instead of float (will make code slower)
 export CLIBFLAGS= -fPIC -shared
-export LDFLAGS=-lm -lpng
+export LDFLAGS=-lm -lpng -g
 CFLAGS += ${SPEEDFLAG}
 #conductance.c always needs to be first - this ensures that the mexfile gets the right name
 SOURCES= conductance.c coupling.c  STDP.c STD.c picture.c output.c evolve.c ringbuffer.c newparam.c yossarian.c init.c theta.c printstruct.c matlab_output.c

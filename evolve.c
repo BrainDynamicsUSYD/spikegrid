@@ -4,7 +4,6 @@
 #include "theta.h"
 #include "output.h"
 #include "STDP.h"
-#include "layer.h"
 
 ///add conductance from a firing neuron to the gE and gI arrays (used in single layer model)
 void evolvept (const int x,const int y,const Compute_float* const __restrict connections,const Compute_float Estrmod,const Compute_float Istrmod,Compute_float* __restrict gE,Compute_float* __restrict gI)
@@ -195,10 +194,10 @@ void StoreFiring(layer* L)
                     {
                         L->recoverys_out[x*grid_size+y]+=L->P->recovery.Wrt;
                     }
-                    if (L->P->output.Switch==ON)
+               /*     if (L->P->output.Switch==ON)
                     {
                         fprintf(L->outfile,"%i,%i;",x,y); // save coordinates of spiking neurons to text file
-                    }
+                    } */
                     this_fcount++;
                 }
                 else if (((Compute_float)random())/((Compute_float)RAND_MAX) < 
@@ -210,11 +209,13 @@ void StoreFiring(layer* L)
             else {L->voltages_out[x*grid_size+y]=Zero;}
         }
     }
+    /*
     if (L->P->output.Switch==ON)
     {
         fprintf(L->outfile,"\n");     //print new line for each time step
         fflush(L->outfile);           //clear the buffer. MATLAB appears to lag if the mex file is compiled more than once in the same session. Weird.
-    }                             
+    } 
+    */
     current_firestore[this_fcount].x=-1;
 }
 ///Cleans up voltages for neurons that are in the refractory state
@@ -269,11 +270,11 @@ void step1(model* m,const unsigned int time)
         if (m->NoLayers==DUALLAYER) {CalcRecoverys(m->layer2.voltages,m->layer2.recoverys,m->gE,m->gI,m->layer2.P->potential,m->layer2.P->recovery,m->layer2.voltages_out,m->layer2.recoverys_out);}
     }
     StoreFiring(&(m->layer1));
-    makemovie(m->layer1.P->Movie,time);
+    dooutput(m->layer1.P->output,time);
     if (m->NoLayers==DUALLAYER)
     {
         StoreFiring(&(m->layer2 ));
-        makemovie(m->layer2.P->Movie,time);
+        dooutput(m->layer2.P->output,time);
     }
     if (Features.Theta==ON)
     {

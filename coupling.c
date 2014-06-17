@@ -108,7 +108,14 @@ Compute_float* CreateCouplingMatrix(const couple_parameters c)
                     }
                     else
                     {
-                        val = expdecay((Compute_float)(x*x+y*y),c.Layer_parameters.dual);
+                        if (c.Layer_parameters.dual.connectivity==EXPONENTIAL)
+                        {
+                            val = expdecay((Compute_float)(x*x+y*y),c.Layer_parameters.dual);
+                        }
+                        else 
+                        {
+                            val = c.Layer_parameters.dual.W;
+                        }
                     }
                     matrix[(x+couplerange)*couple_array_size + y + couplerange] = val;//and set the array
                 }

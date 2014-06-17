@@ -106,9 +106,10 @@ static const parameters DualLayerModelIn =
         {
             .dual = 
             {
-                .W          = -0.30, //-0.40 //-0.57 //-0.70 //-1.25, 
-                .sigma      = 70, 
-                .synapse    = {.R=0.5,.D=3.0},
+                .connectivity = HOMOGENEOUS,   //EXPONENTIAL or HOMOGENEOUS
+                .W            = 0.30, //-0.40 //-0.57 //-0.70 //-1.25, 
+                .sigma        = 70, 
+                .synapse      = {.R=0.5,.D=7.0},
             }
         },
         .norm_type = None,
@@ -130,7 +131,7 @@ static const parameters DualLayerModelIn =
         .Vex     = 0,                    //Ex reversal potential
         .Vin     = -80,                  //In reversal potential
         .glk     = 0.05,                 //leak current
-        .rate = 1,
+        .rate = 0,
     },    
     .recovery = 
     {
@@ -161,7 +162,7 @@ static const parameters DualLayerModelIn =
         .strength    = 5.0,
         .period     = 0.2,
     },
-    .skip=1,
+    .skip=2,
     .output = 
     { 
         .Switch   = OFF,
@@ -178,9 +179,10 @@ static const parameters DualLayerModelEx =
         {
             .dual =     
             {
-                .W          =  0.23, //0.09 //0.12 //0.14  //0.23
-                .sigma      = 14,
-                .synapse    = {.R=0.5,.D=3.0},
+                .connectivity = EXPONENTIAL,   //EXPONENTIAL or CONSTANT
+                .W            =  0.23, //0.09 //0.12 //0.14  //0.23
+                .sigma        = 12,
+                .synapse      = {.R=0.5,.D=2.0},
             }
         },
         .tref       = 5,
@@ -202,7 +204,7 @@ static const parameters DualLayerModelEx =
         .Vex     = 0,                    //Ex reversal potential
         .Vin     = -80,                  //In reversal potential
         .glk     = 0.05,                 //leak current
-        .rate = 1,
+        .rate = 0,
     },
     .recovery = 
     {
@@ -262,9 +264,9 @@ static const model_features Features =
 static const sweepable Sweep =
 {
     .offset=offsetof(parameters,couple)+offsetof(couple_parameters,Layer_parameters) +0+ /*offset in the union is always 0*/  + offsetof(duallayer_parameters,W),
-    .minval = 0.0,
-    .maxval = 1.0,
-    .count = 100
+    .minval = 0.1,
+    .maxval = 1,
+    .count = 10
 };
 
 #ifdef __clang__

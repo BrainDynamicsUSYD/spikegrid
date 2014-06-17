@@ -43,6 +43,8 @@ typedef struct decay_parameters{
     const Compute_float R;  ///<rise time constant (units?)
     const Compute_float D;  ///<decay time constant (units?)
 } decay_parameters;
+///Enum to determine the type of connectivity
+typedef enum ConnectType {HOMOGENEOUS=0,EXPONENTIAL=1} ConnectType;
 ///Enum to determine how many layers are in use
 typedef enum LayerNumbers {SINGLELAYER=0,DUALLAYER=1} LayerNumbers;
 ///Enum to determine whether there is a recovery variable
@@ -60,6 +62,7 @@ typedef struct singlelayer_parameters
 ///Layer parameters for when there are two layers
 typedef struct duallayer_parameters
 {
+    const ConnectType       connectivity;   ///<Connectivity type: EXPONENTIAL or HOMOGENEOUS
     const Compute_float     W;              ///<Maximum connectivity strength
     const Compute_float     sigma;      ///<Connectivity decay length scale
     const decay_parameters  synapse;    ///<Parameters of spike

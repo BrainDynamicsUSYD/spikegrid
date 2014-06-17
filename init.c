@@ -69,7 +69,8 @@ layer setuplayer(const parameters p)
         .voltages           = calloc(sizeof(Compute_float),grid_size*grid_size),
         .voltages_out       = calloc(sizeof(Compute_float),grid_size*grid_size),
         .recoverys       = Features.Recovery==ON?calloc(sizeof(Compute_float),grid_size*grid_size):NULL,
-        .recoverys_out   = Features.Recovery==ON?calloc(sizeof(Compute_float),grid_size*grid_size):NULL
+        .recoverys_out   = Features.Recovery==ON?calloc(sizeof(Compute_float),grid_size*grid_size):NULL,
+        .outfile         = p.output.Switch==ON?fopen(p.output.Filename,"w"):NULL, 
     };
     for (unsigned int i=0;i<cap;i++)
     {
@@ -93,8 +94,8 @@ model* setup(const parameters p,const parameters p2,const LayerNumbers lcount, i
         mkdir(outdir,S_IRWXU);
     }
     remove("struct.dump");//cleanup the old struct file
-    printout_struct(&p,"parameters",outdir,0);     //save the first parameters object
-    printout_struct(&p2,"parameters",outdir,1);    //save the second parameters object and display everything
+   // printout_struct(&p,"parameters",outdir,0);     //save the first parameters object
+    //printout_struct(&p2,"parameters",outdir,1);    //save the second parameters object and display everything
     const layer l1 = setuplayer(p);
     const layer l2 = lcount==DUALLAYER?setuplayer(p2):l1;
     const layer* layer1 = (layer*)newdata(&l1,sizeof(layer));//this is required to ensure that we get heap allocated layers

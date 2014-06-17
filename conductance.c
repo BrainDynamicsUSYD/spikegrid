@@ -62,14 +62,14 @@ mxArray* FirstMatlabCall( )
     mxArray* variables = mxCreateStructMatrix(1,1,6,(const char*[]){"Vin","Vex","Win","Wex","Vsingle_layer","Wsingle_layer"});
     if (ModelType==SINGLELAYER)
     {
-        mxSetField(variables,0,"Vsingle_layer",CreateInitialValues(OneLayerModel.potential.Vrt,OneLayerModel.potential.Vrt+(1.0/20.0)));
+        mxSetField(variables,0,"Vsingle_layer",CreateInitialValues(OneLayerModel.potential.Vrt,OneLayerModel.potential.Vpk));
         if (Features.Recovery==ON)
             {mxSetField(variables,0,"Wsingle_layer",CreateInitialValues(Zero,Zero));}
     }
     else if (ModelType==DUALLAYER) 
     {
-        mxSetField(variables,0,"Vin",CreateInitialValues(DualLayerModelIn.potential.Vrt,DualLayerModelIn.potential.Vrt + (1.0/20.0)));
-        mxSetField(variables,0,"Vex",CreateInitialValues(DualLayerModelEx.potential.Vrt,DualLayerModelEx.potential.Vrt + (1.0/20.0)));
+        mxSetField(variables,0,"Vin",CreateInitialValues(DualLayerModelIn.potential.Vrt,DualLayerModelIn.potential.Vpk));
+        mxSetField(variables,0,"Vex",CreateInitialValues(DualLayerModelEx.potential.Vrt,DualLayerModelEx.potential.Vpk));
         if (Features.Recovery==ON) 
         {
             mxSetField(variables,0,"Win",CreateInitialValues(Zero,Zero));

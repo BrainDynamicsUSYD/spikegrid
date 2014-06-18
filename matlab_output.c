@@ -49,7 +49,7 @@ mxArray* outputToMxStruct(const output_s input)
     Compute_float* minptr = (Compute_float*)mxGetData(minarr);
     mxArray* maxarr = mxCreateNumericMatrix(1,1,MatlabDataType(),mxREAL);
     Compute_float* maxptr = (Compute_float*)mxGetData(maxarr);
-    if (input.data_type==FLOAT_DATA)
+    if (input.data_type==FLOAT_DATA) //ringbuffer data doesn't really have a min/max
     {
         maxptr[0]=input.data.TA_data.maxval;
         minptr[0]=input.data.TA_data.minval;

@@ -101,7 +101,7 @@ void outputToPng(const tagged_array input,const int idx,const unsigned int count
 ///TODO: Need to get a better way of detecting when rendering has finished
 void outputToConsole(const tagged_array input)
 {
-    if (!isatty(fileno(stdout))) {return;} //if we are not outputting to a terminal - dont show pictures on console
+    if (!isatty(fileno(stdout))) {return;} //if we are not outputting to a terminal - dont show pictures on console - need to add matlab detection
     char* buf = malloc(sizeof(char)*1000*1000);//should be plenty
     char* upto = buf;
     const unsigned int size = input.size - (2*input.offset);
@@ -119,8 +119,8 @@ void outputToConsole(const tagged_array input)
         int q = sprintf(upto,"\x1b[0m\n");
         upto += q;
     }
-    puts(buf);
-    usleep(50000);
+    puts(buf); //output giant buffer in one go - should be faster
+    usleep(50000);//let terminal catch up - nasty hacky solution
     upto=buf;
     free(buf);
 

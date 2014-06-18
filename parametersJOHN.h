@@ -73,11 +73,6 @@ static const parameters OneLayerModel =
         .D  = 0.11,
         .F  = 0.005
     },
-    .Movie = 
-    {
-        .MakeMovie = OFF,
-        .Delay = 10,
-    },
     .theta = 
     {
         .strength    = 5.0,
@@ -132,12 +127,6 @@ static const parameters DualLayerModelIn =
         .U  = 0.5,
         .D  = 0.2,
         .F  = 0.45
-    },
-    .Movie = 
-    {
-        .MakeMovie = OFF,
-        .Output = 0,
-        .Delay = 10,
     },
     .theta = 
     {
@@ -194,12 +183,6 @@ static const parameters DualLayerModelEx =
         .D  = 0.2,
         .F  = 0.45
     },
-    .Movie = 
-    {
-        .MakeMovie = ON,
-        .Output = 0,
-        .Delay = 10,
-    },
     .theta = 
     {
         .strength    = 5.0,
@@ -215,6 +198,12 @@ static const model_features Features =
     .Output     = OFF,
     .Theta      = OFF,
     .Timestep   = 0.1,
+};
+///Constant external input to conductances
+static const extinput Extinput =
+{
+    .gE0 = 0.0,
+    .gI0 = 0,
 };
 ///Parameters for conducting a parameter sweep.
 static const sweepable Sweep =

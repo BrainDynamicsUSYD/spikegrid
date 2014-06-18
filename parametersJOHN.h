@@ -47,7 +47,11 @@ static const parameters OneLayerModel =
     {
         .type    = 
         {
-            .type = LIF,
+            .type = EIF,
+            .extra = 
+            {
+                .EIF={.Vth=-55,.Dpk=1}
+            }
         },
         .Vrt     = -70,                  //reset potential
         .Vpk    = -55,                   //peak potential (at which membrane potential is reset -- must match Vth for LIF neurons)
@@ -69,10 +73,11 @@ static const parameters OneLayerModel =
         .D  = 0.11,
         .F  = 0.005
     },
-    .output = 
-    {{
-        .output_method = NO_OUTPUT,
-    }},
+    .Movie = 
+    {
+        .MakeMovie = OFF,
+        .Delay = 10,
+    },
     .theta = 
     {
         .strength    = 5.0,
@@ -91,7 +96,7 @@ static const parameters DualLayerModelIn =
             .dual = 
             {
                 .W          = -1.06, //-0.40 //-0.57 //-0.70 //-1.25, 
-                .sigma      = 40, 
+                .sigma      = 20, 
                 .synapse    = {.R=0.5,.D=3.0},
             }
         },
@@ -102,7 +107,11 @@ static const parameters DualLayerModelIn =
     {
         .type    = 
         {
-            .type = LIF,
+            .type = EIF,
+            .extra = 
+            {
+                .EIF={.Vth=-55,.Dpk=1}
+            }
         },
         .Vrt     = -70,                  //reset potential
         .Vpk    = -55,                   //peak potential (at which membrane potential is reset -- must match Vth for LIF neurons)
@@ -120,27 +129,22 @@ static const parameters DualLayerModelIn =
     }, 
     .STD =
     {
-        .U  = 0.03,
+        .U  = 0.5,
         .D  = 0.2,
         .F  = 0.45
     },
-    .output = 
-    {{
-        .output_method = PICTURE,
+    .Movie = 
+    {
+        .MakeMovie = OFF,
         .Output = 0,
         .Delay = 10,
     },
-    {
-        .output_method = TEXT,
-        .Output = 8,
-        .Delay = 1,
-    }},
     .theta = 
     {
         .strength    = 5.0,
         .period     = 0.2,
     },
-    .skip=2,
+    .skip=1,
 };
 ///parameters for the excitatory layer of the double layer model
 static const parameters DualLayerModelEx =
@@ -152,8 +156,8 @@ static const parameters DualLayerModelEx =
         {
             .dual =     
             {
-                .W          =  0.65, 
-                .sigma      = 40,
+                .W          =  0.43, //0.09 //0.12 //0.14  //0.23
+                .sigma      = 20,
                 .synapse    = {.R=0.5,.D=3.0},
             }
         },
@@ -164,7 +168,11 @@ static const parameters DualLayerModelEx =
     {
         .type    = 
         {
-            .type = LIF,
+            .type = EIF,
+            .extra = 
+            {
+                .EIF={.Vth=-55,.Dpk=1}
+            }
         },
         .Vrt     = -70,                  //reset potential
         .Vpk    = -55,                   //peak potential (at which membrane potential is reset -- must match Vth for LIF neurons)
@@ -182,26 +190,22 @@ static const parameters DualLayerModelEx =
     }, 
     .STD =
     {
-        .U  = 0.03,
+        .U  = 0.5,
         .D  = 0.2,
         .F  = 0.45
     },
-    .output = 
-    {{
-        .output_method = NO_OUTPUT,
-    }},
+    .Movie = 
+    {
+        .MakeMovie = ON,
+        .Output = 0,
+        .Delay = 10,
+    },
     .theta = 
     {
         .strength    = 5.0,
         .period     = 0.2,
     },
     .skip=1,
-};
-///Constant external input to conductances
-static const extinput Extinput =
-{
-    .gE0 = 0.0,
-    .gI0 = 0,
 };
 ///Some global features that can be turned on and off
 static const model_features Features = 
@@ -211,14 +215,13 @@ static const model_features Features =
     .Output     = OFF,
     .Theta      = OFF,
     .Timestep   = 0.1,
-    .Simlength  = 5000
 };
 ///Parameters for conducting a parameter sweep.
 static const sweepable Sweep =
 {
     .offset=offsetof(parameters,couple)+offsetof(couple_parameters,Layer_parameters) +0+ /*offset in the union is always 0*/  + offsetof(duallayer_parameters,W),
     .minval = 0.0,
-    .maxval = 2.0,
+    .maxval = 1.0,
     .count = 100
 };
 

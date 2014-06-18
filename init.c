@@ -34,9 +34,9 @@ void randinit(Compute_float* input,const Compute_float minval,const Compute_floa
 /// @param size   the amount of data to copy
 void* newdata(const void* const input,const unsigned int size)   
 {
-        void* ret = malloc(size);
-            memcpy(ret,input,size);
-                return ret;
+    void* ret = malloc(size);
+    memcpy(ret,input,size);
+    return ret;
 } 
 
 ///given a parameters object, set up a layer object.
@@ -59,7 +59,7 @@ layer setuplayer(const parameters p)
         },
         .connections = CreateCouplingMatrix(p.couple),
         .STDP_connections   = Features.STDP==ON?calloc(sizeof(Compute_float),grid_size*grid_size*couple_array_size*couple_array_size):NULL,
-        .std                = STD_init(p.STD), //this is so fast that it doesn't matter to run in init
+        .std                = STD_init(p.STD), //this is so fast that it doesn't matter to run in init always
         .Extimecourse       = p.couple.Layertype==SINGLELAYER?Synapse_timecourse_cache(cap,p.couple.Layer_parameters.single.Ex,Features.Timestep):
             ((p.couple.Layer_parameters.dual.W>0)?Synapse_timecourse_cache(cap,p.couple.Layer_parameters.dual.synapse,Features.Timestep):NULL),
         .Intimecourse       = p.couple.Layertype==SINGLELAYER?Synapse_timecourse_cache(cap,p.couple.Layer_parameters.single.In,Features.Timestep):
@@ -69,7 +69,6 @@ layer setuplayer(const parameters p)
         .voltages_out       = calloc(sizeof(Compute_float),grid_size*grid_size),
         .recoverys       = Features.Recovery==ON?calloc(sizeof(Compute_float),grid_size*grid_size):NULL,
         .recoverys_out   = Features.Recovery==ON?calloc(sizeof(Compute_float),grid_size*grid_size):NULL,
-      //  .outfile         = p.output.Switch==ON?fopen(p.output.Filename,"w"):NULL, 
     };
     for (unsigned int i=0;i<cap;i++)
     {

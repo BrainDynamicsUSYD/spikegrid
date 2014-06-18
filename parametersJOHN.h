@@ -1,7 +1,7 @@
 /// \file
 #include <stddef.h> //offsetof
 //these first few parameters actually escape into the paramheader file through magic
-#define grid_size 100
+#define grid_size 200
 ///Total size of the grid
 ///Coupling range
 #define couplerange 15
@@ -90,7 +90,7 @@ static const parameters DualLayerModelIn =
         {
             .dual = 
             {
-                .W          = -1.06, //-0.40 //-0.57 //-0.70 //-1.25, 
+                .W          = -1.04, //-0.40 //-0.57 //-0.70 //-1.25, 
                 .sigma      = 20, 
                 .synapse    = {.R=0.5,.D=3.0},
             }

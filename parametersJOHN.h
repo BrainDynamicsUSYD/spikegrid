@@ -20,7 +20,7 @@
 #include "paramheader.h"
 ///Whether we are using the single or double layer model
 static const LayerNumbers ModelType = DUALLAYER;
-
+//#define pot 
 //Fun note - with the right optimisations GCC actually will pull these constants inline (for example disassemble evolvept_STDP with STDP off)
 ///Parameters for the single layer model
 static const parameters OneLayerModel = 
@@ -80,6 +80,20 @@ static const parameters OneLayerModel =
     },
     .skip=1,
 };
+#define potparams  .potential =     \
+    {                               \
+        .type    =                  \
+        {                           \
+            .type = LIF,            \
+        },                          \
+        .Vrt     = -70,             \
+        .Vpk    = -55,              \
+        .Vlk     = -70,             \
+        .Vex     = 0,               \
+        .Vin     = -80,             \
+        .glk     = 0.05,            \
+        .rate = 1,                  \
+    }
 ///parameters for the inhibitory layer of the double layer model
 static const parameters DualLayerModelIn =
 {
@@ -98,40 +112,12 @@ static const parameters DualLayerModelIn =
         .norm_type = None,
         .tref       = 5,
     },
-    .potential = 
-    {
-        .type    = 
-        {
-            .type = EIF,
-            .extra = 
-            {
-                .EIF={.Vth=-55,.Dpk=1}
-            }
-        },
-        .Vrt     = -70,                  //reset potential
-        .Vpk    = -55,                   //peak potential (at which membrane potential is reset -- must match Vth for LIF neurons)
-        .Vlk     = -70,                  //leak reversal potential
-        .Vex     = 0,                    //Ex reversal potential
-        .Vin     = -80,                  //In reversal potential
-        .glk     = 0.05,                 //leak current
-        .rate = 1,
-    },    
-    .STDP = 
-    {
-        .stdp_limit     = 0.1,
-        .stdp_tau       = 20,
-        .stdp_strength  = 0.0004
-    }, 
+    potparams,
     .STD =
     {
         .U  = 0.5,
         .D  = 0.2,
         .F  = 0.45
-    },
-    .theta = 
-    {
-        .strength    = 5.0,
-        .period     = 0.2,
     },
     .skip=2,
 };
@@ -153,40 +139,12 @@ static const parameters DualLayerModelEx =
         .tref       = 5,
         .norm_type = None,
     },
-    .potential = 
-    {
-        .type    = 
-        {
-            .type = EIF,
-            .extra = 
-            {
-                .EIF={.Vth=-55,.Dpk=1}
-            }
-        },
-        .Vrt     = -70,                  //reset potential
-        .Vpk    = -55,                   //peak potential (at which membrane potential is reset -- must match Vth for LIF neurons)
-        .Vlk     = -70,                  //leak reversal potential
-        .Vex     = 0,                    //Ex reversal potential
-        .Vin     = -80,                  //In reversal potential
-        .glk     = 0.05,                 //leak current
-        .rate = 1,
-    },
-    .STDP = 
-    {
-        .stdp_limit     = 0.1,
-        .stdp_tau       = 20,
-        .stdp_strength  = 0.0004
-    }, 
+    potparams,
     .STD =
     {
         .U  = 0.5,
         .D  = 0.2,
         .F  = 0.45
-    },
-    .theta = 
-    {
-        .strength    = 5.0,
-        .period     = 0.2,
     },
     .skip=1,
 };
@@ -194,10 +152,11 @@ static const parameters DualLayerModelEx =
 static const model_features Features = 
 {
     .STDP		= OFF, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep - 
-    .STD        = ON, //               if we need any of these features we can make the changes then.
+    .STD        = OFF, //               if we need any of these features we can make the changes then.
     .Output     = OFF,
     .Theta      = OFF,
     .Timestep   = 0.1,
+    .Simlength  = 10,
 };
 ///Constant external input to conductances
 static const extinput Extinput =

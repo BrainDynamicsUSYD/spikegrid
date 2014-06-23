@@ -96,9 +96,7 @@ model* setup(const parameters p,const parameters p2,const LayerNumbers lcount, i
     //printout_struct(&p2,"parameters",outdir,1);    //save the second parameters object and display everything
     const layer l1 = setuplayer(p);
     const layer l2 = lcount==DUALLAYER?setuplayer(p2):l1;
-    const layer* layer1 = (layer*)newdata(&l1,sizeof(layer));//this is required to ensure that we get heap allocated layers
-    const layer* layer2 = (layer*)newdata(&l2,sizeof(layer));
-    const model m = {.layer1=*layer1,.layer2=*layer2,.NoLayers=lcount};
+    const model m = {.layer1 = l1,.layer2=l2,.NoLayers=lcount};
     model* m2 = malloc(sizeof(m));
     memcpy(m2,&m,sizeof(m));
     char* buffer = malloc(1024);

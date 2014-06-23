@@ -209,13 +209,6 @@ void StoreFiring(layer* L)
             else {L->voltages_out[x*grid_size+y]=Zero;}
         }
     }
-    /*
-    if (L->P->output.Switch==ON)
-    {
-        fprintf(L->outfile,"\n");     //print new line for each time step
-        fflush(L->outfile);           //clear the buffer. MATLAB appears to lag if the mex file is compiled more than once in the same session. Weird.
-    } 
-    */
     current_firestore[this_fcount].x=-1;
 }
 ///Cleans up voltages for neurons that are in the refractory state

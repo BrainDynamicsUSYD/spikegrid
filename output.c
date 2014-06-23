@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include "output.h"
 #include "picture.h"
-#define output_count  11
+#define output_count  15
 output_s* Outputtable;
 FILE* outfiles[output_count];
 ///Extracts the actual information out of a tagged array and converts it to a simple square matrix
@@ -219,12 +219,16 @@ void output_init(const model* const m)
         //Name          data type                  actual data                size                    offset         minval,maxval
         {"gE",          FLOAT_DATA, .data.TA_data={m->gE,                     conductance_array_size, couplerange,   0,0.05}}, //gE is a 'large' matrix - as it wraps around the edges
         {"gI",          FLOAT_DATA, .data.TA_data={m->gI,                     conductance_array_size, couplerange,   0,2}}, //gI is a 'large' matrix - as it wraps around the edges
-        {"Coupling1",   FLOAT_DATA, .data.TA_data={m->layer1.connections,     couple_array_size,      0,             0,100}}, //return the coupling matrix of layer 1 //TODO: fix min and max values
-        {"Coupling2",   FLOAT_DATA, .data.TA_data={m->layer2.connections,     couple_array_size,      0,             0,100}}, //return the coupling matrix of layer 2
+        {"Coupling1",   FLOAT_DATA, .data.TA_data={m->layer1.connections,     couple_array_size,      0,             -0.5,0.5}}, //return the coupling matrix of layer 1 //TODO: fix min and max values
+        {"Coupling2",   FLOAT_DATA, .data.TA_data={m->layer2.connections,     couple_array_size,      0,             -0.5,0.5}}, //return the coupling matrix of layer 2
         {"V1",          FLOAT_DATA, .data.TA_data={m->layer1.voltages_out,    grid_size,              0,             m->layer1.P->potential.Vin,m->layer1.P->potential.Vpk}},
         {"V2",          FLOAT_DATA, .data.TA_data={m->layer2.voltages_out,    grid_size,              0,             m->layer2.P->potential.Vin,m->layer2.P->potential.Vpk}},
         {"Recovery1",   FLOAT_DATA, .data.TA_data={m->layer1.recoverys_out,   grid_size,              0,             0,100}}, //TODO: ask adam for max and min recovery values
         {"Recovery2",   FLOAT_DATA, .data.TA_data={m->layer2.recoverys_out,   grid_size,              0,             0,100}}, //TODO: ask adam for max and min recovery values
+        {"STDU1",       FLOAT_DATA, .data.TA_data={m->layer1.std.U,           grid_size,              0,             0,1}},
+        {"STDR1",       FLOAT_DATA, .data.TA_data={m->layer1.std.R,           grid_size,              0,             0,1}},
+        {"STDU2",       FLOAT_DATA, .data.TA_data={m->layer2.std.U,           grid_size,              0,             0,1}},
+        {"STDR2",       FLOAT_DATA, .data.TA_data={m->layer2.std.R,           grid_size,              0,             0,1}},
         //ringbuffer outputs
         //name          data type        actual data
         {"Firing1",     RINGBUFFER_DATA, .data.RB_data=&m->layer1.spikes}, //take reference as the struct gets modified

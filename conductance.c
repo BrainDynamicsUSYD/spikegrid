@@ -10,6 +10,7 @@
 #include "init.h"
 #include "yossarian.h"
 #include "matlab_output.h"
+#include "cleanup.h"
 unsigned int mytime=0;  ///<< The current time step
 model* m;               ///< The model we are evolving through time
 int jobnumber=-1;        ///< The current job number - used for pics directory etc
@@ -231,6 +232,11 @@ int main(int argc,char** argv) //useful for testing w/out matlab
             }
         }
     }
+    FreeIfNotNull(FirstV);
+    FreeIfNotNull(SecondV);
+    FreeIfNotNull(FirstW);
+    FreeIfNotNull(SecondW);
+    CleanupModel(m);
     return(EXIT_SUCCESS);
 }
 #endif

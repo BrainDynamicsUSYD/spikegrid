@@ -91,9 +91,11 @@ model* setup(const parameters p,const parameters p2,const LayerNumbers lcount, i
         sprintf(outdir,"job-%i/",jobnumber);
         mkdir(outdir,S_IRWXU);
     }
-    remove("struct.dump");//cleanup the old struct file
-   // printout_struct(&p,"parameters",outdir,0);     //save the first parameters object
-    //printout_struct(&p2,"parameters",outdir,1);    //save the second parameters object and display everything
+    char buf[100];
+    sprintf(buf,"%s/struct.dump",outdir);
+    remove(buf);//cleanup the old struct file
+    printout_struct(&p,"parameters",outdir,0);     //save the first parameters object
+    printout_struct(&p2,"parameters",outdir,1);    //save the second parameters object and display everything
     const layer l1 = setuplayer(p);
     const layer l2 = lcount==DUALLAYER?setuplayer(p2):l1;
     const model m = {.layer1 = l1,.layer2=l2,.NoLayers=lcount};

@@ -154,6 +154,8 @@ struct option long_options[] = {{"help",no_argument,0,'h'},{"generate",no_argume
 /// @param argv what the parameters actually are
 int main(int argc,char** argv) //useful for testing w/out matlab
 {
+
+    feenableexcept(FE_INVALID | FE_OVERFLOW); //segfault on NaN and overflow
     parameters* newparam = NULL;
     setvbuf(stdout,NULL,_IONBF,0);
     while (1)

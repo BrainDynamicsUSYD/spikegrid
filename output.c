@@ -217,7 +217,7 @@ void output_init(const model* const m)
     //WHEN YOU ADD SOMETHING - INCREASE OUTPUT_COUNT AT TOP OF FILE;
     output_s* outdata=(output_s[]){ //note - neat feature - missing elements initailized to 0
         //Name          data type                  actual data                size                    offset         minval,maxval
-        {"gE",          FLOAT_DATA, .data.TA_data={m->gE,                     conductance_array_size, couplerange,   0,0.05}}, //gE is a 'large' matrix - as it wraps around the edges
+        {"gE",          FLOAT_DATA, .data.TA_data={m->gE,                     conductance_array_size, couplerange,   0,2}}, //gE is a 'large' matrix - as it wraps around the edges
         {"gI",          FLOAT_DATA, .data.TA_data={m->gI,                     conductance_array_size, couplerange,   0,2}}, //gI is a 'large' matrix - as it wraps around the edges
         {"Coupling1",   FLOAT_DATA, .data.TA_data={m->layer1.connections,     couple_array_size,      0,             -0.5,0.5}}, //return the coupling matrix of layer 1 //TODO: fix min and max values
         {"Coupling2",   FLOAT_DATA, .data.TA_data={m->layer2.connections,     couple_array_size,      0,             -0.5,0.5}}, //return the coupling matrix of layer 2

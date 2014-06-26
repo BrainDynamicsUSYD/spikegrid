@@ -62,21 +62,17 @@ mxArray* outputToMxStruct(const output_s input)
 }
 void outputExtraThings(mxArray* plhs[],int nrhs,const mxArray* prhs[])
 {
-    for (int i = 1;i<nrhs;i++)
+    //error checking
+    if (nrhs ==1) {return;} //no more stuff to output
+    if (nrhs > 3) {printf("Too many output things - error\n");return;} //incorrect no of rhs params
+    if (mxGetClassID(prhs[1]) != mxCELL_CLASS) {printf("rhs parameter 1 is of wrong type - needs to be cell\n");return;}
+    const mwSize numparams = (mwSize)mxGetNumberOfElements(prhs[1]);
+    plhs[1] = mxCreateCellArray(1,(const mwSize[]){numparams});
+    for (int i=0;i<numparams;i++)
     {
-        if (mxGetClassID(prhs[i]) != mxCHAR_CLASS) {printf("rhs parameter %i needs to be a char string\n",i);return;}
-    }
-    if (nrhs>1) //output other stuff
-    {
-        int rhsidx = 1;
-        while (rhsidx<nrhs)
-        {
-            char* data=malloc(sizeof(char)*1024); //should be big enough
-            mxGetString(prhs[rhsidx],data,1023);
-            plhs[rhsidx] = outputToMxStruct(getOutputByName(data));
-            free(data);
-            rhsidx++;
-        }
+        char* data=malloc(sizeof(char)*1024); //should be big enough
+        mxGetString(mxGetCell(prhs[1],i),data,1023);
+        mxSetCell(plhs[1],i,outputToMxStruct(getOutputByName(data)));
     }
 }
 #endif

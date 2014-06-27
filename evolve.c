@@ -4,14 +4,13 @@
 #include "theta.h"
 #include "output.h"
 #include "STDP.h"
-#include "layer.h"
 
 ///add conductance from a firing neuron to the gE and gI arrays (used in single layer model)
 void evolvept (const int x,const int y,const Compute_float* const __restrict connections,const Compute_float Estrmod,const Compute_float Istrmod,Compute_float* __restrict gE,Compute_float* __restrict gI)
 {
     for (int i = 0; i < couple_array_size;i++)
     {
-        const int outoff = (x +i )*conductance_array_size +y;//as gE and gI are larger than the neuron grid size, don't have to worry about wrapping
+        const int outoff = (x + i)*conductance_array_size +y;//as gE and gI are larger than the neuron grid size, don't have to worry about wrapping
         for (int j = 0 ; j<couple_array_size;j++) 
         {
             const int coupleidx = i*couple_array_size + j;
@@ -38,7 +37,7 @@ void evolvept_duallayer (const int x,const  int y,const Compute_float* const __r
 {
     for (int i = 0; i < couple_array_size;i++)
     {
-        const int outoff = (x +i )*conductance_array_size +y;//as gE and gI are larger than the neuron grid size, don't have to worry about wrapping
+        const int outoff = (x + i)*conductance_array_size +y;//as gE and gI are larger than the neuron grid size, don't have to worry about wrapping
         for (int j = 0 ; j<couple_array_size;j++) 
         {
             const int coupleidx = i*couple_array_size + j;
@@ -71,7 +70,7 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
                 evolvept(c.x,c.y,L.connections,Estr*strmod,Istr*strmod,gE,gI);
                 evolvept_STDP(c.x,c.y,L.STDP_connections,Estr*strmod,Istr*strmod,gE,gI);
             }
-            else            {evolvept_duallayer(c.x,c.y,L.connections,(Ion?Istr*-1:Estr)*strmod,(Ion?gI:gE));} //TODO: STDP not implemented in dual-layer
+            else  {evolvept_duallayer(c.x,c.y,L.connections,(Ion?Istr*-1:Estr)*strmod,(Ion?gI:gE));} //TODO: STDP not implemented in dual-layer
             idx++;
         }
     }
@@ -123,7 +122,7 @@ Compute_float __attribute__((const,pure)) rhs_func  (const Compute_float V,const
             return -(p.glk*(V-p.Vlk) + ge*(V-p.Vex) + gi*(V-p.Vin));
         case QIF:
             return -(p.glk*(V-p.Vlk)*(p.type.extra.QIF.Vth-V) + ge*(V-p.Vex) + gi*(V-p.Vin));
-        case EIF: //TODO: this doesn't work correctly
+        case EIF: 
             return -(p.glk*(V-p.Vlk) - p.glk*p.type.extra.EIF.Dpk*exp((V-p.type.extra.EIF.Vth)/p.type.extra.EIF.Dpk) + ge*(V-p.Vex) + gi*(V-p.Vin));
         default: return One; //avoid -Wreturn-type error which is probably wrong anyway
     }
@@ -195,10 +194,6 @@ void StoreFiring(layer* L)
                     {
                         L->recoverys_out[x*grid_size+y]+=L->P->recovery.Wrt;
                     }
-                    if (L->P->output.Switch==ON)
-                    {
-                        fprintf(L->outfile,"%i,%i;",x,y); // save coordinates of spiking neurons to text file
-                    }
                     this_fcount++;
                 }
                 else if (((Compute_float)random())/((Compute_float)RAND_MAX) < 
@@ -210,11 +205,6 @@ void StoreFiring(layer* L)
             else {L->voltages_out[x*grid_size+y]=Zero;}
         }
     }
-    if (L->P->output.Switch==ON)
-    {
-        fprintf(L->outfile,"\n");     //print new line for each time step
-        fflush(L->outfile);           //clear the buffer. MATLAB appears to lag if the mex file is compiled more than once in the same session. Weird.
-    }                             
     current_firestore[this_fcount].x=-1;
 }
 ///Cleans up voltages for neurons that are in the refractory state
@@ -262,18 +252,17 @@ void step1(model* m,const unsigned int time)
             ResetVoltages(m->layer2.voltages_out,m->layer2.P->couple,&m->layer2.spikes,m->layer2.P->potential);
         }
     }
-    // with recovery variable (note no support for theta - no idea if they work together)
     else 
     {
         CalcRecoverys(m->layer1.voltages,m->layer1.recoverys,m->gE,m->gI,m->layer1.P->potential,m->layer1.P->recovery,m->layer1.voltages_out,m->layer1.recoverys_out);
         if (m->NoLayers==DUALLAYER) {CalcRecoverys(m->layer2.voltages,m->layer2.recoverys,m->gE,m->gI,m->layer2.P->potential,m->layer2.P->recovery,m->layer2.voltages_out,m->layer2.recoverys_out);}
     }
     StoreFiring(&(m->layer1));
-    makemovie(m->layer1.P->Movie,time);
+    dooutput(m->layer1.P->output,time);
     if (m->NoLayers==DUALLAYER)
     {
         StoreFiring(&(m->layer2 ));
-        makemovie(m->layer2.P->Movie,time);
+        dooutput(m->layer2.P->output,time);
     }
     if (Features.Theta==ON)
     {

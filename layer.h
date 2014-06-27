@@ -18,7 +18,6 @@ typedef struct layer
     ringbuffer spikes;                          ///<stores spiking history
     parameters* P;                              ///<The parameters that we used to make the layer
     STD_data std;                               ///<Some info that is needed for STD - TODO - I really don't like that layer.h needs to inlude STD.h - feels messy
-    FILE* outfile;                        ///<Stores coordinates of firing neurons
 } layer;
 ///Allows for having multiple layers and simulating them
 typedef struct Model

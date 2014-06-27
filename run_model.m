@@ -1,7 +1,8 @@
 compile;
 time=1;
+outputs={ 'Coupling1','Coupling2','STDR1','gE'};
 %initial call
-[V, gE] = conductance('dummy','gE');
+[V, out1] = conductance('dummy',outputs);
 
 % Membrane potential
 figure(1);
@@ -20,20 +21,20 @@ set(gca,'XLim',[0.5 gridsize+0.5],'YLim',[0.5 gridsize+0.5],'XTick',[],'YTick',[
 colormap('default');
 title('Vin');
 colorbar;
-% Excitatory conductance
-figure(3);
-hG = imagesc(gE.data,[gE.min gE.max]);
-set(gca,'XLim',[0.5 gridsize+0.5],'YLim',[0.5 gridsize+0.5],'XTick',[],'YTick',[],...
-    'XTickLabel',[],'YTickLabel',[],'XGrid','off','YGrid','off');
-title('GE');
+h=[];
+for i=1:length(out1)
+    h(i)=setupplot(out1{1},i+2);
+end
 while time<20000
     time=time+1;
-    [V, gE] =conductance(V,'gE');
+    [V, out1] =conductance(V,outputs);
     if (mod(time,10)==0)
         set(hV,'CData',V.Vex);
         set(hVi,'CData',V.Vin);
         set(hT,'String',sprintf('Time: %.1f',time));
-        set(hG,'CData',gE.data);  
+        for i=1:length(out1)
+            set(h(i),'CData',out1{i}.data);  
+        end
         drawnow;
     end
 end

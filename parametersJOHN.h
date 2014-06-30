@@ -1,7 +1,7 @@
 /// \file
 #include <stddef.h> //offsetof
 //these first few parameters actually escape into the paramheader file through magic
-#define grid_size 200
+#define grid_size 100
 ///Total size of the grid
 ///Coupling range
 #define couplerange 15
@@ -92,7 +92,7 @@ static const parameters OneLayerModel =
         .Vex     = 0,               \
         .Vin     = -80,             \
         .glk     = 0.05,            \
-        .rate = 1,                  \
+        .rate = 2,                  \
     }
 ///parameters for the inhibitory layer of the double layer model
 static const parameters DualLayerModelIn =
@@ -104,8 +104,8 @@ static const parameters DualLayerModelIn =
         {
             .dual = 
             {
-                .W          = -1.04, //-0.40 //-0.57 //-0.70 //-1.25, 
-                .sigma      = 20, 
+                .W          = -0.84, //-0.40 //-0.57 //-0.70 //-1.25, 
+                .sigma      = 50, 
                 .synapse    = {.R=0.5,.D=3.0},
             }
         },
@@ -131,8 +131,8 @@ static const parameters DualLayerModelEx =
         {
             .dual =     
             {
-                .W          =  0.132, //0.09 //0.12 //0.14  //0.23
-                .sigma      = 20,
+                .W          =  0.02, //0.09 //0.12 //0.14  //0.23
+                .sigma      = 50,
                 .synapse    = {.R=0.5,.D=3.0},
             }
         },
@@ -152,17 +152,17 @@ static const parameters DualLayerModelEx =
 static const model_features Features = 
 {
     .STDP		= OFF, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep - 
-    .STD        = OFF, //               if we need any of these features we can make the changes then.
+    .STD        = ON, //               if we need any of these features we can make the changes then.
     .Output     = OFF,
     .Theta      = OFF,
-    .Timestep   = 0.1,
+    .Timestep   = 0.02,
     .Simlength  = 10,
 };
 ///Constant external input to conductances
 static const extinput Extinput =
 {
     .gE0 = 0.0,
-    .gI0 = 0,
+    .gI0 = 0.0,
 };
 ///Parameters for conducting a parameter sweep.
 static const sweepable Sweep =

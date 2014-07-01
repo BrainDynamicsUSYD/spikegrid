@@ -15,6 +15,7 @@
 Compute_float  __attribute__((pure)) Synapse_timecourse(const decay_parameters Decay,const Compute_float time)
 {
     return (One/(Decay.D-Decay.R))*(exp(-time/Decay.D)-exp(-time/Decay.R));
+    //return(One/(Decay.D-Decay.R))*(exp(-time/Decay.D)-exp(-time/Decay.R))/(Decay.D-Decay.R);
 }
 ///Calculate how long we need to track spike histories.  This is done by seeing how long it takes the spike magnitude to decrease below a critical value
 ///@param minval The minimum spike size that we care about.  This is not affected by the coupling matrix at all.  As a result, if your coupling strengths are very high, this might need to be reduced
@@ -22,7 +23,7 @@ unsigned int __attribute__((pure)) setcap(const decay_parameters d,const Compute
 {
     Compute_float prev = -1000;//initial values
     Compute_float time=0;
-    unsigned int count = 1; //keeps compatibility with matlab
+    unsigned int count = 2; //3. keeps compatibility with matlab
     while(1)
     {
         time+=timestep;
@@ -110,7 +111,11 @@ Compute_float* CreateCouplingMatrix(const couple_parameters c)
                     {
                         if (c.Layer_parameters.dual.connectivity==EXPONENTIAL)
                         {
-                            val = expdecay((Compute_float)(x*x+y*y),c.Layer_parameters.dual);
+                            if (x*x+y*y<=100)
+                            {val = expdecay((Compute_float)(x*x+y*y),c.Layer_parameters.dual);}
+                            else 
+                            {val = 0;}
+                            //val = expdecay((Compute_float)(x*x+y*y),c.Layer_parameters.dual);
                         }
                         else 
                         {
@@ -134,8 +139,9 @@ Compute_float* __attribute__((const)) Synapse_timecourse_cache (const unsigned i
     Compute_float* ret = calloc(sizeof(Compute_float),cap);
     for (unsigned int i=0;i<cap;i++)
     {
+        //const Compute_float time = ((Compute_float)i)*timestep;
         const Compute_float time = ((Compute_float)i)*timestep;
-        ret[i]=Synapse_timecourse(Decay,time); 
+        ret[i]=Synapse_timecourse(Decay,time); //The first value in cache should surely be non-zero?
     }
     return ret;
 }

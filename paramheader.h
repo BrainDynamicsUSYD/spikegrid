@@ -8,10 +8,19 @@ typedef float Compute_float ; //for speed
 ///Used to enable simple switching between float and double
 typedef double Compute_float ; //for accuracy
 #endif
+///used for storing arrays with their size.  Allows for the matlab_output (and other) function to take both the big and large arrays
+typedef struct {
+    //we require volatile below as we don't want you to be able to write to an array using the pointer from the tagged array
+    //however, other parts of the code could modify the underlying array, so use volatile to force reads
+    const volatile Compute_float* const data; ///< the actual data
+    const unsigned int size;                  ///< the total dimensions
+    const unsigned int offset;                ///< offset (used by the gE and gI matrices
+} tagged_array;
+
 ///Simple enum for things that are on or off to make their state more obvious
-typedef enum {OFF=0,ON=1} on_off;
+typedef enum ON_OFF {OFF=0,ON=1} on_off;
 ///Normalization method to use when creating a coupling matrix
-typedef enum {None=0,TotalArea=1,GlobalMultiplier=2,MultSep=3} Norm_type;
+typedef enum NORM_TYPE {None=0,TotalArea=1,GlobalMultiplier=2,MultSep=3} Norm_type;
 /// The normalization method used in the 2009 paper.  This method normalizes by the total area of Ex and In connections
 typedef struct
 {
@@ -59,7 +68,7 @@ typedef struct duallayer_parameters
     const decay_parameters  synapse;    ///<Parameters of spike
 } duallayer_parameters;
 /// Contains parameters about coupling within either a single or dual layer
-typedef struct 
+typedef struct couple_parameters
 {
     const LayerNumbers Layertype;       ///<Whether we are using a single/or dual layer model
     const union
@@ -78,7 +87,7 @@ typedef struct
     const int tref     ;                ///<refractory time
 } couple_parameters;
 ///Contains parameters which control the Voltage dynamics of neurons
-typedef struct 
+typedef struct conductance_parameters
 {
     const struct 
     {
@@ -98,34 +107,39 @@ typedef struct
     const Compute_float rate   ;  ///<Rate of external input (spikes/neuron/s)
 } conductance_parameters;
 /// Contains parameters which control the Recovery dynamics of neurons
-typedef struct 
+typedef struct recovery_parameters
 {
     const Compute_float Wrt; /// reset of recovery variable
     const Compute_float Wir; /// determines if resonator or integrator
     const Compute_float Wcv; /// coupling with the voltage?
 } recovery_parameters;
 ///Parameters for STDP
-typedef struct 
+typedef struct STDP_parameters
 {
     const Compute_float stdp_limit;     ///<maximum STDP that can be applied to a synapse as a fraction of its original value
     const Compute_float stdp_tau;       ///<tau for STDP (controls timescale of window function)
     const Compute_float stdp_strength;  ///< controls the amount of STDP
 } STDP_parameters;
 ///Parameters controlling the shape of the STD recovery
-typedef struct 
+typedef struct STD_parameters
 {
     const Compute_float U;
     const Compute_float D;
     const Compute_float F;
 } STD_parameters;
-
-typedef enum {NO_OUTPUT = 0,PICTURE = 1,TEXT=2,CONSOLE=3} output_method;
-typedef struct {
-    const output_method output_method;  ///< Are we outputting something
-    const unsigned int Output;          ///< What will be outputted
-    const unsigned int Delay;           ///< how often to output it
+///Parameters for outputting movies
+typedef struct movie_parameters
+{
+    const on_off MakeMovie;     ///< Are we making a movie?
+    const unsigned int Output;  ///< What will be outputted in the movie
+    const unsigned int Delay;   ///< how often to output it
+} movie_parameters;
+//Parameters for outputting spiking data
+typedef struct output_parameters
+{
+    const on_off Switch;
+    const char Filename[100];
 } output_parameters;
-
 ///Parameters for a subthreshold wave (not necersarrily theta)
 typedef struct theta_parameters
 {
@@ -149,8 +163,8 @@ typedef struct
     const on_off Output;
     const on_off Theta;
     const Compute_float Timestep; ///< The timestep in the model
-    const unsigned int   Simlength; ///< total number of timesteps to run
-    const unsigned int Trial;
+    const unsigned int Simlength; ///< total number of timesteps to run
+    const unsigned int trial;
 } model_features;
  
 ///Structure that holds all the parameters for a layer
@@ -160,10 +174,11 @@ typedef struct
     const conductance_parameters potential;
     const STDP_parameters STDP;
     const STD_parameters STD;
-    const output_parameters output[10];//10 outputs should be enough
+    const movie_parameters Movie;
     const theta_parameters theta;
     const recovery_parameters recovery;
     const int skip;
+    const output_parameters output;
 } parameters;
 
 // to specify an attribute to change for a yossarian run

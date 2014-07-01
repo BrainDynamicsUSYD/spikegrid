@@ -1,11 +1,10 @@
 /// \file
 #include <string.h>
 #include <unistd.h>
+#include <stdio.h>
 #include "output.h"
 #include "picture.h"
-#define output_count  15
-output_s* Outputtable;
-FILE* outfiles[output_count];
+
 ///Extracts the actual information out of a tagged array and converts it to a simple square matrix
 Compute_float* taggedarrayTocomputearray(const tagged_array input)
 {
@@ -84,14 +83,16 @@ bitmap_t* FloattoBitmap(const Compute_float* const input,const unsigned int size
 }
 
 /// number of PNG's outputted.  Used to keep track of the next filename to use
+int printcount=0;
 ///convert a tagged array to a PNG.  Paths are auto-calculated
-void outputToPng(const tagged_array input,const int idx,const unsigned int count)
+void OutputToPng(const tagged_array input,const Compute_float minval,const Compute_float maxval)
 {
     char fnamebuffer[30];
     const unsigned int size = input.size - (2*input.offset);
     Compute_float* actualdata=taggedarrayTocomputearray(input);
-    bitmap_t* b = FloattoBitmap(actualdata,size,input.minval,input.maxval);
-    sprintf(fnamebuffer,"%s/%i-%i.png",outdir,idx,count);
+    bitmap_t* b = FloattoBitmap(actualdata,size,minval,maxval);
+    sprintf(fnamebuffer,"%s/%i.png",outdir,printcount);
+    printcount++;
     save_png_to_file(b,fnamebuffer);
     free(b->pixels);
     free(b);
@@ -99,14 +100,13 @@ void outputToPng(const tagged_array input,const int idx,const unsigned int count
     
 }
 ///TODO: Need to get a better way of detecting when rendering has finished
-void outputToConsole(const tagged_array input)
+void outputToConsole(const tagged_array input, const Compute_float minval,const Compute_float maxval)
 {
-    if (!isatty(fileno(stdout))) {return;} //if we are not outputting to a terminal - dont show pictures on console - need to add matlab detection
     char* buf = malloc(sizeof(char)*1000*1000);//should be plenty
     char* upto = buf;
     const unsigned int size = input.size - (2*input.offset);
     Compute_float* actualdata=taggedarrayTocomputearray(input);
-    bitmap_t* b = FloattoBitmap(actualdata,size,input.minval,input.maxval);
+    bitmap_t* b = FloattoBitmap(actualdata,size,minval,maxval);
     printf("\x1b[2J");
     for (unsigned int i=0;i<size;i++)
     {
@@ -119,82 +119,19 @@ void outputToConsole(const tagged_array input)
         int q = sprintf(upto,"\x1b[0m\n");
         upto += q;
     }
-    puts(buf); //output giant buffer in one go - should be faster
-    usleep(50000);//let terminal catch up - nasty hacky solution
+    puts(buf);
+    usleep(50000);
     upto=buf;
     free(buf);
 
 }
-void outputToText(const output_s input,const int idx)
+///High level function to create a series of PNG images which can be then turned into a movie
+void makemovie(const movie_parameters m,const unsigned int t)
 {
-    if (outfiles[idx]==NULL) 
+    if (m.MakeMovie==ON && t % m.Delay==0)
     {
-        char buf[100];
-        sprintf(buf,"%s/%i.txt",outdir,idx);
-        outfiles[idx]=fopen(buf,"w");
-    }
-    switch (input.data_type)
-    {
-        case FLOAT_DATA:
-        {
-            Compute_float* const data = taggedarrayTocomputearray(input.data.TA_data);
-            const unsigned int size = input.data.TA_data.size - (2*input.data.TA_data.offset);
-            for (unsigned int i=0;i<size;i++)
-            {
-                for (unsigned int j=0;j<size;j++)
-                {
-                    fprintf(outfiles[idx],"%f,",data[i*size+j]);
-                }
-                fprintf(outfiles[idx],"\n");
-            }
-            fflush(outfiles[idx]);//prevents stalling in matlab
-            free(data);
-            break;
-        }
-        case RINGBUFFER_DATA:
-        {
-            const coords* const data = ringbuffer_getoffset(input.data.RB_data,0);
-            int i=0;
-            while (data[i].x != -1)
-            {
-                fprintf(outfiles[idx],"%i,%i;",data[i].x,data[i].y);
-                i++;
-            }
-            fprintf(outfiles[idx],"\n");
-            fflush(outfiles[idx]);
-            break;
-        }
-        default:
-        printf("I don't know how to output this data\n");
-
-    }
-}
-///High level function to do output
-void dooutput(const output_parameters* const m,const unsigned int t)
-{
-    int i = 0;
-    while (m[i].output_method != NO_OUTPUT)
-    {
-        if (t % m[i].Delay==0)
-        {
-            switch (m[i].output_method)
-            {
-                case PICTURE:
-                    if (Outputtable[m[i].Output].data_type == FLOAT_DATA) { outputToPng(Outputtable[m[i].Output].data.TA_data,i,t/m[i].Delay);}
-                    else {printf("can't output a ringbuffer to a picture\n");}
-                    break;
-                case TEXT:
-                    outputToText(Outputtable[m[i].Output],i);
-                    break;
-                case CONSOLE:
-                    if (Outputtable[m[i].Output].data_type == FLOAT_DATA) { outputToConsole(Outputtable[m[i].Output].data.TA_data);}
-                    else {printf("can't output a ringbuffer to the console\n");}
-                    break;
-                default:
-                    printf("unknown output method\n");
-            }
-        }
-        i++;
+        OutputToPng(Outputtable[m.Output].data,Outputtable[m.Output].minval,Outputtable[m.Output].maxval);
+        //outputToConsole(Outputtable[m.Output].data,Outputtable[m.Output].minval,Outputtable[m.Output].maxval);
     }
 }
 
@@ -211,30 +148,4 @@ output_s __attribute__((pure)) getOutputByName(const char* const name)
     } 
     printf("tried to get unknown thing to output\n");
     exit(EXIT_FAILURE);
-}
-void output_init(const model* const m)
-{
-    //WHEN YOU ADD SOMETHING - INCREASE OUTPUT_COUNT AT TOP OF FILE;
-    output_s* outdata=(output_s[]){ //note - neat feature - missing elements initailized to 0
-        //Name          data type                  actual data                size                    offset         minval,maxval
-        {"gE",          FLOAT_DATA, .data.TA_data={m->gE,                     conductance_array_size, couplerange,   0,2}}, //gE is a 'large' matrix - as it wraps around the edges
-        {"gI",          FLOAT_DATA, .data.TA_data={m->gI,                     conductance_array_size, couplerange,   0,2}}, //gI is a 'large' matrix - as it wraps around the edges
-        {"Coupling1",   FLOAT_DATA, .data.TA_data={m->layer1.connections,     couple_array_size,      0,             -0.5,0.5}}, //return the coupling matrix of layer 1 //TODO: fix min and max values
-        {"Coupling2",   FLOAT_DATA, .data.TA_data={m->layer2.connections,     couple_array_size,      0,             -0.5,0.5}}, //return the coupling matrix of layer 2
-        {"V1",          FLOAT_DATA, .data.TA_data={m->layer1.voltages_out,    grid_size,              0,             m->layer1.P->potential.Vin,m->layer1.P->potential.Vpk}},
-        {"V2",          FLOAT_DATA, .data.TA_data={m->layer2.voltages_out,    grid_size,              0,             m->layer2.P->potential.Vin,m->layer2.P->potential.Vpk}},
-        {"Recovery1",   FLOAT_DATA, .data.TA_data={m->layer1.recoverys_out,   grid_size,              0,             0,100}}, //TODO: ask adam for max and min recovery values
-        {"Recovery2",   FLOAT_DATA, .data.TA_data={m->layer2.recoverys_out,   grid_size,              0,             0,100}}, //TODO: ask adam for max and min recovery values
-        {"STDU1",       FLOAT_DATA, .data.TA_data={m->layer1.std.U,           grid_size,              0,             0,1}},
-        {"STDR1",       FLOAT_DATA, .data.TA_data={m->layer1.std.R,           grid_size,              0,             0,1}},
-        {"STDU2",       FLOAT_DATA, .data.TA_data={m->layer2.std.U,           grid_size,              0,             0,1}},
-        {"STDR2",       FLOAT_DATA, .data.TA_data={m->layer2.std.R,           grid_size,              0,             0,1}},
-        //ringbuffer outputs
-        //name          data type        actual data
-        {"Firing1",     RINGBUFFER_DATA, .data.RB_data=&m->layer1.spikes}, //take reference as the struct gets modified
-        {"Firing2",     RINGBUFFER_DATA, .data.RB_data=&m->layer2.spikes},
-        {.name={0}}};         //a marker that we are at the end of the outputabbles list
-    output_s* malloced = malloc(sizeof(output_s)*output_count);
-    memcpy(malloced,outdata,sizeof(output_s)*output_count);
-    Outputtable = malloced;
 }

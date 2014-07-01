@@ -4,17 +4,18 @@
 #include "theta.h"
 #include "output.h"
 #include "STDP.h"
+#include "layer.h"
 
 ///add conductance from a firing neuron to the gE and gI arrays (used in single layer model)
 void evolvept (const int x,const int y,const Compute_float* const __restrict connections,const Compute_float Estrmod,const Compute_float Istrmod,Compute_float* __restrict gE,Compute_float* __restrict gI)
 {
     for (int i = 0; i < couple_array_size;i++)
     {
-        const int outoff = (x + i)*conductance_array_size +y;//as gE and gI are larger than the neuron grid size, don't have to worry about wrapping
+        const int outoff = (x +i )*conductance_array_size +y;//as gE and gI are larger than the neuron grid size, don't have to worry about wrapping
         for (int j = 0 ; j<couple_array_size;j++) 
         {
             const int coupleidx = i*couple_array_size + j;
-            if (connections[coupleidx] > 0) //add either to gE or gI
+            if (connections[coupleidx] > 0) 
             {
                 gE[outoff+j] += connections[coupleidx]*Estrmod;
             }
@@ -26,7 +27,7 @@ void evolvept (const int x,const int y,const Compute_float* const __restrict con
     } 
 }
 
-//when STDP is turned off, gcc will warn about this function needing const.  It is wrong
+//when STDP is turned off, gcc will warn about this function needing const. It is wrong
 void evolvept_STDP  (const int x,const  int y,const Compute_float* const __restrict connections_STDP,const Compute_float Estrmod,const Compute_float Istrmod,Compute_float* __restrict gE,Compute_float* __restrict gI)
 {
     if (Features.STDP == OFF) {return;}
@@ -37,7 +38,7 @@ void evolvept_duallayer (const int x,const  int y,const Compute_float* const __r
 {
     for (int i = 0; i < couple_array_size;i++)
     {
-        const int outoff = (x + i)*conductance_array_size +y;//as gE and gI are larger than the neuron grid size, don't have to worry about wrapping
+        const int outoff = (x +i )*conductance_array_size +y;//as gE and gI are larger than the neuron grid size, don't have to worry about wrapping
         for (int j = 0 ; j<couple_array_size;j++) 
         {
             const int coupleidx = i*couple_array_size + j;
@@ -70,7 +71,7 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
                 evolvept(c.x,c.y,L.connections,Estr*strmod,Istr*strmod,gE,gI);
                 evolvept_STDP(c.x,c.y,L.STDP_connections,Estr*strmod,Istr*strmod,gE,gI);
             }
-            else  {evolvept_duallayer(c.x,c.y,L.connections,(Ion?Istr*-1:Estr)*strmod,(Ion?gI:gE));} //TODO: STDP not implemented in dual-layer
+            else            {evolvept_duallayer(c.x,c.y,L.connections,(Ion?Istr*-1:Estr)*strmod,(Ion?gI:gE));} //TODO: STDP not implemented in dual-layer
             idx++;
         }
     }
@@ -122,7 +123,7 @@ Compute_float __attribute__((const,pure)) rhs_func  (const Compute_float V,const
             return -(p.glk*(V-p.Vlk) + ge*(V-p.Vex) + gi*(V-p.Vin));
         case QIF:
             return -(p.glk*(V-p.Vlk)*(p.type.extra.QIF.Vth-V) + ge*(V-p.Vex) + gi*(V-p.Vin));
-        case EIF: 
+        case EIF: //TODO: this doesn't work correctly
             return -(p.glk*(V-p.Vlk) - p.glk*p.type.extra.EIF.Dpk*exp((V-p.type.extra.EIF.Vth)/p.type.extra.EIF.Dpk) + ge*(V-p.Vex) + gi*(V-p.Vin));
         default: return One; //avoid -Wreturn-type error which is probably wrong anyway
     }
@@ -141,11 +142,9 @@ void CalcVoltages(const Compute_float* const __restrict__ Vinput,
         { //step all neurons through time 
             const int idx = (x+couplerange)*conductance_array_size + y + couplerange; //index for gE/gI
             const int idx2=  x*grid_size+y;
-            // apply midpoint method
-            const Compute_float rhs1=rhs_func(Vinput[idx2],gE[idx],gI[idx],C);
-            const Compute_float Vtemp = Vinput[idx2] + Half*Features.Timestep*rhs1;
-            const Compute_float rhs2=rhs_func(Vtemp,gE[idx],gI[idx],C);
-            Vout[idx2]=Vinput[idx2]+Half*Features.Timestep*(rhs1 + rhs2);
+            // apply Euler method
+            const Compute_float rhs = rhs_func(Vinput[idx2],gE[idx],gI[idx],C);
+            Vout[idx2]=Vinput[idx2]+Features.Timestep*rhs;
         }
     }
 }
@@ -175,24 +174,28 @@ void CalcRecoverys(const Compute_float* const __restrict__ Vinput,
 
 ///Store current firing spikes also apply random spikes
 void StoreFiring(layer* L)
-{
-    coords* current_firestore = L->spikes.data[L->spikes.curidx];//get the thing for currently firing neurons
+{ 
+    coords* current_firestore = L->spikes.data[L->spikes.curidx];//get the thing for currently firing neurons. Normally 1 is NOT added to curidx
     int this_fcount=0;
     const int step =  L->P->skip;
-    for (int x=0;x<grid_size;x+= 1)
+    for (int x=0;x<grid_size;x+=1)
     {
         for (int y=0;y<grid_size;y+=1)
         {
             if (x % step ==0 && y% step ==0)
             {
-                if (L->voltages[x*grid_size + y]  > L->P->potential.Vpk)
+                if (L->voltages_out[x*grid_size + y]  >= L->P->potential.Vpk)
                 {
                     current_firestore[this_fcount] =(coords){.x=x,.y=y};
-                    L->voltages_out[x*grid_size+y]=L->P->potential.Vrt;
+                   // L->voltages_out[x*grid_size+y]=L->P->potential.Vrt;
                     // Reset recovery variable if applicable
                     if (Features.Recovery==ON)
                     {
                         L->recoverys_out[x*grid_size+y]+=L->P->recovery.Wrt;
+                    }
+                    if (L->P->output.Switch==ON)
+                    {
+                        fprintf(L->outfile,"%i,%i;",x,y); // save coordinates of spiking neurons to text file
                     }
                     this_fcount++;
                 }
@@ -205,12 +208,18 @@ void StoreFiring(layer* L)
             else {L->voltages_out[x*grid_size+y]=Zero;}
         }
     }
+    if (L->P->output.Switch==ON)
+    {
+        fprintf(L->outfile,"\n");     //print new line for each time step
+        fflush(L->outfile);           //clear the buffer. MATLAB appears to lag if the mex file is compiled more than once in the same session. Weird.
+    }                             
     current_firestore[this_fcount].x=-1;
 }
 ///Cleans up voltages for neurons that are in the refractory state
 void ResetVoltages(Compute_float* const __restrict Vout,const couple_parameters C,const ringbuffer* const spikes,const conductance_parameters CP)
 {
     const int trefrac_in_ts =(int) ((Compute_float)C.tref / Features.Timestep);
+    //for (int i=1;i<=trefrac_in_ts;i++)
     for (int i=1;i<=trefrac_in_ts;i++) //start at 1 so we don't get currently firing (which should be empty anyway)
     {   //put refractory neurons at reset potential
         const coords* const fire_with_this_lag = ringbuffer_getoffset(spikes,i);
@@ -252,17 +261,18 @@ void step1(model* m,const unsigned int time)
             ResetVoltages(m->layer2.voltages_out,m->layer2.P->couple,&m->layer2.spikes,m->layer2.P->potential);
         }
     }
+    // with recovery variable (note no support for theta - no idea if they work together)
     else 
     {
         CalcRecoverys(m->layer1.voltages,m->layer1.recoverys,m->gE,m->gI,m->layer1.P->potential,m->layer1.P->recovery,m->layer1.voltages_out,m->layer1.recoverys_out);
         if (m->NoLayers==DUALLAYER) {CalcRecoverys(m->layer2.voltages,m->layer2.recoverys,m->gE,m->gI,m->layer2.P->potential,m->layer2.P->recovery,m->layer2.voltages_out,m->layer2.recoverys_out);}
     }
     StoreFiring(&(m->layer1));
-    dooutput(m->layer1.P->output,time);
+    makemovie(m->layer1.P->Movie,time);
     if (m->NoLayers==DUALLAYER)
     {
-        StoreFiring(&(m->layer2 ));
-        dooutput(m->layer2.P->output,time);
+        StoreFiring(&(m->layer2));
+        makemovie(m->layer2.P->Movie,time);
     }
     if (Features.Theta==ON)
     {

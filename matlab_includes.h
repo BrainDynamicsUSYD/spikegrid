@@ -1,6 +1,4 @@
 /// \file
-#ifndef MATLAB_INCLUDE
-#define MATLAB_INCLUDE
 #include "paramheader.h"
 #ifdef MATLAB
     #include <stdint.h>
@@ -11,5 +9,4 @@
     {
         return sizeof(Compute_float)==sizeof(float)?mxSINGLE_CLASS:mxDOUBLE_CLASS;
     }
-#endif
 #endif

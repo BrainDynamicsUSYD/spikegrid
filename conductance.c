@@ -126,20 +126,20 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
     //Now assign the outputs
     if (ModelType == SINGLELAYER)
     {
-        mxSetField(variables,0,"Vsingle_layer",outputToMxArray(getOutputByName("V1").data));
+        mxSetField(variables,0,"Vsingle_layer",outputToMxArray(getOutputByName("V1").data.TA_data));
         if (Features.Recovery == ON) 
         {
-            mxSetField(variables,0,"Wsingle_layer",outputToMxArray(getOutputByName("Recovery1").data));
+            mxSetField(variables,0,"Wsingle_layer",outputToMxArray(getOutputByName("Recovery1").data.TA_data));
         }
     }
     else
     {
-        mxSetField(variables,0,"Vex",outputToMxArray(getOutputByName("V2").data));
-        mxSetField(variables,0,"Vin",outputToMxArray(getOutputByName("V1").data));
+        mxSetField(variables,0,"Vex",outputToMxArray(getOutputByName("V2").data.TA_data));
+        mxSetField(variables,0,"Vin",outputToMxArray(getOutputByName("V1").data.TA_data));
         if (Features.Recovery == ON)
         {
-            mxSetField(variables,0,"Wex",outputToMxArray(getOutputByName("Recovery2").data));
-            mxSetField(variables,0,"Win",outputToMxArray(getOutputByName("Recovery1").data));
+            mxSetField(variables,0,"Wex",outputToMxArray(getOutputByName("Recovery2").data.TA_data));
+            mxSetField(variables,0,"Win",outputToMxArray(getOutputByName("Recovery1").data.TA_data));
         }
     }
     plhs[0] = variables;

@@ -22,7 +22,7 @@ unsigned int __attribute__((pure)) setcap(const decay_parameters d,const Compute
 {
     Compute_float prev = -1000;//initial values
     Compute_float time=0;
-    unsigned int count = 1; //keeps compatibility with matlab
+    unsigned int count = 2; //3. keeps compatibility with matlab
     while(1)
     {
         time+=timestep;

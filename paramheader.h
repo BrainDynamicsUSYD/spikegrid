@@ -8,6 +8,7 @@ typedef float Compute_float ; //for speed
 ///Used to enable simple switching between float and double
 typedef double Compute_float ; //for accuracy
 #endif
+
 ///Simple enum for things that are on or off to make their state more obvious
 typedef enum {OFF=0,ON=1} on_off;
 ///Normalization method to use when creating a coupling matrix
@@ -30,7 +31,7 @@ typedef struct
     const Compute_float Infactor;
 } Multsep_parameters;
 ///Holds the parameters for the decay of a spike
-typedef struct decay_parameters{
+typedef struct {
     const Compute_float R;  ///<rise time constant (units?)
     const Compute_float D;  ///<decay time constant (units?)
 } decay_parameters;
@@ -41,7 +42,7 @@ typedef enum LayerNumbers {SINGLELAYER=0,DUALLAYER=1} LayerNumbers;
 ///Enum to determine whether there is a recovery variable
 typedef enum NEURON_TYPE {LIF=0,QIF=1,EIF=2} neuron_type;
 ///Parameters for a layer when it is the only one
-typedef struct singlelayer_parameters
+typedef struct 
 {
     const Compute_float WE       ;                  ///<excitatory coupling strength
     const Compute_float sigE   ;                    ///<char. length for Ex symapses (int / float?)
@@ -51,7 +52,7 @@ typedef struct singlelayer_parameters
     const decay_parameters In;                      ///<Parameters for In connections
 } singlelayer_parameters;
 ///Layer parameters for when there are two layers
-typedef struct duallayer_parameters
+typedef struct 
 {
     const ConnectType       connectivity;   ///<Connectivity type: EXPONENTIAL or HOMOGENEOUS
     const Compute_float     W;              ///<Maximum connectivity strength
@@ -118,23 +119,23 @@ typedef struct
     const Compute_float D;
     const Compute_float F;
 } STD_parameters;
-
 typedef enum {NO_OUTPUT = 0,PICTURE = 1,TEXT=2,CONSOLE=3} output_method;
-typedef struct {
+///Parameters for outputting movies
+typedef struct 
+{
     const output_method output_method;  ///< Are we outputting something
     const unsigned int Output;          ///< What will be outputted
     const unsigned int Delay;           ///< how often to output it
 } output_parameters;
-
 ///Parameters for a subthreshold wave (not necersarrily theta)
-typedef struct theta_parameters
+typedef struct 
 {
     const Compute_float strength;
 	const Compute_float period;
 } theta_parameters;
 
 /// External input
-typedef struct extinput
+typedef struct 
 {
     const Compute_float gE0;
     const Compute_float gI0;
@@ -149,8 +150,8 @@ typedef struct
     const on_off Output;
     const on_off Theta;
     const Compute_float Timestep; ///< The timestep in the model
-    const unsigned int   Simlength; ///< total number of timesteps to run
-    const unsigned int Trial;
+    const unsigned int Simlength; ///< total number of timesteps to run
+    const unsigned int trial;
 } model_features;
  
 ///Structure that holds all the parameters for a layer
@@ -167,7 +168,7 @@ typedef struct
 } parameters;
 
 // to specify an attribute to change for a yossarian run
-typedef struct Sweepable
+typedef struct 
 {
     const Compute_float minval;
     const Compute_float maxval;

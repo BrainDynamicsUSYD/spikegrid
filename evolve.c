@@ -4,6 +4,7 @@
 #include "theta.h"
 #include "output.h"
 #include "STDP.h"
+#include "layer.h"
 
 ///add conductance from a firing neuron to the gE and gI arrays (used in single layer model)
 void evolvept (const int x,const int y,const Compute_float* const __restrict connections,const Compute_float Estrmod,const Compute_float Istrmod,Compute_float* __restrict gE,Compute_float* __restrict gI)
@@ -14,7 +15,7 @@ void evolvept (const int x,const int y,const Compute_float* const __restrict con
         for (int j = 0 ; j<couple_array_size;j++) 
         {
             const int coupleidx = i*couple_array_size + j;
-            if (connections[coupleidx] > 0) //add either to gE or gI
+            if (connections[coupleidx] > 0) 
             {
                 gE[outoff+j] += connections[coupleidx]*Estrmod;
             }
@@ -26,7 +27,7 @@ void evolvept (const int x,const int y,const Compute_float* const __restrict con
     } 
 }
 
-//when STDP is turned off, gcc will warn about this function needing const.  It is wrong
+//when STDP is turned off, gcc will warn about this function needing const. It is wrong
 void evolvept_STDP  (const int x,const  int y,const Compute_float* const __restrict connections_STDP,const Compute_float Estrmod,const Compute_float Istrmod,Compute_float* __restrict gE,Compute_float* __restrict gI)
 {
     if (Features.STDP == OFF) {return;}
@@ -70,7 +71,7 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
                 evolvept(c.x,c.y,L.connections,Estr*strmod,Istr*strmod,gE,gI);
                 evolvept_STDP(c.x,c.y,L.STDP_connections,Estr*strmod,Istr*strmod,gE,gI);
             }
-            else  {evolvept_duallayer(c.x,c.y,L.connections,(Ion?Istr*-1:Estr)*strmod,(Ion?gI:gE));} //TODO: STDP not implemented in dual-layer
+            else {evolvept_duallayer(c.x,c.y,L.connections,(Ion?Istr*-1:Estr)*strmod,(Ion?gI:gE));} //TODO: STDP not implemented in dual-layer
             idx++;
         }
     }
@@ -141,11 +142,9 @@ void CalcVoltages(const Compute_float* const __restrict__ Vinput,
         { //step all neurons through time 
             const int idx = (x+couplerange)*conductance_array_size + y + couplerange; //index for gE/gI
             const int idx2=  x*grid_size+y;
-            // apply midpoint method
-            const Compute_float rhs1=rhs_func(Vinput[idx2],gE[idx],gI[idx],C);
-            const Compute_float Vtemp = Vinput[idx2] + Half*Features.Timestep*rhs1;
-            const Compute_float rhs2=rhs_func(Vtemp,gE[idx],gI[idx],C);
-            Vout[idx2]=Vinput[idx2]+Half*Features.Timestep*(rhs1 + rhs2);
+            // apply Euler method
+            const Compute_float rhs = rhs_func(Vinput[idx2],gE[idx],gI[idx],C);
+            Vout[idx2]=Vinput[idx2]+Features.Timestep*rhs;
         }
     }
 }
@@ -175,20 +174,19 @@ void CalcRecoverys(const Compute_float* const __restrict__ Vinput,
 
 ///Store current firing spikes also apply random spikes
 void StoreFiring(layer* L)
-{
-    coords* current_firestore = L->spikes.data[L->spikes.curidx];//get the thing for currently firing neurons
+{ 
+    coords* current_firestore = L->spikes.data[L->spikes.curidx];//get the thing for currently firing neurons. Normally 1 is NOT added to curidx
     int this_fcount=0;
     const int step =  L->P->skip;
-    for (int x=0;x<grid_size;x+= 1)
+    for (int x=0;x<grid_size;x+=1)
     {
         for (int y=0;y<grid_size;y+=1)
         {
             if (x % step ==0 && y% step ==0)
             {
-                if (L->voltages[x*grid_size + y]  > L->P->potential.Vpk)
+                if (L->voltages_out[x*grid_size + y]  >= L->P->potential.Vpk)
                 {
                     current_firestore[this_fcount] =(coords){.x=x,.y=y};
-                    L->voltages_out[x*grid_size+y]=L->P->potential.Vrt;
                     // Reset recovery variable if applicable
                     if (Features.Recovery==ON)
                     {
@@ -252,6 +250,7 @@ void step1(model* m,const unsigned int time)
             ResetVoltages(m->layer2.voltages_out,m->layer2.P->couple,&m->layer2.spikes,m->layer2.P->potential);
         }
     }
+    // with recovery variable (note no support for theta - no idea if they work together)
     else 
     {
         CalcRecoverys(m->layer1.voltages,m->layer1.recoverys,m->gE,m->gI,m->layer1.P->potential,m->layer1.P->recovery,m->layer1.voltages_out,m->layer1.recoverys_out);
@@ -261,7 +260,7 @@ void step1(model* m,const unsigned int time)
     dooutput(m->layer1.P->output,time);
     if (m->NoLayers==DUALLAYER)
     {
-        StoreFiring(&(m->layer2 ));
+        StoreFiring(&(m->layer2));
         dooutput(m->layer2.P->output,time);
     }
     if (Features.Theta==ON)

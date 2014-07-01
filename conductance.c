@@ -44,11 +44,11 @@ void step_(const Compute_float* const inpV,const Compute_float* const inpV2, con
 #ifdef MATLAB
 int setup_done=0;
 //TODO: this should just take a min and a max value
-mxArray* CreateInitialValues(const Compute_float minval, const Compute_float maxval)
+mxArray* CreateInitialValues(const Compute_float minval, const Compute_float maxval, unsigned int trialnum)
 {
     mxArray* vals =mxCreateNumericMatrix(grid_size,grid_size,MatlabDataType(),mxREAL);
     Compute_float* datavals = (Compute_float*)mxGetData(vals);
-    randinit(datavals,minval,maxval);
+    randinit(datavals,minval,maxval,trialnum);
     return vals;
 }
 
@@ -61,18 +61,18 @@ mxArray* FirstMatlabCall( )
     mxArray* variables = mxCreateStructMatrix(1,1,6,(const char*[]){"Vin","Vex","Win","Wex","Vsingle_layer","Wsingle_layer"});
     if (ModelType==SINGLELAYER)
     {
-        mxSetField(variables,0,"Vsingle_layer",CreateInitialValues(OneLayerModel.potential.Vrt,OneLayerModel.potential.Vpk));
+        mxSetField(variables,0,"Vsingle_layer",CreateInitialValues(OneLayerModel.potential.Vrt,OneLayerModel.potential.Vpk,Features.trial));
         if (Features.Recovery==ON)
-            {mxSetField(variables,0,"Wsingle_layer",CreateInitialValues(Zero,Zero));}
+            {mxSetField(variables,0,"Wsingle_layer",CreateInitialValues(Zero,Zero,Features.trial));}
     }
     else if (ModelType==DUALLAYER) 
     {
-        mxSetField(variables,0,"Vin",CreateInitialValues(DualLayerModelIn.potential.Vrt,DualLayerModelIn.potential.Vpk));
-        mxSetField(variables,0,"Vex",CreateInitialValues(DualLayerModelEx.potential.Vrt,DualLayerModelEx.potential.Vpk));
+        mxSetField(variables,0,"Vin",CreateInitialValues(DualLayerModelIn.potential.Vrt,DualLayerModelIn.potential.Vpk,Features.trial));
+        mxSetField(variables,0,"Vex",CreateInitialValues(DualLayerModelEx.potential.Vrt,DualLayerModelEx.potential.Vpk,Features.trial));
         if (Features.Recovery==ON) 
         {
-            mxSetField(variables,0,"Win",CreateInitialValues(Zero,Zero));
-            mxSetField(variables,0,"Wex",CreateInitialValues(Zero,Zero));
+            mxSetField(variables,0,"Win",CreateInitialValues(Zero,Zero,Features.trial));
+            mxSetField(variables,0,"Wex",CreateInitialValues(Zero,Zero,Features.trial));
         }
     }
     ///Now - do some dummy outputs of the other elements so that the graphs can be set up.
@@ -126,20 +126,20 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
     //Now assign the outputs
     if (ModelType == SINGLELAYER)
     {
-        mxSetField(variables,0,"Vsingle_layer",outputToMxArray(getOutputByName("V1")));
+        mxSetField(variables,0,"Vsingle_layer",outputToMxArray(getOutputByName("V1").data));
         if (Features.Recovery == ON) 
         {
-            mxSetField(variables,0,"Wsingle_layer",outputToMxArray(getOutputByName("Recovery1")));
+            mxSetField(variables,0,"Wsingle_layer",outputToMxArray(getOutputByName("Recovery1").data));
         }
     }
     else
     {
-        mxSetField(variables,0,"Vex",outputToMxArray(getOutputByName("V2")));
-        mxSetField(variables,0,"Vin",outputToMxArray(getOutputByName("V1")));
+        mxSetField(variables,0,"Vex",outputToMxArray(getOutputByName("V2").data));
+        mxSetField(variables,0,"Vin",outputToMxArray(getOutputByName("V1").data));
         if (Features.Recovery == ON)
         {
-            mxSetField(variables,0,"Wex",outputToMxArray(getOutputByName("Recovery2")));
-            mxSetField(variables,0,"Win",outputToMxArray(getOutputByName("Recovery1")));
+            mxSetField(variables,0,"Wex",outputToMxArray(getOutputByName("Recovery2").data));
+            mxSetField(variables,0,"Win",outputToMxArray(getOutputByName("Recovery1").data));
         }
     }
     plhs[0] = variables;
@@ -154,8 +154,7 @@ struct option long_options[] = {{"help",no_argument,0,'h'},{"generate",no_argume
 /// @param argv what the parameters actually are
 int main(int argc,char** argv) //useful for testing w/out matlab
 {
-
-    feenableexcept(FE_INVALID | FE_OVERFLOW); //segfault on NaN and overflow
+    feenableexcept(FE_INVALID | FE_OVERFLOW); //segfault on NaN and overflo
     parameters* newparam = NULL;
     setvbuf(stdout,NULL,_IONBF,0);
     while (1)
@@ -199,7 +198,7 @@ int main(int argc,char** argv) //useful for testing w/out matlab
     {
         FirstV = calloc(sizeof(Compute_float),grid_size*grid_size);
         SecondV = NULL;
-        randinit(FirstV,OneLayerModel.potential.Vrt,OneLayerModel.potential.Vrt+(1.0/20.0));
+        randinit(FirstV,OneLayerModel.potential.Vrt,OneLayerModel.potential.Vpk,Features.trial);
         if (Features.Recovery==ON)
         {
             FirstW = calloc(sizeof(Compute_float),grid_size*grid_size);
@@ -210,8 +209,8 @@ int main(int argc,char** argv) //useful for testing w/out matlab
     {
         FirstV = malloc(sizeof(Compute_float)*grid_size*grid_size);
         SecondV = malloc(sizeof(Compute_float)*grid_size*grid_size);
-        randinit(FirstV, DualLayerModelIn.potential.Vrt,DualLayerModelIn.potential.Vrt + (1.0/20.0));
-        randinit(SecondV,DualLayerModelEx.potential.Vrt,DualLayerModelEx.potential.Vrt + (1.0/20.0));
+        randinit(FirstV, DualLayerModelIn.potential.Vrt,DualLayerModelIn.potential.Vpk,Features.trial);
+        randinit(SecondV,DualLayerModelEx.potential.Vrt,DualLayerModelEx.potential.Vpk,Features.trial);
         if (Features.Recovery==ON) 
         {
             FirstW = calloc(sizeof(Compute_float),grid_size*grid_size);

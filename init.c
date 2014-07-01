@@ -8,16 +8,17 @@
 #include "coupling.h"
 #include "output.h"
 #include "printstruct.h"
+#include "layer.h"
 int randinit_done = 0;
 ///creates a random initial condition
 ///This is generated as small fluctuations away from Vrt
 /// @param input    The input matrix - Modified in place
 /// @param V        Used to get the Vrt 
-void randinit(Compute_float* input,const Compute_float minval,const Compute_float maxval)
+void randinit(Compute_float* input,const Compute_float minval,const Compute_float maxval, const unsigned int trialnumber)
 {
     if (randinit_done==0)
     {
-        srandom((unsigned)(time(0))); 
+        srandom((unsigned)(trialnumber)); 
         randinit_done=1;
     }
     for (int x=0;x<grid_size;x++)
@@ -59,7 +60,7 @@ layer setuplayer(const parameters p)
         },
         .connections = CreateCouplingMatrix(p.couple),
         .STDP_connections   = Features.STDP==ON?calloc(sizeof(Compute_float),grid_size*grid_size*couple_array_size*couple_array_size):NULL,
-        .std                = STD_init(p.STD), //this is so fast that it doesn't matter to run in init always
+        .std                = STD_init(p.STD), //this is so fast that it doesn't matter to run in init
         .Extimecourse       = p.couple.Layertype==SINGLELAYER?Synapse_timecourse_cache(cap,p.couple.Layer_parameters.single.Ex,Features.Timestep):
             ((p.couple.Layer_parameters.dual.W>0)?Synapse_timecourse_cache(cap,p.couple.Layer_parameters.dual.synapse,Features.Timestep):NULL),
         .Intimecourse       = p.couple.Layertype==SINGLELAYER?Synapse_timecourse_cache(cap,p.couple.Layer_parameters.single.In,Features.Timestep):
@@ -98,7 +99,7 @@ model* setup(const parameters p,const parameters p2,const LayerNumbers lcount, i
     printout_struct(&p2,"parameters",outdir,1);    //save the second parameters object and display everything
     const layer l1 = setuplayer(p);
     const layer l2 = lcount==DUALLAYER?setuplayer(p2):l1;
-    const model m = {.layer1 = l1,.layer2=l2,.NoLayers=lcount};
+    const model m = {.layer1=l1,.layer2=l2,.NoLayers=lcount};
     model* m2 = malloc(sizeof(m));
     memcpy(m2,&m,sizeof(m));
     char* buffer = malloc(1024);

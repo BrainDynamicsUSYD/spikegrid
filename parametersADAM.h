@@ -1,7 +1,7 @@
 /// \file
 #include <stddef.h> //offsetof
 //these first few parameters actually escape into the paramheader file through magic
-#define grid_size 100
+#define grid_size 80
 ///Total size of the grid
 ///Coupling range
 #define couplerange 15
@@ -32,10 +32,10 @@ static const parameters OneLayerModel =
         {
             .single = 
             {
-                .WE     = 0.42,                 //excitatory coupling strength
+                .WE     = 0.41,                 //excitatory coupling strength
                 .sigE   = 14,                   //char. length for Ex symapses (int / float?)
-                .WI     = 0.19,                 //Inhib coupling strength
-                .sigI   = 1000,                   //char. length for In synapses (int / float?)
+                .WI     = 0.24,                 //Inhib coupling strength
+                .sigI   = 42,                   //char. length for In synapses (int / float?)
                 .Ex = {.R=0.5,.D=2.0},          //excitatory rise / decay time
                 .In = {.R=0.5,.D=2.0},          //inhibitory rise / decay time
             }
@@ -47,7 +47,7 @@ static const parameters OneLayerModel =
     {
         .type    = 
         {
-            .type = EIF,
+            .type = LIF,
             .extra = 
             {
                 .EIF={.Vth=-55,.Dpk=1}
@@ -59,7 +59,7 @@ static const parameters OneLayerModel =
         .Vex     = 0,                    //Ex reversal potential
         .Vin     = -80,                  //In reversal potential
         .glk     = 0.05,                 //leak current
-        .rate = 1,
+        .rate = 0,
     },
     .recovery = 
     {
@@ -107,8 +107,8 @@ static const parameters DualLayerModelIn =
             .dual = 
             {
                 .connectivity = HOMOGENEOUS,   //EXPONENTIAL or HOMOGENEOUS
-                .W            = 0.30, //-0.40 //-0.57 //-0.70 //-1.25, 
-                .sigma        = 70, 
+                .W            = -0.30, 
+                .sigma        = 60, 
                 .synapse      = {.R=0.5,.D=7.0},
             }
         },
@@ -162,7 +162,7 @@ static const parameters DualLayerModelIn =
         .strength    = 5.0,
         .period     = 0.2,
     },
-    .skip=2,
+    .skip = 2,
     .output = 
     { 
         .Switch   = OFF,
@@ -179,8 +179,8 @@ static const parameters DualLayerModelEx =
         {
             .dual =     
             {
-                .connectivity = EXPONENTIAL,   //EXPONENTIAL or CONSTANT
-                .W            =  0.23, //0.09 //0.12 //0.14  //0.23
+                .connectivity = EXPONENTIAL,   ///EXPONENTIAL or HOMOGENEOUS
+                .W            = 0.23, //0.09 //0.12 //0.14  //0.23
                 .sigma        = 12,
                 .synapse      = {.R=0.5,.D=2.0},
             }
@@ -227,15 +227,15 @@ static const parameters DualLayerModelEx =
     .Movie = 
     {
         .MakeMovie = ON,
-        .Output = 4,
-        .Delay = 10,
+        .Output = 5,
+        .Delay = 50,
     },
     .theta = 
     {
         .strength    = 5.0,
         .period     = 0.2,
     },
-    .skip=1,
+    .skip = 1,
     .output = 
     {
         .Switch    = ON,
@@ -256,15 +256,15 @@ static const model_features Features =
     .STD        = OFF,  //if we need any of these features we can make the changes then.
     .Output     = OFF,
     .Theta      = OFF,
-    .Timestep   = 0.1,
-    .Simlength  = 1000,
-    .Trial      = 1, //if you want to run multiple trials for the same set of variables, can sweep this
+    .Timestep   = 0.1, // Works in like with 0.1 for midpoint. But if gE too small should addition be smaller too???
+    .Simlength  = 1e5,
+    .trial      = 1, //if you want to run multiple trials for the same set of variables, can sweep this
 };
 ///Parameters for conducting a parameter sweep.
 static const sweepable Sweep =
 {
     .offset=offsetof(parameters,couple)+offsetof(couple_parameters,Layer_parameters) +0+ /*offset in the union is always 0*/  + offsetof(duallayer_parameters,W),
-    .minval = 0.1,
+    .minval = 0.01,
     .maxval = 1,
     .count = 10
 };

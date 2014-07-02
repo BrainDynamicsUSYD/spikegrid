@@ -12,6 +12,10 @@ void CleanupLayer(layer* l)
     FreeIfNotNull(l->voltages_out);
     FreeIfNotNull(l->recoverys);
     FreeIfNotNull(l->recoverys_out);
+    FreeIfNotNull(l->connections);
+    FreeIfNotNull(l->Extimecourse);
+    FreeIfNotNull(l->Intimecourse);
+    FreeIfNotNull(l->P);
     for (unsigned int i = 0;i<l->spikes.count;i++)
     {
         free(l->spikes.data[i]);
@@ -27,4 +31,5 @@ void CleanupModel(model* m)
         CleanupLayer(&m->layer2);
     }
     CleanupOutput();
+    free(m);
 }

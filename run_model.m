@@ -1,6 +1,6 @@
 compile;
 time=1;
-outputs={ 'Coupling1','Coupling2','STDR1','gE'};
+outputs={ 'Coupling1','Coupling2','gE'};
 %initial call
 [V, out1] = conductance('dummy',outputs);
 
@@ -23,7 +23,7 @@ title('Vin');
 colorbar;
 h=[];
 for i=1:length(out1)
-    h(i)=setupplot(out1{1},i+2);
+    h(i)=setupplot(out1{i},i+2);
 end
 while time<20000
     time=time+1;

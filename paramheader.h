@@ -140,7 +140,14 @@ typedef struct
     const Compute_float gE0;
     const Compute_float gI0;
 } extinput;
-
+typedef enum {RAND_TIME=0,RAND_JOB=1,SINGLE_SPIKE=2} InitConds;
+struct Job;
+typedef struct Job
+{
+    const InitConds initcond;
+    const Compute_float Voltage_or_count;
+    const struct Job* const next;
+} Job;
 ///Global switches to enable/disable features.  Also holds some model-independent parameters
 typedef struct 
 {
@@ -152,8 +159,9 @@ typedef struct
     const Compute_float Timestep; ///< The timestep in the model
     const unsigned int Simlength; ///< total number of timesteps to run
     const unsigned int trial;
+    const Job job;
 } model_features;
- 
+
 ///Structure that holds all the parameters for a layer
 typedef struct 
 {
@@ -185,8 +193,8 @@ static const Compute_float Two = (Compute_float)2;
 static const Compute_float Zero = (Compute_float)0;
 ///ugly hack for recursive inclusion
 #define PARAMETERS 
-//get some macros for various sizes
 #include "whichparam.h"  
+//get some macros for various sizes
 ///Size of the "large" arrays (notable examples are gE and gI)
 #define conductance_array_size (grid_size + 2*couplerange)
 ///Size of a coupling matrix

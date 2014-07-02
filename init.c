@@ -1,35 +1,39 @@
 /// \file
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 #include <unistd.h> //gethostname
 #include <sys/stat.h>
+#include <stdio.h>
 #include <sys/types.h>
 #include "coupling.h"
 #include "output.h"
 #include "printstruct.h"
-#include "layer.h"
 int randinit_done = 0;
-///creates a random initial condition
+///creates a random initial condition - assumes random is already seeded
 ///This is generated as small fluctuations away from Vrt
 /// @param input    The input matrix - Modified in place
 /// @param V        Used to get the Vrt 
 void randinit(Compute_float* input,const Compute_float minval,const Compute_float maxval, const unsigned int trialnumber)
 {
-    if (randinit_done==0)
-    {
-        srandom((unsigned)(trialnumber)); 
-        randinit_done=1;
-    }
     for (int x=0;x<grid_size;x++)
     {
         for (int y=0;y<grid_size;y++)
         {
-            input[x*grid_size + y ] = ((Compute_float)random())/((Compute_float)RAND_MAX)*(maxval-minval)+minval;///((Compute_float)20.0) + V.Vrt;
+            input[x*grid_size + y ] = ((Compute_float)random())/((Compute_float)RAND_MAX)*(maxval-minval)+minval;
         }
     }
 }
-
+void Fixedinit(Compute_float* input, const Compute_float def_value,const Compute_float mod_value)
+{
+    for (int x=0;x<grid_size;x++)
+    {
+        for (int y=0;y<grid_size;y++)
+        {
+            input[x*grid_size + y ] = def_value;
+        }
+    }
+    input[grid_size*(grid_size/2) + (grid_size/2)] = mod_value;
+}
 ///Copies a struct using malloc - occasionally required
 /// @param input  the initial input
 /// @param size   the amount of data to copy
@@ -60,7 +64,7 @@ layer setuplayer(const parameters p)
         },
         .connections = CreateCouplingMatrix(p.couple),
         .STDP_connections   = Features.STDP==ON?calloc(sizeof(Compute_float),grid_size*grid_size*couple_array_size*couple_array_size):NULL,
-        .std                = STD_init(p.STD), //this is so fast that it doesn't matter to run in init
+        .std                = Features.STD==ON?STD_init(p.STD):NULL, //this is so fast that it doesn't matter to run in init
         .Extimecourse       = p.couple.Layertype==SINGLELAYER?Synapse_timecourse_cache(cap,p.couple.Layer_parameters.single.Ex,Features.Timestep):
             ((p.couple.Layer_parameters.dual.W>0)?Synapse_timecourse_cache(cap,p.couple.Layer_parameters.dual.synapse,Features.Timestep):NULL),
         .Intimecourse       = p.couple.Layertype==SINGLELAYER?Synapse_timecourse_cache(cap,p.couple.Layer_parameters.single.In,Features.Timestep):

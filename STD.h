@@ -1,7 +1,6 @@
 /// \file
 #ifndef STDH
 #define STDH
-#include <stdio.h>
 #include "mymath.h"
 #include "paramheader.h"
 ///Holds data for STD on a per-neuron basis
@@ -11,7 +10,7 @@ typedef struct
     Compute_float* U;       ///< U STD parameter
     Compute_float* R;       ///< R STD parameter
 } STD_data;
-STD_data STD_init(const STD_parameters s);
+STD_data* STD_init(const STD_parameters s);
 ///calculation of STD strength.  In .h file for inlining (might not be required)
 static inline Compute_float STD_str (const STD_parameters s, const int x, const int y,const unsigned int time,const unsigned int lag, STD_data* const d)
 {

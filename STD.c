@@ -5,17 +5,17 @@
 ///Failing to call this before using STD will give incorrect results initially.
 ///It is possible that results will converge after some time, but best not to risk it.
 /// @param s the STD parameters
-STD_data __attribute__((const)) STD_init(const STD_parameters s)
+STD_data* __attribute__((const)) STD_init(const STD_parameters s)
 {
-    STD_data ret ;
-    ret.U=malloc(sizeof(Compute_float)*grid_size*grid_size);
-    ret.R=malloc(sizeof(Compute_float)*grid_size*grid_size);
-    ret.ftimes=malloc(sizeof(unsigned int)*grid_size*grid_size);
+    STD_data* ret = malloc(sizeof(STD_data)) ;
+    ret->U=malloc(sizeof(Compute_float)*grid_size*grid_size);
+    ret->R=malloc(sizeof(Compute_float)*grid_size*grid_size);
+    ret->ftimes=malloc(sizeof(unsigned int)*grid_size*grid_size);
     for(int i=0;i < grid_size*grid_size;i++)
     {
-        ret.ftimes[i]=0; //probably not required as you can gurantee that the memory is set to 0 by default
-        ret.U[i] = s.U;
-        ret.R[i] = One;
+        ret->ftimes[i]=0; //probably not required as you can gurantee that the memory is set to 0 by default
+        ret->U[i] = s.U;
+        ret->R[i] = One;
     }
     return ret;
 }

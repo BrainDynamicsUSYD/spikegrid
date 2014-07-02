@@ -1,6 +1,7 @@
 /// \file
 #include <string.h>
 #include <unistd.h>
+#include <stdio.h>
 #include "output.h"
 #include "picture.h"
 #define output_count  15
@@ -225,10 +226,10 @@ void output_init(const model* const m)
         {"V2",          FLOAT_DATA, .data.TA_data={m->layer2.voltages_out,    grid_size,              0,             m->layer2.P->potential.Vin,m->layer2.P->potential.Vpk}},
         {"Recovery1",   FLOAT_DATA, .data.TA_data={m->layer1.recoverys_out,   grid_size,              0,             0,100}}, //TODO: ask adam for max and min recovery values
         {"Recovery2",   FLOAT_DATA, .data.TA_data={m->layer2.recoverys_out,   grid_size,              0,             0,100}}, //TODO: ask adam for max and min recovery values
-        {"STDU1",       FLOAT_DATA, .data.TA_data={m->layer1.std.U,           grid_size,              0,             0,1}},
-        {"STDR1",       FLOAT_DATA, .data.TA_data={m->layer1.std.R,           grid_size,              0,             0,1}},
-        {"STDU2",       FLOAT_DATA, .data.TA_data={m->layer2.std.U,           grid_size,              0,             0,1}},
-        {"STDR2",       FLOAT_DATA, .data.TA_data={m->layer2.std.R,           grid_size,              0,             0,1}},
+        {"STDU1",       FLOAT_DATA, .data.TA_data={Features.STD==ON?m->layer1.std->U:NULL,           grid_size,              0,             0,1}},
+        {"STDR1",       FLOAT_DATA, .data.TA_data={Features.STD==ON?m->layer1.std->R:NULL,           grid_size,              0,             0,1}},
+        {"STDU2",       FLOAT_DATA, .data.TA_data={Features.STD==ON?m->layer2.std->U:NULL,           grid_size,              0,             0,1}},
+        {"STDR2",       FLOAT_DATA, .data.TA_data={Features.STD==ON?m->layer2.std->R:NULL,           grid_size,              0,             0,1}},
         //ringbuffer outputs
         //name          data type        actual data
         {"Firing1",     RINGBUFFER_DATA, .data.RB_data=&m->layer1.spikes}, //take reference as the struct gets modified
@@ -237,4 +238,9 @@ void output_init(const model* const m)
     output_s* malloced = malloc(sizeof(output_s)*output_count);
     memcpy(malloced,outdata,sizeof(output_s)*output_count);
     Outputtable = malloced;
+}
+void CleanupOutput()
+{
+    free(Outputtable);//also cleanup outputtables
+    Outputtable=NULL;
 }

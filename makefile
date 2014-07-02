@@ -18,23 +18,24 @@ BINARY=./a.out
 VERSION_HASH = $(shell git rev-parse HEAD)
 export VIEWERBIN=$(shell pwd)/watch
 .PHONY: profile clean submit docs debug params matlabparams viewer ${VIEWERBIN}
+#binary
 ${BINARY}: ${SOURCES} *.h
 	${CC} ${CFLAGS}     ${SOURCES} -o ${BINARY} ${LDFLAGS}
 debug: ${SOURCE}
 	${CC} ${DEBUGFLAGS} ${SOURCES} -o ${BINARY} ${LDFLAGS}
+TEST:
+	mv whichparam.h whichparambackup.h #backup config choice
+	echo -e '#warning "using canonical parameters"\n#include "parametersCANONICAL.h"' > whichparam.h
+	${CC} ${CFLAGS} ${SOURCES} -o ${BINARY} ${LDFLAGS}
+	mv whichparambackup.h whichparam.h #restore config choice
+#documentation
 docs: html/index.html
 html/index.html: ${SOURCES} *.h Doxyfile
-	echo "Suphys computers don't have dot installed, so graphs will be missing if this was run on silliac"
+		echo "Suphys computers don't have dot installed, so graphs will be missing if this was run on silliac"
 	doxygen Doxyfile
 profile:
 	${CC} ${CFLAGS} -pg ${SOURCES} -o ${BINARY} ${LDFLAGS}
-time: ${BINARY}
-	echo ${VERSION_HASH} $$( (/usr/bin/time  -f '%e' 'sh' '-c' './${BINARY} > /dev/null') 2>&1) >> times
-	echo ${VERSION_HASH} $$( (/usr/bin/time  -f '%e' 'sh' '-c' './${BINARY} > /dev/null') 2>&1) >> times
-	echo ${VERSION_HASH} $$( (/usr/bin/time  -f '%e' 'sh' '-c' './${BINARY} > /dev/null') 2>&1) >> times
-	echo ${VERSION_HASH} $$( (/usr/bin/time  -f '%e' 'sh' '-c' './${BINARY} > /dev/null') 2>&1) >> times
-	echo ${VERSION_HASH} $$( (/usr/bin/time  -f '%e' 'sh' '-c' './${BINARY} > /dev/null') 2>&1) >> times
-	echo ${VERSION_HASH} $$( (/usr/bin/time  -f '%e' 'sh' '-c' './${BINARY} > /dev/null') 2>&1) >> times
+#yossarian
 yossarian.csh: ${BINARY}
 	${BINARY} -g
 	chmod +x yossarian.csh
@@ -43,10 +44,12 @@ submit: yossarian.csh
 clean:
 	-rm -f ${BINARY}
 	-rm -rf html
+#.m files
 compile.m: makefile
 	echo "mex CFLAGS=\"-fPIC -shared ${CFLAGS}  -DMATLAB \" LDFLAGS=\"${LDFLAGS} -shared\" ${SOURCES}" > compile.m
 compileslow.m: makefile
 	echo "mex CFLAGS=\"-fPIC -shared ${DEBUGFLAGS}  -DMATLAB \" LDFLAGS=\"${LDFLAGS} -shared\" ${SOURCES}" > compileslow.m
+#movie viewer
 viewer: ${VIEWERBIN}
 ${VIEWERBIN} :
 	cd viewer && $(MAKE) ${VIEWERBIN}

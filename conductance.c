@@ -5,6 +5,8 @@
 #include <getopt.h> //getopt
 #include <stdlib.h> //exit
 #include <fenv.h>   //for some debugging
+#include <stdio.h>
+#include <time.h>
 #include "evolve.h"
 #include "newparam.h"
 #include "init.h"
@@ -189,55 +191,78 @@ int main(int argc,char** argv) //useful for testing w/out matlab
                 break;
         }
     }
-    if (ModelType==SINGLELAYER) {m=setup(newparam!=NULL? (*newparam):OneLayerModel,newparam!=NULL? (*newparam):OneLayerModel,ModelType,jobnumber);} //pass the same layer as a double parameter
-    //else {m=setup(newparam!=NULL?*newparam:DualLayerModelEx,DualLayerModelIn,ModelType,jobnumber);}
-    else {m=setup(DualLayerModelIn,newparam!=NULL?*newparam:DualLayerModelEx,ModelType,jobnumber);}
+    const Job* job = &Features.job;
+    while (job != NULL)
+    {
+        int count = job->initcond==RAND_JOB?(int)job->Voltage_or_count:1; //default to 1 job
+        for (int c = 0;c<count;c++)
+        {
+            mytime=0;
+            //seed RNG as appropriate - with either time or job number
+            if (job->initcond == RAND_TIME) {srandom((unsigned)time(0));}
+            else if (job->initcond==RAND_JOB) {srandom((unsigned)c);}
+            //sets up the model code
+            if (ModelType==SINGLELAYER) {m=setup(newparam!=NULL? (*newparam):OneLayerModel,newparam!=NULL? (*newparam):OneLayerModel,ModelType,jobnumber);} //pass the same layer as a double parameter
+            else {m=setup(DualLayerModelIn,newparam!=NULL?*newparam:DualLayerModelEx,ModelType,jobnumber);}
 
-    Compute_float *FirstV,*SecondV,*FirstW,*SecondW;
-    if (ModelType==SINGLELAYER)
-    {
-        FirstV = calloc(sizeof(Compute_float),grid_size*grid_size);
-        SecondV = NULL;
-        randinit(FirstV,OneLayerModel.potential.Vrt,OneLayerModel.potential.Vpk,Features.trial);
-        if (Features.Recovery==ON)
-        {
-            FirstW = calloc(sizeof(Compute_float),grid_size*grid_size);
-            SecondW = NULL;
-        } else {FirstW=NULL;SecondW=NULL;}
-    }
-    else if (ModelType==DUALLAYER) 
-    {
-        FirstV = malloc(sizeof(Compute_float)*grid_size*grid_size);
-        SecondV = malloc(sizeof(Compute_float)*grid_size*grid_size);
-        randinit(FirstV, DualLayerModelIn.potential.Vrt,DualLayerModelIn.potential.Vpk,Features.trial);
-        randinit(SecondV,DualLayerModelEx.potential.Vrt,DualLayerModelEx.potential.Vpk,Features.trial);
-        if (Features.Recovery==ON) 
-        {
-            FirstW = calloc(sizeof(Compute_float),grid_size*grid_size);
-            SecondW = calloc(sizeof(Compute_float),grid_size*grid_size);
-        } else {FirstW=NULL;SecondW=NULL;}
-    }
-    while (mytime<Features.Simlength)
-    {
-        step_(FirstV,SecondV,FirstW,SecondW);//always fine to pass an extra argument here
-        printf("%i\n",mytime);
-        for (int i=0;i<grid_size;i++)
-        {
-            for (int j=0;j<grid_size;j++)
+            Compute_float *FirstV,*SecondV,*FirstW,*SecondW;
+            if (ModelType==SINGLELAYER)
             {
-                FirstV                       [i*grid_size+j] = m->layer1.voltages_out[i*grid_size + j]; //always fine to copy
-                //check before copying other data
-                if (SecondV != NULL) {SecondV[i*grid_size+j] = m->layer2.voltages_out [i*grid_size+j];}
-                if (FirstW != NULL)  {FirstW [i*grid_size+j] = m->layer1.recoverys_out[i*grid_size+j];}
-                if (SecondW != NULL) {SecondW[i*grid_size+j] = m->layer2.recoverys_out[i*grid_size+j];}
+                FirstV = calloc(sizeof(Compute_float),grid_size*grid_size);
+                SecondV = NULL;
+                if (job->initcond == SINGLE_SPIKE) {Fixedinit(FirstV,OneLayerModel.potential.Vrt,job->Voltage_or_count);}
+                else                               {randinit(FirstV,OneLayerModel.potential.Vrt,OneLayerModel.potential.Vpk,Features.trial);}
+                if (Features.Recovery==ON)
+                {
+                    FirstW = calloc(sizeof(Compute_float),grid_size*grid_size);
+                    SecondW = NULL;
+                } else {FirstW=NULL;SecondW=NULL;}
             }
+            else if (ModelType==DUALLAYER) 
+            {
+                FirstV = malloc(sizeof(Compute_float)*grid_size*grid_size);
+                SecondV = malloc(sizeof(Compute_float)*grid_size*grid_size);
+                if (job->initcond == SINGLE_SPIKE) 
+                {
+                    Fixedinit(FirstV, DualLayerModelIn.potential.Vrt,job->Voltage_or_count);
+                    Fixedinit(SecondV,DualLayerModelEx.potential.Vrt,job->Voltage_or_count);
+                }
+                else
+                {
+                    randinit(FirstV, DualLayerModelIn.potential.Vrt,DualLayerModelIn.potential.Vpk,Features.trial);
+                    randinit(SecondV,DualLayerModelEx.potential.Vrt,DualLayerModelEx.potential.Vpk,Features.trial);
+                }
+                if (Features.Recovery==ON) 
+                {
+                    FirstW = calloc(sizeof(Compute_float),grid_size*grid_size);
+                    SecondW = calloc(sizeof(Compute_float),grid_size*grid_size);
+                } else {FirstW=NULL;SecondW=NULL;}
+            }
+            //actually runs the model
+            while (mytime<Features.Simlength)
+            {
+                step_(FirstV,SecondV,FirstW,SecondW);//always fine to pass an extra argument here
+                printf("%i\n",mytime);
+                for (int i=0;i<grid_size;i++)
+                {
+                    for (int j=0;j<grid_size;j++)
+                    {
+                        FirstV                       [i*grid_size+j] = m->layer1.voltages_out[i*grid_size + j]; //always fine to copy
+                        //check before copying other data
+                        if (SecondV != NULL) {SecondV[i*grid_size+j] = m->layer2.voltages_out [i*grid_size+j];}
+                        if (FirstW != NULL)  {FirstW [i*grid_size+j] = m->layer1.recoverys_out[i*grid_size+j];}
+                        if (SecondW != NULL) {SecondW[i*grid_size+j] = m->layer2.recoverys_out[i*grid_size+j];}
+                    }
+                }
+            }
+            FreeIfNotNull(FirstV);
+            FreeIfNotNull(SecondV);
+            FreeIfNotNull(FirstW);
+            FreeIfNotNull(SecondW);
+            CleanupModel(m);
         }
+        job=job->next;
     }
-    FreeIfNotNull(FirstV);
-    FreeIfNotNull(SecondV);
-    FreeIfNotNull(FirstW);
-    FreeIfNotNull(SecondW);
-    CleanupModel(m);
     return(EXIT_SUCCESS);
 }
 #endif

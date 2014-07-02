@@ -4,7 +4,6 @@
 #include "theta.h"
 #include "output.h"
 #include "STDP.h"
-#include "layer.h"
 
 ///add conductance from a firing neuron to the gE and gI arrays (used in single layer model)
 void evolvept (const int x,const int y,const Compute_float* const __restrict connections,const Compute_float Estrmod,const Compute_float Istrmod,Compute_float* __restrict gE,Compute_float* __restrict gI)
@@ -64,7 +63,7 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
             Compute_float strmod=One;
             if (Features.STD == ON)
             {
-                strmod=STD_str(L.P->STD,c.x,c.y,time,i,&(L.std));
+                strmod=STD_str(L.P->STD,c.x,c.y,time,i,(L.std));
             }
             if (Eon && Ion) 
             {

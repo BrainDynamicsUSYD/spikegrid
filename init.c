@@ -96,6 +96,7 @@ model* setup(const parameters p,const parameters p2,const LayerNumbers lcount, i
         sprintf(outdir,"job-%i/",jobnumber);
         mkdir(outdir,S_IRWXU);
     }
+    printf("outdir is %s\n",outdir);
     char buf[100];
     sprintf(buf,"%s/struct.dump",outdir);
     remove(buf);//cleanup the old struct file

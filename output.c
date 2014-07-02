@@ -241,6 +241,14 @@ void output_init(const model* const m)
 }
 void CleanupOutput()
 {
+    for (int i=0;i<output_count;i++)
+    {
+        if (outfiles[i] != NULL)
+        {
+            fclose(outfiles[i]);
+            outfiles[i]=NULL;
+        }
+    }
     free(Outputtable);//also cleanup outputtables
     Outputtable=NULL;
 }

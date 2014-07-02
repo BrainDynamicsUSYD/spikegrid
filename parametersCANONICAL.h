@@ -140,6 +140,39 @@ static const parameters DualLayerModelEx =
         .rate = 0,
     },
     .skip = 1,
+    .output=
+    {
+        {
+            .output_method=TEXT,
+            .Output=0, //gE
+            .Delay=5
+        },
+        {
+            .output_method=TEXT,
+            .Output=1,//gI
+            .Delay=5
+        },
+        {
+            .output_method=TEXT,
+            .Output=2,//coupling1
+            .Delay=1000
+        },
+        {
+            .output_method=TEXT,
+            .Output=3,//coupling2
+            .Delay=1000
+        },
+        {
+            .output_method=TEXT,
+            .Output=4,//V1
+            .Delay=5
+        },
+        {
+            .output_method=TEXT,
+            .Output=5,//V2
+            .Delay=5
+        },
+    }
 
 };
 ///Constant external input to conductances
@@ -157,7 +190,7 @@ static const model_features Features =
     .Output     = OFF,
     .Theta      = OFF,
     .Timestep   = 0.1, // Works in like with 0.1 for midpoint. But if gE too small should addition be smaller too???
-    .Simlength  = 1e1,
+    .Simlength  = 1e4,
     .job=
     {
         .initcond=SINGLE_SPIKE,

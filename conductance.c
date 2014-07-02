@@ -192,6 +192,7 @@ int main(int argc,char** argv) //useful for testing w/out matlab
         }
     }
     const Job* job = &Features.job;
+    if (job->next != NULL || (job->initcond==RAND_JOB && job->Voltage_or_count>1)) {jobnumber=0;} //if more than one job - then start at 0 - so that stuff goes in folders
     while (job != NULL)
     {
         int count = job->initcond==RAND_JOB?(int)job->Voltage_or_count:1; //default to 1 job
@@ -260,6 +261,7 @@ int main(int argc,char** argv) //useful for testing w/out matlab
             FreeIfNotNull(FirstW);
             FreeIfNotNull(SecondW);
             CleanupModel(m);
+            jobnumber++;
         }
         job=job->next;
     }

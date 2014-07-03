@@ -36,7 +36,7 @@ typedef struct {
     const Compute_float D;  ///<decay time constant (units?)
 } decay_parameters;
 ///Enum to determine the type of connectivity
-typedef enum ConnectType {HOMOGENEOUS=0,EXPONENTIAL=1} ConnectType;
+typedef enum ConnectType {HOMOGENEOUS=1,EXPONENTIAL=0} ConnectType;
 ///Enum to determine how many layers are in use
 typedef enum LayerNumbers {SINGLELAYER=0,DUALLAYER=1} LayerNumbers;
 ///Enum to determine whether there is a recovery variable

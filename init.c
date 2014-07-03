@@ -13,7 +13,7 @@ int randinit_done = 0;
 ///This is generated as small fluctuations away from Vrt
 /// @param input    The input matrix - Modified in place
 /// @param V        Used to get the Vrt 
-void randinit(Compute_float* input,const Compute_float minval,const Compute_float maxval, const unsigned int trialnumber)
+void randinit(Compute_float* input,const Compute_float minval,const Compute_float maxval)
 {
     for (int x=0;x<grid_size;x++)
     {

@@ -50,7 +50,7 @@ mxArray* CreateInitialValues(const Compute_float minval, const Compute_float max
 {
     mxArray* vals =mxCreateNumericMatrix(grid_size,grid_size,MatlabDataType(),mxREAL);
     Compute_float* datavals = (Compute_float*)mxGetData(vals);
-    randinit(datavals,minval,maxval,trialnum);
+    randinit(datavals,minval,maxval);
     return vals;
 }
 
@@ -212,7 +212,7 @@ int main(int argc,char** argv) //useful for testing w/out matlab
                 FirstV = calloc(sizeof(Compute_float),grid_size*grid_size);
                 SecondV = NULL;
                 if (job->initcond == SINGLE_SPIKE) {Fixedinit(FirstV,OneLayerModel.potential.Vrt,job->Voltage_or_count);}
-                else                               {randinit(FirstV,OneLayerModel.potential.Vrt,OneLayerModel.potential.Vpk,Features.trial);}
+                else                               {randinit(FirstV,OneLayerModel.potential.Vrt,OneLayerModel.potential.Vpk);}
                 if (Features.Recovery==ON)
                 {
                     FirstW = calloc(sizeof(Compute_float),grid_size*grid_size);
@@ -230,8 +230,8 @@ int main(int argc,char** argv) //useful for testing w/out matlab
                 }
                 else
                 {
-                    randinit(FirstV, DualLayerModelIn.potential.Vrt,DualLayerModelIn.potential.Vpk,Features.trial);
-                    randinit(SecondV,DualLayerModelEx.potential.Vrt,DualLayerModelEx.potential.Vpk,Features.trial);
+                    randinit(FirstV, DualLayerModelIn.potential.Vrt,DualLayerModelIn.potential.Vpk);
+                    randinit(SecondV,DualLayerModelEx.potential.Vrt,DualLayerModelEx.potential.Vpk);
                 }
                 if (Features.Recovery==ON) 
                 {

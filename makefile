@@ -24,10 +24,15 @@ ${BINARY}: ${SOURCES} *.h
 debug: ${SOURCE}
 	${CC} ${DEBUGFLAGS} ${SOURCES} -o ${BINARY} ${LDFLAGS}
 TEST:
+	rm -rf jobtest/*
 	mv whichparam.h whichparambackup.h #backup config choice
 	echo -e '#warning "using canonical parameters"\n#include "parametersCANONICAL.h"' > whichparam.h
-	${CC} ${CFLAGS} ${SOURCES} -o ${BINARY} ${LDFLAGS}
+	${CC} ${CFLAGS} -fno-omit-frame-pointer ${SOURCES} -o ${BINARY} ${LDFLAGS}
 	mv whichparambackup.h whichparam.h #restore config choice
+	./a.out
+	mv job-{0..5} jobtest
+	diff -r Test_known_good jobtest
+	echo "Tests passed"
 #documentation
 docs: html/index.html
 html/index.html: ${SOURCES} *.h Doxyfile

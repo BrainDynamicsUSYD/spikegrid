@@ -243,7 +243,7 @@ int main(int argc,char** argv) //useful for testing w/out matlab
             while (mytime<Features.Simlength)
             {
                 step_(FirstV,SecondV,FirstW,SecondW);//always fine to pass an extra argument here
-                printf("%i\n",mytime);
+                if (mytime%10==0){printf("%i\n",mytime);}
                 for (int i=0;i<grid_size;i++)
                 {
                     for (int j=0;j<grid_size;j++)

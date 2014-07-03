@@ -1,7 +1,7 @@
 /// \file
 #include <stddef.h> //offsetof
 //these first few parameters actually escape into the paramheader file through magic
-#define grid_size 300
+#define grid_size 80
 ///Total size of the grid
 ///Coupling range
 #define couplerange 15
@@ -143,12 +143,12 @@ static const parameters DualLayerModelEx =
     .output=
     {
         {
-            .output_method=TEXT,
+            .output_method=PICTURE,
             .Output=0, //gE
             .Delay=5
         },
         {
-            .output_method=TEXT,
+            .output_method=PICTURE,
             .Output=1,//gI
             .Delay=5
         },
@@ -163,12 +163,12 @@ static const parameters DualLayerModelEx =
             .Delay=1000
         },
         {
-            .output_method=TEXT,
+            .output_method=PICTURE,
             .Output=4,//V1
             .Delay=5
         },
         {
-            .output_method=TEXT,
+            .output_method=PICTURE,
             .Output=5,//V2
             .Delay=5
         },
@@ -190,7 +190,7 @@ static const model_features Features =
     .Output     = OFF,
     .Theta      = OFF,
     .Timestep   = 0.1, // Works in like with 0.1 for midpoint. But if gE too small should addition be smaller too???
-    .Simlength  = 1e4,
+    .Simlength  = 2e3,
     .job=
     {
         .initcond=SINGLE_SPIKE,

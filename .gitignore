@@ -35,3 +35,5 @@ compileslow.m
 perf.data
 *~
 watch
+
+!Test_known_good/*

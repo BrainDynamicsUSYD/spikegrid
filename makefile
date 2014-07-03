@@ -29,7 +29,7 @@ TEST:
 	echo -e '#warning "using canonical parameters"\n#include "parametersCANONICAL.h"' > whichparam.h
 	${CC} ${CFLAGS} -fno-omit-frame-pointer ${SOURCES} -o ${BINARY} ${LDFLAGS}
 	mv whichparambackup.h whichparam.h #restore config choice
-	./a.out
+	time ./a.out
 	mv job-{0..5} jobtest
 	diff -r Test_known_good jobtest
 	echo "Tests passed"

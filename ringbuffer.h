@@ -1,10 +1,11 @@
 /// \file
 #ifndef HELPERS
 #define HELPERS
+#include <stdint.h>
 ///helper type for coordinates.
 ///try to use this than passing around x,y pairs as it is simpler to understand.
 ///Computational overhead should be minimal
-typedef struct coords {int x; /**<x coord*/int y;/**<y coord*/} coords;
+typedef struct coords {int16_t x; /**<x coord*/int16_t y;/**<y coord*/} coords;
 ///store data in a ring - used for things like firing histories
 typedef struct ringbuffer {
     coords ** data;     ///<the actual data

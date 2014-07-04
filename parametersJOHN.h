@@ -92,7 +92,7 @@ static const parameters OneLayerModel =
         .Vex     = 0,               \
         .Vin     = -80,             \
         .glk     = 0.05,            \
-        .rate = 2,                  \
+        .rate = 5,                  \
     }
 ///parameters for the inhibitory layer of the double layer model
 static const parameters DualLayerModelIn =
@@ -105,17 +105,17 @@ static const parameters DualLayerModelIn =
             .dual = 
             {
                 .W          = -0.84, //-0.40 //-0.57 //-0.70 //-1.25, 
-                .sigma      = 50, 
+                .sigma      = 60, 
                 .synapse    = {.R=0.5,.D=3.0},
             }
         },
         .norm_type = None,
-        .tref       = 5,
+        .tref       = 2,
     },
     potparams,
     .STD =
     {
-        .U  = 0.5,
+        .U  = 0.03,
         .D  = 0.2,
         .F  = 0.45
     },
@@ -131,18 +131,18 @@ static const parameters DualLayerModelEx =
         {
             .dual =     
             {
-                .W          =  0.02, //0.09 //0.12 //0.14  //0.23
-                .sigma      = 50,
+                .W          =  0.13, 
+                .sigma      = 60,
                 .synapse    = {.R=0.5,.D=3.0},
             }
         },
-        .tref       = 5,
+        .tref       = 2,
         .norm_type = None,
     },
     potparams,
     .STD =
     {
-        .U  = 0.5,
+        .U  = 0.03,
         .D  = 0.2,
         .F  = 0.45
     },
@@ -155,7 +155,7 @@ static const model_features Features =
     .STD        = ON, //               if we need any of these features we can make the changes then.
     .Output     = OFF,
     .Theta      = OFF,
-    .Timestep   = 0.02,
+    .Timestep   = 0.01,
     .Simlength  = 10,
 };
 ///Constant external input to conductances

@@ -23,6 +23,8 @@ ${BINARY}: ${SOURCES} *.h
 	${CC} ${CFLAGS}     ${SOURCES} -o ${BINARY} ${LDFLAGS}
 debug: ${SOURCE}
 	${CC} ${DEBUGFLAGS} ${SOURCES} -o ${BINARY} ${LDFLAGS}
+mediumopt:
+	${CC} -g -std=gnu99 ${SOURCES} -o ${BINARY} ${LDFLAGS}
 TEST:
 	rm -rf jobtest/*
 	mv whichparam.h whichparambackup.h #backup config choice

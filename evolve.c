@@ -38,7 +38,9 @@ void evolvept_duallayer (const int x,const  int y,const Compute_float* const __r
     for (int i = 0; i < couple_array_size;i++)
     {
         const int outoff = (x + i)*conductance_array_size +y;//as gE and gI are larger than the neuron grid size, don't have to worry about wrapping
-        for (int j = 0 ; j<couple_array_size;j++) 
+        const Compute_float compi = (Compute_float)(i-couplerange);
+        const Compute_float off = sqrt(couplerange*couplerange-compi*compi);
+        for (int j = (couplerange-off) ; j<(couplerange+off);j++) 
         {
             const int coupleidx = i*couple_array_size + j;
             condmat[outoff+j] += connections[coupleidx]*strmod;

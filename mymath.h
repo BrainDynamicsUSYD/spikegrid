@@ -5,4 +5,5 @@
 #define exp(x) expf(x)
 #define fabs(x) fabsf(x)
 #define sin(x) sinf(x)
+#define ceil(x) ceilf(x)
 #endif

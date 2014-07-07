@@ -93,6 +93,7 @@ Compute_float __attribute__((const)) expdecay(const Compute_float rsq,const dual
 Compute_float* CreateCouplingMatrix(const couple_parameters c)
 {
     Compute_float* matrix = calloc(sizeof(Compute_float),couple_array_size*couple_array_size); //matrix of coupling values
+    int count=0;
     for(int x=-couplerange;x<=couplerange;x++)
     {
         for(int y=-couplerange;y<=couplerange;y++)
@@ -117,8 +118,11 @@ Compute_float* CreateCouplingMatrix(const couple_parameters c)
                             val = c.Layer_parameters.dual.W;
                         }
                     }
-                    matrix[(x+couplerange)*couple_array_size + y + couplerange] = val;//and set the array
+                    matrix[count]=val;
+                    count++;
+//                    matrix[(x+couplerange)*couple_array_size + y + couplerange] = val;//and set the array
                 }
+                else {count++;}
             }
         }
     }

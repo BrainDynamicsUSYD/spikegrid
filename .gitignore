@@ -37,3 +37,5 @@ perf.data
 watch
 
 !Test_known_good/*
+evolvegen.c
+mask

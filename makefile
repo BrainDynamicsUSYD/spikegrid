@@ -1,5 +1,5 @@
 ifeq ($(CC),cc)
-	optflags= -Ofast -msse -msse2 -msse3 -funsafe-loop-optimizations -mtune=native -march=native  -floop-interchange -ftree-loop-optimize -floop-strip-mine -floop-block -flto  -fassociative-math -fno-signed-zeros -freciprocal-math -ffinite-math-only -fno-trapping-math 
+	optflags= -Ofast -msse -msse2 -msse3 -funsafe-loop-optimizations -mtune=native -march=native  -floop-interchange -ftree-loop-optimize -floop-strip-mine -floop-block -flto  -fassociative-math -fno-signed-zeros -freciprocal-math -ffinite-math-only -fno-trapping-math -ftree-vectorize -fopt-info
 	extrawarnings=-Wstrict-aliasing -fstrict-aliasing   -Wshadow  -Wconversion -Wdouble-promotion -Wformat=2 -Wunused -Wuninitialized -Wfloat-equal -Wunsafe-loop-optimizations -Wcast-qual -Wcast-align -Wwrite-strings -Wjump-misses-init -Wlogical-op  -Wvector-operation-performance -Wno-pragmas
 	extraextrawarnings=-Wsuggest-attribute=pure -Wsuggest-attribute=const -Wsuggest-attribute=noreturn -Wstrict-overflow=4 
 	export CFLAGS=-g -Wall -Wextra -std=gnu99 ${optflags} ${extrawarnings} ${extraextrawarnings}
@@ -13,14 +13,17 @@ export CLIBFLAGS= -fPIC -shared
 export LDFLAGS=-lm -lpng -g
 CFLAGS += ${SPEEDFLAG}
 #conductance.c always needs to be first - this ensures that the mexfile gets the right name
-SOURCES= conductance.c coupling.c  STDP.c STD.c picture.c output.c evolve.c ringbuffer.c newparam.c yossarian.c init.c theta.c printstruct.c matlab_output.c cleanup.c
+SOURCES= conductance.c coupling.c  STDP.c STD.c picture.c output.c evolve.c ringbuffer.c newparam.c yossarian.c init.c theta.c printstruct.c matlab_output.c cleanup.c evolvegen.c
 BINARY=./a.out
 VERSION_HASH = $(shell git rev-parse HEAD)
 export VIEWERBIN=$(shell pwd)/watch
-.PHONY: profile clean submit docs debug params matlabparams viewer ${VIEWERBIN}
+export maskgen=$(shell pwd)/mask
+.PHONY: profile clean submit docs debug params matlabparams viewer ${VIEWERBIN} ${maskgen}
 #binary
 ${BINARY}: ${SOURCES} *.h
 	${CC} ${CFLAGS}     ${SOURCES} -o ${BINARY} ${LDFLAGS}
+evolvegen.c: param*.h whichparam.h ${maskgen}
+	${maskgen} > evolvegen.c
 debug: ${SOURCE}
 	${CC} ${DEBUGFLAGS} ${SOURCES} -o ${BINARY} ${LDFLAGS}
 mediumopt:
@@ -29,6 +32,7 @@ TEST:
 	rm -rf jobtest/*
 	mv whichparam.h whichparambackup.h #backup config choice
 	echo -e '#warning "using canonical parameters"\n#include "parametersCANONICAL.h"' > whichparam.h
+	$(MAKE) evolvegen.c
 	${CC} ${CFLAGS} -fno-omit-frame-pointer ${SOURCES} -o ${BINARY} ${LDFLAGS}
 	mv whichparambackup.h whichparam.h #restore config choice
 	time ./a.out
@@ -60,3 +64,6 @@ compileslow.m: makefile
 viewer: ${VIEWERBIN}
 ${VIEWERBIN} :
 	cd viewer && $(MAKE) ${VIEWERBIN}
+mask: ${maskgen}
+${maskgen} : param*.h whichparam.h
+	cd maskgen && $(MAKE) ${maskgen}

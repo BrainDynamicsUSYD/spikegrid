@@ -4,7 +4,7 @@
 #include "theta.h"
 #include "output.h"
 #include "STDP.h"
-int offsets[couple_array_size];
+#include "evolvegen.h"
 ///add conductance from a firing neuron to the gE and gI arrays (used in single layer model)
 void evolvept (const int x,const int y,const Compute_float* const __restrict connections,const Compute_float Estrmod,const Compute_float Istrmod,Compute_float* __restrict gE,Compute_float* __restrict gI)
 {
@@ -32,30 +32,7 @@ void evolvept_STDP  (const int x,const  int y,const Compute_float* const __restr
     if (Features.STDP == OFF) {return;}
     evolvept(x,y,&(connections_STDP[(x*grid_size +y)*couple_array_size*couple_array_size]),Estrmod,Istrmod,gE,gI);
 }
-///add conductance from a firing neuron to either gE or gI as appropriate (used in dual layer model)
-void evolvept_duallayer (const int x,const  int y,const Compute_float* const __restrict connections,const Compute_float strmod, Compute_float* __restrict condmat)
-{
-    for (int i = 0; i < couple_array_size;i++)
-    {
-        const int off = offsets[i];
-        const int outoff = (x + i)*conductance_array_size +y;//as gE and gI are larger than the neuron grid size, don't have to worry about wrapping
-        for (int j = (couplerange-off) ; j<=(couplerange+off);j++) 
-        {
-            const int coupleidx = i*couple_array_size + j;
-            condmat[outoff+j] += connections[coupleidx]*strmod;
-        }
-    } 
-//    Need to find a way to do STDP here
-}
-void makeoffsets()
-{
-    for (int i = 0; i < couple_array_size;i++)
-    {
-        const Compute_float compi = (Compute_float)(i-couplerange);
-        const int off =min(couplerange,(int) (ceil(sqrt(couplerange*couplerange-compi*compi)) ));
-        offsets[i]=off;
-    }
-}
+
 ///Adds the effect of the spikes that have fired in the past to the gE and gI arrays as appropriate
 void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restrict__ gI,const unsigned int time)
 {
@@ -234,7 +211,6 @@ void ResetVoltages(Compute_float* const __restrict Vout,const couple_parameters 
 ///Steps a model through 1 timestep - quite high-level function
 void step1(model* m,const unsigned int time)
 {
-    makeoffsets();//nasty hack for now
     const Compute_float timemillis = ((Compute_float)time) * Features.Timestep ;
     memset(m->gE,0,sizeof(Compute_float)*conductance_array_size*conductance_array_size); //zero the gE/gI matrices so they can be reused for this timestep
     memset(m->gI,0,sizeof(Compute_float)*conductance_array_size*conductance_array_size);

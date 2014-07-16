@@ -164,9 +164,9 @@ void StoreFiring(layer* L)
     coords* current_firestore = L->spikes.data[L->spikes.curidx];//get the thing for currently firing neurons. Normally 1 is NOT added to curidx
     int this_fcount=0;
     const int step =  L->P->skip;
-    for (int16_t x=0;x<grid_size;x+=(int16_t)1)
+    for (int16_t x=0;x<grid_size;x++)
     {
-        for (int16_t y=0;y<grid_size;y+=(int16_t)1)
+        for (int16_t y=0;y<grid_size;y++)
         {
             if (x % step ==0 && y% step ==0)
             {

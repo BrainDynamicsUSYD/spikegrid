@@ -56,7 +56,7 @@ mxArray* CreateInitialValues(const Compute_float minval, const Compute_float max
 
 mxArray* FirstMatlabCall( )
 {
- //   feenableexcept(FE_INVALID | FE_OVERFLOW);
+    srandom((unsigned)time(0));
     if (ModelType==SINGLELAYER) {m=setup(OneLayerModel,OneLayerModel,ModelType,jobnumber);} //pass the same layer as a double parameter
     else {m=setup(DualLayerModelIn,DualLayerModelEx,ModelType,jobnumber);}
     //set up initial voltage matrix - we need a different number if we are in single or double layer model - so encase the voltages in a struct

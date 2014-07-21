@@ -2,8 +2,8 @@
 #ifndef LAYER
 #define LAYER
 #include "ringbuffer.h"
-#include "STD.h"
-
+#include "paramheader.h"
+typedef struct STD_data STD_data; //forward declare STD_data to make things cleaner - makes this file a little messier, but it makes it more obvious where things come from
 ///hold the requisite data for a layer that enables it to be evolved through time.
 typedef struct layer
 {

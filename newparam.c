@@ -1,9 +1,12 @@
 /// \file
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
 #include "paramheader.h"
-
+///Modifies a parameters object in place using memset magic
+///@param input     parameter to modify
+///@param offset    offset into parameters object to change
+///@param newdata   the data to copy in
+///@param newcount  the size of the data to copy in
 parameters* modparam(const parameters* input,const int offset, const void* newdata, const size_t newcount)
 {
     parameters* paramnew = malloc(sizeof(parameters));

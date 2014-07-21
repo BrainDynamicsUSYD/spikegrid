@@ -2,10 +2,14 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdio.h>
+#include "STD.h"
 #include "output.h"
 #include "picture.h"
+///Total number of things to be output - occasionally needs to be incremented
 #define output_count  15
+///Holds the outputtable objects for the current model
 output_s* Outputtable;
+///Holds file* for the output types that output to a consistent file over time to save repeatedly calling fopen/fclose - mainly useful for ouputting ringbuffer stuff
 FILE* outfiles[output_count];
 ///Extracts the actual information out of a tagged array and converts it to a simple square matrix
 Compute_float* taggedarrayTocomputearray(const tagged_array input)
@@ -126,6 +130,9 @@ void outputToConsole(const tagged_array input)
     free(buf);
 
 }
+///Send an outputtable to a text file
+///@param input     the outputtable object to output
+///@param idx       the index of the outputtable so that if multiple objects are output, files have consistent naming
 void outputToText(const output_s input,const int idx)
 {
     if (outfiles[idx]==NULL) 
@@ -198,7 +205,8 @@ void dooutput(const output_parameters* const m,const unsigned int t)
         i++;
     }
 }
-
+///Finds an output which matches the given name - case sensitive
+///@param name the name of the outputtable
 output_s __attribute__((pure)) getOutputByName(const char* const name)
 {
     int outidx=0;
@@ -213,6 +221,8 @@ output_s __attribute__((pure)) getOutputByName(const char* const name)
     printf("tried to get unknown thing to output\n");
     exit(EXIT_FAILURE);
 }
+///Set up the outputtables for a given model
+///@param m the model we are going to output stuff from
 void output_init(const model* const m)
 {
     //WHEN YOU ADD SOMETHING - INCREASE OUTPUT_COUNT AT TOP OF FILE;
@@ -239,6 +249,7 @@ void output_init(const model* const m)
     memcpy(malloced,outdata,sizeof(output_s)*output_count);
     Outputtable = malloced;
 }
+///Cleans up memory and file handles that are used by the outputtables object
 void CleanupOutput()
 {
     for (int i=0;i<output_count;i++)

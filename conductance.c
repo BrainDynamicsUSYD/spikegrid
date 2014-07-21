@@ -16,12 +16,12 @@
 unsigned int mytime=0;  ///<< The current time step
 model* m;               ///< The model we are evolving through time
 int jobnumber=-1;        ///< The current job number - used for pics directory etc
-//The step function - evolves the model through time.
-//Perf wise the memcpy is probably not ideal, but this is a simple setup and the perf loss here is pretty small as memcpy is crazy fast
 //DO NOT CALL THIS FUNCTION "step" - this causes a weird collision in matlab that results in segfaults.  Incredibly fun to debug
 ///Function that steps the model through time (high level).
-/// @param inp the input voltages
-/// @param inp2 input voltages for layer 2.  In the single layer model a dummy argument needs to be passed.
+/// @param inpV the input voltages
+/// @param inpV2 input voltages for layer 2.  In the single layer model a dummy argument needs to be passed.
+/// @param inpW the input recoveries
+/// @param inpW2 input recoveries for layer 2.  In the single layer model a dummy argument needs to be passed.
 void step_(const Compute_float* const inpV,const Compute_float* const inpV2, const Compute_float* inpW, const Compute_float* inpW2)
 {
     if (Features.Recovery==ON && inpW==NULL){printf("missing first recovery input");exit(EXIT_FAILURE);}

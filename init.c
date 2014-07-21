@@ -8,11 +8,12 @@
 #include "coupling.h"
 #include "output.h"
 #include "printstruct.h"
-int randinit_done = 0;
+#include "STD.h"
 ///creates a random initial condition - assumes random is already seeded
 ///This is generated as small fluctuations away from Vrt
 /// @param input    The input matrix - Modified in place
-/// @param V        Used to get the Vrt 
+/// @param minval   The minimum value
+/// @param maxval   The maximum value
 void randinit(Compute_float* input,const Compute_float minval,const Compute_float maxval)
 {
     for (int x=0;x<grid_size;x++)
@@ -23,6 +24,10 @@ void randinit(Compute_float* input,const Compute_float minval,const Compute_floa
         }
     }
 }
+///Create an initial condition where all neurons have the same voltage except for the one in the middle
+/// @param input The matrix to modify.
+/// @param def_value The value for almost all the neurons
+/// @param mod_value The value for the middle neuron
 void Fixedinit(Compute_float* input, const Compute_float def_value,const Compute_float mod_value)
 {
     for (int x=0;x<grid_size;x++)

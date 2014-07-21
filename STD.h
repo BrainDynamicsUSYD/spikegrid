@@ -4,7 +4,7 @@
 #include "mymath.h"
 #include "paramheader.h"
 ///Holds data for STD on a per-neuron basis
-typedef struct 
+typedef struct STD_data
 {   //some parts of this should be const - but oh well
     unsigned int* ftimes;   ///< time of previous firing
     Compute_float* U;       ///< U STD parameter

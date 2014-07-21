@@ -5,6 +5,6 @@ time=1;
 [V, gE] = conductance('dummy',{'gE'});
 
 while time<20000
-    time=time+1;
+    time=time+1
     [V, gE] =conductance(V,{'gE'});
 end

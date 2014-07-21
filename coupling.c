@@ -18,6 +18,8 @@ Compute_float  __attribute__((pure)) Synapse_timecourse(const decay_parameters D
 }
 ///Calculate how long we need to track spike histories.  This is done by seeing how long it takes the spike magnitude to decrease below a critical value
 ///@param minval The minimum spike size that we care about.  This is not affected by the coupling matrix at all.  As a result, if your coupling strengths are very high, this might need to be reduced
+///@param d Information about the decay of the synapse
+///@param timestep The current model timestep
 unsigned int __attribute__((pure)) setcap(const decay_parameters d,const Compute_float minval, const Compute_float timestep)
 {
     Compute_float prev = -1000;//initial values

@@ -2,7 +2,7 @@ function [] = run_model()
 exit=0;
 compile;
 time=1;
-outputs={'STDU2','STDR2' 'gE','gI'};
+outputs={ 'gE','gI'};
 %initial call
 [V, out1] = conductance('dummy',outputs);
 global k

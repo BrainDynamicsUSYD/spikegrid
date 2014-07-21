@@ -187,7 +187,6 @@ static const model_features Features =
     .Recovery   = OFF,
     .STDP		= OFF, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep - 
     .STD        = OFF,  //if we need any of these features we can make the changes then.
-    .Output     = OFF,
     .Theta      = OFF,
     .Timestep   = 0.1, // Works in like with 0.1 for midpoint. But if gE too small should addition be smaller too???
     .Simlength  = 2e3,

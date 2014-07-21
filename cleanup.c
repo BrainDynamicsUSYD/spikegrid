@@ -1,10 +1,14 @@
-#include "layer.h"
-#include "output.h"
+/// \file
 #include <stdlib.h>
+#include "output.h"
+///Free a pointer if it is not null
+///@param v pointer to free
 void FreeIfNotNull(void* v)
 {
     if (v != NULL) {free(v);}
 }
+///Free all the memory used by a layer
+///@param l layer to free
 void CleanupLayer(layer* l)
 {
     FreeIfNotNull(l->STDP_connections);
@@ -16,6 +20,7 @@ void CleanupLayer(layer* l)
     FreeIfNotNull(l->Extimecourse);
     FreeIfNotNull(l->Intimecourse);
     FreeIfNotNull(l->P);
+    FreeIfNotNull(l->std);
     for (unsigned int i = 0;i<l->spikes.count;i++)
     {
         free(l->spikes.data[i]);
@@ -23,6 +28,8 @@ void CleanupLayer(layer* l)
     FreeIfNotNull(l->spikes.data);
 
 }
+///Free all memory used by a model
+///@param m model to clean up
 void CleanupModel(model* m)
 { 
     CleanupLayer(&m->layer1);

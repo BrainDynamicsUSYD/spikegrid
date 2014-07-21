@@ -6,6 +6,11 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <unistd.h>
+///print the value of a struct to a file
+///@param invar the input variable
+///@param structname the name of the struct type
+///@param dir the output directory
+///@param disp whether to display the output
 void printout_struct(const void* const invar, const char* const structname,const char* const dir,const int disp)
 {
     char dbx[160];

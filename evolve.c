@@ -5,6 +5,7 @@
 #include "output.h"
 #include "STDP.h"
 #include "evolvegen.h"
+#include "STD.h"
 ///add conductance from a firing neuron to the gE and gI arrays (used in single layer model)
 void evolvept (const int x,const int y,const Compute_float* const __restrict connections,const Compute_float Estrmod,const Compute_float Istrmod,Compute_float* __restrict gE,Compute_float* __restrict gI)
 {
@@ -27,6 +28,7 @@ void evolvept (const int x,const int y,const Compute_float* const __restrict con
 }
 
 //when STDP is turned off, gcc will warn about this function needing const. It is wrong
+///Add conductances in the presence of STDP
 void evolvept_STDP  (const int x,const  int y,const Compute_float* const __restrict connections_STDP,const Compute_float Estrmod,const Compute_float Istrmod,Compute_float* __restrict gE,Compute_float* __restrict gI)
 {
     if (Features.STDP == OFF) {return;}

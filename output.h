@@ -13,14 +13,15 @@ typedef struct {
     const Compute_float maxval;               ///< maximum value in array (for a colorbar - currently unused)
 } tagged_array;
 
-
+///The directory that we are outputting to
 char outdir [100];
+///The type of data to output
 typedef enum {FLOAT_DATA=0,RINGBUFFER_DATA=1} data_type;
 ///Holds data for outputtting in various ways
 typedef struct {
     const char name[10];            ///< a string identifier that is used to identify the output
-    const data_type data_type;
-    const union test
+    const data_type data_type;      ///< The type of data to output
+    const union 
     {   
         const tagged_array TA_data;        
         const ringbuffer* const  RB_data;

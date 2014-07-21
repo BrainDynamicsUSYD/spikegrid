@@ -120,9 +120,9 @@ Compute_float* CreateCouplingMatrix(const couple_parameters c)
                             val = c.Layer_parameters.dual.W;
                         }
                     }
-                    matrix[count]=val;
-                    count++;
-//                    matrix[(x+couplerange)*couple_array_size + y + couplerange] = val;//and set the array
+//                    matrix[count]=val;
+  //                  count++;
+                    matrix[(x+couplerange)*couple_array_size + y + couplerange] = val;//and set the array
                 }
                 else {count++;}
             }

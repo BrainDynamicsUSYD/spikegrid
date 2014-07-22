@@ -59,7 +59,17 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
                 evolvept(c.x,c.y,L.connections,Estr*strmod,Istr*strmod,gE,gI);
                 evolvept_STDP(c.x,c.y,L.STDP_connections,Estr*strmod,Istr*strmod,gE,gI);
             }
-            else {evolvept_duallayer(c.x,c.y,L.connections,(Ion?Istr*-1:Estr)*strmod,(Ion?gI:gE));} //TODO: STDP not implemented in dual-layer
+            else 
+            {
+                if (Features.STDP==ON)
+                {
+                    evolvept_duallayer_STDP(c.x,c.y,L.connections,L.STDP_connections,(Ion?Istr*-1:Estr)*strmod,(Ion?gI:gE));
+                }
+                else
+                {
+                    evolvept_duallayer(c.x,c.y,L.connections,(Ion?Istr*-1:Estr)*strmod,(Ion?gI:gE));
+                }
+            } 
             idx++;
         }
     }

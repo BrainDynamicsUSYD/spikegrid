@@ -46,7 +46,7 @@ void step_(const Compute_float* const inpV,const Compute_float* const inpV2, con
 #ifdef MATLAB
 int setup_done=0;
 //TODO: this should just take a min and a max value
-mxArray* CreateInitialValues(const Compute_float minval, const Compute_float maxval, unsigned int trialnum)
+mxArray* CreateInitialValues(const Compute_float minval, const Compute_float maxval)
 {
     mxArray* vals =mxCreateNumericMatrix(grid_size,grid_size,MatlabDataType(),mxREAL);
     Compute_float* datavals = (Compute_float*)mxGetData(vals);
@@ -63,18 +63,18 @@ mxArray* FirstMatlabCall( )
     mxArray* variables = mxCreateStructMatrix(1,1,6,(const char*[]){"Vin","Vex","Win","Wex","Vsingle_layer","Wsingle_layer"});
     if (ModelType==SINGLELAYER)
     {
-        mxSetField(variables,0,"Vsingle_layer",CreateInitialValues(OneLayerModel.potential.Vrt,OneLayerModel.potential.Vpk,Features.trial));
+        mxSetField(variables,0,"Vsingle_layer",CreateInitialValues(OneLayerModel.potential.Vrt,OneLayerModel.potential.Vpk));
         if (Features.Recovery==ON)
-            {mxSetField(variables,0,"Wsingle_layer",CreateInitialValues(Zero,Zero,Features.trial));}
+            {mxSetField(variables,0,"Wsingle_layer",CreateInitialValues(Zero,Zero));}
     }
     else if (ModelType==DUALLAYER) 
     {
-        mxSetField(variables,0,"Vin",CreateInitialValues(DualLayerModelIn.potential.Vrt,DualLayerModelIn.potential.Vpk,Features.trial));
-        mxSetField(variables,0,"Vex",CreateInitialValues(DualLayerModelEx.potential.Vrt,DualLayerModelEx.potential.Vpk,Features.trial));
+        mxSetField(variables,0,"Vin",CreateInitialValues(DualLayerModelIn.potential.Vrt,DualLayerModelIn.potential.Vpk));
+        mxSetField(variables,0,"Vex",CreateInitialValues(DualLayerModelEx.potential.Vrt,DualLayerModelEx.potential.Vpk));
         if (Features.Recovery==ON) 
         {
-            mxSetField(variables,0,"Win",CreateInitialValues(Zero,Zero,Features.trial));
-            mxSetField(variables,0,"Wex",CreateInitialValues(Zero,Zero,Features.trial));
+            mxSetField(variables,0,"Win",CreateInitialValues(Zero,Zero));
+            mxSetField(variables,0,"Wex",CreateInitialValues(Zero,Zero));
         }
     }
     ///Now - do some dummy outputs of the other elements so that the graphs can be set up.

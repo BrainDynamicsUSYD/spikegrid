@@ -174,6 +174,7 @@ void CalcRecoverys(const Compute_float* const __restrict__ Vinput,
 void StoreFiring(layer* L)
 { 
     coords* current_firestore = L->spikes.data[L->spikes.curidx];//get the thing for currently firing neurons. Normally 1 is NOT added to curidx
+    coords* STDP_firestore = Features.STDP==ON?L->spikes_STDP.data[L->spikes_STDP.curidx]:NULL;
     int this_fcount=0;
     const int step =  L->P->skip;
     for (int16_t x=0;x<grid_size;x++)
@@ -185,6 +186,10 @@ void StoreFiring(layer* L)
                 if (L->voltages_out[x*grid_size + y]  >= L->P->potential.Vpk)
                 {
                     current_firestore[this_fcount] =(coords){.x=x,.y=y};
+                    if (Features.STDP==ON)
+                    {
+                        STDP_firestore[this_fcount] =(coords){.x=x,.y=y};
+                    }
                     // Reset recovery variable if applicable
                     if (Features.Recovery==ON)
                     {

@@ -7,6 +7,13 @@ void FreeIfNotNull(void* v)
 {
     if (v != NULL) {free(v);}
 }
+void CleanupRingBuffer(ringbuffer* r)
+{
+    for (unsigned int i = 0;i<r->count;i++)
+    {
+        free(r->data[i]);
+    }
+}
 ///Free all the memory used by a layer
 ///@param l layer to free
 void CleanupLayer(layer* l)
@@ -21,10 +28,8 @@ void CleanupLayer(layer* l)
     FreeIfNotNull(l->Intimecourse);
     FreeIfNotNull(l->P);
     FreeIfNotNull(l->std);
-    for (unsigned int i = 0;i<l->spikes.count;i++)
-    {
-        free(l->spikes.data[i]);
-    }
+    CleanupRingBuffer(&l->spikes);
+    if (Features.STDP==ON){ CleanupRingBuffer(&l->spikes_STDP);}
     FreeIfNotNull(l->spikes.data);
 
 }

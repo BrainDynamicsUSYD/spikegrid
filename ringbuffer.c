@@ -8,3 +8,7 @@ coords* __attribute__((pure)) ringbuffer_getoffset (const ringbuffer* const inpu
     if (offset <=(int) input->curidx) {return input->data[(int)input->curidx - offset];}
     else {return input->data[(int)input->curidx - offset + (int)input->count];}
 }
+void ringbuffer_increment (ringbuffer* const input,const unsigned int time)
+{
+    input->curidx=time%input->count;
+}

@@ -6,7 +6,7 @@
 #include "output.h"
 #include "picture.h"
 ///Total number of things to be output - occasionally needs to be incremented
-#define output_count  15
+#define output_count  17
 ///Holds the outputtable objects for the current model
 output_s* Outputtable;
 ///Holds file* for the output types that output to a consistent file over time to save repeatedly calling fopen/fclose - mainly useful for ouputting ringbuffer stuff
@@ -226,6 +226,7 @@ output_s __attribute__((pure)) getOutputByName(const char* const name)
 void output_init(const model* const m)
 {
     //WHEN YOU ADD SOMETHING - INCREASE OUTPUT_COUNT AT TOP OF FILE;
+    //ALSO - only add things to the end of the array
     output_s* outdata=(output_s[]){ //note - neat feature - missing elements initailized to 0
         //Name          data type                  actual data                size                    offset         minval,maxval
         {"gE",          FLOAT_DATA, .data.TA_data={m->gE,                     conductance_array_size, couplerange,   0,2}}, //gE is a 'large' matrix - as it wraps around the edges
@@ -244,6 +245,8 @@ void output_init(const model* const m)
         //name          data type        actual data
         {"Firing1",     RINGBUFFER_DATA, .data.RB_data=&m->layer1.spikes}, //take reference as the struct gets modified
         {"Firing2",     RINGBUFFER_DATA, .data.RB_data=&m->layer2.spikes},
+        {"STDP1",       FLOAT_DATA, .data.TA_data={Features.STDP==ON?m->layer1.STDP_connections:NULL,10*couple_array_size,0,-0.01,0.01}},
+        {"STDP2",       FLOAT_DATA, .data.TA_data={Features.STDP==ON?m->layer2.STDP_connections:NULL,10*couple_array_size,0,-0.01,0.01}},
         {.name={0}}};         //a marker that we are at the end of the outputabbles list
     output_s* malloced = malloc(sizeof(output_s)*output_count);
     memcpy(malloced,outdata,sizeof(output_s)*output_count);

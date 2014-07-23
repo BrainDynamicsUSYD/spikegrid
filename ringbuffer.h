@@ -16,7 +16,7 @@ typedef struct ringbuffer {
 } ringbuffer;
 
 coords* ringbuffer_getoffset (const ringbuffer* const input,const int offset);
-
+void ringbuffer_increment (ringbuffer* const input,const unsigned int time);
 ///Gcc approved type safe max definition
 #define max(a,b) \
     ({ __typeof__ (a) _a = (a);\

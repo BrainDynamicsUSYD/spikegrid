@@ -33,12 +33,14 @@ void step_(const Compute_float* const inpV,const Compute_float* const inpV2, con
     mytime++;
     memcpy(m->layer1.voltages,inpV,sizeof(Compute_float)*grid_size*grid_size);
     if (Features.Recovery==ON) {memcpy(m->layer1.recoverys,inpW,sizeof(Compute_float)*grid_size*grid_size);}
-    m->layer1.spikes.curidx=mytime%(m->layer1.spikes.count);
+    ringbuffer_increment(&m->layer1.spikes,mytime);
+    ringbuffer_increment(&m->layer1.spikes_STDP,mytime);
     if (ModelType==DUALLAYER) 
     {
         memcpy(m->layer2.voltages,inpV2,sizeof(Compute_float)*grid_size*grid_size);
         if (Features.Recovery==ON) {memcpy(m->layer2.recoverys,inpW,sizeof(Compute_float)*grid_size*grid_size);}
-        m->layer2.spikes.curidx=mytime%(m->layer2.spikes.count);
+        ringbuffer_increment(&m->layer2.spikes,mytime);
+        ringbuffer_increment(&m->layer2.spikes_STDP,mytime);
     }
     step1(m,mytime);
 

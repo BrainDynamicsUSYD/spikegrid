@@ -11,7 +11,7 @@ mxArray* outputToMxArray (const output_s input)
         case FLOAT_DATA:
             {
                 const tagged_array data = input.data.TA_data;
-                const unsigned int size = data.size - (2*data.offset);
+                const unsigned int size = (data.size - (2*data.offset))*data.subgrid;
                 mxArray* ret = mxCreateNumericMatrix((int)size,(int)size,MatlabDataType(),mxREAL); //matlab has signed ints for array sizes - really?
                 Compute_float* dataptr =  (Compute_float*)mxGetData(ret);
                 Compute_float* actualdata = taggedarrayTocomputearray(data);

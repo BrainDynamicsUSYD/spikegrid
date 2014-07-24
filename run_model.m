@@ -1,7 +1,7 @@
 exit=0;
 compile;
 time=1;
-outputs={ 'STDP1','STDP2'};
+outputs={ };
 %initial call
 [V, out1] = conductance('dummy',outputs);
 global k
@@ -33,7 +33,7 @@ end
 while time<20000
     time=time+1;
     [V, out1] =conductance(V,outputs);
-    if (mod(time,100)==0)
+    if (mod(time,10)==0)
         set(hV,'CData',V.Vex);
         set(hVi,'CData',V.Vin);
         set(hT,'String',sprintf('Time: %.1f',time));

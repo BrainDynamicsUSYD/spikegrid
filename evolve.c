@@ -207,6 +207,10 @@ void StoreFiring(layer* L)
         }
     }
     current_firestore[this_fcount].x=-1;
+    if (Features.STDP==ON)
+    {
+        STDP_firestore[this_fcount].x=-1;
+    }
 }
 ///Cleans up voltages for neurons that are in the refractory state
 void ResetVoltages(Compute_float* const __restrict Vout,const couple_parameters C,const ringbuffer* const spikes,const conductance_parameters CP)
@@ -273,7 +277,7 @@ void step1(model* m,const unsigned int time)
     }
     if (Features.STDP==ON)
     {
-        doSTDP(m->layer1.STDP_connections,&m->layer1.spikes,m->layer1.connections,m->layer1.P->STDP);
-        if (m->NoLayers==DUALLAYER) {doSTDP(m->layer2.STDP_connections,&m->layer2.spikes,m->layer2.connections,m->layer2.P->STDP);}
+        doSTDP(m->layer1.STDP_connections,&m->layer1.spikes_STDP,m->layer1.connections,m->layer1.P->STDP);
+        if (m->NoLayers==DUALLAYER) {doSTDP(m->layer2.STDP_connections,&m->layer2.spikes_STDP,m->layer2.connections,m->layer2.P->STDP);}
     }
 }

@@ -1,7 +1,7 @@
 /// \file
 #ifndef HELPERS
 #define HELPERS
-#include "synapse.h"
+#include "typedefs.h"
 ///helper type for coordinates.
 ///try to use this than passing around x,y pairs as it is simpler to understand.
 ///Computational overhead should be minimal

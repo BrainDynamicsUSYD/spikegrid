@@ -2,6 +2,7 @@
 #include "paramheader.h"
 #include "ringbuffer.h"
 #include "mymath.h" //fabsf
+#include "sizes.h"
 ///Use this macro to change how far we apply STDP.  Maximum is couplerange^2, but anything smaller will improve performance
 #define STDP_RANGE_SQUARED (couplerange*couplerange)
 ///helper function for STDP.  Calculates distance between two neurons, taking into account wrapping in the network

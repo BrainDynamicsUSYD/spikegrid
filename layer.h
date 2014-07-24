@@ -2,7 +2,7 @@
 #ifndef LAYER
 #define LAYER
 #include "ringbuffer.h"
-#include "paramheader.h"
+#include "sizes.h"
 typedef struct STD_data STD_data; //forward declare STD_data to make things cleaner - makes this file a little messier, but it makes it more obvious where things come from
 ///hold the requisite data for a layer that enables it to be evolved through time.
 typedef struct layer
@@ -18,7 +18,7 @@ typedef struct layer
     ringbuffer spikes;                          ///<stores spiking history
     ringbuffer spikes_STDP;                     ///<stores spiking history for STDP
     parameters* P;                              ///<The parameters that we used to make the layer
-    STD_data* std;                               ///<Some info that is needed for STD - TODO - I really don't like that layer.h needs to inlude STD.h - feels messy
+    STD_data* std;                               ///<Some info that is needed for STD
 } layer;
 ///Allows for having multiple layers and simulating them
 typedef struct Model

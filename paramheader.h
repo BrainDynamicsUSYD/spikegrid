@@ -188,22 +188,4 @@ typedef struct
     const int offset;           ///< the offset into the parameters object of the value to modify
     const unsigned int count;   ///< the number of jobs to create - spacing of parameter is linear between maxval and minval
 } sweepable;
-///Useful constant to avoid messy conversions
-static const Compute_float One = (Compute_float)1; 
-///Useful constant to avoid messy conversions
-static const Compute_float Half = (Compute_float)0.5;
-///Useful constant to avoid messy conversions
-static const Compute_float Two = (Compute_float)2;
-///Useful constant to avoid messy conversions
-static const Compute_float Zero = (Compute_float)0;
-///ugly hack for recursive inclusion - there is no obvious solution for this
-///the basic problem is that we need computed sizes, that are accessed from lots of places,
-///but at the same time, the definition needs access to the parameters file
-#define PARAMETERS 
-#include "whichparam.h"  
-//get some macros for various sizes
-///Size of the "large" arrays (notable examples are gE and gI)
-#define conductance_array_size (grid_size + 2*couplerange)
-///Size of a coupling matrix
-#define couple_array_size (2*couplerange + 1)
 #endif

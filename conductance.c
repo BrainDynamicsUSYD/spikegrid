@@ -84,7 +84,6 @@ void setuppointers(Compute_float** FirstV,Compute_float** SecondV, Compute_float
 
 #ifdef MATLAB
 int setup_done=0;
-//TODO: this should just take a min and a max value
 mxArray* CreateInitialValues(const Compute_float minval, const Compute_float maxval)
 {
     mxArray* vals =mxCreateNumericMatrix(grid_size,grid_size,MatlabDataType(),mxREAL);

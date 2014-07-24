@@ -1,6 +1,8 @@
 /// \file
 #include "paramheader.h"
 #include "mymath.h"
+#include "sizes.h"
+#include "typedefs.h"
 ///Add in theta wave changes to voltages
 /// @param vin          input voltages (modeified in place)
 /// @param theta        Contains the parameters of the theta wave

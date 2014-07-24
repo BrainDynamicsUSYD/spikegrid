@@ -34,17 +34,54 @@ void step_(const Compute_float* const inpV,const Compute_float* const inpV2, con
     memcpy(m->layer1.voltages,inpV,sizeof(Compute_float)*grid_size*grid_size);
     if (Features.Recovery==ON) {memcpy(m->layer1.recoverys,inpW,sizeof(Compute_float)*grid_size*grid_size);}
     ringbuffer_increment(&m->layer1.spikes,mytime);
-    ringbuffer_increment(&m->layer1.spikes_STDP,mytime);
+    if (Features.STDP==ON) {ringbuffer_increment(&m->layer1.spikes_STDP,mytime);}
     if (ModelType==DUALLAYER) 
     {
         memcpy(m->layer2.voltages,inpV2,sizeof(Compute_float)*grid_size*grid_size);
         if (Features.Recovery==ON) {memcpy(m->layer2.recoverys,inpW,sizeof(Compute_float)*grid_size*grid_size);}
         ringbuffer_increment(&m->layer2.spikes,mytime);
-        ringbuffer_increment(&m->layer2.spikes_STDP,mytime);
+        if (Features.STDP==ON) {ringbuffer_increment(&m->layer2.spikes_STDP,mytime);}
     }
     step1(m,mytime);
 
 }
+
+void setuppointers(Compute_float** FirstV,Compute_float** SecondV, Compute_float** FirstW, Compute_float** SecondW,const Job* const job)
+{
+    if (ModelType==SINGLELAYER)
+    {
+        *FirstV = calloc(sizeof(Compute_float),grid_size*grid_size);
+        *SecondV = NULL;
+        if (job->initcond == SINGLE_SPIKE) {Fixedinit(*FirstV,OneLayerModel.potential.Vrt,job->Voltage_or_count);}
+        else                               {randinit(*FirstV,OneLayerModel.potential.Vrt,OneLayerModel.potential.Vpk);}
+        if (Features.Recovery==ON)
+        {
+            *FirstW = calloc(sizeof(Compute_float),grid_size*grid_size);
+            *SecondW = NULL;
+        } else {*FirstW=NULL;*SecondW=NULL;}
+    }
+    else if (ModelType==DUALLAYER) 
+    {
+        *FirstV = malloc(sizeof(Compute_float)*grid_size*grid_size);
+        *SecondV = malloc(sizeof(Compute_float)*grid_size*grid_size);
+        if (job->initcond == SINGLE_SPIKE) 
+        {
+            Fixedinit(*FirstV, DualLayerModelIn.potential.Vrt,job->Voltage_or_count);
+            Fixedinit(*SecondV,DualLayerModelEx.potential.Vrt,job->Voltage_or_count);
+        }
+        else
+        {
+            randinit(*FirstV, DualLayerModelIn.potential.Vrt,DualLayerModelIn.potential.Vpk);
+            randinit(*SecondV,DualLayerModelEx.potential.Vrt,DualLayerModelEx.potential.Vpk);
+        }
+        if (Features.Recovery==ON) 
+        {
+            *FirstW =   calloc(sizeof(Compute_float),grid_size*grid_size);
+            *SecondW = calloc(sizeof(Compute_float),grid_size*grid_size);
+        } else {*FirstW=NULL;*SecondW=NULL;}
+    }
+}
+
 #ifdef MATLAB
 int setup_done=0;
 //TODO: this should just take a min and a max value
@@ -96,11 +133,6 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
         setup_done=1;
         return;
     }
-    //error checking
-   // if (mxGetClassID(prhs[0]) != MatlabDataType()) {printf("rhs parameter 1 is not of the correct data type (single/double)\n");return;}
-  //  if (mxGetClassID(prhs[1]) != MatlabDataType()) {printf("rhs parameter 2 is not of the correct data type (single/double)\n");return;}
-  //  if (mxGetM(prhs[0]) != grid_size || mxGetN(prhs[0]) != grid_size || mxGetNumberOfDimensions(prhs[0]) != 2) {printf("rhs parameter 1 has the wrong shape\n");return;}
-  //  if (mxGetM(prhs[1]) != grid_size || mxGetN(prhs[1]) != grid_size || mxGetNumberOfDimensions(prhs[1]) != 2) {printf("rhs parameter 2 has the wrong shape\n");return;}
     //step the model through time
     mxArray* variables = mxCreateStructMatrix(1,1,6,(const char*[]){"Vin","Vex","Win","Wex","Vsingle_layer","Wsingle_layer"});
     Compute_float *FirstV,*SecondV,*FirstW,*SecondW;
@@ -158,7 +190,7 @@ struct option long_options[] = {{"help",no_argument,0,'h'},{"generate",no_argume
 /// @param argv what the parameters actually are
 int main(int argc,char** argv) //useful for testing w/out matlab
 {
-    feenableexcept(FE_INVALID | FE_OVERFLOW); //segfault on NaN and overflo
+    feenableexcept(FE_INVALID | FE_OVERFLOW); //segfault on NaN and overflow.  Note - this cannot be used in matlab
     parameters* newparam = NULL;
     setvbuf(stdout,NULL,_IONBF,0);
     while (1)
@@ -209,54 +241,18 @@ int main(int argc,char** argv) //useful for testing w/out matlab
             else {m=setup(DualLayerModelIn,newparam!=NULL?*newparam:DualLayerModelEx,ModelType,jobnumber);}
 
             Compute_float *FirstV,*SecondV,*FirstW,*SecondW;
-            if (ModelType==SINGLELAYER)
-            {
-                FirstV = calloc(sizeof(Compute_float),grid_size*grid_size);
-                SecondV = NULL;
-                if (job->initcond == SINGLE_SPIKE) {Fixedinit(FirstV,OneLayerModel.potential.Vrt,job->Voltage_or_count);}
-                else                               {randinit(FirstV,OneLayerModel.potential.Vrt,OneLayerModel.potential.Vpk);}
-                if (Features.Recovery==ON)
-                {
-                    FirstW = calloc(sizeof(Compute_float),grid_size*grid_size);
-                    SecondW = NULL;
-                } else {FirstW=NULL;SecondW=NULL;}
-            }
-            else if (ModelType==DUALLAYER) 
-            {
-                FirstV = malloc(sizeof(Compute_float)*grid_size*grid_size);
-                SecondV = malloc(sizeof(Compute_float)*grid_size*grid_size);
-                if (job->initcond == SINGLE_SPIKE) 
-                {
-                    Fixedinit(FirstV, DualLayerModelIn.potential.Vrt,job->Voltage_or_count);
-                    Fixedinit(SecondV,DualLayerModelEx.potential.Vrt,job->Voltage_or_count);
-                }
-                else
-                {
-                    randinit(FirstV, DualLayerModelIn.potential.Vrt,DualLayerModelIn.potential.Vpk);
-                    randinit(SecondV,DualLayerModelEx.potential.Vrt,DualLayerModelEx.potential.Vpk);
-                }
-                if (Features.Recovery==ON) 
-                {
-                    FirstW = calloc(sizeof(Compute_float),grid_size*grid_size);
-                    SecondW = calloc(sizeof(Compute_float),grid_size*grid_size);
-                } else {FirstW=NULL;SecondW=NULL;}
-            }
+            setuppointers(&FirstV,&SecondV,&FirstW,&SecondW,job);
             //actually runs the model
             while (mytime<Features.Simlength)
             {
-                step_(FirstV,SecondV,FirstW,SecondW);//always fine to pass an extra argument here
+
                 if (mytime%10==0){printf("%i\n",mytime);}
-                for (int i=0;i<grid_size;i++)
-                {
-                    for (int j=0;j<grid_size;j++)
-                    {
-                        FirstV                       [i*grid_size+j] = m->layer1.voltages_out[i*grid_size + j]; //always fine to copy
-                        //check before copying other data
-                        if (SecondV != NULL) {SecondV[i*grid_size+j] = m->layer2.voltages_out [i*grid_size+j];}
-                        if (FirstW != NULL)  {FirstW [i*grid_size+j] = m->layer1.recoverys_out[i*grid_size+j];}
-                        if (SecondW != NULL) {SecondW[i*grid_size+j] = m->layer2.recoverys_out[i*grid_size+j];}
-                    }
-                }
+                step_(FirstV,SecondV,FirstW,SecondW);//always fine to pass an extra argument here
+                //copy the output to be new input
+                memcpy                       (FirstV, m->layer1.voltages_out, sizeof(Compute_float)*grid_size*grid_size);
+                if (SecondV != NULL)  {memcpy(SecondV,m->layer2.voltages_out, sizeof(Compute_float)*grid_size*grid_size);}
+                if (FirstW != NULL)   {memcpy(FirstW, m->layer1.recoverys_out,sizeof(Compute_float)*grid_size*grid_size);}
+                if (SecondW != NULL)  {memcpy(SecondW,m->layer2.recoverys_out,sizeof(Compute_float)*grid_size*grid_size);}
             }
             FreeIfNotNull(FirstV);
             FreeIfNotNull(SecondV);

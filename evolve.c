@@ -73,6 +73,21 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
                     evolvept_duallayer(c.x,c.y,L.connections,(Ion?Istr*-1:Estr)*strmod,(Ion?gI:gE));
                 }
             } 
+            if (Features.Random_connections == ON)
+            {
+                for (int d = 0;d<L.P->random.numberper;d++)
+                {
+                    const randomconnection rc = L.randconns[(c.x*grid_size + c.y)*L.P->random.numberper + d];
+                    if (Ion)
+                    {
+                        gI[(rc.destination.x + couplerange) * conductance_array_size + rc.destination.y + couplerange] += Istr * strmod *rc.strength;
+                    }
+                    if (Eon)
+                    {
+                        gE[(rc.destination.x + couplerange) * conductance_array_size + rc.destination.y + couplerange] += Estr * strmod *rc.strength;
+                    }
+                }
+            }
             idx++;
         }
     }

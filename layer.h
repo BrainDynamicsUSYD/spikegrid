@@ -7,6 +7,12 @@
 typedef struct STD_data STD_data; //forward declare STD_data to make things cleaner - makes this file a little messier, but it makes it more obvious where things come from
 ///hold the requisite data for a layer that enables it to be evolved through time.
 typedef struct parameters parameters;
+typedef struct randomconnection
+{
+    Compute_float   strength;
+    Compute_float   stdp_strength;
+    coords          destination;
+} randomconnection;
 typedef struct layer
 {
     Compute_float* const connections;     ///<Matrix of connections coming from a single point
@@ -17,6 +23,7 @@ typedef struct layer
     Compute_float* recoverys_out;               ///<Return value for recovery variable
     Compute_float* const Extimecourse;    ///<store time course of Ex synapses  
     Compute_float* const Intimecourse;    ///<store time course of In synapses  
+    randomconnection* randconns;                ///<stores random connections
     ringbuffer spikes;                          ///<stores spiking history
     ringbuffer spikes_STDP;                     ///<stores spiking history for STDP
     parameters* P;                              ///<The parameters that we used to make the layer

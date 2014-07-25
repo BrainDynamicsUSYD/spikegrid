@@ -116,8 +116,14 @@ typedef struct output_parameters
 typedef struct theta_parameters
 {
     const Compute_float strength;   ///<the strength of the theta wave
-	const Compute_float period;     ///<the period of the theta wave
+  	const Compute_float period;     ///<the period of the theta wave
 } theta_parameters;
+
+typedef struct randconn_parameters
+{
+    const int numberper;
+    const Compute_float str;
+} randconn_parameters;
 
 /// External input
 typedef struct 
@@ -144,6 +150,7 @@ typedef struct
 	const on_off STDP;              ///< Is STDP enabled
     const on_off STD;               ///< Is STD enabled
     const on_off Theta;             ///< Is theta (subthreshold oscillation enabled
+    const on_off Random_connections;///< Is random connectivity enabled?
     const Compute_float Timestep;   ///< The timestep in the model
     const unsigned int Simlength;   ///< total number of timesteps to run
     const Job job;                  ///< the jobs we are going to run
@@ -160,6 +167,7 @@ typedef struct parameters
     const theta_parameters theta;               ///<parameters controling theta wave
     const recovery_parameters recovery;         ///<parameters controlling recovery (alternative to refractory time)
     const int skip;                             ///<Number of neurons to skip over in the layer setting skip=2 will produce 4-1 ratio of neurons to a layer with skip=1
+    const randconn_parameters random;           ///<parameters controlling random connectivity
 } parameters;
 
 /// On yossarian this is used for a parameter sweep

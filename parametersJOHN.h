@@ -61,9 +61,16 @@ static const parameters DualLayerModelIn =
                 .synapse    = {.R=0.5,.D=2.0},
             }
         },
+
         .norm_type = None,
         .tref       = 5,
     },
+    .random = 
+    {
+        .numberper=10,
+        .str = 0.8
+    },
+
     potparams,
     STDPparams,
     .skip=2,
@@ -86,6 +93,11 @@ static const parameters DualLayerModelEx =
         .tref       = 5,
         .norm_type = None,
     },
+    .random = 
+    {
+        .numberper=2,
+        .str = 0.8
+    },
     STDPparams,
     potparams,
     .skip=1,
@@ -93,8 +105,8 @@ static const parameters DualLayerModelEx =
 ///Some global features that can be turned on and off
 static const model_features Features = 
 {
-    .STDP		= ON, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep - 
-    .STD        = OFF, //               if we need any of these features we can make the changes then.
+    .STDP		= OFF, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep - 
+    .Random_connections = ON,
     .Timestep   = 0.1,
     .Simlength  = 1000,
 };

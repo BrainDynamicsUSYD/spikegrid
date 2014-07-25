@@ -82,6 +82,7 @@ layer setuplayer(const parameters p)
             ((p.couple.Layer_parameters.dual.W>0)?Synapse_timecourse_cache(cap,p.couple.Layer_parameters.dual.synapse,Features.Timestep):NULL),
         .Intimecourse       = p.couple.Layertype==SINGLELAYER?Synapse_timecourse_cache(cap,p.couple.Layer_parameters.single.In,Features.Timestep):
             ((p.couple.Layer_parameters.dual.W<0)?Synapse_timecourse_cache(cap,p.couple.Layer_parameters.dual.synapse,Features.Timestep):NULL),
+        .randconns          = Features.Random_connections==ON?calloc(sizeof(randomconnection),(size_t)(grid_size*grid_size*p.random.numberper)):NULL,
         .P                  = (parameters*)newdata(&p,sizeof(p)), 
         .voltages           = calloc(sizeof(Compute_float),grid_size*grid_size),
         .voltages_out       = calloc(sizeof(Compute_float),grid_size*grid_size),
@@ -100,6 +101,29 @@ layer setuplayer(const parameters p)
         {
             L.spikes_STDP.data[i]=calloc(sizeof(coords),(grid_size*grid_size + 1));//assume worst case - all neurons firing.  Need to leave spae on the end for the -1 which marks the end.
             L.spikes_STDP.data[i][0].x=-1;//need to make sure that we don't start with spikes by ending at 0
+        }
+    }
+    if (Features.Random_connections == ON)
+    {
+        srandom((unsigned)0);
+        for (int x=0;x<grid_size;x++)
+        {
+            for (int y=0;y<grid_size;y++)
+            {
+                for (int c=0;c<p.random.numberper;c++)
+                {
+                    L.randconns[(x*grid_size+y)*p.random.numberper + c] = 
+                        (randomconnection){
+                            .strength = p.random.str,
+                            .stdp_strength = Zero,
+                            .destination = 
+                            {
+                                .x = (Neuron_coord)((Compute_float)(random() / (Compute_float)RAND_MAX) * (Compute_float)grid_size),
+                                .y = (Neuron_coord)((Compute_float)(random() / (Compute_float)RAND_MAX) * (Compute_float)grid_size),
+                            }
+                        };
+                }
+            }
         }
     }
     return L;

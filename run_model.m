@@ -1,7 +1,8 @@
 exit=0;
 compile;
 time=1;
-outputs={ 'STDP1','STDP2' };
+%outputs={ 'STDP1','STDP2' };
+outputs={'gI'};
 %initial call
 [V, out1] = conductance('dummy',outputs);
 global k

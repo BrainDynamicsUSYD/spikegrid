@@ -1,3 +1,3 @@
 /// \file
-#include "paramheader.h"
+typedef struct sweepable sweepable;
 void createyossarianfile (const char* const outfile,const sweepable sweep);

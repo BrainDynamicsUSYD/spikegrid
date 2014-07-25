@@ -1,6 +1,8 @@
 /// \file
 #include <stdlib.h>
 #include "STD.h"
+#include "mymath.h"
+#include "paramheader.h"
 ///Initialise the STD parameters to their initial values.  
 ///Failing to call this before using STD will give incorrect results initially.
 ///It is possible that results will converge after some time, but best not to risk it.
@@ -18,5 +20,21 @@ STD_data* __attribute__((const)) STD_init(const STD_parameters s)
         ret->R[i] = One;
     }
     return ret;
+}
+Compute_float STD_str (const STD_parameters s, const int x, const int y,const unsigned int time,const unsigned int lag, STD_data* const d)
+{
+    const int stdidx=x*grid_size+y;
+    if (lag==1) //recalculate after spiking
+    {
+        const Compute_float spike_interval = ((Compute_float)(time-(d->ftimes[stdidx])))/((Compute_float)1000.0)*Features.Timestep;//calculate inter spike interval in seconds
+        d->ftimes[stdidx]=time; //update the time
+        const Compute_float prevu=d->U[stdidx]; //need the previous U value
+        //newU = U + oldU*(1-U)*exp(-dt/F)
+        d->U[stdidx] = s.U + d->U[stdidx]*(One- s.U)*exp(-spike_interval/s.F);
+        //newR = 1 + (oldR-oldU*oldR-1)*exp(-dt/D)
+        d->R[stdidx] = One + (d->R[stdidx] - prevu*d->R[stdidx] - One)*exp(-spike_interval/s.D);
+    }
+    return d->U[stdidx] * d->R[stdidx] * Two; //multiplication by 2 is not in the cited papers, but you could eliminate it by multiplying some other parameters by 2, but multiplying by 2 here enables easier comparison with the non-STD model.  Max has an improvement that calculates a first-order approxiamation that should be included
+
 }
 

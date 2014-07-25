@@ -9,6 +9,8 @@
 #include "output.h"
 #include "printstruct.h"
 #include "STD.h"
+#include "paramheader.h"
+#include "layer.h"
 ///creates a random initial condition - assumes random is already seeded
 ///This is generated as small fluctuations away from Vrt
 /// @param input    The input matrix - Modified in place

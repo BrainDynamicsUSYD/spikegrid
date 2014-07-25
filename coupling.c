@@ -4,7 +4,6 @@
 #include "paramheader.h"
 #include "sizes.h"
 #include "mymath.h"
-#include "typedefs.h"
 /* //This function is useful - but not used
    Compute_float __attribute__((const))exrange(const couple_parameters c)
    {

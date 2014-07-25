@@ -23,7 +23,7 @@ typedef struct layer
     STD_data* std;                               ///<Some info that is needed for STD
 } layer;
 ///Allows for having multiple layers and simulating them
-typedef struct Model
+typedef struct model
 {
     const LayerNumbers NoLayers;                                        ///<Whether this is a single or double layer model
     layer layer1;                                                       ///< First layer

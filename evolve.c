@@ -6,6 +6,9 @@
 #include "STDP.h"
 #include "evolvegen.h"
 #include "STD.h"
+#include "mymath.h"
+#include "paramheader.h"
+#include "layer.h"
 ///add conductance from a firing neuron to the gE and gI arrays (used in single layer model)
 void evolvept (const int x,const int y,const Compute_float* const __restrict connections,const Compute_float Estrmod,const Compute_float Istrmod,Compute_float* __restrict gE,Compute_float* __restrict gI)
 {

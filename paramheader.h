@@ -21,7 +21,7 @@ typedef struct
     const Compute_float Infactor;   ///< Factor to multiply inhibitory connections by
 } Multsep_parameters;
 ///Holds the parameters for the decay of a spike
-typedef struct {
+typedef struct decay_parameters{
     const Compute_float R;  ///<rise time constant (units?)
     const Compute_float D;  ///<decay time constant (units?)
 } decay_parameters;
@@ -44,7 +44,7 @@ typedef struct
     const decay_parameters  synapse;    ///<Parameters of spike
 } duallayer_parameters;
 /// Contains parameters about coupling within either a single or dual layer
-typedef struct 
+typedef struct couple_parameters
 {
     const LayerNumbers Layertype;       ///<Whether we are using a single/or dual layer model
     const union
@@ -90,7 +90,7 @@ typedef struct
     const Compute_float Wcv; ///< coupling with the voltage?
 } recovery_parameters;
 ///Parameters for STDP
-typedef struct 
+typedef struct STDP_parameters
 {
     const Compute_float stdp_limit;     ///<maximum STDP that can be applied to a synapse as a fraction of its original value
     const Compute_float stdp_tau;       ///<tau for STDP (controls timescale of window function)
@@ -98,7 +98,7 @@ typedef struct
 } STDP_parameters;
 ///Parameters controlling the shape of the STD recovery
 ///see various markram papers for details
-typedef struct 
+typedef struct STD_parameters
 {
     const Compute_float U;  ///<Utilisation
     const Compute_float D;  ///<depression timescale
@@ -113,7 +113,7 @@ typedef struct output_parameters
     const unsigned int Delay;           ///< how often to output it
 } output_parameters;
 ///Parameters for a subthreshold wave (not necersarrily theta)
-typedef struct 
+typedef struct theta_parameters
 {
     const Compute_float strength;   ///<the strength of the theta wave
 	const Compute_float period;     ///<the period of the theta wave
@@ -163,7 +163,7 @@ typedef struct parameters
 } parameters;
 
 /// On yossarian this is used for a parameter sweep
-typedef struct 
+typedef struct sweepable
 {
     const Compute_float minval; ///< the minimum value of the parameter
     const Compute_float maxval; ///< the maximum value of the parameter

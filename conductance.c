@@ -7,12 +7,14 @@
 #include <fenv.h>   //for some debugging
 #include <stdio.h>
 #include <time.h>
+#include "cleanup.h"
 #include "evolve.h"
 #include "newparam.h"
 #include "init.h"
 #include "yossarian.h"
 #include "matlab_output.h"
-#include "cleanup.h"
+#include "paramheader.h"
+#include "layer.h"
 unsigned int mytime=0;  ///<< The current time step
 model* m;               ///< The model we are evolving through time
 int jobnumber=-1;        ///< The current job number - used for pics directory etc

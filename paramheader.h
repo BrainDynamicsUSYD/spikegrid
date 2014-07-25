@@ -1,19 +1,9 @@
 /// \file
 #ifndef PARAMHEADER
 #define PARAMHEADER
-#ifdef FAST
-///Used to enable simple switching between float and double
-typedef float Compute_float ; //for speed
-#else
-///Used to enable simple switching between float and double
-typedef double Compute_float ; //for accuracy
-#endif
+#include "typedefs.h"
+#include "enums.h"
 
-///Simple enum for things that are on or off to make their state more obvious
-typedef enum {OFF=0,ON=1} on_off;
-///Normalization method to use when creating a coupling matrix
-typedef enum {None=0,TotalArea=1,GlobalMultiplier=2,MultSep=3} Norm_type;
-/// The normalization method used in the 2009 paper.  This method normalizes by the total area of Ex and In connections
 typedef struct
 {
     const Compute_float WE; ///<total strength of excitatory connections
@@ -35,12 +25,6 @@ typedef struct {
     const Compute_float R;  ///<rise time constant (units?)
     const Compute_float D;  ///<decay time constant (units?)
 } decay_parameters;
-///Enum to determine the type of connectivity
-typedef enum ConnectType {HOMOGENEOUS=1,EXPONENTIAL=0} ConnectType;
-///Enum to determine how many layers are in use
-typedef enum LayerNumbers {SINGLELAYER=0,DUALLAYER=1} LayerNumbers;
-///Enum to determine whether there is a recovery variable
-typedef enum NEURON_TYPE {LIF=0,QIF=1,EIF=2} neuron_type;
 ///Parameters for a layer when it is the only one
 typedef struct 
 {
@@ -120,10 +104,9 @@ typedef struct
     const Compute_float D;  ///<depression timescale
     const Compute_float F;  ///<facilitation timescale
 } STD_parameters;
-///Specify the destination of the output
-typedef enum {NO_OUTPUT = 0,PICTURE = 1,TEXT=2,CONSOLE=3} output_method;
+
 ///Parameters for outputting movies
-typedef struct 
+typedef struct output_parameters
 {
     const output_method output_method;  ///< Are we outputting something
     const unsigned int Output;          ///< What will be outputted
@@ -142,8 +125,7 @@ typedef struct
     const Compute_float gE0;    ///< constant input to gE
     const Compute_float gI0;    ///< constant input to gI
 } extinput;
-///Types of initial conditions that we have
-typedef enum {RAND_TIME=0,RAND_JOB=1,SINGLE_SPIKE=2} InitConds;
+
 struct Job;
 ///Within a single run of the program it is possible to run multiple different tasks.
 ///For example, you can run several jobs with random initial conditions,
@@ -168,7 +150,7 @@ typedef struct
 } model_features;
 
 ///Structure that holds all the parameters for a layer
-typedef struct 
+typedef struct parameters
 {
     const couple_parameters couple;             ///<Parameters controlling coupling and synapses
     const conductance_parameters potential;     ///<parameters controlling the potential; dynamics of neurons
@@ -188,4 +170,5 @@ typedef struct
     const int offset;           ///< the offset into the parameters object of the value to modify
     const unsigned int count;   ///< the number of jobs to create - spacing of parameter is linear between maxval and minval
 } sweepable;
+#include "whichparam.h"
 #endif

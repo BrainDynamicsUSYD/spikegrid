@@ -2,6 +2,7 @@
 #ifndef OUTPUT
 #define OUTPUT
 #include "layer.h" //only needed for the init function
+typedef struct output_parameters output_parameters;
 ///used for storing arrays with their size.  Allows for the matlab_output (and other) function to take both the big and large arrays
 typedef struct {
     //we require volatile below as we don't want you to be able to write to an array using the pointer from the tagged array

@@ -5,9 +5,9 @@
 ///Total size of the grid
 ///Coupling range
 #define couplerange 15
-#ifndef PARAMATERS  //DO NOT REMOVE
+#ifndef PARAMETERS  //DO NOT REMOVE
 ///include guard
-#define PARAMATERS  //DO NOT REMOVE
+#define PARAMETERS  //DO NOT REMOVE
 //disable warnings about float conversion in this file only
 #ifdef __clang__
 #pragma clang diagnostic push
@@ -18,7 +18,6 @@
 #pragma GCC diagnostic ignored "-Wconversion"
 #endif
 //the following typedef must be before the include to get the right compute types
-#include "paramheader.h"
 ///Whether we are using the single or double layer model
 static const LayerNumbers ModelType = DUALLAYER;
 

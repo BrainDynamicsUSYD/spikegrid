@@ -29,7 +29,7 @@ void CleanupLayer(layer* l)
     FreeIfNotNull(l->P);
     FreeIfNotNull(l->std);
     CleanupRingBuffer(&l->spikes);
-    if (Features.STDP==ON){ CleanupRingBuffer(&l->spikes_STDP);}
+    CleanupRingBuffer(&l->spikes_STDP);
     FreeIfNotNull(l->spikes.data);
 
 }

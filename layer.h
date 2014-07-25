@@ -3,8 +3,10 @@
 #define LAYER
 #include "ringbuffer.h"
 #include "sizes.h"
+#include "enums.h"
 typedef struct STD_data STD_data; //forward declare STD_data to make things cleaner - makes this file a little messier, but it makes it more obvious where things come from
 ///hold the requisite data for a layer that enables it to be evolved through time.
+typedef struct parameters parameters;
 typedef struct layer
 {
     Compute_float* const connections;     ///<Matrix of connections coming from a single point

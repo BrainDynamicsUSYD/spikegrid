@@ -3,7 +3,6 @@
 #define STDH
 #include "mymath.h"
 #include "paramheader.h"
-#include "typedefs.h"
 #include "sizes.h"
 ///Holds data for STD on a per-neuron basis
 typedef struct STD_data

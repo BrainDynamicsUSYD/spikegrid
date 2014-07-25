@@ -6,7 +6,6 @@
 #include "output.h"
 #include "picture.h"
 #include "paramheader.h"
-#include "ringbuffer.h"
 #include "layer.h"
 ///Total number of things to be output - occasionally needs to be incremented
 #define output_count  17

@@ -26,7 +26,7 @@ typedef struct layer
     randomconnection* randconns;                ///<stores random connections
     const unsigned int MaxFirings;
     const int cap;
-    int* firinglags;
+    int16_t* firinglags;
     parameters* P;                              ///<The parameters that we used to make the layer
     STD_data* std;                               ///<Some info that is needed for STD
 } layer;

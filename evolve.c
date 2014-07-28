@@ -58,6 +58,7 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
             if (Ion) {str = (-str);}
             if (idx2 > 0) //only fire if we had a spike.
             {
+                if (str == 0.0) printf("%f\n",str);
                 evolvept_duallayer(x,y,L.connections,str,(Ion?gI:gE));
             }
 
@@ -228,8 +229,18 @@ void StoreFiring(layer* L)
                 {
                     L->firinglags[(x*grid_size+y)*L->MaxFirings + idx]++;
                     idx++;
-                }
-                if (idx> 10) {printf("index is large\n");}
+                }/*
+                if (idx> 10) 
+                {
+                    printf("index is large:");
+                    int idx2=0;
+                    while (L->firinglags[(x*grid_size+y)*L->MaxFirings + idx2] != -1)
+                    {
+                        printf("%i ",L->firinglags[(x*grid_size+y)*L->MaxFirings + idx2]);
+                        idx2++;
+                    }
+                    printf("DD\n");
+                }*/
                 if (L->firinglags[(x*grid_size+y)*L->MaxFirings] == L->cap )//if first entry is at cap - remove and shuffle everything down
                 {
                     unsigned int idx2 = 0;
@@ -274,7 +285,7 @@ void StoreFiring(layer* L)
     }
 }
 ///Cleans up voltages for neurons that are in the refractory state
-void ResetVoltages(Compute_float* const __restrict Vout,const couple_parameters C,const int* const firinglags,const unsigned int MaxFirings,const conductance_parameters CP)
+void ResetVoltages(Compute_float* const __restrict Vout,const couple_parameters C,const int16_t* const firinglags,const unsigned int MaxFirings,const conductance_parameters CP)
 {
     const int trefrac_in_ts =(int) ((Compute_float)C.tref / Features.Timestep);
     for (unsigned int x=0;x<grid_size;x++)

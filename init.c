@@ -68,11 +68,11 @@ layer setuplayer(const parameters p)
     layer L = 
     {
         .cap                = cap,
-        .firinglags         = calloc(sizeof(Compute_float),grid_size*grid_size*flagcount),
+        .firinglags         = calloc(sizeof(int16_t),grid_size*grid_size*flagcount),
         .MaxFirings         = flagcount,
         .connections        = CreateCouplingMatrix(p.couple),
         .STDP_connections   = Features.STDP==ON?calloc(sizeof(Compute_float),grid_size*grid_size*couple_array_size*couple_array_size):NULL,
-        .std                = Features.STD==ON?STD_init(p.STD):NULL, //this is so fast that it doesn't matter to run in init
+        .std                = Features.STD==ON?STD_init(p.STD):NULL,
         .Extimecourse       = p.couple.Layertype==SINGLELAYER?Synapse_timecourse_cache(cap,p.couple.Layer_parameters.single.Ex,Features.Timestep):
             ((p.couple.Layer_parameters.dual.W>0)?Synapse_timecourse_cache(cap,p.couple.Layer_parameters.dual.synapse,Features.Timestep):NULL),
         .Intimecourse       = p.couple.Layertype==SINGLELAYER?Synapse_timecourse_cache(cap,p.couple.Layer_parameters.single.In,Features.Timestep):

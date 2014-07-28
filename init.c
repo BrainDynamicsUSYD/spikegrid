@@ -59,23 +59,18 @@ void* newdata(const void* const input,const unsigned int size)
 layer setuplayer(const parameters p)
 {
     const Compute_float min_effect = (Compute_float)1E-6;
-    const unsigned int STDP_cap = (unsigned int)(p.STDP.stdp_tau  * 5.0 / Features.Timestep);
     unsigned int cap;
     if (p.couple.Layertype==SINGLELAYER) {cap=max(setcap(p.couple.Layer_parameters.single.Ex,min_effect,Features.Timestep),setcap(p.couple.Layer_parameters.single.In,min_effect,Features.Timestep));}
     else                                 {cap=setcap(p.couple.Layer_parameters.dual.synapse,min_effect,Features.Timestep);}
+    const unsigned int trefrac_in_ts =(unsigned int) ((Compute_float)p.couple.tref / Features.Timestep);
+    const unsigned int flagcount = (cap/(size_t)trefrac_in_ts) + 40;
+    printf("cap is %i\n", cap);
     layer L = 
     {
-        .spikes=
-        {   
-            .count=cap,
-            .data=calloc(sizeof(coords*), cap)
-        },
-        .spikes_STDP = //allocate this even when STDP is off - total memory should be pretty small.  Also, default STDP_tau is 0, so this will use no memory in that case
-        {
-            .count=STDP_cap,
-            .data=calloc(sizeof(coords*),STDP_cap)
-        },
-        .connections = CreateCouplingMatrix(p.couple),
+        .cap                = cap,
+        .firinglags         = calloc(sizeof(Compute_float),grid_size*grid_size*flagcount),
+        .MaxFirings         = flagcount,
+        .connections        = CreateCouplingMatrix(p.couple),
         .STDP_connections   = Features.STDP==ON?calloc(sizeof(Compute_float),grid_size*grid_size*couple_array_size*couple_array_size):NULL,
         .std                = Features.STD==ON?STD_init(p.STD):NULL, //this is so fast that it doesn't matter to run in init
         .Extimecourse       = p.couple.Layertype==SINGLELAYER?Synapse_timecourse_cache(cap,p.couple.Layer_parameters.single.Ex,Features.Timestep):
@@ -89,18 +84,11 @@ layer setuplayer(const parameters p)
         .recoverys       = Features.Recovery==ON?calloc(sizeof(Compute_float),grid_size*grid_size):NULL,
         .recoverys_out   = Features.Recovery==ON?calloc(sizeof(Compute_float),grid_size*grid_size):NULL,
     };
-    for (unsigned int i=0;i<cap;i++)
+    for (unsigned int x = 0;x<grid_size;x++)
     {
-        L.spikes.data[i]=calloc(sizeof(coords),(grid_size*grid_size + 1));//assume worst case - all neurons firing.  Need to leave spae on the end for the -1 which marks the end.
-        L.spikes.data[i][0].x=-1;//need to make sure that we don't start with spikes by ending at 0
-    }
-    if (Features.STDP ==ON)
-    {   //this part might actually use lots of ram, so only create if STDP is on
-        for (unsigned int i=0;i<STDP_cap;i++)
-
+        for (unsigned int y = 0;y<grid_size;y++)
         {
-            L.spikes_STDP.data[i]=calloc(sizeof(coords),(grid_size*grid_size + 1));//assume worst case - all neurons firing.  Need to leave spae on the end for the -1 which marks the end.
-            L.spikes_STDP.data[i][0].x=-1;//need to make sure that we don't start with spikes by ending at 0
+            L.firinglags[(x*grid_size+y)*L.MaxFirings]=-1;
         }
     }
     if (Features.Random_connections == ON)

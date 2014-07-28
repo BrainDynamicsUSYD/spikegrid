@@ -252,8 +252,8 @@ void output_init(const model* const m)
         {"STDR2",       FLOAT_DATA, .data.TA_data={Features.STD==ON?m->layer2.std->R:NULL, grid_size, 0,             1,0,1}},
         //ringbuffer outputs
         //name          data type        actual data
-        {"Firing1",     RINGBUFFER_DATA, .data.RB_data=&m->layer1.spikes}, //take reference as the struct gets modified
-        {"Firing2",     RINGBUFFER_DATA, .data.RB_data=&m->layer2.spikes},
+    //    {"Firing1",     RINGBUFFER_DATA, .data.RB_data=&m->layer1.spikes}, //take reference as the struct gets modified
+      //  {"Firing2",     RINGBUFFER_DATA, .data.RB_data=&m->layer2.spikes},
         {"STDP1",       FLOAT_DATA, .data.TA_data={Features.STDP==ON?m->layer1.STDP_connections:NULL,grid_size,0,couple_array_size,-0.01,0.01}},
         {"STDP2",       FLOAT_DATA, .data.TA_data={Features.STDP==ON?m->layer2.STDP_connections:NULL,grid_size,0,couple_array_size,-0.01,0.01}},
         {.name={0}}};         //a marker that we are at the end of the outputabbles list

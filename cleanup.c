@@ -29,9 +29,9 @@ void CleanupLayer(layer* l)
     FreeIfNotNull(l->Intimecourse);
     FreeIfNotNull(l->P);
     FreeIfNotNull(l->std);
-    CleanupRingBuffer(&l->spikes);
-    CleanupRingBuffer(&l->spikes_STDP);
-    FreeIfNotNull(l->spikes.data);
+ //   CleanupRingBuffer(&l->spikes);
+   // CleanupRingBuffer(&l->spikes_STDP);
+//    FreeIfNotNull(l->spikes.data);
 
 }
 ///Free all memory used by a model

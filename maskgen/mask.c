@@ -42,18 +42,18 @@ int main(int argc, char** argv)
     printf("//parameters: conductance_array_size %i, couplerange %i, couple_array_size %i\n",conductance_array_size,couplerange,couple_array_size);
     printf("#include \"sizes.h\"\n");
     printf("#include \"typedefs.h\"\n");
-    printf("void evolvept_duallayer (const int x,const int y,const Compute_float* const __restrict connections,const Compute_float strmod, Compute_float* __restrict condmat)\n");
+    printf("void evolvept_duallayer (const unsigned int x,const unsigned int y,const Compute_float* const __restrict connections,const Compute_float strmod, Compute_float* __restrict condmat)\n");
     printf("{\n");
     //start the loop
     for (int i = 0; i < couple_array_size;i++)
     {
-        printf("    const int outoff%i = ((x+%i)*%i + y);\n",i,i,conductance_array_size);
-        printf("    const int conoff%i = %i*couple_array_size;\n",i,i);
+        printf("    const unsigned int outoff%i = ((x+%i)*%i + y);\n",i,i,conductance_array_size);
+        printf("    const unsigned int conoff%i = %i*couple_array_size;\n",i,i);
         char buf [1000];
         sprintf(buf,"((x+%i)*%i + y)",i,conductance_array_size);
         const int off = getoffset(couplerange,i);
         const int itercount = 2*off+1;
-        printf("    for (int kk=(couplerange-%i);kk<=(couplerange+%i);kk++)\n",off,off); //this is the key part - offsets are now known at compile time
+        printf("    for (unsigned int kk=(couplerange-%i);kk<=(couplerange+%i);kk++)\n",off,off); //this is the key part - offsets are now known at compile time
         printf("    {\n");
         printf("        condmat[outoff%i + kk] += connections[conoff%i+kk]*strmod;\n",i,i);
         printf("    }\n");

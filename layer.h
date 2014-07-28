@@ -24,8 +24,9 @@ typedef struct layer
     Compute_float* const Extimecourse;    ///<store time course of Ex synapses  
     Compute_float* const Intimecourse;    ///<store time course of In synapses  
     randomconnection* randconns;                ///<stores random connections
-    ringbuffer spikes;                          ///<stores spiking history
-    ringbuffer spikes_STDP;                     ///<stores spiking history for STDP
+    const unsigned int MaxFirings;
+    const int cap;
+    int* firinglags;
     parameters* P;                              ///<The parameters that we used to make the layer
     STD_data* std;                               ///<Some info that is needed for STD
 } layer;

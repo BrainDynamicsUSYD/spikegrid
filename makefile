@@ -18,11 +18,11 @@ BINARY=./a.out
 VERSION_HASH = $(shell git rev-parse HEAD)
 export VIEWERBIN=$(shell pwd)/watch
 export maskgen=$(shell pwd)/mask
-.PHONY: profile clean submit docs debug params matlabparams viewer ${VIEWERBIN} ${maskgen}
+.PHONY: profile clean submit docs debug params matlabparams viewer ${VIEWERBIN}  ${maskgen}
 #binary
 ${BINARY}: ${SOURCES} *.h
 	${CC} ${CFLAGS}     ${SOURCES} -o ${BINARY} ${LDFLAGS}
-evolvegen.c: param*.h whichparam.h ${maskgen}
+evolvegen.c: mask whichparam.h param*.h
 	${maskgen} > evolvegen.c
 debug: ${SOURCE}
 	${CC} ${DEBUGFLAGS} ${SOURCES} -o ${BINARY} ${LDFLAGS}
@@ -65,5 +65,5 @@ viewer: ${VIEWERBIN}
 ${VIEWERBIN} :
 	cd viewer && $(MAKE) ${VIEWERBIN}
 mask: ${maskgen}
-${maskgen} : param*.h whichparam.h
+${maskgen} :
 	cd maskgen && $(MAKE) ${maskgen}

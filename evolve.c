@@ -51,10 +51,10 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
             Compute_float str = Zero;
             const int idx = x*grid_size + y;
             int idx2 = 0;
-            while (L.firinglags[idx*L.MaxFirings+idx2] != -1)
+            while (L.firinglags.lags[idx*L.firinglags.lagsperpoint+idx2] != -1)
             {
                 //                str += Eon?L.Extimecourse[L.firinglags[idx*L.MaxFirings + idx2]]:L.Intimecourse[L.firinglags[idx*L.MaxFirings + idx2]];
-                str += Synapse_timecourse(D,L.firinglags[idx*L.MaxFirings + idx2] * Features.Timestep);
+                str += Synapse_timecourse(D,L.firinglags.lags[idx*L.firinglags.lagsperpoint + idx2] * Features.Timestep);
                 idx2++;
             }
             if (Ion) {str = (-str);}
@@ -162,6 +162,26 @@ void CalcRecoverys(const Compute_float* const __restrict__ Vinput,
     }
 }
 
+void modifyLags(lagstorage* L,int baseidx)
+{
+    //first - increment the firing lags.
+    int idx = 0;
+    while (L->lags[baseidx+idx] != -1)
+    {
+        L->lags[baseidx+idx]++;
+        idx++;
+    }
+    if (L->lags[0] == L->cap )//if first entry is at cap - remove and shuffle everything down
+    {
+        int idx2 = 0;
+        while (L->lags[baseidx+idx2] != -1) //move everthing down
+        {
+            L->lags[baseidx+idx2] = L->lags[baseidx+idx2+1];
+            idx2++;
+        }
+    }
+}
+
 ///Store current firing spikes also apply random spikes
 void StoreFiring(layer* L)
 { 
@@ -172,33 +192,8 @@ void StoreFiring(layer* L)
         { 
             if (x % step ==0 && y% step ==0)
             {
-                //first - increment the firing lags.
-                int idx = 0;
-                while (L->firinglags[(x*grid_size+y)*L->MaxFirings + idx] != -1)
-                {
-                    L->firinglags[(x*grid_size+y)*L->MaxFirings + idx]++;
-                    idx++;
-                }/*
-                if (idx> 10) 
-                {
-                    printf("index is large:");
-                    int idx2=0;
-                    while (L->firinglags[(x*grid_size+y)*L->MaxFirings + idx2] != -1)
-                    {
-                        printf("%i ",L->firinglags[(x*grid_size+y)*L->MaxFirings + idx2]);
-                        idx2++;
-                    }
-                    printf("DD\n");
-                }*/
-                if (L->firinglags[(x*grid_size+y)*L->MaxFirings] == L->cap )//if first entry is at cap - remove and shuffle everything down
-                {
-                    int idx2 = 0;
-                    while (L->firinglags[(x*grid_size+y)*L->MaxFirings + idx2] != -1) //move everthing down
-                    {
-                        L->firinglags[(x*grid_size+y)*L->MaxFirings + idx2] = L->firinglags[(x*grid_size+y)*L->MaxFirings + idx2+1];
-                        idx2++;
-                    }
-                }
+                const int baseidx=(x*grid_size+y)*L->firinglags.lagsperpoint;
+                modifyLags(&L->firinglags,baseidx);
                 //now - add in new spikes
                 if (L->voltages_out[x*grid_size + y]  >= L->P->potential.Vpk)
                 {   
@@ -208,17 +203,15 @@ void StoreFiring(layer* L)
                     }
                     //find the empty idx
                     int idx2 = 0;
-                    while (L->firinglags[(x*grid_size+y)*L->MaxFirings + idx2] != -1) 
+                    while (L->firinglags.lags[baseidx + idx2] != -1) 
                     {
                         idx2++;
                     }
                     //and set it to 0
 
-                    L->firinglags[(x*grid_size+y)*L->MaxFirings + idx2]=1;
+                    L->firinglags.lags[baseidx + idx2]=1;
                     //and set the next one to -1
-                    L->firinglags[(x*grid_size+y)*L->MaxFirings + idx2+1]= -1;
-               //     printf("setting number %i",idx2);
-                 //   printf("    %i %i %i %i %i %i \n",L->firinglags[(x*grid_size+y)*L->MaxFirings],L->firinglags[(x*grid_size+y)*L->MaxFirings+1],L->firinglags[(x*grid_size+y)*L->MaxFirings+2],L->firinglags[(x*grid_size+y)*L->MaxFirings+3],L->firinglags[(x*grid_size+y)*L->MaxFirings+4]),L->firinglags[(x*grid_size+y)*L->MaxFirings+5];
+                    L->firinglags.lags[baseidx + idx2+1]= -1;
                 }//add random spikes
                 else if (((Compute_float)random())/((Compute_float)RAND_MAX) < 
                         (L->P->potential.rate*((Compute_float)0.001)*Features.Timestep))
@@ -234,7 +227,7 @@ void StoreFiring(layer* L)
     }
 }
 ///Cleans up voltages for neurons that are in the refractory state
-void ResetVoltages(Compute_float* const __restrict Vout,const couple_parameters C,const int16_t* const firinglags,const int MaxFirings,const conductance_parameters CP)
+void ResetVoltages(Compute_float* const __restrict Vout,const couple_parameters C,const lagstorage l,const conductance_parameters CP)
 {
     const int trefrac_in_ts =(int) ((Compute_float)C.tref / Features.Timestep);
     for (int x=0;x<grid_size;x++)
@@ -242,11 +235,11 @@ void ResetVoltages(Compute_float* const __restrict Vout,const couple_parameters 
         for (int y=0;y<grid_size;y++)
         { 
             int idx=0;
-            while (firinglags[(x*grid_size+y)*MaxFirings + idx] != -1)
+            while (l.lags[(x*grid_size+y)*l.lagsperpoint+ idx] != -1)
             {
                 idx++;
             } //take the last entry - then check if in refrac period and set voltages
-            if (idx >0 && firinglags[(x*grid_size+y)*MaxFirings + idx-1] <= trefrac_in_ts)
+            if (idx >0 && l.lags[(x*grid_size+y)*l.lagsperpoint + idx-1] <= trefrac_in_ts)
             {
                 Vout[x*grid_size + y] = CP.Vrt;
             }
@@ -274,11 +267,11 @@ void step1(model* m,const unsigned int time)
     if (Features.Recovery==OFF) 
     {
         CalcVoltages(m->layer1.voltages,m->gE,m->gI,m->layer1.P->potential,m->layer1.voltages_out);
-        ResetVoltages(m->layer1.voltages_out,m->layer1.P->couple,m->layer1.firinglags,m->layer1.MaxFirings,m->layer1.P->potential);
+        ResetVoltages(m->layer1.voltages_out,m->layer1.P->couple,m->layer1.firinglags,m->layer1.P->potential);
         if(m->NoLayers==DUALLAYER)
         {
             CalcVoltages(m->layer2.voltages,m->gE,m->gI,m->layer2.P->potential,m->layer2.voltages_out);
-            ResetVoltages(m->layer2.voltages_out,m->layer2.P->couple,m->layer2.firinglags,m->layer2.MaxFirings,m->layer2.P->potential);
+            ResetVoltages(m->layer2.voltages_out,m->layer2.P->couple,m->layer2.firinglags,m->layer2.P->potential);
         }
     }
     // with recovery variable (note no support for theta - no idea if they work together)

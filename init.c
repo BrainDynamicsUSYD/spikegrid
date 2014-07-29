@@ -63,13 +63,16 @@ layer setuplayer(const parameters p)
     if (p.couple.Layertype==SINGLELAYER) {cap=(int)max(setcap(p.couple.Layer_parameters.single.Ex,min_effect,Features.Timestep),setcap(p.couple.Layer_parameters.single.In,min_effect,Features.Timestep));}
     else                                 {cap=(int)setcap(p.couple.Layer_parameters.dual.synapse,min_effect,Features.Timestep);}
     const int trefrac_in_ts =(int) ((Compute_float)p.couple.tref / Features.Timestep);
-    const int flagcount = (int)(cap/(int)trefrac_in_ts) + 2;
-    printf("cap is %i\n", cap);
+    const int flagcount = (int)(cap/trefrac_in_ts) + 2;
+    const int stdplagcount = (int)((p.STDP.stdp_tau*5/trefrac_in_ts)+2);
     layer L = 
     {
-        .cap                = cap,
-        .firinglags         = calloc(sizeof(int16_t),grid_size*grid_size*(size_t)flagcount),
-        .MaxFirings         = flagcount,
+        .firinglags         = 
+        {
+            .lags = calloc(sizeof(int16_t),grid_size*grid_size*(size_t)flagcount),
+            .cap = cap,
+            .lagsperpoint = flagcount
+        },
         .connections        = CreateCouplingMatrix(p.couple),
         .STDP_connections   = Features.STDP==ON?calloc(sizeof(Compute_float),grid_size*grid_size*couple_array_size*couple_array_size):NULL,
         .std                = Features.STD==ON?STD_init(p.STD):NULL,
@@ -88,7 +91,7 @@ layer setuplayer(const parameters p)
     {
         for (int y = 0;y<grid_size;y++)
         {
-            L.firinglags[(x*grid_size+y)*L.MaxFirings]=-1;
+            L.firinglags.lags[(x*grid_size+y)*L.firinglags.lagsperpoint]=-1;
         }
     }
     if (Features.Random_connections == ON)

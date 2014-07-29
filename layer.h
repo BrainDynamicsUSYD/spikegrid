@@ -13,6 +13,12 @@ typedef struct randomconnection
     Compute_float   stdp_strength;
     coords          destination;
 } randomconnection;
+typedef struct lagstorage
+{
+    int16_t*    lags;
+    const int   cap;
+    const int   lagsperpoint;
+} lagstorage;
 typedef struct layer
 {
     Compute_float* const connections;     ///<Matrix of connections coming from a single point
@@ -24,9 +30,8 @@ typedef struct layer
     Compute_float* const Extimecourse;    ///<store time course of Ex synapses  
     Compute_float* const Intimecourse;    ///<store time course of In synapses  
     randomconnection* randconns;                ///<stores random connections
-    const int MaxFirings;
-    const int cap;
-    int16_t* firinglags;
+    lagstorage      firinglags;
+    lagstorage      STDP_lags;
     parameters* P;                              ///<The parameters that we used to make the layer
     STD_data* std;                               ///<Some info that is needed for STD
 } layer;

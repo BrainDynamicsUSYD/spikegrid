@@ -38,7 +38,6 @@ void evolvept_STDP  (const int x,const  int y,const Compute_float* const __restr
     if (Features.STDP == OFF) {return;}
     evolvept(x,y,&(connections_STDP[(x*grid_size +y)*couple_array_size*couple_array_size]),Estrmod,Istrmod,gE,gI);
 }
-#include <stdio.h> //used later - massive hack - REMOVE
 ///Adds the effect of the spikes that have fired in the past to the gE and gI arrays as appropriate
 void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restrict__ gI,const unsigned int time)
 {

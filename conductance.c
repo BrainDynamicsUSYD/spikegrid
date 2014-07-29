@@ -189,7 +189,6 @@ struct option long_options[] = {{"help",no_argument,0,'h'},{"generate",no_argume
 ///Main function for the entire program
 /// @param argc number of cmdline args
 /// @param argv what the parameters actually are
-#include "evolvegen.h"
 int main(int argc,char** argv) //useful for testing w/out matlab
 {
     feenableexcept(FE_INVALID | FE_OVERFLOW); //segfault on NaN and overflow.  Note - this cannot be used in matlab
@@ -265,7 +264,6 @@ int main(int argc,char** argv) //useful for testing w/out matlab
         }
         job=job->next;
     }
-    printf("%lli\n",c);
     return(EXIT_SUCCESS);
 }
 #endif

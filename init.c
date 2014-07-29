@@ -63,7 +63,7 @@ layer setuplayer(const parameters p)
     if (p.couple.Layertype==SINGLELAYER) {cap=max(setcap(p.couple.Layer_parameters.single.Ex,min_effect,Features.Timestep),setcap(p.couple.Layer_parameters.single.In,min_effect,Features.Timestep));}
     else                                 {cap=setcap(p.couple.Layer_parameters.dual.synapse,min_effect,Features.Timestep);}
     const unsigned int trefrac_in_ts =(unsigned int) ((Compute_float)p.couple.tref / Features.Timestep);
-    const unsigned int flagcount = (cap/(size_t)trefrac_in_ts) + 40;
+    const unsigned int flagcount = (cap/(size_t)trefrac_in_ts) + 2;
     printf("cap is %i\n", cap);
     layer L = 
     {

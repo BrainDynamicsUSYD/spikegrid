@@ -9,6 +9,7 @@
 #include "mymath.h"
 #include "paramheader.h"
 #include "layer.h"
+#include "coupling.h"
 ///add conductance from a firing neuron to the gE and gI arrays (used in single layer model)
 void evolvept (const int x,const int y,const Compute_float* const __restrict connections,const Compute_float Estrmod,const Compute_float Istrmod,Compute_float* __restrict gE,Compute_float* __restrict gI)
 {
@@ -43,6 +44,7 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
 {
     const int Eon = L.Extimecourse!=NULL; //does this layer have excitation
     const int Ion = L.Intimecourse!=NULL; //and inhibition
+    const decay_parameters D = L.P->couple.Layer_parameters.dual.synapse;
     for (unsigned int x=0;x<grid_size;x++)
     {
         for (unsigned int y=0;y<grid_size;y++)
@@ -52,13 +54,13 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
             unsigned int idx2 = 0;
             while (L.firinglags[idx*L.MaxFirings+idx2] != -1)
             {
-                str += Eon?L.Extimecourse[L.firinglags[idx*L.MaxFirings + idx2]]:L.Intimecourse[L.firinglags[idx*L.MaxFirings + idx2]];
+//                str += Eon?L.Extimecourse[L.firinglags[idx*L.MaxFirings + idx2]]:L.Intimecourse[L.firinglags[idx*L.MaxFirings + idx2]];
+                str += Synapse_timecourse(D,L.firinglags[idx*L.MaxFirings + idx2] * Features.Timestep);
                 idx2++;
             }
             if (Ion) {str = (-str);}
             if (idx2 > 0) //only fire if we had a spike.
             {
-                if (str == 0.0) printf("%f\n",str);
                 evolvept_duallayer(x,y,L.connections,str,(Ion?gI:gE));
             }
 

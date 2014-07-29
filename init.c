@@ -68,15 +68,15 @@ layer setuplayer(const parameters p)
     layer L = 
     {
         .cap                = cap,
-        .firinglags         = calloc(sizeof(int16_t),grid_size*grid_size*flagcount),
+        .firinglags         = calloc(sizeof(int16_t),grid_size*grid_size*(size_t)flagcount),
         .MaxFirings         = flagcount,
         .connections        = CreateCouplingMatrix(p.couple),
         .STDP_connections   = Features.STDP==ON?calloc(sizeof(Compute_float),grid_size*grid_size*couple_array_size*couple_array_size):NULL,
         .std                = Features.STD==ON?STD_init(p.STD):NULL,
-        .Extimecourse       = p.couple.Layertype==SINGLELAYER?Synapse_timecourse_cache(cap,p.couple.Layer_parameters.single.Ex,Features.Timestep):
-            ((p.couple.Layer_parameters.dual.W>0)?Synapse_timecourse_cache(cap,p.couple.Layer_parameters.dual.synapse,Features.Timestep):NULL),
-        .Intimecourse       = p.couple.Layertype==SINGLELAYER?Synapse_timecourse_cache(cap,p.couple.Layer_parameters.single.In,Features.Timestep):
-            ((p.couple.Layer_parameters.dual.W<0)?Synapse_timecourse_cache(cap,p.couple.Layer_parameters.dual.synapse,Features.Timestep):NULL),
+        .Extimecourse       = p.couple.Layertype==SINGLELAYER?Synapse_timecourse_cache((unsigned int)cap,p.couple.Layer_parameters.single.Ex,Features.Timestep):
+            ((p.couple.Layer_parameters.dual.W>0)?Synapse_timecourse_cache((unsigned int)cap,p.couple.Layer_parameters.dual.synapse,Features.Timestep):NULL),
+        .Intimecourse       = p.couple.Layertype==SINGLELAYER?Synapse_timecourse_cache((unsigned int)cap,p.couple.Layer_parameters.single.In,Features.Timestep):
+            ((p.couple.Layer_parameters.dual.W<0)?Synapse_timecourse_cache((unsigned int)cap,p.couple.Layer_parameters.dual.synapse,Features.Timestep):NULL),
         .randconns          = Features.Random_connections==ON?calloc(sizeof(randomconnection),(size_t)(grid_size*grid_size*p.random.numberper)):NULL,
         .P                  = (parameters*)newdata(&p,sizeof(p)), 
         .voltages           = calloc(sizeof(Compute_float),grid_size*grid_size),

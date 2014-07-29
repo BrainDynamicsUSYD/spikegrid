@@ -139,6 +139,9 @@ void outputToConsole(const tagged_array input)
     free(buf);
 
 }
+#include <string.h>
+#include <error.h>
+#include <errno.h>
 ///Send an outputtable to a text file
 ///@param input     the outputtable object to output
 ///@param idx       the index of the outputtable so that if multiple objects are output, files have consistent naming
@@ -149,6 +152,7 @@ void outputToText(const output_s input,const int idx)
         char buf[100];
         sprintf(buf,"%s/%i.txt",outdir,idx);
         outfiles[idx]=fopen(buf,"w");
+        if (outfiles[idx]==NULL) {printf("fopen failed on %s error is %s\n",buf,strerror(errno));}
     }
     switch (input.data_type)
     {

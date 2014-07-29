@@ -42,19 +42,19 @@ void evolvept_STDP  (const int x,const  int y,const Compute_float* const __restr
 ///Adds the effect of the spikes that have fired in the past to the gE and gI arrays as appropriate
 void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restrict__ gI,const unsigned int time)
 {
-    const int Eon = L.Extimecourse!=NULL; //does this layer have excitation
+ //   const int Eon = L.Extimecourse!=NULL; //does this layer have excitation
     const int Ion = L.Intimecourse!=NULL; //and inhibition
     const decay_parameters D = L.P->couple.Layer_parameters.dual.synapse;
-    for (unsigned int x=0;x<grid_size;x++)
+    for (int y=0;y<grid_size;y++)
     {
-        for (unsigned int y=0;y<grid_size;y++)
+        for (int x=0;x<grid_size;x++)
         {
             Compute_float str = Zero;
-            const unsigned int idx = x*grid_size + y;
-            unsigned int idx2 = 0;
+            const int idx = x*grid_size + y;
+            int idx2 = 0;
             while (L.firinglags[idx*L.MaxFirings+idx2] != -1)
             {
-//                str += Eon?L.Extimecourse[L.firinglags[idx*L.MaxFirings + idx2]]:L.Intimecourse[L.firinglags[idx*L.MaxFirings + idx2]];
+                //                str += Eon?L.Extimecourse[L.firinglags[idx*L.MaxFirings + idx2]]:L.Intimecourse[L.firinglags[idx*L.MaxFirings + idx2]];
                 str += Synapse_timecourse(D,L.firinglags[idx*L.MaxFirings + idx2] * Features.Timestep);
                 idx2++;
             }
@@ -66,58 +66,6 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
 
         }
     }
-    /*
-    for (unsigned int i=1;i<L.spikes.count;i++) //start at 1 so we don't get currently firing (which should be empty anyway)
-    {
-        const coords* const fire_with_this_lag = ringbuffer_getoffset(&L.spikes,(int)i);
-        const int Eon = L.Extimecourse!=NULL; //does this layer have excitation
-        const int Ion = L.Intimecourse!=NULL; //and inhibition
-        const Compute_float Estr =Eon? L.Extimecourse[i]:Zero;
-        const Compute_float Istr =Ion? L.Intimecourse[i]:Zero; 
-        int idx=0; //iterate through all neurons firing with this lag
-        while (fire_with_this_lag[idx].x != -1)
-        {
-            coords c = fire_with_this_lag[idx]; //add conductances
-            Compute_float strmod=One;
-            if (Features.STD == ON)
-            {
-                strmod=STD_str(L.P->STD,c.x,c.y,time,i,(L.std));
-            }
-            if (Eon && Ion) 
-            {
-                evolvept(c.x,c.y,L.connections,Estr*strmod,Istr*strmod,gE,gI);
-                evolvept_STDP(c.x,c.y,L.STDP_connections,Estr*strmod,Istr*strmod,gE,gI);
-            }
-            else 
-            {
-                if (Features.STDP==ON)
-                {
-                    evolvept_duallayer_STDP(c.x,c.y,L.connections,L.STDP_connections,(Ion?Istr*-1:Estr)*strmod,(Ion?gI:gE));
-                }
-                else
-                {
-                    evolvept_duallayer(c.x,c.y,L.connections,(Ion?Istr*-1:Estr)*strmod,(Ion?gI:gE));
-                }
-            } 
-            if (Features.Random_connections == ON)
-            {
-                for (int d = 0;d<L.P->random.numberper;d++)
-                {
-                    const randomconnection rc = L.randconns[(c.x*grid_size + c.y)*L.P->random.numberper + d];
-                    if (Ion)
-                    {
-                        gI[(rc.destination.x + couplerange) * conductance_array_size + rc.destination.y + couplerange] += Istr * strmod *rc.strength;
-                    }
-                    if (Eon)
-                    {
-                        gE[(rc.destination.x + couplerange) * conductance_array_size + rc.destination.y + couplerange] += Estr * strmod *rc.strength;
-                    }
-                }
-            }
-            idx++;
-        }
-    }
-    */
 }
 
 ///This function adds in the overlapping bits back into the original matrix.  It is slightly opaque but using pictures you can convince yourself that it works
@@ -218,15 +166,15 @@ void CalcRecoverys(const Compute_float* const __restrict__ Vinput,
 ///Store current firing spikes also apply random spikes
 void StoreFiring(layer* L)
 { 
-    const unsigned int step = (unsigned int)L->P->skip;
-    for (unsigned int x=0;x<grid_size;x++)
+    const int step = (int)L->P->skip;
+    for (int x=0;x<grid_size;x++)
     {
-        for (unsigned int y=0;y<grid_size;y++)
+        for (int y=0;y<grid_size;y++)
         { 
             if (x % step ==0 && y% step ==0)
             {
                 //first - increment the firing lags.
-                unsigned int idx = 0;
+                int idx = 0;
                 while (L->firinglags[(x*grid_size+y)*L->MaxFirings + idx] != -1)
                 {
                     L->firinglags[(x*grid_size+y)*L->MaxFirings + idx]++;
@@ -245,7 +193,7 @@ void StoreFiring(layer* L)
                 }*/
                 if (L->firinglags[(x*grid_size+y)*L->MaxFirings] == L->cap )//if first entry is at cap - remove and shuffle everything down
                 {
-                    unsigned int idx2 = 0;
+                    int idx2 = 0;
                     while (L->firinglags[(x*grid_size+y)*L->MaxFirings + idx2] != -1) //move everthing down
                     {
                         L->firinglags[(x*grid_size+y)*L->MaxFirings + idx2] = L->firinglags[(x*grid_size+y)*L->MaxFirings + idx2+1];
@@ -260,7 +208,7 @@ void StoreFiring(layer* L)
                         L->recoverys_out[x*grid_size+y]+=L->P->recovery.Wrt;
                     }
                     //find the empty idx
-                    unsigned int idx2 = 0;
+                    int idx2 = 0;
                     while (L->firinglags[(x*grid_size+y)*L->MaxFirings + idx2] != -1) 
                     {
                         idx2++;
@@ -287,14 +235,14 @@ void StoreFiring(layer* L)
     }
 }
 ///Cleans up voltages for neurons that are in the refractory state
-void ResetVoltages(Compute_float* const __restrict Vout,const couple_parameters C,const int16_t* const firinglags,const unsigned int MaxFirings,const conductance_parameters CP)
+void ResetVoltages(Compute_float* const __restrict Vout,const couple_parameters C,const int16_t* const firinglags,const int MaxFirings,const conductance_parameters CP)
 {
     const int trefrac_in_ts =(int) ((Compute_float)C.tref / Features.Timestep);
-    for (unsigned int x=0;x<grid_size;x++)
+    for (int x=0;x<grid_size;x++)
     {
-        for (unsigned int y=0;y<grid_size;y++)
+        for (int y=0;y<grid_size;y++)
         { 
-            unsigned int idx=0;
+            int idx=0;
             while (firinglags[(x*grid_size+y)*MaxFirings + idx] != -1)
             {
                 idx++;

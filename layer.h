@@ -24,7 +24,7 @@ typedef struct layer
     Compute_float* const Extimecourse;    ///<store time course of Ex synapses  
     Compute_float* const Intimecourse;    ///<store time course of In synapses  
     randomconnection* randconns;                ///<stores random connections
-    const unsigned int MaxFirings;
+    const int MaxFirings;
     const int cap;
     int16_t* firinglags;
     parameters* P;                              ///<The parameters that we used to make the layer

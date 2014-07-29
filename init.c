@@ -59,11 +59,11 @@ void* newdata(const void* const input,const unsigned int size)
 layer setuplayer(const parameters p)
 {
     const Compute_float min_effect = (Compute_float)1E-6;
-    unsigned int cap;
-    if (p.couple.Layertype==SINGLELAYER) {cap=max(setcap(p.couple.Layer_parameters.single.Ex,min_effect,Features.Timestep),setcap(p.couple.Layer_parameters.single.In,min_effect,Features.Timestep));}
-    else                                 {cap=setcap(p.couple.Layer_parameters.dual.synapse,min_effect,Features.Timestep);}
-    const unsigned int trefrac_in_ts =(unsigned int) ((Compute_float)p.couple.tref / Features.Timestep);
-    const unsigned int flagcount = (cap/(size_t)trefrac_in_ts) + 2;
+    int cap;
+    if (p.couple.Layertype==SINGLELAYER) {cap=(int)max(setcap(p.couple.Layer_parameters.single.Ex,min_effect,Features.Timestep),setcap(p.couple.Layer_parameters.single.In,min_effect,Features.Timestep));}
+    else                                 {cap=(int)setcap(p.couple.Layer_parameters.dual.synapse,min_effect,Features.Timestep);}
+    const int trefrac_in_ts =(int) ((Compute_float)p.couple.tref / Features.Timestep);
+    const int flagcount = (int)(cap/(int)trefrac_in_ts) + 2;
     printf("cap is %i\n", cap);
     layer L = 
     {
@@ -84,9 +84,9 @@ layer setuplayer(const parameters p)
         .recoverys       = Features.Recovery==ON?calloc(sizeof(Compute_float),grid_size*grid_size):NULL,
         .recoverys_out   = Features.Recovery==ON?calloc(sizeof(Compute_float),grid_size*grid_size):NULL,
     };
-    for (unsigned int x = 0;x<grid_size;x++)
+    for (int x = 0;x<grid_size;x++)
     {
-        for (unsigned int y = 0;y<grid_size;y++)
+        for (int y = 0;y<grid_size;y++)
         {
             L.firinglags[(x*grid_size+y)*L.MaxFirings]=-1;
         }

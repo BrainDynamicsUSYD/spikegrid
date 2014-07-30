@@ -7,6 +7,7 @@
 typedef struct STD_data STD_data; //forward declare STD_data to make things cleaner - makes this file a little messier, but it makes it more obvious where things come from
 ///hold the requisite data for a layer that enables it to be evolved through time.
 typedef struct parameters parameters;
+typedef struct STDP_data STDP_data;
 typedef struct randomconnection
 {
     Compute_float   strength;
@@ -22,7 +23,6 @@ typedef struct lagstorage
 typedef struct layer
 {
     Compute_float* const connections;     ///<Matrix of connections coming from a single point
-    Compute_float* STDP_connections;            ///<Dynamic connections from STDP
     Compute_float* voltages;                    ///<Input voltages
     Compute_float* voltages_out;                ///<return value 
     Compute_float* recoverys;                   ///<Recovery variable
@@ -31,7 +31,7 @@ typedef struct layer
     Compute_float* const Intimecourse;    ///<store time course of In synapses  
     randomconnection* randconns;                ///<stores random connections
     lagstorage      firinglags;
-    lagstorage      STDP_lags;
+    STDP_data*       STDP_data;
     parameters* P;                              ///<The parameters that we used to make the layer
     STD_data* std;                               ///<Some info that is needed for STD
 } layer;

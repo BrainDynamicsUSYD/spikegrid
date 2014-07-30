@@ -61,6 +61,10 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
             if (idx2 > 0) //only fire if we had a spike.
             {
                 evolvept_duallayer(x,y,L.connections,str,(Ion?gI:gE));
+                if (Features.STDP==ON)
+                {
+                    evolvept_duallayer_STDP(x,y,L.connections,L.STDP_data->connections,str,(Ion?gI:gE));
+                }
             }
 
         }
@@ -171,7 +175,7 @@ void modifyLags(lagstorage* L,int baseidx)
         L->lags[baseidx+idx]++;
         idx++;
     }
-    if (L->lags[0] == L->cap )//if first entry is at cap - remove and shuffle everything down
+    if (L->lags[baseidx] == L->cap )//if first entry is at cap - remove and shuffle everything down
     {
         int idx2 = 0;
         while (L->lags[baseidx+idx2] != -1) //move everthing down
@@ -181,6 +185,22 @@ void modifyLags(lagstorage* L,int baseidx)
         }
     }
 }
+
+void AddnewSpike(lagstorage* L,const int baseidx)
+{
+    //find the empty idx
+    int idx = 0;
+    while (L->lags[baseidx + idx] != -1) 
+    {
+        idx++;
+    }
+    //and set it to 1 - this makes things work
+    L->lags[baseidx + idx]=1;
+    //and set the next one to -1 to mark the end of the array
+    L->lags[baseidx + idx+1]= -1;
+
+}
+
 
 ///Store current firing spikes also apply random spikes
 void StoreFiring(layer* L)
@@ -194,6 +214,7 @@ void StoreFiring(layer* L)
             {
                 const int baseidx=(x*grid_size+y)*L->firinglags.lagsperpoint;
                 modifyLags(&L->firinglags,baseidx);
+                if (Features.STDP==ON) {modifyLags(&L->STDP_data->lags,(x*grid_size+y)*L->STDP_data->lags.lagsperpoint);}
                 //now - add in new spikes
                 if (L->voltages_out[x*grid_size + y]  >= L->P->potential.Vpk)
                 {   
@@ -201,17 +222,8 @@ void StoreFiring(layer* L)
                     {
                         L->recoverys_out[x*grid_size+y]+=L->P->recovery.Wrt;
                     }
-                    //find the empty idx
-                    int idx2 = 0;
-                    while (L->firinglags.lags[baseidx + idx2] != -1) 
-                    {
-                        idx2++;
-                    }
-                    //and set it to 0
-
-                    L->firinglags.lags[baseidx + idx2]=1;
-                    //and set the next one to -1
-                    L->firinglags.lags[baseidx + idx2+1]= -1;
+                AddnewSpike(&L->firinglags,baseidx);
+                if (Features.STDP==ON) {AddnewSpike(&L->STDP_data->lags,(x*grid_size+y)*L->STDP_data->lags.lagsperpoint);}
                 }//add random spikes
                 else if (((Compute_float)random())/((Compute_float)RAND_MAX) < 
                         (L->P->potential.rate*((Compute_float)0.001)*Features.Timestep))
@@ -294,7 +306,7 @@ void step1(model* m,const unsigned int time)
     }
     if (Features.STDP==ON)
     {
-     //   doSTDP(m->layer1.STDP_connections,&m->layer1.spikes_STDP,m->layer1.connections,m->layer1.P->STDP);
-    //    if (m->NoLayers==DUALLAYER) {doSTDP(m->layer2.STDP_connections,&m->layer2.spikes_STDP,m->layer2.connections,m->layer2.P->STDP);}
+        DoSTDP(m->layer1.connections,m->layer1.STDP_data,m->layer1.P->STDP);
+        if (m->NoLayers==DUALLAYER) {DoSTDP(m->layer2.connections,m->layer2.STDP_data,m->layer2.P->STDP);}
     }
 }

@@ -11,6 +11,7 @@
 #include "STD.h"
 #include "paramheader.h"
 #include "layer.h"
+#include "STDP.h"
 ///creates a random initial condition - assumes random is already seeded
 ///This is generated as small fluctuations away from Vrt
 /// @param input    The input matrix - Modified in place
@@ -64,7 +65,6 @@ layer setuplayer(const parameters p)
     else                                 {cap=(int)setcap(p.couple.Layer_parameters.dual.synapse,min_effect,Features.Timestep);}
     const int trefrac_in_ts =(int) ((Compute_float)p.couple.tref / Features.Timestep);
     const int flagcount = (int)(cap/trefrac_in_ts) + 2;
-    const int stdplagcount = (int)((p.STDP.stdp_tau*5/trefrac_in_ts)+2);
     layer L = 
     {
         .firinglags         = 
@@ -73,8 +73,8 @@ layer setuplayer(const parameters p)
             .cap = cap,
             .lagsperpoint = flagcount
         },
+        .STDP_data = Features.STDP==ON?STDP_init(p.STDP,trefrac_in_ts):NULL,
         .connections        = CreateCouplingMatrix(p.couple),
-        .STDP_connections   = Features.STDP==ON?calloc(sizeof(Compute_float),grid_size*grid_size*couple_array_size*couple_array_size):NULL,
         .std                = Features.STD==ON?STD_init(p.STD):NULL,
         .Extimecourse       = p.couple.Layertype==SINGLELAYER?Synapse_timecourse_cache((unsigned int)cap,p.couple.Layer_parameters.single.Ex,Features.Timestep):
             ((p.couple.Layer_parameters.dual.W>0)?Synapse_timecourse_cache((unsigned int)cap,p.couple.Layer_parameters.dual.synapse,Features.Timestep):NULL),

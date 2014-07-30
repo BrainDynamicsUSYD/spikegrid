@@ -1,10 +1,18 @@
 /// \file
+#include <stdlib.h>
+#include <string.h>
 #include "paramheader.h"
 #include "ringbuffer.h"
 #include "mymath.h" //fabsf
 #include "sizes.h"
-///Use this macro to change how far we apply STDP.  Maximum is couplerange^2, but anything smaller will improve performance
-#define STDP_RANGE_SQUARED (couplerange*couplerange)
+#include "layer.h"
+#include "STDP.h"
+#include <stdio.h>
+Compute_float __attribute__((pure)) STDP_strength(const STDP_parameters S,const Compute_float lag)
+{  
+    return  S.stdp_strength * exp(-lag*Features.Timestep/S.stdp_tau);
+}
+
 ///helper function for STDP.  Calculates distance between two neurons, taking into account wrapping in the network
 ///interesting idea - in some cases I don't care about this wrapping and could cheat
 inline static int dist(int cur,int prev)
@@ -14,62 +22,86 @@ inline static int dist(int cur,int prev)
     else if (dx < -(grid_size/2)) {return (dx + grid_size);}
     else {return dx;}
 }
+
 ///invert a vector joining 2 points (not really - applied after there has been some additions and also does some tidying up)
 inline static int invertdist(int v) {return ((2*couplerange) - v);}
-///Does most of the work of changing coupling matrices using STDP
-///this method is incredibly hard to understand.  Many weird things are driven by speed.  But basically, implement STDP.
-void ApplySTDP(Compute_float * __restrict__ dmats,const coords* curfire,const coords* prevfire,const Compute_float str,const Compute_float* constm,const STDP_parameters S)
+
+void  DoSTDP(Compute_float* const_couples,STDP_data* data,const STDP_parameters S)
 {
-    int cindex = 0;
-    while(curfire[cindex].x != -1)
-    {   
-        const int nx = curfire[cindex].x ; //switching these to use ++ slows things down
-        const int ny = curfire[cindex].y;
-        int pindex = 0;
-        if (nx < grid_size - couplerange && nx > couplerange) //no wrapping
+
+    for (int x=0;x<grid_size;x++)
+    {
+        for (int y=0;y<grid_size;y++)
         {
-            if (prevfire[pindex].x > nx+couplerange) {goto loop_end;} //basically, there are no firing neurons in range, so bail out
-        }
-        while(prevfire[pindex].x != -1)
-        {
-            const int px = prevfire[pindex].x ; 
-            const int py = prevfire[pindex].y;
-            if (px > nx + couplerange && nx > couplerange) {break;} //if we go past the end we can break - but need to check we haven't gone to far
-            //calculate distance
-            const int cx = dist(nx,px);
-            const int cy = dist(ny,py);
-            if ((cx*cx+cy*cy) < STDP_RANGE_SQUARED)
+            const int baseidx = (x*grid_size + y)*data->lags.lagsperpoint;
+            //first - check if the neuron has fired this timestep
+            int idx = 0;
+            while (data->lags.lags[baseidx + idx] != -1) 
             {
-                const int cdx = cx + couplerange;
-                const int cdy = cy + couplerange;
-                const int rx = invertdist(cdx); //moving this into loop has no effect - each is one lea instrucion only - possibly never even calculated
-                const int ry = invertdist(cdy);
-                if((dmats[(px*grid_size+py)*couple_array_size*couple_array_size + cdx*couple_array_size + cdy]) <  fabs(S.stdp_limit * constm[cdx*couple_array_size+cdy])  )
-                {   
-                    dmats[(px*grid_size+py)*couple_array_size*couple_array_size + cdx*couple_array_size + cdy] += str; //all the lookup code here is cached
-                    dmats[(nx*grid_size+ny)*couple_array_size*couple_array_size + rx*couple_array_size + ry]   -= str;
+                idx++;
+            }
+            if (idx >0 && data->lags.lags[baseidx+idx-1]==1) //so the neuron did actually fire at the last timestep
+            {
+                //now check if other neurons recently fired - first for nearby connections
+                for (int i = -STDP_RANGE;i<=STDP_RANGE;i++)
+                {
+                    for (int j = -STDP_RANGE ;j<=STDP_RANGE;j++)
+                    {
+                        if (x+i<0 || x+i>=grid_size || y+j<0 || y+j>=grid_size) {continue;}
+                        int idx2=0;
+                        const int baseidx2 = (x*grid_size + y) *data->lags.lagsperpoint;
+                        Compute_float str = Zero;
+                        while (data->lags.lags[baseidx2+idx2] != -1)
+                        {
+                            str += STDP_strength(S,data->lags.lags[baseidx2+idx2]);
+                            idx2++;
+                        }
+                        if (idx2 > 0) 
+                        {
+                            // the other neuron actually fired - so we can apply STDP - need to apply in two directions
+                            //calculate the offsets
+                            const int px = x+i;
+                            const int py = y+j;
+                            const int cdx = i + STDP_RANGE;
+                            const int cdy = j + STDP_RANGE;
+                            const int rx  = invertdist(cdx);
+                            const int ry  = invertdist(cdy);
+                            const int fidx = (px*grid_size+py)*STDP_array_size*STDP_array_size + cdx*STDP_array_size + cdy;
+                            if (fidx<0) {printf("%i %i %i %i\n",px,py,cdx,cdy);};
+                            if (fidx>grid_size*grid_size*STDP_array_size*STDP_array_size) {printf("%i %i %i %i\n",px,py,cdx,cdy);};
+                            if (data->connections[fidx] < fabs(S.stdp_limit * const_couples[cdx*couple_array_size + cdy]))
+                            {
+                                data->connections[fidx] += str;
+                                data->connections[(x*grid_size+y)*STDP_array_size*STDP_array_size + rx*STDP_array_size+ry]-=str;
+                            }
+                        }
+                    }
                 }
             }
-            pindex++;
         }
-        loop_end:
-            cindex++;
     }
+}
+STDP_data* STDP_init(const STDP_parameters S,const int trefrac_in_ts)
+{
+    STDP_data* ret = malloc(sizeof(*ret));    
+    const int STDP_cap = (int)(S.stdp_tau*5.0 / Features.Timestep);
+    const int stdplagcount = (int)((STDP_cap/trefrac_in_ts)+2);
+
+    ret->connections = calloc(sizeof(Compute_float),grid_size*grid_size*STDP_array_size*STDP_array_size);
+    lagstorage L = 
+    {
+        .lags = calloc(sizeof(int16_t),grid_size*grid_size*(size_t)stdplagcount),
+        .cap  = STDP_cap,
+        .lagsperpoint = stdplagcount
+    };    for (int x = 0;x<grid_size;x++)
+    {
+        for (int y = 0;y<grid_size;y++)
+        {
+            L.lags[(x*grid_size+y)*L.lagsperpoint]=-1;
+        }
+    }
+
+    memcpy(&ret->lags,&L,sizeof(lagstorage));
+    return ret;
 }
 
-///Actually does STDP
-///How STDP works:
-///We have an array of (int,int) tuples which store locations which are firing at some time step (firestore / flocstore).  
-///However, as we only need to know when nearby points are firing, we also have flocdex - this stores were each x-coord starts
-///      as a result, we can skip through large parts of the array preemptively, makeing things significantly faster
-//Next idea for STDP speed improvements - The Magnitude check is based on the direction from the previous to the current (increasing) - as a result, the innermost loop frequently calculates the offset - swapping curfire and prevfire
-void doSTDP (Compute_float* dmats,const ringbuffer* const fdata , const Compute_float*constm,const STDP_parameters S)
-{
-    const coords* const curfire = fdata->data[fdata->curidx];
-    for(unsigned int offset = 1;offset<fdata->count;offset++)
-    {
-        Compute_float strn = S.stdp_strength* exp(-((Compute_float)offset)/S.stdp_tau);
-        const coords* const fire_with_this_lag = ringbuffer_getoffset(fdata,(int)offset);
-        ApplySTDP(dmats,curfire,fire_with_this_lag,strn,constm,S);
-    }
-}

@@ -19,7 +19,6 @@ void CleanupRingBuffer(ringbuffer* r)
 ///@param l layer to free
 void CleanupLayer(layer* l)
 {
-    FreeIfNotNull(l->STDP_connections);
     FreeIfNotNull(l->voltages);
     FreeIfNotNull(l->voltages_out);
     FreeIfNotNull(l->recoverys);

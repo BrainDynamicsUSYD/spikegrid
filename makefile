@@ -2,12 +2,12 @@ ifeq ($(CC),cc)
 	optflags=  -Ofast -msse -msse2 -msse3 -funsafe-loop-optimizations -mtune=native -march=native  -floop-interchange -ftree-loop-optimize -floop-strip-mine -floop-block -flto  -fassociative-math -fno-signed-zeros -freciprocal-math -ffinite-math-only -fno-trapping-math -ftree-vectorize 
 	extrawarnings=-Wstrict-aliasing -fstrict-aliasing   -Wshadow  -Wconversion -Wdouble-promotion -Wformat=2 -Wunused -Wuninitialized -Wfloat-equal -Wunsafe-loop-optimizations -Wcast-qual -Wcast-align -Wwrite-strings -Wjump-misses-init -Wlogical-op  -Wvector-operation-performance -Wno-pragmas
 	extraextrawarnings=-Wsuggest-attribute=pure -Wsuggest-attribute=const -Wsuggest-attribute=noreturn -Wstrict-overflow=4 
-	export CFLAGS=-g -ggdb -Wall -Wextra -std=gnu99 ${optflags} ${extrawarnings} ${extraextrawarnings}
+	export CFLAGS=-g -ggdb -Wall -Wextra -std=gnu11 ${optflags} ${extrawarnings} ${extraextrawarnings}
 else #clang
-	export CFLAGS= -g -Wno-padded -Wno-missing-prototypes -Wno-missing-variable-declarations -Weverything -pedantic --std=gnu99 -Ofast
+	export CFLAGS= -g -Wno-padded -Wno-missing-prototypes -Wno-missing-variable-declarations -Weverything -pedantic --std=gnu11 -Ofast -Wno-documentation-unknown-command -Wno-covered-switch-default
 
 endif
-export DEBUGFLAGS= -g -std=gnu99
+export DEBUGFLAGS= -g -std=gnu11
 #export SPEEDFLAG=-DFAST #comment out this line for double instead of float (will make code slower)
 export CLIBFLAGS= -fPIC -shared
 export LDFLAGS=-lm -lpng -g

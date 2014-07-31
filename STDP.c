@@ -22,13 +22,21 @@ inline static int dist(int cur,int prev)
     else if (dx < -(grid_size/2)) {return (dx + grid_size);}
     else {return dx;}
 }
+inline static Compute_float clamp(Compute_float V,Compute_float target,Compute_float frac)
+{
+    if (target<0) {printf("negative target - possible error target is %f frac is %f V is %f \n",target,frac,V);}
+    if (target > 1) {printf("large target created\n");}
+    if (V > target * frac) {return (target * frac);}
+    else if (V < target * -frac) {return (target * -frac);}
+    else {return V;}
 
+}
 ///invert a vector joining 2 points (not really - applied after there has been some additions and also does some tidying up)
 inline static int invertdist(int v) {return ((2*couplerange) - v);}
 
-void  DoSTDP(Compute_float* const_couples,STDP_data* data,const STDP_parameters S)
+void  DoSTDP(const Compute_float* const const_couples,STDP_data* data,const STDP_parameters S)
 {
-
+    if (S.stdp_strength ==Zero) {return;}
     for (int x=0;x<grid_size;x++)
     {
         for (int y=0;y<grid_size;y++)
@@ -47,7 +55,7 @@ void  DoSTDP(Compute_float* const_couples,STDP_data* data,const STDP_parameters 
                 {
                     for (int j = -STDP_RANGE ;j<=STDP_RANGE;j++)
                     {
-                        if (x+i<0 || x+i>=grid_size || y+j<0 || y+j>=grid_size) {continue;}
+                        if (x+i<0 || x+i>=grid_size || y+j<0 || y+j>=grid_size || i*i+j*j > STDP_RANGE_SQUARED) {continue;}
                         int idx2=0;
                         const int baseidx2 = (x*grid_size + y) *data->lags.lagsperpoint;
                         Compute_float str = Zero;
@@ -67,12 +75,14 @@ void  DoSTDP(Compute_float* const_couples,STDP_data* data,const STDP_parameters 
                             const int rx  = invertdist(cdx);
                             const int ry  = invertdist(cdy);
                             const int fidx = (px*grid_size+py)*STDP_array_size*STDP_array_size + cdx*STDP_array_size + cdy;
-                            if (fidx<0) {printf("%i %i %i %i\n",px,py,cdx,cdy);};
-                            if (fidx>grid_size*grid_size*STDP_array_size*STDP_array_size) {printf("%i %i %i %i\n",px,py,cdx,cdy);};
-                            if (data->connections[fidx] < fabs(S.stdp_limit * const_couples[cdx*couple_array_size + cdy]))
+                            const int ridx = (x*grid_size+y)*STDP_array_size*STDP_array_size + rx*STDP_array_size + ry;
+               //             if (fidx < 0) {printf("small fidx error\n");}
+                 //           if (fidx > grid_size*grid_size*STDP_array_size*STDP_array_size) {printf("large fidx error\n");}
+                            data->connections[fidx] = clamp(data->connections[fidx] + str,const_couples[cdx*couple_array_size + cdy],S.stdp_limit);
+                            data->connections[ridx] = clamp(data->connections[ridx] - str,const_couples[cdx*couple_array_size + cdy],S.stdp_limit);
+                            if (fabs(data->connections[fidx]) > 1.0 || fabs(data->connections[ridx]) > 1.0)
                             {
-                                data->connections[fidx] += str;
-                                data->connections[(x*grid_size+y)*STDP_array_size*STDP_array_size + rx*STDP_array_size+ry]-=str;
+                                printf("something bad has happened at idx %i or %i %i %i %i %i\n",fidx,ridx,x,y,i,j);
                             }
                         }
                     }
@@ -86,22 +96,26 @@ STDP_data* STDP_init(const STDP_parameters S,const int trefrac_in_ts)
     STDP_data* ret = malloc(sizeof(*ret));    
     const int STDP_cap = (int)(S.stdp_tau*5.0 / Features.Timestep);
     const int stdplagcount = (int)((STDP_cap/trefrac_in_ts)+2);
-
-    ret->connections = calloc(sizeof(Compute_float),grid_size*grid_size*STDP_array_size*STDP_array_size);
-    lagstorage L = 
+    STDP_data D = 
     {
-        .lags = calloc(sizeof(int16_t),grid_size*grid_size*(size_t)stdplagcount),
-        .cap  = STDP_cap,
-        .lagsperpoint = stdplagcount
-    };    for (int x = 0;x<grid_size;x++)
+        .lags = 
+        {
+            .lags = calloc(sizeof(int16_t),grid_size*grid_size*(size_t)stdplagcount),
+            .cap  = STDP_cap,
+            .lagsperpoint = stdplagcount
+        },
+        .connections =  calloc(sizeof(Compute_float),grid_size*grid_size*STDP_array_size*STDP_array_size)
+
+    };    
+    for (int x = 0;x<grid_size;x++)
     {
         for (int y = 0;y<grid_size;y++)
         {
-            L.lags[(x*grid_size+y)*L.lagsperpoint]=-1;
+            D.lags.lags[(x*grid_size+y)*D.lags.lagsperpoint]=-1;
         }
     }
 
-    memcpy(&ret->lags,&L,sizeof(lagstorage));
+    memcpy(ret,&D,sizeof(*ret));
     return ret;
 }
 

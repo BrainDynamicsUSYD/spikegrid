@@ -210,7 +210,8 @@ void StoreFiring(layer* L)
     {
         for (int y=0;y<grid_size;y++)
         { 
-            if (x % step ==0 && y% step ==0)
+            const int test = x % step ==0 && y % step ==0;
+            if ((test && step > 0) || ((!test) && step<0))
             {
                 const int baseidx=(x*grid_size+y)*L->firinglags.lagsperpoint;
                 modifyLags(&L->firinglags,baseidx);

@@ -4,7 +4,7 @@
 #define grid_size 100
 ///Total size of the grid
 ///Coupling range
-#define couplerange 15
+#define couplerange 25
 #ifndef PARAMETERS  //DO NOT REMOVE
 ///include guard
 #define PARAMETERS  //DO NOT REMOVE
@@ -42,9 +42,9 @@ static const parameters OneLayerModel = {.couple={0}}; //since unused - shortes 
 
 #define STDPparams .STDP=   \
     {                       \
-        .stdp_limit=1.8,    \
+        .stdp_limit=5.8,    \
         .stdp_tau=20,       \
-        .stdp_strength=0.05  \
+        .stdp_strength=0.0018  \
     }
 ///parameters for the inhibitory layer of the double layer model
 static const parameters DualLayerModelIn =
@@ -70,7 +70,7 @@ static const parameters DualLayerModelIn =
         .numberper=10,
         .str = 0.8
     },
-
+    STDPparams,
     potparams,
     .skip=2,
 };
@@ -84,7 +84,7 @@ static const parameters DualLayerModelEx =
         {
             .dual =     
             {
-                .W          =  0.13, 
+                .W          =  0.20, 
                 .sigma      = 12,
                 .synapse    = {.R=0.5,.D=2.0},
             }
@@ -99,7 +99,7 @@ static const parameters DualLayerModelEx =
     },
     STDPparams,
     potparams,
-    .skip=1,
+    .skip=-2,
 };
 ///Some global features that can be turned on and off
 static const model_features Features = 

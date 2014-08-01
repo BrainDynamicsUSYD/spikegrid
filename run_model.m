@@ -31,7 +31,7 @@ for i=1:length(out1)
     h(i)=setupplot(out1{i},i+2,outputs);
 end
 
-while time<20000
+while time<2000000
     time=time+1;
     if (mod(time,10)==0)
         [V, out1] =conductance(V,outputs);

@@ -24,7 +24,7 @@ inline static int dist(int cur,int prev)
 }
 inline static Compute_float clamp(Compute_float V,Compute_float target,Compute_float frac)
 {
-    if (target<0) {printf("negative target - possible error target is %f frac is %f V is %f \n",target,frac,V);}
+    target = fabs(target);
     if (target > 1) {printf("large target created\n");}
     if (V > target * frac) {return (target * frac);}
     else if (V < target * -frac) {return (target * -frac);}

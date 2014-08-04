@@ -307,7 +307,7 @@ void step1(model* m,const unsigned int time)
     }
     if (Features.STDP==ON)
     {
-        DoSTDP(m->layer1.connections,m->layer1.STDP_data,m->layer1.P->STDP);
-        if (m->NoLayers==DUALLAYER) {DoSTDP(m->layer2.connections,m->layer2.STDP_data,m->layer2.P->STDP);}
+        DoSTDP(m->layer1.connections,m->layer2.connections,m->layer1.STDP_data,m->layer1.P->STDP, m->layer2.STDP_data,m->layer2.P->STDP);
+        DoSTDP(m->layer2.connections,m->layer1.connections,m->layer2.STDP_data,m->layer2.P->STDP, m->layer1.STDP_data,m->layer1.P->STDP);
     }
 }

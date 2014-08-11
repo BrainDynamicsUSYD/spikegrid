@@ -7,7 +7,16 @@
 #include "sizes.h"
 #include "layer.h"
 #include "STDP.h"
+#include "enums.h"
 #include <stdio.h>
+
+typedef struct
+{
+    Compute_float Forward_strength;
+    Compute_float Reverse_strength;
+    on_off        valid;
+} STDP_change;
+
 Compute_float __attribute__((pure)) STDP_strength(const STDP_parameters S,const Compute_float lag)
 {  
     return  S.stdp_strength * exp(-lag*Features.Timestep/S.stdp_tau);
@@ -31,29 +40,37 @@ inline static Compute_float clamp(Compute_float V,Compute_float target,Compute_f
     else {return V;}
 
 }
-///invert a vector joining 2 points (not really - applied after there has been some additions and also does some tidying up)
+
+STDP_change STDP_change_calc (const int baseidx,const int baseidx2, const STDP_parameters S, const STDP_parameters S2,const int16_t* const lags,const int16_t* revlags)
+{
+    STDP_change ret = {.Forward_strength=Zero, .Reverse_strength=Zero,.valid=OFF};
+    int idx=0;
+    while (lags[baseidx+idx] != -1) //connections within the layer
+    {
+        ret.Forward_strength += STDP_strength(S,lags[baseidx+idx]);
+        idx++;
+        ret.valid = ON;
+    }
+    idx = 0;
+    while (revlags[baseidx2+idx] != -1) //connections to the other layer.  This is way too complicated - but I tghink it should work
+    {
+        ret.Reverse_strength += STDP_strength(S2,revlags[baseidx2+idx]);
+        ret.Forward_strength += STDP_strength(S, revlags[baseidx2+idx]);
+        idx++;
+        ret.valid=OFF;
+    }
+    return ret;
+}
+
+//invert a vector joining 2 points (not really - applied after there has been some additions and also does some tidying up)
 inline static int invertdist(int v) {return ((2*couplerange) - v);}
 void STDP_At_point(const int x, const int y,STDP_data* const data,STDP_data* const revdata,const STDP_parameters S,const STDP_parameters S2,const int xoffset,const int yoffset,
         const Compute_float* const const_couples,const Compute_float* const revconst_couples)
 {
-    int idx=0;
     const int baseidx = (x*grid_size + y) *data->lags.lagsperpoint;
-    Compute_float str = Zero;
-    while (data->lags.lags[baseidx+idx] != -1) //connections within the layer
-    {
-        str += STDP_strength(S,data->lags.lags[baseidx+idx]);
-        idx++;
-    }
     const int baseidx2 = (x*grid_size + y) *revdata->lags.lagsperpoint;
-    int idx2=0;
-    Compute_float str2r = Zero;
-    while (revdata->lags.lags[baseidx2+idx2] != -1) //connections to the other layer.  This is way too complicated - but I tghink it should work
-    {
-        str2r += STDP_strength(S2,revdata->lags.lags[baseidx2+idx2]);
-        str +=   STDP_strength(S, revdata->lags.lags[baseidx2+idx2]);
-        idx2++;
-    }
-    if (idx2+idx > 0) 
+    STDP_change change = STDP_change_calc(baseidx,baseidx2,S,S2,data->lags.lags,revdata->lags.lags);
+    if (change.valid==ON) 
     {
         // the other neuron actually fired - so we can apply STDP - need to apply in two directions
         //calculate the offsets
@@ -65,9 +82,9 @@ void STDP_At_point(const int x, const int y,STDP_data* const data,STDP_data* con
         const int ry  = invertdist(cdy);
         const int fidx = (px*grid_size+py)*STDP_array_size*STDP_array_size + cdx*STDP_array_size + cdy;
         const int ridx = (x*grid_size+y)*STDP_array_size*STDP_array_size + rx*STDP_array_size + ry;
-        data->connections[fidx] = clamp(data->connections[fidx] + str,const_couples[cdx*couple_array_size + cdy],S.stdp_limit);
-        data->connections[ridx] = clamp(data->connections[ridx] - str,const_couples[cdx*couple_array_size + cdy],S.stdp_limit);
-        revdata->connections[ridx] = clamp(revdata->connections[ridx] - str,revconst_couples[cdx*couple_array_size + cdy],S2.stdp_limit);
+        data->connections[fidx] =    clamp(data->   connections[fidx] + change.Forward_strength  ,const_couples[cdx*couple_array_size + cdy],S.stdp_limit);
+        data->connections[ridx] =    clamp(data->   connections[ridx] - change.Forward_strength  ,const_couples[cdx*couple_array_size + cdy],S.stdp_limit);
+        revdata->connections[ridx] = clamp(revdata->connections[ridx] - change.Reverse_strength  ,revconst_couples[cdx*couple_array_size + cdy],S2.stdp_limit);
 
         if (fabs(data->connections[fidx]) > 1.0 || fabs(data->connections[ridx]) > 1.0)
         {
@@ -75,7 +92,9 @@ void STDP_At_point(const int x, const int y,STDP_data* const data,STDP_data* con
         }
     }
 }
-void  DoSTDP(const Compute_float* const const_couples, const Compute_float* const const_couples2,STDP_data* data,const STDP_parameters S,STDP_data* const data2,const STDP_parameters S2)
+void  DoSTDP(const Compute_float* const const_couples, const Compute_float* const const_couples2,
+        STDP_data* data,const STDP_parameters S, STDP_data* const data2,const STDP_parameters S2,
+        randomconnection* rcs,const randconn_parameters* const rparams )
 {
     if (S.stdp_strength ==Zero) {return;}
     for (int x=0;x<grid_size;x++)
@@ -85,7 +104,7 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
             const int baseidx = (x*grid_size + y)*data->lags.lagsperpoint;
             //first - check if the neuron has fired this timestep
             int idx = 0;
-            while (data->lags.lags[baseidx + idx] != -1) 
+            while (data->lags.lags[baseidx + idx] != -2) 
             {
                 idx++;
             }
@@ -98,6 +117,20 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
                     {
                         if (x+i<0 || x+i>=grid_size || y+j<0 || y+j>=grid_size || i*i+j*j > STDP_RANGE_SQUARED) {continue;}
                         STDP_At_point(x,y,data,data2,S,S2,i,j,const_couples,const_couples2);
+                    }
+                }
+                //random connections away from (x,y) - these will be getting decreased
+                if (Features.Random_connections == ON)
+                {
+                    const int basercidx = (x*grid_size+y) * rparams->numberper ;
+                    //iterate over the rcs.
+                    for (int i = 0;i<rparams->numberper;i++)
+                    {
+                        randomconnection rc = rcs[basercidx + i];
+                        const int destbaseidx = ((rc.destination.x * grid_size) + y)*data->lags.lagsperpoint;
+                        const int destbaseidx2 = 0;//MASSIVE HACK
+                        STDP_change rcchange = STDP_change_calc(destbaseidx,destbaseidx2,S,S2,data->lags.lags,data2->lags.lags);
+                        rc.stdp_strength = clamp(rc.stdp_strength-rcchange.Forward_strength,rc.strength,S.stdp_limit);
                     }
                 }
             }

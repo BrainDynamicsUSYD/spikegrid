@@ -57,13 +57,24 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
                 str += Synapse_timecourse(D,L.firinglags.lags[idx*L.firinglags.lagsperpoint + idx2] * Features.Timestep);
                 idx2++;
             }
-            if (Ion) {str = (-str);}
+            if (Ion) {str = (-str);} //invert strength for inhib conns.
             if (idx2 > 0) //only fire if we had a spike.
             {
                 evolvept_duallayer(x,y,L.connections,str,(Ion?gI:gE));
                 if (Features.STDP==ON)
                 {
                     evolvept_duallayer_STDP(x,y,L.connections,L.STDP_data->connections,str,(Ion?gI:gE));
+                }
+            }
+            if (Features.Random_connections == ON)
+            {
+                const int randbase = (x*grid_size+y)*L.P->random.numberper;
+                for (int i=0;i<L.P->random.numberper;i++)
+                {
+                    const randomconnection rc = L.randconns[randbase+i];
+                    const int condindex = (rc.destination.x + couplerange) * conductance_array_size + rc.destination.y + couplerange;
+                    if (Ion) {gI[condindex] += str * rc.strength;}
+                    else  {gE[condindex] += str * rc.strength;}
                 }
             }
 
@@ -307,7 +318,7 @@ void step1(model* m,const unsigned int time)
     }
     if (Features.STDP==ON)
     {
-        DoSTDP(m->layer1.connections,m->layer2.connections,m->layer1.STDP_data,m->layer1.P->STDP, m->layer2.STDP_data,m->layer2.P->STDP);
-        DoSTDP(m->layer2.connections,m->layer1.connections,m->layer2.STDP_data,m->layer2.P->STDP, m->layer1.STDP_data,m->layer1.P->STDP);
+        DoSTDP(m->layer1.connections,m->layer2.connections,m->layer1.STDP_data,m->layer1.P->STDP, m->layer2.STDP_data,m->layer2.P->STDP,m->layer1.randconns,&m->layer1.P->random);
+        DoSTDP(m->layer2.connections,m->layer1.connections,m->layer2.STDP_data,m->layer2.P->STDP, m->layer1.STDP_data,m->layer1.P->STDP,m->layer2.randconns,&m->layer2.P->random);
     }
 }

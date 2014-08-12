@@ -104,7 +104,7 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
             const int baseidx = (x*grid_size + y)*data->lags.lagsperpoint;
             //first - check if the neuron has fired this timestep
             int idx = 0;
-            while (data->lags.lags[baseidx + idx] != -2) 
+            while (data->lags.lags[baseidx + idx] != -1) 
             {
                 idx++;
             }

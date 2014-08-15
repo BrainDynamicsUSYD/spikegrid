@@ -35,6 +35,18 @@ void withSTDP()
     printf("}\n");
 
 }
+void checkfn()
+{
+    printf("void check()\n");
+    printf("{\n");
+    printf("    if (conductance_array_size != %i || couplerange != %i || couple_array_size != %i)\n",conductance_array_size,couplerange,couple_array_size);
+    printf("    {\n");
+    printf("        printf(\"You need to regenerate maskgen.c\");\n");
+    printf("        exit(EXIT_FAILURE);\n");
+    printf("    }\n");
+    printf("}");
+
+}
 int main(int argc, char** argv)
 {
     //some initial setup lines
@@ -42,6 +54,8 @@ int main(int argc, char** argv)
     printf("//parameters: conductance_array_size %i, couplerange %i, couple_array_size %i\n",conductance_array_size,couplerange,couple_array_size);
     printf("#include \"sizes.h\"\n");
     printf("#include \"typedefs.h\"\n");
+    printf("#include \"stdlib.h\"\n");
+    printf("#include \"stdio.h\"\n");
     printf("long long int c  = 0;\n");
     printf("void evolvept_duallayer (const int x,const int y,const Compute_float* const __restrict connections,const Compute_float strmod, Compute_float* __restrict condmat)\n");
     printf("{\n");
@@ -62,4 +76,5 @@ int main(int argc, char** argv)
     } 
     printf("}\n");
     withSTDP();
+    checkfn();
 }

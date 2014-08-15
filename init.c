@@ -12,6 +12,7 @@
 #include "paramheader.h"
 #include "layer.h"
 #include "STDP.h"
+#include "evolvegen.h"
 ///creates a random initial condition - assumes random is already seeded
 ///This is generated as small fluctuations away from Vrt
 /// @param input    The input matrix - Modified in place
@@ -123,6 +124,7 @@ layer setuplayer(const parameters p)
 // No idea wtf this function is doing - Adam.
 model* setup(const parameters p,const parameters p2,const LayerNumbers lcount, int jobnumber)
 {
+    check(); //check evolvegen is correct
     if (jobnumber <0)
     {
         sprintf(outdir,"output/");

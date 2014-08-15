@@ -88,7 +88,7 @@ void STDP_At_point(const int x, const int y,STDP_data* const data,STDP_data* con
 
         if (fabs(data->connections[fidx]) > 1.0 || fabs(data->connections[ridx]) > 1.0)
         {
-            printf("something bad has happened at idx %i or %i %i %i\n",fidx,ridx,x,y);
+          //  printf("something bad has happened at idx %i or %i %i %i\n",fidx,ridx,x,y);
         }
     }
 }

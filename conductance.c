@@ -45,7 +45,6 @@ void step_(const Compute_float* const inpV,const Compute_float* const inpV2, con
        // if (Features.STDP==ON) {ringbuffer_increment(&m->layer2.spikes_STDP,mytime);}
     }
     step1(m,mytime);
-
 }
 
 void setuppointers(Compute_float** FirstV,Compute_float** SecondV, Compute_float** FirstW, Compute_float** SecondW,const Job* const job)

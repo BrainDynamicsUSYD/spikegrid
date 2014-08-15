@@ -1,4 +1,5 @@
 exit=0;
+!make evolvegen.c
 compile;
 time=1;
 %outputs={ 'STDP1','STDP2' };

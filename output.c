@@ -2,11 +2,11 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <errno.h>
 #include "STD.h"
 #include "output.h"
 #include "picture.h"
 #include "paramheader.h"
-#include "layer.h"
 #include "STDP.h"
 ///Total number of things to be output - occasionally needs to be incremented
 #define output_count  17
@@ -140,9 +140,6 @@ void outputToConsole(const tagged_array input)
     free(buf);
 
 }
-#include <string.h>
-#include <error.h>
-#include <errno.h>
 ///Send an outputtable to a text file
 ///@param input     the outputtable object to output
 ///@param idx       the index of the outputtable so that if multiple objects are output, files have consistent naming

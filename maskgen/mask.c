@@ -54,8 +54,8 @@ int main(int argc, char** argv)
     printf("//parameters: conductance_array_size %i, couplerange %i, couple_array_size %i\n",conductance_array_size,couplerange,couple_array_size);
     printf("#include \"sizes.h\"\n");
     printf("#include \"typedefs.h\"\n");
-    printf("#include \"stdlib.h\"\n");
-    printf("#include \"stdio.h\"\n");
+    printf("#include <stdio.h>\n");
+    printf("#include <stdlib.h>\n");
     printf("long long int c  = 0;\n");
     printf("void evolvept_duallayer (const int x,const int y,const Compute_float* const __restrict connections,const Compute_float strmod, Compute_float* __restrict condmat)\n");
     printf("{\n");

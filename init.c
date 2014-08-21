@@ -10,7 +10,6 @@
 #include "printstruct.h"
 #include "STD.h"
 #include "paramheader.h"
-#include "layer.h"
 #include "STDP.h"
 #include "evolvegen.h"
 ///creates a random initial condition - assumes random is already seeded

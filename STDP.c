@@ -2,12 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include "paramheader.h"
-#include "ringbuffer.h"
 #include "mymath.h" //fabsf
-#include "sizes.h"
-#include "layer.h"
 #include "STDP.h"
-#include "enums.h"
 #include <stdio.h>
 
 typedef struct

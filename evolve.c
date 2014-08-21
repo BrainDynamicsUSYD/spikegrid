@@ -8,7 +8,6 @@
 #include "STD.h"
 #include "mymath.h"
 #include "paramheader.h"
-#include "layer.h"
 #include "coupling.h"
 ///add conductance from a firing neuron to the gE and gI arrays (used in single layer model)
 void evolvept (const int x,const int y,const Compute_float* const __restrict connections,const Compute_float Estrmod,const Compute_float Istrmod,Compute_float* __restrict gE,Compute_float* __restrict gI)
@@ -53,7 +52,6 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
             int idx2 = 0;
             while (L.firinglags.lags[idx*L.firinglags.lagsperpoint+idx2] != -1)
             {
-                //                str += Eon?L.Extimecourse[L.firinglags[idx*L.MaxFirings + idx2]]:L.Intimecourse[L.firinglags[idx*L.MaxFirings + idx2]];
                 str += Synapse_timecourse(D,L.firinglags.lags[idx*L.firinglags.lagsperpoint + idx2] * Features.Timestep);
                 idx2++;
             }

@@ -1,5 +1,7 @@
 ///\file
 #include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
 #include "matlab_includes.h"
 #include "output.h"
 #include "ringbuffer.h"

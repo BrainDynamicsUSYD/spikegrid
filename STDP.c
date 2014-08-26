@@ -92,7 +92,7 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
         STDP_data* data,const STDP_parameters S, STDP_data* const data2,const STDP_parameters S2,
         randomconnection* rcs,const randconn_parameters* const rparams )
 {
-    if (S.stdp_strength ==Zero) {return;}
+    if (S.STDP_on ==OFF) {return;}
     for (int x=0;x<grid_size;x++)
     {
         for (int y=0;y<grid_size;y++)

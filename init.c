@@ -101,16 +101,16 @@ layer setuplayer(const parameters p)
         {
             for (int y=0;y<grid_size;y++)
             {
-                for (int c=0;c<p.random.numberper;c++)
+                for (int i=0;i<p.random.numberper;i++)
                 {
-                    L.randconns[(x*grid_size+y)*p.random.numberper + c] = 
+                    L.randconns[(x*grid_size+y)*p.random.numberper + i] = 
                         (randomconnection){
                             .strength = p.random.str,
                             .stdp_strength = Zero,
                             .destination = 
                             {
-                                .x = (Neuron_coord)((Compute_float)(random() / (Compute_float)RAND_MAX) * (Compute_float)grid_size),
-                                .y = (Neuron_coord)((Compute_float)(random() / (Compute_float)RAND_MAX) * (Compute_float)grid_size),
+                                .x = (Neuron_coord)(((Compute_float)random() / (Compute_float)RAND_MAX) * (Compute_float)grid_size),
+                                .y = (Neuron_coord)(((Compute_float)random() / (Compute_float)RAND_MAX) * (Compute_float)grid_size),
                             }
                         };
                 }

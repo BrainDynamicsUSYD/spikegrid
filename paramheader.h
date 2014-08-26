@@ -95,6 +95,7 @@ typedef struct STDP_parameters
     const Compute_float stdp_limit;     ///<maximum STDP that can be applied to a synapse as a fraction of its original value
     const Compute_float stdp_tau;       ///<tau for STDP (controls timescale of window function)
     const Compute_float stdp_strength;  ///< controls the amount of STDP
+    const on_off        STDP_on;
 } STDP_parameters;
 ///Parameters controlling the shape of the STD recovery
 ///see various markram papers for details

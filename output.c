@@ -196,6 +196,7 @@ void dooutput(const output_parameters* const m,const unsigned int t)
     {
         if (t % m[i].Delay==0)
         {
+            //clang gives a warning about NO_output not being handled here - safe to ignore
             switch (m[i].output_method)
             {
                 case PICTURE:

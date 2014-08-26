@@ -7,6 +7,8 @@ else #clang
 	export CFLAGS= -g -Wno-padded -Wno-missing-prototypes -Wno-missing-variable-declarations -Weverything -pedantic --std=gnu11 -Ofast -Wno-documentation-unknown-command -Wno-covered-switch-default
 
 endif
+export opencvcflags=$(shell pkg-config --cflags opencv)
+export opencvldflags=$(shell pkg-config --libs opencv)
 export DEBUGFLAGS= -g -std=gnu11
 #export SPEEDFLAG=-DFAST #comment out this line for double instead of float (will make code slower)
 export CLIBFLAGS= -fPIC -shared
@@ -21,7 +23,7 @@ export maskgen=$(shell pwd)/mask
 .PHONY: profile clean submit docs debug params matlabparams viewer ${VIEWERBIN}  ${maskgen}
 #binary
 ${BINARY}: ${SOURCES} *.h
-	${CC} ${CFLAGS}     ${SOURCES} -o ${BINARY} ${LDFLAGS}
+	${CC} ${CFLAGS} ${opencvcflags}     ${SOURCES} -o ${BINARY} ${LDFLAGS}
 evolvegen.c: mask whichparam.h param*.h
 	${maskgen} > evolvegen.c
 debug: ${SOURCE}

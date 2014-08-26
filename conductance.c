@@ -7,6 +7,8 @@
 #include <fenv.h>   //for some debugging
 #include <stdio.h>
 #include <time.h>
+#include "cv.h"
+#include "highgui.h"
 #include "cleanup.h"
 #include "evolve.h"
 #include "newparam.h"

@@ -19,12 +19,13 @@ SOURCES= conductance.c coupling.c  STDP.c STD.c picture.c output.c evolve.c ring
 BINARY=./a.out
 VERSION_HASH = $(shell git rev-parse HEAD)
 export VIEWERBIN=$(shell pwd)/watch
-export CVClib=$(shell pwd)/cvlib
+export CVClib=$(shell pwd)/libcv
 export maskgen=$(shell pwd)/mask
-.PHONY: profile clean submit docs debug params matlabparams viewer ${VIEWERBIN}  ${maskgen}
+export CVClibdir=$(shell pwd)/openCVAPI
+.PHONY: profile clean submit docs debug params matlabparams viewer ${VIEWERBIN}  ${maskgen} force_look
 #binary
-${BINARY}: ${SOURCES} *.h ${CVClib}
-	${CC} ${CFLAGS} ${opencvcflags}     ${SOURCES} -o ${BINARY} -L. ${LDFLAGS}  -l:cvlib  ${opencvldflags}
+${BINARY}: ${SOURCES} *.h ${CVClibdir}
+	${CC} ${CFLAGS} ${opencvcflags}     ${SOURCES} -o ${BINARY} -L. ${LDFLAGS}  -l:libcv  ${opencvldflags}
 evolvegen.c: mask whichparam.h param*.h
 	${maskgen} > evolvegen.c
 debug: ${SOURCE}
@@ -67,9 +68,9 @@ compileslow.m: makefile
 viewer: ${VIEWERBIN}
 ${VIEWERBIN} :
 	cd viewer && $(MAKE) ${VIEWERBIN}
-cv : ${CVClib}
-${CVClib} : 
-	cd openCVAPI && $(MAKE) ${CVClib}
+${CVClibdir} : force_look
+	$(MAKE) -C openCVAPI ${CVClib}
+${CVClib} : ${CVClibdir}
 mask: ${maskgen}
 ${maskgen} :
-	cd maskgen && $(MAKE) ${maskgen}
+	$(MAKE) -C maskgen ${maskgen}

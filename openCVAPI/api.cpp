@@ -1,6 +1,7 @@
 #include <opencv2/contrib/contrib.hpp>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
+#include "api.h"
 using namespace cv;
 void PlotColored(const char* winname,const double* data,const double min,const double max,const int size)
 {
@@ -16,7 +17,7 @@ void PlotColored(const char* winname,const double* data,const double min,const d
 	Mat outmat;
 	applyColorMap(m,outmat,COLORMAP_JET);
 	imshow(winname,outmat);
-	waitKey(0);
+	waitKey(33);
 	free(dispmat);
 }
 

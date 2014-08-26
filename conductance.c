@@ -234,6 +234,14 @@ int main(int argc,char** argv) //useful for testing w/out matlab
     if (job->next != NULL || (job->initcond==RAND_JOB && job->Voltage_or_count>1)) {jobnumber=0;} //if more than one job - then start at 0 - so that stuff goes in folders
     while (job != NULL)
     {
+        const char* const w1 = "viewer1";
+        cvNamedWindow(w1,CV_WINDOW_NORMAL);
+        cvMoveWindow(w1,0,0);
+        cvResizeWindow(w1,300,300);
+        const char* const w2 = "viewer2";
+        cvNamedWindow(w2,CV_WINDOW_NORMAL);
+        cvMoveWindow(w2,300,0);
+        cvResizeWindow(w2,300,300);
         int count = job->initcond==RAND_JOB?(int)job->Voltage_or_count:1; //default to 1 job
         for (int c = 0;c<count;c++)
         {
@@ -261,12 +269,9 @@ int main(int argc,char** argv) //useful for testing w/out matlab
                 //do some opencv stuff
                 if(mytime % 10 ==0)
                 {
-                    const char* const winname = "viewer";
-                    cvNamedWindow(winname,CV_WINDOW_NORMAL);
-                    cvMoveWindow(winname,0,0);
-                    cvResizeWindow(winname,1000,1000);
-                    PlotColored(winname,SecondV,m->layer1.P->potential.Vin,m->layer1.P->potential.Vpk,grid_size);
-                    cvWaitKey(33);
+                    PlotColored(w1,FirstV,m->layer1.P->potential.Vin,m->layer1.P->potential.Vpk,grid_size);
+                    if (SecondV != NULL) { PlotColored(w2,SecondV,m->layer2.P->potential.Vin,m->layer2.P->potential.Vpk,grid_size);}
+                    cvWaitKey(1); //wait smallest possible time
                 }
             }
             FreeIfNotNull(FirstV);

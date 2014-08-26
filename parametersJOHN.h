@@ -46,6 +46,12 @@ static const parameters OneLayerModel = {.couple={0}}; //since unused - shortes 
         .stdp_tau=20,       \
         .stdp_strength=0.0048  \
     }
+#define STDparams .STD= \
+    {                   \
+        .U = 0.13,       \
+        .D = 0.2,      \
+        .F = 0.45      \
+    }
 ///parameters for the inhibitory layer of the double layer model
 static const parameters DualLayerModelIn =
 {
@@ -70,6 +76,7 @@ static const parameters DualLayerModelIn =
         .numberper=10,
         .str = 0.8
     },
+    STDparams,
     STDPparams,
     potparams,
     .skip=2,
@@ -97,6 +104,7 @@ static const parameters DualLayerModelEx =
         .numberper=2,
         .str = 0.8
     },
+    STDparams,
     STDPparams,
     potparams,
     .skip=-2,
@@ -104,8 +112,9 @@ static const parameters DualLayerModelEx =
 ///Some global features that can be turned on and off
 static const model_features Features = 
 {
+    .STD        = ON,
     .STDP		= ON, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep - 
-    .Random_connections = ON,
+    .Random_connections = OFF,
     .Timestep   = 0.1,
     .Simlength  = 10000,
 };

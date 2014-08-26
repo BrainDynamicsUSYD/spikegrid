@@ -21,7 +21,7 @@ STD_data* __attribute__((const)) STD_init(const STD_parameters s)
     }
     return ret;
 }
-Compute_float STD_str (const STD_parameters s, const int x, const int y,const unsigned int time,const unsigned int lag, STD_data* const d)
+Compute_float STD_str (const STD_parameters s, const int x, const int y,const unsigned int time,const int16_t lag, STD_data* const d)
 {
     const int stdidx=x*grid_size+y;
     if (lag==1) //recalculate after spiking
@@ -34,7 +34,6 @@ Compute_float STD_str (const STD_parameters s, const int x, const int y,const un
         //newR = 1 + (oldR-oldU*oldR-1)*exp(-dt/D)
         d->R[stdidx] = One + (d->R[stdidx] - prevu*d->R[stdidx] - One)*exp(-spike_interval/s.D);
     }
-    return d->U[stdidx] * d->R[stdidx] * Two; //multiplication by 2 is not in the cited papers, but you could eliminate it by multiplying some other parameters by 2, but multiplying by 2 here enables easier comparison with the non-STD model.  Max has an improvement that calculates a first-order approxiamation that should be included
-
+    return d->U[stdidx] * d->R[stdidx] * (1.0/s.U); //multiply by 1/u so that the initial spike has the correct size
 }
 

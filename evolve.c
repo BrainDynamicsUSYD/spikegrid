@@ -38,6 +38,7 @@ void evolvept_STDP  (const int x,const  int y,const Compute_float* const __restr
     evolvept(x,y,&(connections_STDP[(x*grid_size +y)*couple_array_size*couple_array_size]),Estrmod,Istrmod,gE,gI);
 }
 ///Adds the effect of the spikes that have fired in the past to the gE and gI arrays as appropriate
+/// currently, single layer doesn't work (correctly)
 void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restrict__ gI,const unsigned int time)
 {
  //   const int Eon = L.Extimecourse!=NULL; //does this layer have excitation
@@ -52,7 +53,12 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
             int idx2 = 0;
             while (L.firinglags.lags[idx*L.firinglags.lagsperpoint+idx2] != -1)
             {
-                str += Synapse_timecourse(D,L.firinglags.lags[idx*L.firinglags.lagsperpoint + idx2] * Features.Timestep);
+                Compute_float this_str = Synapse_timecourse(D,L.firinglags.lags[idx*L.firinglags.lagsperpoint + idx2] * Features.Timestep);
+                if (Features.STD == ON)
+                {
+                    this_str = this_str * STD_str(L.P->STD,x,y,time,L.firinglags.lags[idx*L.firinglags.lagsperpoint + idx2],L.std);
+                }
+                str += this_str;
                 idx2++;
             }
             if (Ion) {str = (-str);} //invert strength for inhib conns.

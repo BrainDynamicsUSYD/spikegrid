@@ -14,8 +14,10 @@ void PlotColored(const char* winname,const double* data,const double min,const d
 		}
 	}
 	Mat m(size,size,CV_64F,dispmat);
+    Mat n;
+    m.convertTo(n, CV_8UC1, 255.0 , 0); 
 	Mat outmat;
-	applyColorMap(m,outmat,COLORMAP_JET);
+	applyColorMap(n,outmat,COLORMAP_JET);
 	imshow(winname,outmat);
 	waitKey(33);
 	free(dispmat);

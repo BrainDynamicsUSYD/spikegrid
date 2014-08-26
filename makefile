@@ -12,22 +12,23 @@ export opencvldflags=$(shell pkg-config --libs opencv)
 export DEBUGFLAGS= -g -std=gnu11
 #export SPEEDFLAG=-DFAST #comment out this line for double instead of float (will make code slower)
 export CLIBFLAGS= -fPIC -shared
-export LDFLAGS=-lm -lpng -g
+export LDFLAGS= -lm -lpng -g 
 CFLAGS += ${SPEEDFLAG}
 #conductance.c always needs to be first - this ensures that the mexfile gets the right name
 SOURCES= conductance.c coupling.c  STDP.c STD.c picture.c output.c evolve.c ringbuffer.c newparam.c yossarian.c init.c theta.c printstruct.c matlab_output.c cleanup.c evolvegen.c
 BINARY=./a.out
 VERSION_HASH = $(shell git rev-parse HEAD)
 export VIEWERBIN=$(shell pwd)/watch
+export CVClib=$(shell pwd)/cvlib
 export maskgen=$(shell pwd)/mask
 .PHONY: profile clean submit docs debug params matlabparams viewer ${VIEWERBIN}  ${maskgen}
 #binary
-${BINARY}: ${SOURCES} *.h
-	${CC} ${CFLAGS} ${opencvcflags}     ${SOURCES} -o ${BINARY} ${LDFLAGS}
+${BINARY}: ${SOURCES} *.h ${CVClib}
+	${CC} ${CFLAGS} ${opencvcflags}     ${SOURCES} -o ${BINARY} -L. ${LDFLAGS}  -l:cvlib  ${opencvldflags}
 evolvegen.c: mask whichparam.h param*.h
 	${maskgen} > evolvegen.c
 debug: ${SOURCE}
-	${CC} ${DEBUGFLAGS} ${SOURCES} -o ${BINARY} ${LDFLAGS}
+	${CC} ${DEBUGFLAGS} ${SOURCES} -o ${BINARY} ${LDFLAGS} 
 mediumopt:
 	${CC} -g -std=gnu99 ${SOURCES} -o ${BINARY} ${LDFLAGS}
 TEST:
@@ -66,6 +67,9 @@ compileslow.m: makefile
 viewer: ${VIEWERBIN}
 ${VIEWERBIN} :
 	cd viewer && $(MAKE) ${VIEWERBIN}
+cv : ${CVClib}
+${CVClib} : 
+	cd openCVAPI && $(MAKE) ${CVClib}
 mask: ${maskgen}
 ${maskgen} :
 	cd maskgen && $(MAKE) ${maskgen}

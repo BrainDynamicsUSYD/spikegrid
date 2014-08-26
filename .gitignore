@@ -40,3 +40,4 @@ watch
 evolvegen.c
 mask
 .ycm_extra_conf.pyc
+cvlib

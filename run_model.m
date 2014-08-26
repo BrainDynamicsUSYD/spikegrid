@@ -2,8 +2,8 @@ exit=0;
 !make evolvegen.c
 compile;
 time=1;
-outputs={ 'STDU1','STDU2' };
-%outputs={'gI'};
+%outputs={ 'STDU1','STDU2' };
+outputs={'gI'};
 %initial call
 [V, out1] = conductance('dummy',outputs);
 global k

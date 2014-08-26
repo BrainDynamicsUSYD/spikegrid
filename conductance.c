@@ -7,8 +7,11 @@
 #include <fenv.h>   //for some debugging
 #include <stdio.h>
 #include <time.h>
+#ifndef MATLAB
 #include "cv.h"
 #include "highgui.h"
+#include "openCVAPI/api.h"
+#endif
 #include "cleanup.h"
 #include "evolve.h"
 #include "newparam.h"
@@ -255,6 +258,16 @@ int main(int argc,char** argv) //useful for testing w/out matlab
                 if (SecondV != NULL)  {memcpy(SecondV,m->layer2.voltages_out, sizeof(Compute_float)*grid_size*grid_size);}
                 if (FirstW != NULL)   {memcpy(FirstW, m->layer1.recoverys_out,sizeof(Compute_float)*grid_size*grid_size);}
                 if (SecondW != NULL)  {memcpy(SecondW,m->layer2.recoverys_out,sizeof(Compute_float)*grid_size*grid_size);}
+                //do some opencv stuff
+                if(mytime % 10 ==0)
+                {
+                    const char* const winname = "viewer";
+                    cvNamedWindow(winname,CV_WINDOW_NORMAL);
+                    cvMoveWindow(winname,0,0);
+                    cvResizeWindow(winname,1000,1000);
+                    PlotColored(winname,SecondV,m->layer1.P->potential.Vin,m->layer1.P->potential.Vpk,grid_size);
+                    cvWaitKey(33);
+                }
             }
             FreeIfNotNull(FirstV);
             FreeIfNotNull(SecondV);

@@ -113,7 +113,7 @@ static const parameters DualLayerModelEx =
 ///Some global features that can be turned on and off
 static const model_features Features = 
 {
-    .STD        = ON,
+    .STD        = OFF,
     .STDP		= ON, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep - 
     .Random_connections = OFF,
     .Timestep   = 0.1,

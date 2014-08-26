@@ -21,8 +21,8 @@ void mousecb(int event, int x,int y,int dummy,void* dummy2)
 }
 int compare(const void* a, const void* b)
 {
-    char * ca = *(const char**)a;
-    char * cb = *(const char**)b;
+    const char * ca = *(const char**)a;
+    const char * cb = *(const char**)b;
     int ia = atoi(ca+4);
     int ib = atoi(cb+4);
     return ia-ib;

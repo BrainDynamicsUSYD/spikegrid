@@ -114,11 +114,12 @@ static const parameters DualLayerModelEx =
 ///Some global features that can be turned on and off
 static const model_features Features = 
 {
-    .STD        = OFF,
+    .STD        = ON,
     .STDP		= ON, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep - 
     .Random_connections = OFF,
     .Timestep   = 0.1,
     .Simlength  = 10000,
+    .job        = {.initcond = RAND_ZERO}
 };
 ///Constant external input to conductances
 static const extinput Extinput =

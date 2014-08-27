@@ -250,6 +250,7 @@ int main(int argc,char** argv) //useful for testing w/out matlab
             //seed RNG as appropriate - with either time or job number
             if (job->initcond == RAND_TIME) {srandom((unsigned)time(0));}
             else if (job->initcond==RAND_JOB) {srandom((unsigned)c);}
+            else if (job->initcond==RAND_ZERO) {srandom((unsigned)0);}
             //sets up the model code
             if (ModelType==SINGLELAYER) {m=setup(newparam!=NULL? (*newparam):OneLayerModel,newparam!=NULL? (*newparam):OneLayerModel,ModelType,jobnumber);} //pass the same layer as a double parameter
             else {m=setup(newparamIn!=NULL?*newparamIn:DualLayerModelIn,newparamEx!=NULL?*newparamEx:DualLayerModelEx,ModelType,jobnumber);}

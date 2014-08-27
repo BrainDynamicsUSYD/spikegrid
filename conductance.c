@@ -190,7 +190,7 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
 }
 #else
 ///Structure which holds the command line options that the program recognises
-struct option long_options[] = {{"help",no_argument,0,'h'},{"generate",no_argument,0,'g'},{"sweep",required_argument,0,'s'},{"nocv",no_argument,0,'c'}};
+struct option long_options[] = {{"help",no_argument,0,'h'},{"generate",no_argument,0,'g'},{"sweep",required_argument,0,'s'},{"nocv",no_argument,0,'n'},{0,0,0,0}};
 ///Main function for the entire program
 /// @param argc number of cmdline args
 /// @param argv what the parameters actually are
@@ -205,7 +205,7 @@ int main(int argc,char** argv) //useful for testing w/out matlab
     while (1)
     {
         int option_index=0;
-        int c=getopt_long(argc,argv,"hgs:",long_options,&option_index);
+        int c=getopt_long(argc,argv,"hgns:",long_options,&option_index);
         if (c==-1) {break;} //end of options
         switch (c)
         {
@@ -213,7 +213,7 @@ int main(int argc,char** argv) //useful for testing w/out matlab
                 printf("available arguments:\n"
                         "   -h --help print this message\n"
                         "   -g --generate generate a yossarian config file\n"
-                        "   -c --nocv disable open cv viewer\n"
+                        "   -n --nocv disable open cv viewer\n"
                         "   -s --sweep N do the nth element of a sweep\n");
                 exit(EXIT_SUCCESS);
             case 'g':
@@ -234,7 +234,7 @@ int main(int argc,char** argv) //useful for testing w/out matlab
                     }
                 }
                 break;
-            case 'c':
+            case 'n':
                 OpenCv = OFF;
                 break;
         }
@@ -252,7 +252,7 @@ int main(int argc,char** argv) //useful for testing w/out matlab
             else if (job->initcond==RAND_JOB) {srandom((unsigned)c);}
             //sets up the model code
             if (ModelType==SINGLELAYER) {m=setup(newparam!=NULL? (*newparam):OneLayerModel,newparam!=NULL? (*newparam):OneLayerModel,ModelType,jobnumber);} //pass the same layer as a double parameter
-            else {m=setup(newparaIn!=NULL?*newparamIn:DualLayerModelIn,newparamEx!=NULL?*newparamEx:DualLayerModelEx,ModelType,jobnumber);}
+            else {m=setup(newparamIn!=NULL?*newparamIn:DualLayerModelIn,newparamEx!=NULL?*newparamEx:DualLayerModelEx,ModelType,jobnumber);}
 
             if (OpenCv==ON){ cvdispInit((const char*[]){"V1","V2"},2);}
             Compute_float *FirstV,*SecondV,*FirstW,*SecondW;

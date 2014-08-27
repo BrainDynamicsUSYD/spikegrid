@@ -109,6 +109,7 @@ static const parameters DualLayerModelEx =
     STDPparams,
     potparams,
     .skip=-2,
+    .output = {{ .output_method=PICTURE,.Output=4,.Delay=10}}
 };
 ///Some global features that can be turned on and off
 static const model_features Features = 

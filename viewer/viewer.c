@@ -45,6 +45,7 @@ int main() {
             }
         }
     }
+    printf("Found all directories");
     qsort(dirnames,dirno,sizeof(char*),compare);
     //set up video inputs
     cvNamedWindow(winname,CV_WINDOW_AUTOSIZE);

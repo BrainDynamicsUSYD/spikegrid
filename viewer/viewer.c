@@ -37,8 +37,8 @@ int main() {
     {
         while ((dir=readdir(d)) != NULL)
         {
-            if (!strncmp(dir->d_name,"job-",4))
-            {
+            if (!strncmp(dir->d_name,"job-",4)) //check dirname matches pattern
+            {   //store dirname
                 dirnames[dirno]=malloc(strlen(dir->d_name));
                 strcpy(dirnames[dirno],dir->d_name);
                 dirno++;
@@ -47,7 +47,7 @@ int main() {
     }
     printf("Found all directories");
     qsort(dirnames,dirno,sizeof(char*),compare);
-    //set up video inputs
+    //set up window
     cvNamedWindow(winname,CV_WINDOW_AUTOSIZE);
     cvMoveWindow(winname,0,0);
     cvSetMouseCallback(winname,mousecb,0);
@@ -59,12 +59,14 @@ int main() {
     {
         int vcount=0;
         upto = vididx;
+        //open video files for viewing
         for (int i=0;i<rows*cols && vididx< dirno ;i++)
         {
             char buf[100];
             sprintf(buf,"%s/test.avi",dirnames[vididx]);
             caps[i] = cvCreateFileCapture(buf);
             if (caps[i]){size = (int)cvGetCaptureProperty(caps[i],CV_CAP_PROP_FRAME_HEIGHT);}
+            else {printf("init capture failed for %s - maybe test.avi doesn't exist?\n",buf);}
             vididx++;
             vcount++;
         }
@@ -76,19 +78,22 @@ int main() {
         {
             for (int i=0; i<vcount;i++)
             {
-                frame=cvQueryFrame(caps[i]);
-                if (!frame) 
-                {
-                    if (i==0) goto done;
-                    else continue;
+                if (caps[i]) //only process frames where capture succeeded
+                {            //if the capture failed, just leave the square blank.
+                    frame=cvQueryFrame(caps[i]);
+                    if (!frame) 
+                    {
+                        if (i==0) goto done; //here we have assumed once one video is done they all are, and we bail
+                        else continue;
+                    }
+                    cvSetImageROI(dispimage,cvRect((i/cols)*size,(i%cols)*size,size,size));
+                    cvResize(frame,dispimage,CV_INTER_LINEAR);
+                    cvResetImageROI(dispimage);
                 }
-                cvSetImageROI(dispimage,cvRect((i/cols)*size,(i%cols)*size,size,size));
-                cvResize(frame,dispimage,CV_INTER_LINEAR);
-                cvResetImageROI(dispimage);
             }
             cvShowImage(winname,dispimage);
-                int c = cvWaitKey(33);
-                if (c==27) break;
+            int c = cvWaitKey(33);
+            if (c==27) break;
         }
 done:
         // free memory

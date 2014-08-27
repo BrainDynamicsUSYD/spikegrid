@@ -12,6 +12,7 @@
 #include "highgui.h"
 #include "openCVAPI/api.h"
 #endif
+#include "output.h"
 #include "cleanup.h"
 #include "evolve.h"
 #include "newparam.h"
@@ -189,7 +190,7 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
 }
 #else
 ///Structure which holds the command line options that the program recognises
-struct option long_options[] = {{"help",no_argument,0,'h'},{"generate",no_argument,0,'g'},{"sweep",required_argument,0,'s'}};
+struct option long_options[] = {{"help",no_argument,0,'h'},{"generate",no_argument,0,'g'},{"sweep",required_argument,0,'s'},{"nocv",no_argument,0,'c'}};
 ///Main function for the entire program
 /// @param argc number of cmdline args
 /// @param argv what the parameters actually are
@@ -197,7 +198,10 @@ int main(int argc,char** argv) //useful for testing w/out matlab
 {
     feenableexcept(FE_INVALID | FE_OVERFLOW); //segfault on NaN and overflow.  Note - this cannot be used in matlab
     parameters* newparam = NULL;
+    parameters* newparamEx = NULL;
+    parameters* newparamIn = NULL;
     setvbuf(stdout,NULL,_IONBF,0);
+    on_off OpenCv=ON;
     while (1)
     {
         int option_index=0;
@@ -209,6 +213,7 @@ int main(int argc,char** argv) //useful for testing w/out matlab
                 printf("available arguments:\n"
                         "   -h --help print this message\n"
                         "   -g --generate generate a yossarian config file\n"
+                        "   -c --nocv disable open cv viewer\n"
                         "   -s --sweep N do the nth element of a sweep\n");
                 exit(EXIT_SUCCESS);
             case 'g':
@@ -224,9 +229,13 @@ int main(int argc,char** argv) //useful for testing w/out matlab
                     }
                     else 
                     {
-                           newparam = GetNthParam(DualLayerModelEx,Sweep,(unsigned int)jobnumber);
+                           newparamEx = GetNthParam(DualLayerModelEx,Sweep,(unsigned int)jobnumber);
+                           newparamIn = GetNthParam(DualLayerModelIn,Sweep,(unsigned int)jobnumber);
                     }
                 }
+                break;
+            case 'c':
+                OpenCv = OFF;
                 break;
         }
     }
@@ -234,14 +243,6 @@ int main(int argc,char** argv) //useful for testing w/out matlab
     if (job->next != NULL || (job->initcond==RAND_JOB && job->Voltage_or_count>1)) {jobnumber=0;} //if more than one job - then start at 0 - so that stuff goes in folders
     while (job != NULL)
     {
-        const char* const w1 = "viewer1";
-        cvNamedWindow(w1,CV_WINDOW_NORMAL);
-        cvMoveWindow(w1,0,0);
-        cvResizeWindow(w1,300,300);
-        const char* const w2 = "viewer2";
-        cvNamedWindow(w2,CV_WINDOW_NORMAL);
-        cvMoveWindow(w2,300,0);
-        cvResizeWindow(w2,300,300);
         int count = job->initcond==RAND_JOB?(int)job->Voltage_or_count:1; //default to 1 job
         for (int c = 0;c<count;c++)
         {
@@ -251,8 +252,9 @@ int main(int argc,char** argv) //useful for testing w/out matlab
             else if (job->initcond==RAND_JOB) {srandom((unsigned)c);}
             //sets up the model code
             if (ModelType==SINGLELAYER) {m=setup(newparam!=NULL? (*newparam):OneLayerModel,newparam!=NULL? (*newparam):OneLayerModel,ModelType,jobnumber);} //pass the same layer as a double parameter
-            else {m=setup(DualLayerModelIn,newparam!=NULL?*newparam:DualLayerModelEx,ModelType,jobnumber);}
+            else {m=setup(newparaIn!=NULL?*newparamIn:DualLayerModelIn,newparamEx!=NULL?*newparamEx:DualLayerModelEx,ModelType,jobnumber);}
 
+            if (OpenCv==ON){ cvdispInit((const char*[]){"V1","V2"},2);}
             Compute_float *FirstV,*SecondV,*FirstW,*SecondW;
             setuppointers(&FirstV,&SecondV,&FirstW,&SecondW,job);
             //actually runs the model
@@ -267,11 +269,9 @@ int main(int argc,char** argv) //useful for testing w/out matlab
                 if (FirstW != NULL)   {memcpy(FirstW, m->layer1.recoverys_out,sizeof(Compute_float)*grid_size*grid_size);}
                 if (SecondW != NULL)  {memcpy(SecondW,m->layer2.recoverys_out,sizeof(Compute_float)*grid_size*grid_size);}
                 //do some opencv stuff
-                if(mytime % 10 ==0)
+                if(mytime % 10 ==0 && OpenCv == ON)
                 {
-                    PlotColored(w1,FirstV,m->layer1.P->potential.Vin,m->layer1.P->potential.Vpk,grid_size);
-                    if (SecondV != NULL) { PlotColored(w2,SecondV,m->layer2.P->potential.Vin,m->layer2.P->potential.Vpk,grid_size);}
-                    cvWaitKey(1); //wait smallest possible time
+                    cvdisp((const char*[]){"V1","V2"},2);
                 }
             }
             FreeIfNotNull(FirstV);

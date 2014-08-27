@@ -3,7 +3,7 @@ exit=0;
 compile;
 time=1;
 %outputs={ 'STDU1','STDU2' };
-outputs={'gI'};
+outputs={};
 %initial call
 [V, out1] = conductance('dummy',outputs);
 global k
@@ -31,10 +31,11 @@ h=[];
 for i=1:length(out1)
     h(i)=setupplot(out1{i},i+2,outputs);
 end
-
-while time<2000000
+tic
+while time<5000
     time=time+1;
     if (mod(time,10)==0)
+        disp(time)
         [V, out1] =conductance(V,outputs);
         set(hV,'CData',V.Vex);
         set(hVi,'CData',V.Vin);
@@ -50,3 +51,4 @@ while time<2000000
         return
     end
 end
+toc

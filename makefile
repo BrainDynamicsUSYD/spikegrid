@@ -22,11 +22,11 @@ export VIEWERBIN=$(shell pwd)/watch
 export CVClib=$(shell pwd)/libcv
 export maskgen=$(shell pwd)/mask
 export CVClibdir=$(shell pwd)/openCVAPI
-.PHONY: profile clean submit docs debug params matlabparams viewer ${VIEWERBIN}  ${maskgen} force_look
+.PHONY: profile clean submit docs debug params matlabparams viewer ${VIEWERBIN}  force_look
 #binary
 ${BINARY}: ${SOURCES} *.h ${CVClibdir}
 	${CC} ${CFLAGS} ${opencvcflags}     ${SOURCES} -o ${BINARY} -L. ${LDFLAGS}  -l:libcv  ${opencvldflags}
-evolvegen.c: mask whichparam.h param*.h
+evolvegen.c: ${maskgen} whichparam.h param*.h
 	${maskgen} > evolvegen.c
 debug: ${SOURCE}
 	${CC} ${DEBUGFLAGS} ${SOURCES} -o ${BINARY} ${LDFLAGS} 
@@ -57,7 +57,7 @@ yossarian.csh: ${BINARY}
 submit: yossarian.csh
 	qsub yossarian.csh
 clean:
-	-rm -f ${BINARY}
+	-rm -f ${BINARY} ${CVClib} ${maskgen} evolvegen.c
 	-rm -rf html
 #.m files
 compile.m: makefile
@@ -71,6 +71,5 @@ ${VIEWERBIN} :
 ${CVClibdir} : force_look
 	$(MAKE) -C openCVAPI ${CVClib}
 ${CVClib} : ${CVClibdir}
-mask: ${maskgen}
-${maskgen} :
+${maskgen} : force_look
 	$(MAKE) -C maskgen ${maskgen}

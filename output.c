@@ -3,6 +3,11 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <errno.h>
+#ifndef MATLAB
+    #include "cv.h"
+    #include "highgui.h"
+    #include "openCVAPI/api.h"
+#endif
 #include "STD.h"
 #include "output.h"
 #include "picture.h"
@@ -230,9 +235,31 @@ output_s __attribute__((pure)) getOutputByName(const char* const name)
         }
         outidx++;
     } 
-    printf("tried to get unknown thing to output\n");
+    printf("tried to get unknown thing to output called -%s-\n",name);
     exit(EXIT_FAILURE);
 }
+#ifndef MATLAB
+void cvdispInit(const char** const names,const int count)
+{
+    for (int i=0;i<count;i++)
+    {
+        output_s out = getOutputByName(names[i]);
+        cvNamedWindow(out.name,CV_WINDOW_NORMAL);
+    }
+}
+void cvdisp (const char** const names, const int count)
+{
+    for (int i=0;i<count;i++)
+    {
+        output_s out = getOutputByName(names[i]);
+        const unsigned int size = (out.data.TA_data.size - (2*out.data.TA_data.offset));
+        Compute_float* data = taggedarrayTocomputearray(out.data.TA_data);
+        PlotColored(out.name,data,out.data.TA_data.minval,out.data.TA_data.maxval,size);
+        cvWaitKey(1);
+        free(data);
+    }
+}
+#endif
 ///Set up the outputtables for a given model
 ///@param m the model we are going to output stuff from
 void output_init(const model* const m)

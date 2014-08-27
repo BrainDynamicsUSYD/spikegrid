@@ -3,7 +3,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include "api.h"
 using namespace cv;
-void PlotColored(const char* winname,const double* data,const double min,const double max,const int size)
+void PlotColored(const char* winname,const double* data,const double min,const double max,const unsigned int size)
 {
 	double* dispmat = (double*)malloc(sizeof(*dispmat)*size*size);
 	for (int i=0;i<size;i++)
@@ -19,7 +19,6 @@ void PlotColored(const char* winname,const double* data,const double min,const d
 	Mat outmat;
 	applyColorMap(n,outmat,COLORMAP_JET);
 	imshow(winname,outmat);
-	waitKey(33);
 	free(dispmat);
 }
 

@@ -128,7 +128,7 @@ static const extinput Extinput =
 ///Parameters for conducting a parameter sweep.
 static const sweepable Sweep =
 {
-    .offset=offsetof(parameters,couple)+offsetof(couple_parameters,Layer_parameters) +0+ /*offset in the union is always 0*/  + offsetof(duallayer_parameters,W),
+    .offset=offsetof(parameters,STD)+offsetof(STD_parameters,U) ,
     .minval = 0.0,
     .maxval = 1.0,
     .count = 100

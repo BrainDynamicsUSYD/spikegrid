@@ -280,7 +280,7 @@ void output_init(const model* const m)
         {"STDR1",       FLOAT_DATA, .data.TA_data={Features.STD==ON?m->layer1.std->R:NULL, grid_size, 0,             1,0,1}},
         {"STDU2",       FLOAT_DATA, .data.TA_data={Features.STD==ON?m->layer2.std->U:NULL, grid_size, 0,             1,0,1}},
         {"STDR2",       FLOAT_DATA, .data.TA_data={Features.STD==ON?m->layer2.std->R:NULL, grid_size, 0,             1,0,1}},
-        //ringbuffer outputs
+        //ringbuffer outputs note - currently unused sine the switch to time since fired
         //name          data type        actual data
     //    {"Firing1",     RINGBUFFER_DATA, .data.RB_data=&m->layer1.spikes}, //take reference as the struct gets modified
       //  {"Firing2",     RINGBUFFER_DATA, .data.RB_data=&m->layer2.spikes},

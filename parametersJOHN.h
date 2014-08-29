@@ -49,7 +49,7 @@ static const parameters OneLayerModel = {.couple={0}}; //since unused - shortes 
     }
 #define STDparams .STD= \
     {                   \
-        .U = 0.13,       \
+        .U = 0.5,       \
         .D = 0.2,      \
         .F = 0.45      \
     }
@@ -109,7 +109,7 @@ static const parameters DualLayerModelEx =
     STDPparams,
     potparams,
     .skip=-2,
-    .output = {{ .output_method=PICTURE,.Output=4,.Delay=10}}
+    .output = {{ .output_method=PICTURE,.Output=5,.Delay=10}}
 };
 ///Some global features that can be turned on and off
 static const model_features Features = 
@@ -130,7 +130,7 @@ static const extinput Extinput =
 ///Parameters for conducting a parameter sweep.
 static const sweepable Sweep =
 {
-    .offset=offsetof(parameters,STD)+offsetof(STD_parameters,U) ,
+    .offset=offsetof(parameters,STD)+offsetof(STD_parameters,F) ,
     .minval = 0.0,
     .maxval = 1.0,
     .count = 100

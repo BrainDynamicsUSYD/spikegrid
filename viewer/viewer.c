@@ -83,8 +83,7 @@ int main() {
                     frame=cvQueryFrame(caps[i]);
                     if (!frame) 
                     {
-                        if (i==0) goto done; //here we have assumed once one video is done they all are, and we bail
-                        else continue;
+                        goto done; //here we have assumed once one video is done they all are, and we bail
                     }
                     cvSetImageROI(dispimage,cvRect((i/cols)*size,(i%cols)*size,size,size));
                     cvResize(frame,dispimage,CV_INTER_LINEAR);

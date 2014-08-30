@@ -15,7 +15,7 @@ typedef struct
     const Compute_float GM; ///< The constant to multiply by
 } global_multiplier_parameters;
 ///Used when normalizing excitatory and inhibitory seperately
-typedef struct 
+typedef struct
 {
     const Compute_float Exfactor;   ///< Factor to multiply excitatory connections by
     const Compute_float Infactor;   ///< Factor to multiply inhibitory connections by
@@ -26,7 +26,7 @@ typedef struct decay_parameters{
     const Compute_float D;  ///<decay time constant (units?)
 } decay_parameters;
 ///Parameters for a layer when it is the only one
-typedef struct 
+typedef struct
 {
     const Compute_float WE       ;                  ///<excitatory coupling strength
     const Compute_float sigE   ;                    ///<char. length for Ex symapses (int / float?)
@@ -36,7 +36,7 @@ typedef struct
     const decay_parameters In;                      ///<Parameters for In connections
 } singlelayer_parameters;
 ///Layer parameters for when there are two layers
-typedef struct 
+typedef struct
 {
     const ConnectType       connectivity;   ///<Connectivity type: EXPONENTIAL or HOMOGENEOUS
     const Compute_float     W;              ///<Maximum connectivity strength
@@ -53,7 +53,7 @@ typedef struct couple_parameters
         duallayer_parameters   dual;    ///<double layer
     } Layer_parameters;                 ///<Parameters specific to the number of layers
     const Norm_type     norm_type;      ///<what normalization method to use
-    const union 
+    const union
     {
         Total_area_parameters total_area;
         global_multiplier_parameters glob_mult;
@@ -63,19 +63,19 @@ typedef struct couple_parameters
     const int tref     ;                ///<refractory time
 } couple_parameters;
 ///Contains parameters which control the Voltage dynamics of neurons
-typedef struct 
+typedef struct
 {
-    const struct 
+    const struct
     {
         const neuron_type type ; ///< type of neuron - how it integrates input
         const union
-        {   
+        {
             const struct {const Compute_float Vth;} QIF;
             const struct {const Compute_float Vth; const Compute_float Dpk;} EIF;
         } extra;
     } type                     ;  ///< holds parameters for how to integrate neuron
     const Compute_float Vrt    ;  ///<Reset potential.
-    const Compute_float Vpk    ;  ///<Peak potential 
+    const Compute_float Vpk    ;  ///<Peak potential
     const Compute_float Vlk    ;  ///<leak reversal potential
     const Compute_float Vex    ;  ///<Ex reversal potential
     const Compute_float Vin    ;  ///<In reversal potential
@@ -83,7 +83,7 @@ typedef struct
     const Compute_float rate   ;  ///<Rate of external input (spikes/neuron/s)
 } conductance_parameters;
 /// Contains parameters which control the Recovery dynamics of neurons
-typedef struct 
+typedef struct
 {
     const Compute_float Wrt; ///< reset of recovery variable
     const Compute_float Wir; ///< determines if resonator or integrator
@@ -127,7 +127,7 @@ typedef struct randconn_parameters
 } randconn_parameters;
 
 /// External input
-typedef struct 
+typedef struct
 {
     const Compute_float gE0;    ///< constant input to gE
     const Compute_float gI0;    ///< constant input to gI
@@ -145,7 +145,7 @@ typedef struct Job
     const struct Job* const next; ///< this is a linked list, so treat it like one
 } Job;
 ///Global switches to enable/disable features.  Also holds some model-independent parameters
-typedef struct 
+typedef struct
 {
     const on_off Recovery;          ///< Is recovery enables
 	const on_off STDP;              ///< Is STDP enabled

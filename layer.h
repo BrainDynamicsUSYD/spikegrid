@@ -1,9 +1,9 @@
 /// \file
 #ifndef LAYER
 #define LAYER
-#include "ringbuffer.h"
 #include "sizes.h"
 #include "enums.h"
+#include "coords.h"
 typedef struct STD_data STD_data; //forward declare STD_data to make things cleaner - makes this file a little messier, but it makes it more obvious where things come from
 ///hold the requisite data for a layer that enables it to be evolved through time.
 typedef struct parameters parameters;
@@ -24,11 +24,11 @@ typedef struct layer
 {
     Compute_float* const connections;     ///<Matrix of connections coming from a single point
     Compute_float* voltages;                    ///<Input voltages
-    Compute_float* voltages_out;                ///<return value 
+    Compute_float* voltages_out;                ///<return value
     Compute_float* recoverys;                   ///<Recovery variable
     Compute_float* recoverys_out;               ///<Return value for recovery variable
-    Compute_float* const Extimecourse;    ///<store time course of Ex synapses  
-    Compute_float* const Intimecourse;    ///<store time course of In synapses  
+    Compute_float* const Extimecourse;    ///<store time course of Ex synapses
+    Compute_float* const Intimecourse;    ///<store time course of In synapses
     randomconnection* randconns;                ///<stores random connections
     lagstorage      firinglags;
     STDP_data*       STDP_data;

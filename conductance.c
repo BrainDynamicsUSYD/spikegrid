@@ -16,6 +16,8 @@
 #include "matlab_output.h"
 #include "paramheader.h"
 #include "layer.h"
+
+
 unsigned int mytime=0;  ///<< The current time step
 model* m;               ///< The model we are evolving through time
 int jobnumber=-1;        ///< The current job number - used for pics directory etc

@@ -8,13 +8,6 @@ void FreeIfNotNull(void* v)
 {
     if (v != NULL) {free(v);}
 }
-void CleanupRingBuffer(ringbuffer* r)
-{
-    for (unsigned int i = 0;i<r->count;i++)
-    {
-        free(r->data[i]);
-    }
-}
 ///Free all the memory used by a layer
 ///@param l layer to free
 void CleanupLayer(layer* l)

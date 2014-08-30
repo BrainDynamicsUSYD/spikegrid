@@ -1,7 +1,7 @@
 ifeq ($(CC),cc)
-	optflags=  -Ofast -msse -msse2 -msse3 -funsafe-loop-optimizations -mtune=native -march=native  -floop-interchange -ftree-loop-optimize -floop-strip-mine -floop-block -flto  -fassociative-math -fno-signed-zeros -freciprocal-math -ffinite-math-only -fno-trapping-math -ftree-vectorize 
+	optflags=  -Ofast -msse -msse2 -msse3 -funsafe-loop-optimizations -mtune=native -march=native  -floop-interchange -ftree-loop-optimize -floop-strip-mine -floop-block -flto  -fassociative-math -fno-signed-zeros -freciprocal-math -ffinite-math-only -fno-trapping-math -ftree-vectorize
 	extrawarnings=-Wstrict-aliasing -fstrict-aliasing   -Wshadow  -Wconversion -Wdouble-promotion -Wformat=2 -Wunused -Wuninitialized -Wfloat-equal -Wunsafe-loop-optimizations -Wcast-qual -Wcast-align -Wwrite-strings -Wjump-misses-init -Wlogical-op  -Wvector-operation-performance -Wno-pragmas
-	extraextrawarnings=-Wsuggest-attribute=pure -Wsuggest-attribute=const -Wsuggest-attribute=noreturn -Wstrict-overflow=4 
+	extraextrawarnings=-Wsuggest-attribute=pure -Wsuggest-attribute=const -Wsuggest-attribute=noreturn -Wstrict-overflow=4
 	export CFLAGS=-g -ggdb -Wall -Wextra -std=gnu11 ${optflags} ${extrawarnings} ${extraextrawarnings}
 else #clang
 	export CFLAGS= -g -Wno-padded -Wno-missing-prototypes -Wno-missing-variable-declarations -Weverything -pedantic --std=gnu11 -Ofast -Wno-documentation-unknown-command -Wno-covered-switch-default
@@ -12,10 +12,10 @@ export opencvldflags=$(shell pkg-config --libs opencv)
 export DEBUGFLAGS= -g -std=gnu11
 #export SPEEDFLAG=-DFAST #comment out this line for double instead of float (will make code slower)
 export CLIBFLAGS= -fPIC -shared
-export LDFLAGS= -lm -lpng -g 
+export LDFLAGS= -lm -lpng -g
 CFLAGS += ${SPEEDFLAG}
 #conductance.c always needs to be first - this ensures that the mexfile gets the right name
-SOURCES= conductance.c coupling.c  STDP.c STD.c picture.c output.c evolve.c ringbuffer.c newparam.c yossarian.c init.c theta.c printstruct.c matlab_output.c cleanup.c evolvegen.c
+SOURCES= conductance.c coupling.c  STDP.c STD.c picture.c output.c evolve.c  newparam.c yossarian.c init.c theta.c printstruct.c matlab_output.c cleanup.c evolvegen.c
 BINARY=./a.out
 VERSION_HASH = $(shell git rev-parse HEAD)
 export VIEWERBIN=$(shell pwd)/watch
@@ -29,7 +29,7 @@ ${BINARY}: ${SOURCES} *.h ${CVClibdir}
 evolvegen.c: ${maskgen} whichparam.h param*.h
 	${maskgen} > evolvegen.c
 debug: ${SOURCE}
-	${CC} ${DEBUGFLAGS} ${SOURCES} -o ${BINARY} ${LDFLAGS} 
+	${CC} ${DEBUGFLAGS} ${SOURCES} -o ${BINARY} ${LDFLAGS}
 mediumopt:
 	${CC} -g -std=gnu99 ${SOURCES} -o ${BINARY} ${LDFLAGS}
 TEST:

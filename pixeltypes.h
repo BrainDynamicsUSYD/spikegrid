@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <stdlib.h> //size_t
 ///structure to represent a single pixel.
-typedef struct { 
+typedef struct {
     uint8_t red;    ///<red value
     uint8_t green;  ///<green value
     uint8_t blue;   ///<blue value

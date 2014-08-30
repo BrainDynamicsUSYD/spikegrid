@@ -57,7 +57,7 @@ void JetCmap(const Compute_float scaledval, pixel_t * pixel)
     {
         pixel->red = 0;
         pixel->green = (uint8_t)(255*(4*scaledval - 0.5));
-        pixel->blue = 255; 
+        pixel->blue = 255;
     }
     else if (scaledval < 0.625)
     {
@@ -116,7 +116,6 @@ void outputToPng(const tagged_array input,const int idx,const unsigned int count
     free(b->pixels);
     free(b);
     free(actualdata);
-    
 }
 ///TODO: Need to get a better way of detecting when rendering has finished
 void outputToConsole(const tagged_array input)
@@ -143,14 +142,13 @@ void outputToConsole(const tagged_array input)
     usleep(50000);//let terminal catch up - nasty hacky solution
     upto=buf;
     free(buf);
-
 }
 ///Send an outputtable to a text file
 ///@param input     the outputtable object to output
 ///@param idx       the index of the outputtable so that if multiple objects are output, files have consistent naming
 void outputToText(const output_s input,const int idx)
 {
-    if (outfiles[idx]==NULL) 
+    if (outfiles[idx]==NULL)
     {
         char buf[100];
         sprintf(buf,"%s/%i.txt",outdir,idx);
@@ -173,19 +171,6 @@ void outputToText(const output_s input,const int idx)
             }
             fflush(outfiles[idx]);//prevents stalling in matlab
             free(data);
-            break;
-        }
-        case RINGBUFFER_DATA:
-        {
-            const coords* const data = ringbuffer_getoffset(input.data.RB_data,0);
-            int i=0;
-            while (data[i].x != -1)
-            {
-                fprintf(outfiles[idx],"%i,%i;",data[i].x,data[i].y);
-                i++;
-            }
-            fprintf(outfiles[idx],"\n");
-            fflush(outfiles[idx]);
             break;
         }
         default:
@@ -234,7 +219,7 @@ output_s __attribute__((pure)) getOutputByName(const char* const name)
             return Outputtable[outidx];
         }
         outidx++;
-    } 
+    }
     printf("tried to get unknown thing to output called -%s-\n",name);
     exit(EXIT_FAILURE);
 }
@@ -280,10 +265,6 @@ void output_init(const model* const m)
         {"STDR1",       FLOAT_DATA, .data.TA_data={Features.STD==ON?m->layer1.std->R:NULL, grid_size, 0,             1,0,1}},
         {"STDU2",       FLOAT_DATA, .data.TA_data={Features.STD==ON?m->layer2.std->U:NULL, grid_size, 0,             1,0,1}},
         {"STDR2",       FLOAT_DATA, .data.TA_data={Features.STD==ON?m->layer2.std->R:NULL, grid_size, 0,             1,0,1}},
-        //ringbuffer outputs note - currently unused sine the switch to time since fired
-        //name          data type        actual data
-    //    {"Firing1",     RINGBUFFER_DATA, .data.RB_data=&m->layer1.spikes}, //take reference as the struct gets modified
-      //  {"Firing2",     RINGBUFFER_DATA, .data.RB_data=&m->layer2.spikes},
         {"STDP1",       FLOAT_DATA, .data.TA_data={Features.STDP==ON?m->layer1.STDP_data->connections:NULL,grid_size,0,couple_array_size,-0.01,0.01}},
         {"STDP2",       FLOAT_DATA, .data.TA_data={Features.STDP==ON?m->layer2.STDP_data->connections:NULL,grid_size,0,couple_array_size,-0.01,0.01}},
         {.name={0}}};         //a marker that we are at the end of the outputabbles list

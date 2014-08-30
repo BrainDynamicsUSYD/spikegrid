@@ -12,6 +12,11 @@
 #include "paramheader.h"
 #include "STDP.h"
 #include "evolvegen.h"
+#define max(a,b) \
+    ({ __typeof__ (a) _a = (a);\
+       __typeof__ (b) _b = (b); \
+        _a>_b?_a:_b;})
+
 ///creates a random initial condition - assumes random is already seeded
 ///This is generated as small fluctuations away from Vrt
 /// @param input    The input matrix - Modified in place

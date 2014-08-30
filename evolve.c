@@ -272,6 +272,26 @@ void ResetVoltages(Compute_float* const __restrict Vout,const couple_parameters 
         }
     }
 }
+void tidylayer (layer* l,const unsigned int time,const Compute_float timemillis,const Compute_float* const gE,const Compute_float* const gI)
+{
+    // without recovery variable
+    if (Features.Recovery==OFF)
+    {
+        CalcVoltages(l->voltages,gE,gI,l->P->potential,l->voltages_out);
+        ResetVoltages(l->voltages_out,l->P->couple,l->firinglags,l->P->potential);
+    }
+    // with recovery variable (note no support for theta - no idea if they work together)
+    else
+    {
+        CalcRecoverys(l->voltages,l->recoverys,gE,gI,l->P->potential,l->P->recovery,l->voltages_out,l->recoverys_out);
+    }
+    StoreFiring(l);
+    dooutput(l->P->output,time);
+    if (Features.Theta==ON)
+    {
+        dotheta(l->voltages_out,l->P->theta,timemillis);
+    }
+}
 ///Steps a model through 1 timestep - quite high-level function
 void step1(model* m,const unsigned int time)
 {
@@ -289,35 +309,8 @@ void step1(model* m,const unsigned int time)
         m->gI[i] += Extinput.gI0;
     }
     //from this point the GE and GI are actually fixed - as a result there is no more layer interaction - so do things sequentially to each layer
-    // without recovery variable
-    if (Features.Recovery==OFF)
-    {
-        CalcVoltages(m->layer1.voltages,m->gE,m->gI,m->layer1.P->potential,m->layer1.voltages_out);
-        ResetVoltages(m->layer1.voltages_out,m->layer1.P->couple,m->layer1.firinglags,m->layer1.P->potential);
-        if(m->NoLayers==DUALLAYER)
-        {
-            CalcVoltages(m->layer2.voltages,m->gE,m->gI,m->layer2.P->potential,m->layer2.voltages_out);
-            ResetVoltages(m->layer2.voltages_out,m->layer2.P->couple,m->layer2.firinglags,m->layer2.P->potential);
-        }
-    }
-    // with recovery variable (note no support for theta - no idea if they work together)
-    else
-    {
-        CalcRecoverys(m->layer1.voltages,m->layer1.recoverys,m->gE,m->gI,m->layer1.P->potential,m->layer1.P->recovery,m->layer1.voltages_out,m->layer1.recoverys_out);
-        if (m->NoLayers==DUALLAYER) {CalcRecoverys(m->layer2.voltages,m->layer2.recoverys,m->gE,m->gI,m->layer2.P->potential,m->layer2.P->recovery,m->layer2.voltages_out,m->layer2.recoverys_out);}
-    }
-    StoreFiring(&(m->layer1));
-    dooutput(m->layer1.P->output,time);
-    if (m->NoLayers==DUALLAYER)
-    {
-        StoreFiring(&(m->layer2));
-        dooutput(m->layer2.P->output,time);
-    }
-    if (Features.Theta==ON)
-    {
-        dotheta(m->layer1.voltages_out,m->layer1.P->theta,timemillis);
-        if (m->NoLayers==DUALLAYER) {dotheta(m->layer2.voltages_out,m->layer2.P->theta,timemillis);}
-    }
+    tidylayer(&m->layer1,time,timemillis,m->gE,m->gI);
+    if (m->NoLayers==DUALLAYER){tidylayer(&m->layer2,time,timemillis,m->gE,m->gI);}
     if (Features.STDP==ON)
     {
         DoSTDP(m->layer1.connections,m->layer2.connections,m->layer1.STDP_data,m->layer1.P->STDP, m->layer2.STDP_data,m->layer2.P->STDP,m->layer1.randconns,&m->layer1.P->random);

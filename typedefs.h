@@ -13,7 +13,7 @@ typedef double Compute_float ; //for accuracy
 typedef int16_t Neuron_coord;
 
 ///Useful constant to avoid messy conversions
-static const Compute_float One = (Compute_float)1; 
+static const Compute_float One = (Compute_float)1;
 ///Useful constant to avoid messy conversions
 static const Compute_float Half = (Compute_float)0.5;
 ///Useful constant to avoid messy conversions

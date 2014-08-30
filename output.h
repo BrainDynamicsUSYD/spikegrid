@@ -3,7 +3,6 @@
 #define OUTPUT
 #include "typedefs.h"
 typedef struct output_parameters output_parameters;
-typedef struct ringbuffer ringbuffer;
 typedef struct model model;
 ///used for storing arrays with their size.  Allows for the matlab_output (and other) function to take both the big and large arrays
 typedef struct {
@@ -20,15 +19,14 @@ typedef struct {
 ///The directory that we are outputting to
 char outdir [100];
 ///The type of data to output
-typedef enum {FLOAT_DATA=0,RINGBUFFER_DATA=1} data_type;
+typedef enum {FLOAT_DATA=0} data_type;
 ///Holds data for outputtting in various ways
 typedef struct {
     const char name[10];            ///< a string identifier that is used to identify the output
     const data_type data_type;      ///< The type of data to output
-    const union 
-    {   
-        const tagged_array TA_data;        
-        const ringbuffer* const  RB_data;
+    const union
+    {
+        const tagged_array TA_data;
     } data;                         ///< the data to return
 
 } output_s; //used so that matlab has string identifiers that correspond to a specific tagged_array

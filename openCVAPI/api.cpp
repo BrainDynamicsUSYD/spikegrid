@@ -6,9 +6,9 @@ using namespace cv;
 Mat ProcessMatrix(const double* data,const double min,const double max,const unsigned int size)
 {
 	double* dispmat = (double*)malloc(sizeof(*dispmat)*size*size);
-	for (int i=0;i<size;i++)
+	for (unsigned int i=0;i<size;i++)
 	{
-		for (int j=0;j<size;j++)
+		for (unsigned int j=0;j<size;j++)
 		{
 			dispmat[i*size+j]=(data[i*size+j] - min)/(max-min);
 		}

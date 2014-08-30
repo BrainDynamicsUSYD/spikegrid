@@ -37,6 +37,7 @@ TEST:
 	mv whichparam.h whichparambackup.h #backup config choice
 	echo -e '#warning "using canonical parameters"\n#include "parametersCANONICAL.h"' > whichparam.h
 	$(MAKE) evolvegen.c
+	$(MAKE) ${CVClibdir}
 	${CC} ${CFLAGS} ${opencvcflags} -fno-omit-frame-pointer ${SOURCES} -o ${BINARY} ${LDFLAGS} -l:libcv ${opencvldflags}
 	mv whichparambackup.h whichparam.h #restore config choice
 	time ./a.out -n

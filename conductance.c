@@ -7,11 +7,6 @@
 #include <fenv.h>   //for some debugging
 #include <stdio.h>
 #include <time.h>
-#ifndef MATLAB
-#include "cv.h"
-#include "highgui.h"
-#include "openCVAPI/api.h"
-#endif
 #include "output.h"
 #include "cleanup.h"
 #include "evolve.h"
@@ -35,29 +30,25 @@ void step_(const Compute_float* const inpV,const Compute_float* const inpV2, con
     if (Features.Recovery==ON && inpW==NULL){printf("missing first recovery input");exit(EXIT_FAILURE);}
     if (ModelType==DUALLAYER)
     {
-        if (inpV2==NULL){printf("missing second input voltage in dual-layer model");exit(EXIT_FAILURE);}
-        if (Features.Recovery==ON && inpW2==NULL){printf("missing second recovery input in dual-layer model");exit(EXIT_FAILURE);}
-    }       
+        if(inpV2==NULL)                         {printf("missing second input voltage in dual-layer model");exit (EXIT_FAILURE);}
+        if(Features.Recovery==ON && inpW2==NULL){printf("missing second recovery input in dual-layer model");exit(EXIT_FAILURE);}
+    }
     mytime++;
     memcpy(m->layer1.voltages,inpV,sizeof(Compute_float)*grid_size*grid_size);
     if (Features.Recovery==ON) {memcpy(m->layer1.recoverys,inpW,sizeof(Compute_float)*grid_size*grid_size);}
-   // ringbuffer_increment(&m->layer1.spikes,mytime);
-   // if (Features.STDP==ON) {ringbuffer_increment(&m->layer1.spikes_STDP,mytime);}
-    if (ModelType==DUALLAYER) 
+    if (ModelType==DUALLAYER)
     {
         memcpy(m->layer2.voltages,inpV2,sizeof(Compute_float)*grid_size*grid_size);
         if (Features.Recovery==ON) {memcpy(m->layer2.recoverys,inpW,sizeof(Compute_float)*grid_size*grid_size);}
-     //   ringbuffer_increment(&m->layer2.spikes,mytime);
-       // if (Features.STDP==ON) {ringbuffer_increment(&m->layer2.spikes_STDP,mytime);}
     }
     step1(m,mytime);
 }
 
 void setuppointers(Compute_float** FirstV,Compute_float** SecondV, Compute_float** FirstW, Compute_float** SecondW,const Job* const job)
 {
+    *FirstV = calloc(sizeof(Compute_float),grid_size*grid_size);
     if (ModelType==SINGLELAYER)
     {
-        *FirstV = calloc(sizeof(Compute_float),grid_size*grid_size);
         *SecondV = NULL;
         if (job->initcond == SINGLE_SPIKE) {Fixedinit(*FirstV,OneLayerModel.potential.Vrt,job->Voltage_or_count);}
         else                               {randinit(*FirstV,OneLayerModel.potential.Vrt,OneLayerModel.potential.Vpk);}
@@ -67,11 +58,10 @@ void setuppointers(Compute_float** FirstV,Compute_float** SecondV, Compute_float
             *SecondW = NULL;
         } else {*FirstW=NULL;*SecondW=NULL;}
     }
-    else if (ModelType==DUALLAYER) 
+    else if (ModelType==DUALLAYER)
     {
-        *FirstV = malloc(sizeof(Compute_float)*grid_size*grid_size);
         *SecondV = malloc(sizeof(Compute_float)*grid_size*grid_size);
-        if (job->initcond == SINGLE_SPIKE) 
+        if (job->initcond == SINGLE_SPIKE)
         {
             Fixedinit(*FirstV, DualLayerModelIn.potential.Vrt,job->Voltage_or_count);
             Fixedinit(*SecondV,DualLayerModelEx.potential.Vrt,job->Voltage_or_count);
@@ -81,9 +71,9 @@ void setuppointers(Compute_float** FirstV,Compute_float** SecondV, Compute_float
             randinit(*FirstV, DualLayerModelIn.potential.Vrt,DualLayerModelIn.potential.Vpk);
             randinit(*SecondV,DualLayerModelEx.potential.Vrt,DualLayerModelEx.potential.Vpk);
         }
-        if (Features.Recovery==ON) 
+        if (Features.Recovery==ON)
         {
-            *FirstW =   calloc(sizeof(Compute_float),grid_size*grid_size);
+            *FirstW  = calloc(sizeof(Compute_float),grid_size*grid_size);
             *SecondW = calloc(sizeof(Compute_float),grid_size*grid_size);
         } else {*FirstW=NULL;*SecondW=NULL;}
     }
@@ -112,11 +102,11 @@ mxArray* FirstMatlabCall( )
         if (Features.Recovery==ON)
             {mxSetField(variables,0,"Wsingle_layer",CreateInitialValues(Zero,Zero));}
     }
-    else if (ModelType==DUALLAYER) 
+    else if (ModelType==DUALLAYER)
     {
         mxSetField(variables,0,"Vin",CreateInitialValues(DualLayerModelIn.potential.Vrt,DualLayerModelIn.potential.Vpk));
         mxSetField(variables,0,"Vex",CreateInitialValues(DualLayerModelEx.potential.Vrt,DualLayerModelEx.potential.Vpk));
-        if (Features.Recovery==ON) 
+        if (Features.Recovery==ON)
         {
             mxSetField(variables,0,"Win",CreateInitialValues(Zero,Zero));
             mxSetField(variables,0,"Wex",CreateInitialValues(Zero,Zero));
@@ -132,10 +122,10 @@ mxArray* FirstMatlabCall( )
 void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
 {
     if (nrhs!=nlhs) {printf("We need the same number of parameters on the left and right hand side\n");return;}
-    if (setup_done==0) 
+    if (setup_done==0)
     {
         plhs[0]=FirstMatlabCall();
-        outputExtraThings(plhs,nrhs,prhs); 
+        outputExtraThings(plhs,nrhs,prhs);
         setup_done=1;
         return;
     }
@@ -169,7 +159,7 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
     if (ModelType == SINGLELAYER)
     {
         mxSetField(variables,0,"Vsingle_layer",outputToMxArray(getOutputByName("V1")));
-        if (Features.Recovery == ON) 
+        if (Features.Recovery == ON)
         {
             mxSetField(variables,0,"Wsingle_layer",outputToMxArray(getOutputByName("Recovery1")));
         }
@@ -227,7 +217,7 @@ int main(int argc,char** argv) //useful for testing w/out matlab
                     {
                            newparam = GetNthParam(OneLayerModel,Sweep,(unsigned int)jobnumber);
                     }
-                    else 
+                    else
                     {
                            newparamEx = GetNthParam(DualLayerModelEx,Sweep,(unsigned int)jobnumber);
                            newparamIn = GetNthParam(DualLayerModelIn,Sweep,(unsigned int)jobnumber);
@@ -248,9 +238,9 @@ int main(int argc,char** argv) //useful for testing w/out matlab
         {
             mytime=0;
             //seed RNG as appropriate - with either time or job number
-            if (job->initcond == RAND_TIME) {srandom((unsigned)time(0));}
-            else if (job->initcond==RAND_JOB) {srandom((unsigned)c);}
-            else if (job->initcond==RAND_ZERO) {srandom((unsigned)0);}
+            if     (job->initcond == RAND_TIME){srandom((unsigned)time(0));}
+            else if(job->initcond==RAND_JOB)   {srandom((unsigned)c);}
+            else if(job->initcond==RAND_ZERO)  {srandom((unsigned)0);}
             //sets up the model code
             if (ModelType==SINGLELAYER) {m=setup(newparam!=NULL? (*newparam):OneLayerModel,newparam!=NULL? (*newparam):OneLayerModel,ModelType,jobnumber);} //pass the same layer as a double parameter
             else {m=setup(newparamIn!=NULL?*newparamIn:DualLayerModelIn,newparamEx!=NULL?*newparamEx:DualLayerModelEx,ModelType,jobnumber);}
@@ -265,10 +255,10 @@ int main(int argc,char** argv) //useful for testing w/out matlab
                 if (mytime%10==0){printf("%i\n",mytime);}
                 step_(FirstV,SecondV,FirstW,SecondW);//always fine to pass an extra argument here
                 //copy the output to be new input
-                memcpy                       (FirstV, m->layer1.voltages_out, sizeof(Compute_float)*grid_size*grid_size);
-                if (SecondV != NULL)  {memcpy(SecondV,m->layer2.voltages_out, sizeof(Compute_float)*grid_size*grid_size);}
-                if (FirstW != NULL)   {memcpy(FirstW, m->layer1.recoverys_out,sizeof(Compute_float)*grid_size*grid_size);}
-                if (SecondW != NULL)  {memcpy(SecondW,m->layer2.recoverys_out,sizeof(Compute_float)*grid_size*grid_size);}
+                memcpy ( FirstV, m->layer1.voltages_out, sizeof ( Compute_float)*grid_size*grid_size);
+                if(SecondV != NULL){memcpy(SecondV,m->layer2.voltages_out, sizeof(Compute_float)*grid_size*grid_size);}
+                if(FirstW != NULL) {memcpy(FirstW, m->layer1.recoverys_out,sizeof(Compute_float)*grid_size*grid_size);}
+                if(SecondW != NULL){memcpy(SecondW,m->layer2.recoverys_out,sizeof(Compute_float)*grid_size*grid_size);}
                 //do some opencv stuff
                 if(mytime % 10 ==0 && OpenCv == ON)
                 {

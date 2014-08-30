@@ -15,10 +15,10 @@ void evolvept (const int x,const int y,const Compute_float* const __restrict con
     for (int i = 0; i < couple_array_size;i++)
     {
         const int outoff = (x + i)*conductance_array_size +y;//as gE and gI are larger than the neuron grid size, don't have to worry about wrapping
-        for (int j = 0 ; j<couple_array_size;j++) 
+        for (int j = 0 ; j<couple_array_size;j++)
         {
             const int coupleidx = i*couple_array_size + j;
-            if (connections[coupleidx] > 0) 
+            if (connections[coupleidx] > 0)
             {
                 gE[outoff+j] += connections[coupleidx]*Estrmod;
             }
@@ -27,7 +27,7 @@ void evolvept (const int x,const int y,const Compute_float* const __restrict con
                 gI[outoff+j] += -(connections[coupleidx]*Istrmod);
             }
         }
-    } 
+    }
 }
 
 //when STDP is turned off, gcc will warn about this function needing const. It is wrong
@@ -81,7 +81,6 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
                     else  {gE[condindex] += str * rc.strength;}
                 }
             }
-
         }
     }
 }
@@ -104,9 +103,9 @@ void fixboundary(Compute_float* __restrict gE, Compute_float* __restrict gI)
 	{
         for (int j=0;j<conductance_array_size;j++)
 		{
-            gE[(grid_size+i)*conductance_array_size + j] +=gE[i*conductance_array_size+j]; //add to bottom
+            gE[(grid_size+i)*conductance_array_size + j] += gE[i*conductance_array_size+j]; //add to bottom
             gE[(i+couplerange)*conductance_array_size+j] += gE[(grid_size+couplerange+i)*conductance_array_size+j];//add to top
-            gI[(grid_size+i)*conductance_array_size + j] +=gI[i*conductance_array_size+j]; //add to bottom
+            gI[(grid_size+i)*conductance_array_size + j] += gI[i*conductance_array_size+j]; //add to bottom
             gI[(i+couplerange)*conductance_array_size+j] += gI[(grid_size+couplerange+i)*conductance_array_size+j];//add to top
 		}
 	}
@@ -115,9 +114,9 @@ void fixboundary(Compute_float* __restrict gE, Compute_float* __restrict gI)
 	{
         for (int j=0;j<couplerange;j++)
 		{
-             gE[i*conductance_array_size +grid_size+j ] += gE[i*conductance_array_size+j];//left
+             gE[i*conductance_array_size +grid_size+j ]  += gE[i*conductance_array_size+j];//left
              gE[i*conductance_array_size +couplerange+j] += gE [i*conductance_array_size + grid_size+couplerange+j];//right
-             gI[i*conductance_array_size +grid_size+j ] += gI[i*conductance_array_size+j];//left
+             gI[i*conductance_array_size +grid_size+j ]  += gI[i*conductance_array_size+j];//left
              gI[i*conductance_array_size +couplerange+j] += gI [i*conductance_array_size + grid_size+couplerange+j];//right
 		}
 	}
@@ -126,13 +125,13 @@ void fixboundary(Compute_float* __restrict gE, Compute_float* __restrict gI)
 ///rhs_func used when integrating the neurons forward through time.  The actual integration is done using the midpoint method
 Compute_float __attribute__((const,pure)) rhs_func  (const Compute_float V,const Compute_float ge,const Compute_float gi,const conductance_parameters p)
 {
-    switch (p.type.type) 
-    {   
+    switch (p.type.type)
+    {
         case LIF:
             return -(p.glk*(V-p.Vlk) + ge*(V-p.Vex) + gi*(V-p.Vin));
         case QIF:
             return -(p.glk*(V-p.Vlk)*(p.type.extra.QIF.Vth-V) + ge*(V-p.Vex) + gi*(V-p.Vin));
-        case EIF: 
+        case EIF:
             return -(p.glk*(V-p.Vlk) - p.glk*p.type.extra.EIF.Dpk*exp((V-p.type.extra.EIF.Vth)/p.type.extra.EIF.Dpk) + ge*(V-p.Vex) + gi*(V-p.Vin));
         default: return One; //avoid -Wreturn-type error which is probably wrong anyway
     }
@@ -140,15 +139,15 @@ Compute_float __attribute__((const,pure)) rhs_func  (const Compute_float V,const
 
 ///Uses precalculated gE and gI to integrate the voltages forward through time.
 void CalcVoltages(const Compute_float* const __restrict__ Vinput,
-        const Compute_float* const __restrict__ gE, 
+        const Compute_float* const __restrict__ gE,
         const Compute_float* const __restrict__ gI,
-        const conductance_parameters C, 
+        const conductance_parameters C,
         Compute_float* const __restrict__ Vout)
 {
-    for (int x=0;x<grid_size;x++) 
+    for (int x=0;x<grid_size;x++)
     {
         for (int y=0;y<grid_size;y++)
-        { //step all neurons through time 
+        { //step all neurons through time
             const int idx = (x+couplerange)*conductance_array_size + y + couplerange; //index for gE/gI
             const int idx2=  x*grid_size+y;
             // apply Euler method
@@ -158,16 +157,16 @@ void CalcVoltages(const Compute_float* const __restrict__ Vinput,
     }
 }
 ///Uses precalculated gE and gI to integrate the voltages and recoverys forward through time. This uses the Euler method
-void CalcRecoverys(const Compute_float* const __restrict__ Vinput, 
-        const Compute_float* const __restrict__ Winput, 
-        const Compute_float* const __restrict__ gE, 
+void CalcRecoverys(const Compute_float* const __restrict__ Vinput,
+        const Compute_float* const __restrict__ Winput,
+        const Compute_float* const __restrict__ gE,
         const Compute_float* const __restrict__ gI,
-        const conductance_parameters C, 
-        const recovery_parameters R, 
-        Compute_float* const __restrict__ Vout, 
+        const conductance_parameters C,
+        const recovery_parameters R,
+        Compute_float* const __restrict__ Vout,
         Compute_float* const __restrict__ Wout)
 {    // Adaptive quadratic integrate-and-fire
-    for (int x=0;x<grid_size;x++) 
+    for (int x=0;x<grid_size;x++)
     {
         for (int y=0;y<grid_size;y++)
         {   //step all neurons through time - use Euler method
@@ -205,7 +204,7 @@ void AddnewSpike(lagstorage* L,const int baseidx)
 {
     //find the empty idx
     int idx = 0;
-    while (L->lags[baseidx + idx] != -1) 
+    while (L->lags[baseidx + idx] != -1)
     {
         idx++;
     }
@@ -213,18 +212,17 @@ void AddnewSpike(lagstorage* L,const int baseidx)
     L->lags[baseidx + idx]=1;
     //and set the next one to -1 to mark the end of the array
     L->lags[baseidx + idx+1]= -1;
-
 }
 
 
 ///Store current firing spikes also apply random spikes
 void StoreFiring(layer* L)
-{ 
+{
     const int step = (int)L->P->skip;
     for (int x=0;x<grid_size;x++)
     {
         for (int y=0;y<grid_size;y++)
-        { 
+        {
             const int test = x % step ==0 && y % step ==0;
             if ((test && step > 0) || ((!test) && step<0))
             {
@@ -233,7 +231,7 @@ void StoreFiring(layer* L)
                 if (Features.STDP==ON) {modifyLags(&L->STDP_data->lags,(x*grid_size+y)*L->STDP_data->lags.lagsperpoint);}
                 //now - add in new spikes
                 if (L->voltages_out[x*grid_size + y]  >= L->P->potential.Vpk)
-                {   
+                {
                     if (Features.Recovery==ON) //reset recovery if needed
                     {
                         L->recoverys_out[x*grid_size+y]+=L->P->recovery.Wrt;
@@ -241,7 +239,7 @@ void StoreFiring(layer* L)
                 AddnewSpike(&L->firinglags,baseidx);
                 if (Features.STDP==ON) {AddnewSpike(&L->STDP_data->lags,(x*grid_size+y)*L->STDP_data->lags.lagsperpoint);}
                 }//add random spikes
-                else if (((Compute_float)random())/((Compute_float)RAND_MAX) < 
+                else if (((Compute_float)random())/((Compute_float)RAND_MAX) <
                         (L->P->potential.rate*((Compute_float)0.001)*Features.Timestep))
                 {
                     L->voltages_out[x*grid_size+y]=L->P->potential.Vpk+(Compute_float)0.1;//make sure it fires - the neuron will actually fire next timestep
@@ -261,7 +259,7 @@ void ResetVoltages(Compute_float* const __restrict Vout,const couple_parameters 
     for (int x=0;x<grid_size;x++)
     {
         for (int y=0;y<grid_size;y++)
-        { 
+        {
             int idx=0;
             while (l.lags[(x*grid_size+y)*l.lagsperpoint+ idx] != -1)
             {
@@ -289,10 +287,10 @@ void step1(model* m,const unsigned int time)
     {
         m->gE[i] += Extinput.gE0;
         m->gI[i] += Extinput.gI0;
-    } 
+    }
     //from this point the GE and GI are actually fixed - as a result there is no more layer interaction - so do things sequentially to each layer
     // without recovery variable
-    if (Features.Recovery==OFF) 
+    if (Features.Recovery==OFF)
     {
         CalcVoltages(m->layer1.voltages,m->gE,m->gI,m->layer1.P->potential,m->layer1.voltages_out);
         ResetVoltages(m->layer1.voltages_out,m->layer1.P->couple,m->layer1.firinglags,m->layer1.P->potential);
@@ -303,7 +301,7 @@ void step1(model* m,const unsigned int time)
         }
     }
     // with recovery variable (note no support for theta - no idea if they work together)
-    else 
+    else
     {
         CalcRecoverys(m->layer1.voltages,m->layer1.recoverys,m->gE,m->gI,m->layer1.P->potential,m->layer1.P->recovery,m->layer1.voltages_out,m->layer1.recoverys_out);
         if (m->NoLayers==DUALLAYER) {CalcRecoverys(m->layer2.voltages,m->layer2.recoverys,m->gE,m->gI,m->layer2.P->potential,m->layer2.P->recovery,m->layer2.voltages_out,m->layer2.recoverys_out);}

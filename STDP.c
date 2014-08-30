@@ -14,7 +14,7 @@ typedef struct
 } STDP_change;
 
 Compute_float __attribute__((pure)) STDP_strength(const STDP_parameters S,const Compute_float lag)
-{  
+{
     return  S.stdp_strength * exp(-lag*Features.Timestep/S.stdp_tau);
 }
 
@@ -23,17 +23,17 @@ Compute_float __attribute__((pure)) STDP_strength(const STDP_parameters S,const 
 inline static int dist(int cur,int prev)
 {
     int dx = cur-prev;
-    if (dx > (grid_size/2)) {return (dx - grid_size);}
-    else if (dx < -(grid_size/2)) {return (dx + grid_size);}
-    else {return dx;}
+    if     (dx >       (grid_size/2)){return(dx - grid_size);}
+    else if(dx < -     (grid_size/2)){return(dx + grid_size);}
+    else   {return dx;}
 }
 inline static Compute_float clamp(Compute_float V,Compute_float target,Compute_float frac)
 {
     target = fabs(target);
-    if (target > 1) {printf("large target created\n");}
-    if (V > target * frac) {return (target * frac);}
-    else if (V < target * -frac) {return (target * -frac);}
-    else {return V;}
+    if     (target > 1)        {printf("large target created\n");}
+    if     (V > target * frac) {return(target * frac);}
+    else if(V < target * -frac){return(target * -frac);}
+    else   {return V;}
 
 }
 
@@ -63,23 +63,23 @@ inline static int invertdist(int v) {return ((2*couplerange) - v);}
 void STDP_At_point(const int x, const int y,STDP_data* const data,STDP_data* const revdata,const STDP_parameters S,const STDP_parameters S2,const int xoffset,const int yoffset,
         const Compute_float* const const_couples,const Compute_float* const revconst_couples)
 {
-    const int baseidx = (x*grid_size + y) *data->lags.lagsperpoint;
-    const int baseidx2 = (x*grid_size + y) *revdata->lags.lagsperpoint;
+    const int baseidx  = (x*grid_size + y) * data->lags.lagsperpoint;
+    const int baseidx2 = (x*grid_size + y) * revdata->lags.lagsperpoint;
     STDP_change change = STDP_change_calc(baseidx,baseidx2,S,S2,data->lags.lags,revdata->lags.lags);
-    if (change.valid==ON) 
+    if (change.valid==ON)
     {
         // the other neuron actually fired - so we can apply STDP - need to apply in two directions
         //calculate the offsets
-        const int px = x+xoffset;
-        const int py = y+yoffset;
-        const int cdx = xoffset + STDP_RANGE;
-        const int cdy = yoffset + STDP_RANGE;
-        const int rx  = invertdist(cdx);
-        const int ry  = invertdist(cdy);
-        const int fidx = (px*grid_size+py)*STDP_array_size*STDP_array_size + cdx*STDP_array_size + cdy;
-        const int ridx = (x*grid_size+y)*STDP_array_size*STDP_array_size + rx*STDP_array_size + ry;
-        data->connections[fidx] =    clamp(data->   connections[fidx] + change.Forward_strength  ,const_couples[cdx*couple_array_size + cdy],S.stdp_limit);
-        data->connections[ridx] =    clamp(data->   connections[ridx] - change.Forward_strength  ,const_couples[cdx*couple_array_size + cdy],S.stdp_limit);
+        const int px               = x+xoffset;
+        const int py               = y+yoffset;
+        const int cdx              = xoffset + STDP_RANGE;
+        const int cdy              = yoffset + STDP_RANGE;
+        const int rx               = invertdist(cdx);
+        const int ry               = invertdist(cdy);
+        const int fidx             = (px*grid_size+py)*STDP_array_size*STDP_array_size + cdx*STDP_array_size + cdy;
+        const int ridx             = (x*grid_size+y)  *STDP_array_size*STDP_array_size + rx *STDP_array_size + ry;
+        data->connections[fidx]    = clamp(data->   connections[fidx] + change.Forward_strength  ,const_couples[   cdx*couple_array_size + cdy],S.stdp_limit);
+        data->connections[ridx]    = clamp(data->   connections[ridx] - change.Forward_strength  ,const_couples[   cdx*couple_array_size + cdy],S.stdp_limit);
         revdata->connections[ridx] = clamp(revdata->connections[ridx] - change.Reverse_strength  ,revconst_couples[cdx*couple_array_size + cdy],S2.stdp_limit);
 
         if (fabs(data->connections[fidx]) > 1.0 || fabs(data->connections[ridx]) > 1.0)
@@ -100,7 +100,7 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
             const int baseidx = (x*grid_size + y)*data->lags.lagsperpoint;
             //first - check if the neuron has fired this timestep
             int idx = 0;
-            while (data->lags.lags[baseidx + idx] != -1) 
+            while (data->lags.lags[baseidx + idx] != -1)
             {
                 idx++;
             }
@@ -122,11 +122,11 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
                     //iterate over the rcs.
                     for (int i = 0;i<rparams->numberper;i++)
                     {
-                        randomconnection rc = rcs[basercidx + i];
-                        const int destbaseidx = ((rc.destination.x * grid_size) + y)*data->lags.lagsperpoint;
-                        const int destbaseidx2 = 0;//MASSIVE HACK
-                        STDP_change rcchange = STDP_change_calc(destbaseidx,destbaseidx2,S,S2,data->lags.lags,data2->lags.lags);
-                        rc.stdp_strength = clamp(rc.stdp_strength-rcchange.Forward_strength,rc.strength,S.stdp_limit);
+                        randomconnection rc    = rcs[basercidx + i];
+                        const int destbaseidx  = ((rc.destination.x * grid_size) + y)*data->lags.lagsperpoint;
+                        const int destbaseidx2 = 0;//MASSIVE HACK - no positive change to RCs
+                        STDP_change rcchange   = STDP_change_calc(destbaseidx,destbaseidx2,S,S2,data->lags.lags,data2->lags.lags);
+                        rc.stdp_strength       = clamp(rc.stdp_strength-rcchange.Forward_strength,rc.strength,S.stdp_limit);
                     }
                 }
             }
@@ -135,20 +135,20 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
 }
 STDP_data* STDP_init(const STDP_parameters S,const int trefrac_in_ts)
 {
-    STDP_data* ret = malloc(sizeof(*ret));    
+    STDP_data* ret = malloc(sizeof(*ret));
     const int STDP_cap = (int)(S.stdp_tau*5.0 / Features.Timestep);
     const int stdplagcount = (int)((STDP_cap/trefrac_in_ts)+2);
-    STDP_data D = 
+    STDP_data D =
     {
-        .lags = 
+        .lags =
         {
-            .lags = calloc(sizeof(int16_t),grid_size*grid_size*(size_t)stdplagcount),
-            .cap  = STDP_cap,
+            .lags         = calloc(sizeof(int16_t),grid_size*grid_size*(size_t)stdplagcount),
+            .cap          = STDP_cap,
             .lagsperpoint = stdplagcount
         },
         .connections =  calloc(sizeof(Compute_float),grid_size*grid_size*STDP_array_size*STDP_array_size)
 
-    };    
+    };
     for (int x = 0;x<grid_size;x++)
     {
         for (int y = 0;y<grid_size;y++)

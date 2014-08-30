@@ -30,7 +30,7 @@ unsigned int __attribute__((pure)) setcap(const decay_parameters d,const Compute
     {
         time+=timestep;
         count++;
-        Compute_float alpha=Synapse_timecourse(d,time); 
+        Compute_float alpha=Synapse_timecourse(d,time);
         // check that the spike is in the decreasing phase and that it has magnitude less than the critical value
         if (alpha<minval && alpha<prev) {break;}
         prev=alpha;
@@ -54,7 +54,7 @@ Compute_float* Norm_couplematrix(const couple_parameters c, Compute_float* const
                     if (val < 0) {negval += val;} else {plusval += val;}
                 }
                 const Compute_float plusnorm = c.normalization_parameters.total_area.WE/plusval;
-                const Compute_float negnorm = c.normalization_parameters.total_area.WI/negval;
+                const Compute_float negnorm  = c.normalization_parameters.total_area.WI/negval;
                 for (int i=0;i<couple_array_size*couple_array_size;i++)
                 {
                     if (unnormed[i] < 0) {unnormed[i]  *= plusnorm;} else {unnormed[i] *= negnorm;}
@@ -84,7 +84,6 @@ Compute_float* Norm_couplematrix(const couple_parameters c, Compute_float* const
             return NULL;
     }
 }
-
 
 /// Computes the mexican-hat based coupling function - used in single layer model
 Compute_float __attribute__((const)) mexhat  (const Compute_float rsq,const singlelayer_parameters c){return c.WE*exp(-rsq/c.sigE)-c.WI*exp(-rsq/c.sigI);}
@@ -116,13 +115,11 @@ Compute_float* CreateCouplingMatrix(const couple_parameters c)
                         {
                             val = expdecay((Compute_float)(x*x+y*y),c.Layer_parameters.dual);
                         }
-                        else 
+                        else
                         {
                             val = c.Layer_parameters.dual.W;
                         }
                     }
-//                    matrix[count]=val;
-  //                  count++;
                     matrix[(x+couplerange)*couple_array_size + y + couplerange] = val;//and set the array
                 }
                 else {count++;}
@@ -142,7 +139,7 @@ Compute_float* __attribute__((const)) Synapse_timecourse_cache (const unsigned i
     for (unsigned int i=0;i<cap;i++)
     {
         const Compute_float time = ((Compute_float)i)*timestep;
-        ret[i]=Synapse_timecourse(Decay,time); 
+        ret[i]=Synapse_timecourse(Decay,time);
     }
     return ret;
 }

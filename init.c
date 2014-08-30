@@ -45,12 +45,12 @@ void Fixedinit(Compute_float* input, const Compute_float def_value,const Compute
 ///Copies a struct using malloc - occasionally required
 /// @param input  the initial input
 /// @param size   the amount of data to copy
-void* newdata(const void* const input,const unsigned int size)   
+void* newdata(const void* const input,const unsigned int size)
 {
     void* ret = malloc(size);
     memcpy(ret,input,size);
     return ret;
-} 
+}
 
 ///given a parameters object, set up a layer object.
 ///This function is what theoretically will allow for sweeping through parameter space.
@@ -65,15 +65,15 @@ layer setuplayer(const parameters p)
     else                                 {cap=(int)setcap(p.couple.Layer_parameters.dual.synapse,min_effect,Features.Timestep);}
     const int trefrac_in_ts =(int) ((Compute_float)p.couple.tref / Features.Timestep);
     const int flagcount = (int)(cap/trefrac_in_ts) + 2;
-    layer L = 
+    layer L =
     {
-        .firinglags         = 
+        .firinglags         =
         {
-            .lags = calloc(sizeof(int16_t),grid_size*grid_size*(size_t)flagcount),
-            .cap = cap,
+            .lags         = calloc(sizeof(int16_t),grid_size*grid_size*(size_t)flagcount),
+            .cap          = cap,
             .lagsperpoint = flagcount
         },
-        .STDP_data = Features.STDP==ON?STDP_init(p.STDP,trefrac_in_ts):NULL,
+        .STDP_data          = Features.STDP==ON?STDP_init(p.STDP,trefrac_in_ts):NULL,
         .connections        = CreateCouplingMatrix(p.couple),
         .std                = Features.STD==ON?STD_init(p.STD):NULL,
         .Extimecourse       = p.couple.Layertype==SINGLELAYER?Synapse_timecourse_cache((unsigned int)cap,p.couple.Layer_parameters.single.Ex,Features.Timestep):
@@ -81,15 +81,15 @@ layer setuplayer(const parameters p)
         .Intimecourse       = p.couple.Layertype==SINGLELAYER?Synapse_timecourse_cache((unsigned int)cap,p.couple.Layer_parameters.single.In,Features.Timestep):
             ((p.couple.Layer_parameters.dual.W<0)?Synapse_timecourse_cache((unsigned int)cap,p.couple.Layer_parameters.dual.synapse,Features.Timestep):NULL),
         .randconns          = Features.Random_connections==ON?calloc(sizeof(randomconnection),(size_t)(grid_size*grid_size*p.random.numberper)):NULL,
-        .P                  = (parameters*)newdata(&p,sizeof(p)), 
+        .P                  = (parameters*)newdata(&p,sizeof(p)),
         .voltages           = calloc(sizeof(Compute_float),grid_size*grid_size),
         .voltages_out       = calloc(sizeof(Compute_float),grid_size*grid_size),
-        .recoverys       = Features.Recovery==ON?calloc(sizeof(Compute_float),grid_size*grid_size):NULL,
-        .recoverys_out   = Features.Recovery==ON?calloc(sizeof(Compute_float),grid_size*grid_size):NULL,
+        .recoverys          = Features.Recovery==ON?calloc(sizeof(Compute_float),grid_size*grid_size):NULL,
+        .recoverys_out      = Features.Recovery==ON?calloc(sizeof(Compute_float),grid_size*grid_size):NULL,
     };
     for (int x = 0;x<grid_size;x++)
     {
-        for (int y = 0;y<grid_size;y++)
+        for (int    y = 0;y<grid_size;y++)
         {
             L.firinglags.lags[(x*grid_size+y)*L.firinglags.lagsperpoint]=-1;
         }
@@ -103,11 +103,11 @@ layer setuplayer(const parameters p)
             {
                 for (int i=0;i<p.random.numberper;i++)
                 {
-                    L.randconns[(x*grid_size+y)*p.random.numberper + i] = 
+                    L.randconns[(x*grid_size+y)*p.random.numberper + i] =
                         (randomconnection){
                             .strength = p.random.str,
                             .stdp_strength = Zero,
-                            .destination = 
+                            .destination =
                             {
                                 .x = (Neuron_coord)(((Compute_float)random() / (Compute_float)RAND_MAX) * (Compute_float)grid_size),
                                 .y = (Neuron_coord)(((Compute_float)random() / (Compute_float)RAND_MAX) * (Compute_float)grid_size),
@@ -123,7 +123,7 @@ layer setuplayer(const parameters p)
 // No idea wtf this function is doing - Adam.
 model* setup(const parameters p,const parameters p2,const LayerNumbers lcount, int jobnumber)
 {
-    check(); //check evolvegen is correct
+    check(); //check evolvegen   is correct
     if (jobnumber <0)
     {
         sprintf(outdir,"output/");
@@ -140,16 +140,15 @@ model* setup(const parameters p,const parameters p2,const LayerNumbers lcount, i
     remove(buf);//cleanup the old struct file
     printout_struct(&p,"parameters",outdir,0);     //save the first parameters object
     printout_struct(&p2,"parameters",outdir,1);    //save the second parameters object and display everything
-    const layer l1 = setuplayer(p);
-    const layer l2 = lcount==DUALLAYER?setuplayer(p2):l1;
-    const model m = {.layer1=l1,.layer2=l2,.NoLayers=lcount};
-    model* m2 = malloc(sizeof(m));
+    const layer l1  = setuplayer(p);
+    const layer l2  = lcount==DUALLAYER?setuplayer(p2):l1;
+    const model m   = {.layer1=l1,.layer2=l2,.NoLayers=lcount};
+    model* m2       = malloc(sizeof(m));
     memcpy(m2,&m,sizeof(m));
     char* buffer = malloc(1024);
     gethostname(buffer,1023);
     if (!strcmp(buffer,"headnode.physics.usyd.edu.au")) {printf("DON'T RUN THIS CODE ON HEADNODE\n");exit(EXIT_FAILURE);}
     free(buffer);
     output_init(m2);
- //   makeoffsets();
     return m2;
 }

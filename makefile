@@ -37,9 +37,9 @@ TEST:
 	mv whichparam.h whichparambackup.h #backup config choice
 	echo -e '#warning "using canonical parameters"\n#include "parametersCANONICAL.h"' > whichparam.h
 	$(MAKE) evolvegen.c
-	${CC} ${CFLAGS} -fno-omit-frame-pointer ${SOURCES} -o ${BINARY} ${LDFLAGS}
+	${CC} ${CFLAGS} ${opencvcflags} -fno-omit-frame-pointer ${SOURCES} -o ${BINARY} ${LDFLAGS} -l:libcv ${opencvldflags}
 	mv whichparambackup.h whichparam.h #restore config choice
-	time ./a.out
+	time ./a.out -n
 	mv job-{0..5} jobtest
 	diff -r Test_known_good jobtest
 	echo "Tests passed"

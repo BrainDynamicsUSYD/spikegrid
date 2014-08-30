@@ -3,7 +3,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include "api.h"
 using namespace cv;
-void PlotColored(const char* winname,const double* data,const double min,const double max,const unsigned int size)
+Mat ProcessMatrix(const double* data,const double min,const double max,const unsigned int size)
 {
 	double* dispmat = (double*)malloc(sizeof(*dispmat)*size*size);
 	for (int i=0;i<size;i++)
@@ -15,10 +15,21 @@ void PlotColored(const char* winname,const double* data,const double min,const d
 	}
 	Mat m(size,size,CV_64F,dispmat);
     Mat n;
-    m.convertTo(n, CV_8UC1, 255.0 , 0); 
+    m.convertTo(n, CV_8UC1, 255.0 , 0);
 	Mat outmat;
 	applyColorMap(n,outmat,COLORMAP_JET);
+    free(dispmat);
+    return outmat;
+}
+void PlotColored(const char* winname,const double* data,const double min,const double max,const unsigned int size)
+{
+    Mat outmat = ProcessMatrix(data,min,max,size);
 	imshow(winname,outmat);
-	free(dispmat);
+}
+
+void SaveImage(const char* filename,const double* data,const double min,const double max,const unsigned int size)
+{
+    Mat outmat = ProcessMatrix(data,min,max,size);
+    imwrite(filename,outmat);
 }
 

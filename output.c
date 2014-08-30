@@ -110,12 +110,8 @@ void outputToPng(const tagged_array input,const int idx,const unsigned int count
     char fnamebuffer[30];
     const unsigned int size = (input.size - (2*input.offset))*input.subgrid;
     Compute_float* actualdata=taggedarrayTocomputearray(input);
-    bitmap_t* b = FloattoBitmap(actualdata,size,input.minval,input.maxval);
     sprintf(fnamebuffer,"%s/%i-%i.png",outdir,idx,count);
-    save_png_to_file(b,fnamebuffer);
-    free(b->pixels);
-    free(b);
-    free(actualdata);
+    SaveImage(fnamebuffer,actualdata,input.minval,input.maxval,size);
 }
 ///TODO: Need to get a better way of detecting when rendering has finished
 void outputToConsole(const tagged_array input)

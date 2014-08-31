@@ -12,10 +12,10 @@ export opencvldflags=$(shell pkg-config --libs opencv)
 export DEBUGFLAGS= -g -std=gnu11
 #export SPEEDFLAG=-DFAST #comment out this line for double instead of float (will make code slower)
 export CLIBFLAGS= -fPIC -shared
-export LDFLAGS= -lm -lpng -g
+export LDFLAGS= -lm -g
 CFLAGS += ${SPEEDFLAG}
 #conductance.c always needs to be first - this ensures that the mexfile gets the right name
-SOURCES= conductance.c coupling.c  STDP.c STD.c picture.c output.c evolve.c  newparam.c yossarian.c init.c theta.c printstruct.c matlab_output.c cleanup.c evolvegen.c
+SOURCES= conductance.c coupling.c  STDP.c STD.c output.c evolve.c  newparam.c yossarian.c init.c theta.c printstruct.c matlab_output.c cleanup.c evolvegen.c
 BINARY=./a.out
 VERSION_HASH = $(shell git rev-parse HEAD)
 export VIEWERBIN=$(shell pwd)/watch

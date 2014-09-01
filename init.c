@@ -99,7 +99,7 @@ layer setuplayer(const parameters p)
         //allows for 10x the avg number of connections per point.  Incredibly wasteful.  It would be really nice to have some c++ vectors here
         const unsigned int overkill_factor = 10;
         randomconnection** bigmat = calloc(sizeof(randomconnection*),grid_size*grid_size*p.random.numberper*overkill_factor);
-        int* bigmatcounts = calloc(sizeof(int),grid_size*grid_size);
+        unsigned int* bigmatcounts = calloc(sizeof(unsigned int),grid_size*grid_size);
         srandom((unsigned)0);
         for (unsigned int x=0;x<grid_size;x++)
         {
@@ -119,15 +119,30 @@ layer setuplayer(const parameters p)
                     };
                     L.randconns[(x*grid_size+y)*p.random.numberper + i] = rc;
                     //the normal matrix stores by where they come from.  Also need to store where they got to.
-                    bigmat[(rc.destination.x*grid_size+rc.destination.y)*(int)p.random.numberper*(int)overkill_factor + bigmatcounts[rc.destination.x*grid_size+rc.destination.y]]=&L.randconns[(x*grid_size+y)*p.random.numberper + i];
+                    bigmat[(rc.destination.x*grid_size+rc.destination.y)*(int)p.random.numberper*(int)overkill_factor + (int)bigmatcounts[rc.destination.x*grid_size+rc.destination.y]]=&L.randconns[(x*grid_size+y)*p.random.numberper + i];
                     bigmatcounts[rc.destination.x*grid_size+rc.destination.y]++;
+                    if(bigmatcounts[rc.destination.x*grid_size+rc.destination.y] > overkill_factor)
+                    {
+                        printf("Overkill factor is not large enough - please make it bigger\n");
+                        exit(EXIT_FAILURE);
+                    }
                 }
             }
         }
+        randomconnection** rev_conns = malloc(sizeof(randomconnection*)*grid_size*grid_size*p.random.numberper);
+        randomconnection*** rev_conns_lookup = malloc(sizeof(randomconnection**)*grid_size*grid_size);
+        int count = 0;
         for (unsigned int x=0;x<grid_size;x++)
         {
             for (unsigned int y=0;y<grid_size;y++)
             {
+                rev_conns_lookup[x*grid_size+y] = &rev_conns[count];
+                unsigned int mycount = 0;
+                while(bigmat[(x*grid_size+y)*p.random.numberper*overkill_factor + mycount] != NULL && mycount < overkill_factor)
+                {
+                    rev_conns[count]=bigmat[(x*grid_size+y)*p.random.numberper*overkill_factor + mycount];
+                    count++;mycount++;
+                }
             }
         }
     }

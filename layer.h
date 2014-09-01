@@ -13,7 +13,6 @@ typedef struct randomconnection
     Compute_float   strength;
     Compute_float   stdp_strength;
     coords          destination;
-    coords          from;
 } randomconnection;
 typedef struct lagstorage
 {

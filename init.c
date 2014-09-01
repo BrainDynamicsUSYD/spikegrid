@@ -131,6 +131,7 @@ layer setuplayer(const parameters p)
         }
         randomconnection** rev_conns = malloc(sizeof(randomconnection*)*grid_size*grid_size*p.random.numberper);
         randomconnection*** rev_conns_lookup = malloc(sizeof(randomconnection**)*grid_size*grid_size);
+        unsigned int* rev_pp = malloc(sizeof(unsigned int)*grid_size*grid_size);
         int count = 0;
         for (unsigned int x=0;x<grid_size;x++)
         {
@@ -143,8 +144,12 @@ layer setuplayer(const parameters p)
                     rev_conns[count]=bigmat[(x*grid_size+y)*p.random.numberper*overkill_factor + mycount];
                     count++;mycount++;
                 }
+                rev_pp[x*grid_size+y]=mycount;
             }
         }
+        L.rev_pp=rev_pp;
+        L.randconns_reverse=rev_conns;
+        L.randconns_reverse_lookup = rev_conns_lookup;
     }
     return L;
 }

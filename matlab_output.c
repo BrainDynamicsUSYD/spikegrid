@@ -48,7 +48,7 @@ mxArray* outputToMxStruct(const output_s input)
 void outputExtraThings(mxArray* plhs[],int nrhs,const mxArray* prhs[])
 {
     //error checking
-    if (nrhs != 2) {printf("Need exactly two entries on the RHS of the MATLAB call - not outputting anything")}
+    if (nrhs != 2) {printf("Need exactly two entries on the RHS of the MATLAB call - not outputting anything");}
     if (mxGetClassID(prhs[1]) != mxCELL_CLASS) {printf("rhs parameter 1 is of wrong type - needs to be cell\n");return;}
     const mwSize numparams = (mwSize)mxGetNumberOfElements(prhs[1]);
     plhs[1] = mxCreateCellArray(1,(const mwSize[]){numparams});

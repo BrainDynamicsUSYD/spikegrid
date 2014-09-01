@@ -118,9 +118,9 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
                 //random connections away from (x,y) - these will be getting decreased
                 if (Features.Random_connections == ON)
                 {
-                    const int basercidx = (x*grid_size+y) * rparams->numberper ;
+                    const int basercidx = (x*grid_size+y) * (int)rparams->numberper ;
                     //iterate over the rcs.
-                    for (int i = 0;i<rparams->numberper;i++)
+                    for (int i = 0;i<(int)rparams->numberper;i++)
                     {
                         randomconnection rc    = rcs[basercidx + i];
                         const int destbaseidx  = ((rc.destination.x * grid_size) + y)*data->lags.lagsperpoint;

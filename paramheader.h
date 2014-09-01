@@ -122,7 +122,7 @@ typedef struct theta_parameters
 
 typedef struct randconn_parameters
 {
-    const int numberper;
+    const unsigned int numberper;
     const Compute_float str;
 } randconn_parameters;
 

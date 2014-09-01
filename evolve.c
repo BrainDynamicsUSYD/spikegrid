@@ -72,8 +72,8 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
             }
             if (Features.Random_connections == ON)
             {
-                const int randbase = (x*grid_size+y)*L.P->random.numberper;
-                for (int i=0;i<L.P->random.numberper;i++)
+                const int randbase = (x*grid_size+y)*(int)L.P->random.numberper;
+                for (int i=0;i<(int)L.P->random.numberper;i++)
                 {
                     const randomconnection rc = L.randconns[randbase+i];
                     const int condindex = (rc.destination.x + couplerange) * conductance_array_size + rc.destination.y + couplerange;

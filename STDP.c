@@ -132,9 +132,9 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
                     for (int i = 0;i<(int)rparams->numberper;i++)
                     {
                         randomconnection rc    = rcs[basercidx + i];
-                        const int receiveindx  = ((rc.destination.x * grid_size) + y)*data->lags.lagsperpoint;
-                        const int reveiveindx2 = ((rc.destination.x * grid_size) + y)*data2->lags.lagsperpoint;
-                        STDP_change rcchange   = STDP_change_calc(receiveindx,receiveindx2,S,S2,data->lags.lags,data2->lags.lags);
+                        const int destidx  = ((rc.destination.x * grid_size) + y)*data->lags.lagsperpoint;
+                        const int destidx2 = ((rc.destination.x * grid_size) + y)*data2->lags.lagsperpoint;
+                        STDP_change rcchange   = STDP_change_calc(destidx,destidx2,S,S2,data->lags.lags,data2->lags.lags);
                         rc.stdp_strength       = clamp(rc.stdp_strength-rcchange.Forward_strength,rc.strength,S.stdp_limit);
                     }
                 }

@@ -13,9 +13,15 @@ typedef struct
     on_off        valid;
 } STDP_change;
 
-Compute_float __attribute__((pure)) STDP_strength(const STDP_parameters S,const Compute_float lag)
+Compute_float __attribute__((pure)) STDP_strength(const STDP_parameters S,const Compute_float lag) //implicitrly assumed that the function is odd
 {
     return  S.stdp_strength * exp(-lag*Features.Timestep/S.stdp_tau);
+}
+int wrap (int n)
+{
+    if (n<0) {return grid_size+n;}
+    if (n>=grid_size) {return n-grid_size;}
+    else {return n;}
 }
 
 ///helper function for STDP.  Calculates distance between two neurons, taking into account wrapping in the network
@@ -37,23 +43,25 @@ inline static Compute_float clamp(Compute_float V,Compute_float target,Compute_f
 
 }
 
-STDP_change STDP_change_calc (const int baseidx,const int baseidx2, const STDP_parameters S, const STDP_parameters S2,const int16_t* const lags,const int16_t* revlags)
+STDP_change STDP_change_calc (const int destneuronidx,const int destinotherlayeridx, const STDP_parameters S, const STDP_parameters S2,const int16_t* const lags,const int16_t* revlags)
 {
     STDP_change ret = {.Forward_strength=Zero, .Reverse_strength=Zero,.valid=OFF};
     int idx=0;
-    while (lags[baseidx+idx] != -1) //connections within the layer
+    while (lags[destneuronidx+idx] != -1) //connections within the layer
     {
-        ret.Forward_strength += STDP_strength(S,lags[baseidx+idx]);
+        ret.Forward_strength += STDP_strength(S,lags[destneuronidx+idx]);
+        ret.Reverse_strength += STDP_strength(S,lags[destneuronidx+idx]);
         idx++;
         ret.valid = ON;
     }
     idx = 0;
-    while (revlags[baseidx2+idx] != -1) //connections to the other layer.  This is way too complicated - but I tghink it should work
+    while (revlags[destinotherlayeridx+idx] != -1) //connections to the other layer.  This is way too complicated - but I tghink it should work
     {
-        ret.Reverse_strength += STDP_strength(S2,revlags[baseidx2+idx]);
-        ret.Forward_strength += STDP_strength(S, revlags[baseidx2+idx]);
+        ret.Reverse_strength += STDP_strength(S2,revlags[destneuronidx+idx]);
+        //the connection from the other layer to the current layer uses the other layer parameters
+        //slightly arbitrary but feels correct and maintains the sum of STDP=0 when window function is odd.
+        ret.Forward_strength += STDP_strength(S, revlags[destneuronidx+idx]); 
         idx++;
-        ret.valid=OFF;
     }
     return ret;
 }
@@ -63,8 +71,9 @@ inline static int invertdist(int v) {return ((2*couplerange) - v);}
 void STDP_At_point(const int x, const int y,STDP_data* const data,STDP_data* const revdata,const STDP_parameters S,const STDP_parameters S2,const int xoffset,const int yoffset,
         const Compute_float* const const_couples,const Compute_float* const revconst_couples)
 {
-    const int baseidx  = (x*grid_size + y) * data->lags.lagsperpoint;
-    const int baseidx2 = (x*grid_size + y) * revdata->lags.lagsperpoint;
+    //calculate the indexes for the neuron we are connected to and compute the offsets
+    const int baseidx = (wrap(x+xoffset)*grid_size + wrap(y+yoffset)) * data->lags.lagsperpoint;
+    const int baseidx2 = (wrap(x+xoffset)*grid_size + wrap(y+yoffset)) * revdata->lags.lagsperpoint;
     STDP_change change = STDP_change_calc(baseidx,baseidx2,S,S2,data->lags.lags,revdata->lags.lags);
     if (change.valid==ON)
     {
@@ -102,7 +111,7 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
             int idx = 0;
             while (data->lags.lags[baseidx + idx] != -1)
             {
-                idx++;
+                idx++; //we need to get to the last entry to ensure the neuron fired
             }
             if (idx >0 && data->lags.lags[baseidx+idx-1]==1) //so the neuron did actually fire at the last timestep
             {
@@ -118,14 +127,14 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
                 //random connections away from (x,y) - these will be getting decreased
                 if (Features.Random_connections == ON)
                 {
-                    const int basercidx = (x*grid_size+y) * rparams->numberper ;
+                    const int basercidx = (x*grid_size+y) * (int)rparams->numberper ;
                     //iterate over the rcs.
-                    for (int i = 0;i<rparams->numberper;i++)
+                    for (int i = 0;i<(int)rparams->numberper;i++)
                     {
                         randomconnection rc    = rcs[basercidx + i];
-                        const int destbaseidx  = ((rc.destination.x * grid_size) + y)*data->lags.lagsperpoint;
-                        const int destbaseidx2 = 0;//MASSIVE HACK - no positive change to RCs
-                        STDP_change rcchange   = STDP_change_calc(destbaseidx,destbaseidx2,S,S2,data->lags.lags,data2->lags.lags);
+                        const int destidx  = ((rc.destination.x * grid_size) + y)*data->lags.lagsperpoint;
+                        const int destidx2 = ((rc.destination.x * grid_size) + y)*data2->lags.lagsperpoint;
+                        STDP_change rcchange   = STDP_change_calc(destidx,destidx2,S,S2,data->lags.lags,data2->lags.lags);
                         rc.stdp_strength       = clamp(rc.stdp_strength-rcchange.Forward_strength,rc.strength,S.stdp_limit);
                     }
                 }

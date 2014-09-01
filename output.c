@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <errno.h>
+#include <stdlib.h>
 #ifndef MATLAB
     #include "cv.h"
     #include "highgui.h"
@@ -49,11 +50,14 @@ void outputToPng(const tagged_array input,const int idx,const unsigned int count
     const unsigned int size = (input.size - (2*input.offset))*input.subgrid;
     Compute_float* actualdata=taggedarrayTocomputearray(input);
     sprintf(fnamebuffer,"%s/%i-%i.png",outdir,idx,count);
+#ifndef MATLAB
     SaveImage(fnamebuffer,actualdata,input.minval,input.maxval,size);
+#endif
 }
 ///TODO: Need to get a better way of detecting when rendering has finished
 void outputToConsole(const tagged_array input)
 {
+#ifndef MATLAB
     if (!isatty(fileno(stdout))) {return;} //if we are not outputting to a terminal - dont show pictures on console - need to add matlab detection
     char* buf = malloc(sizeof(char)*1000*1000);//should be plenty
     char* upto = buf;
@@ -78,6 +82,7 @@ void outputToConsole(const tagged_array input)
     usleep(50000);//let terminal catch up - nasty hacky solution
     upto=buf;
     free(buf);free(red);free(green);free(blue);
+#endif
 }
 ///Send an outputtable to a text file
 ///@param input     the outputtable object to output

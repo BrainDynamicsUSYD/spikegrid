@@ -95,24 +95,39 @@ layer setuplayer(const parameters p)
     }
     if (Features.Random_connections == ON)
     {
+        //creat a rather ridiculously sized matrix
+        //allows for 10x the avg number of connections per point.  Incredibly wasteful.  It would be really nice to have some c++ vectors here
+        const unsigned int overkill_factor = 10;
+        randomconnection** bigmat = calloc(sizeof(randomconnection*),grid_size*grid_size*p.random.numberper*overkill_factor);
+        int* bigmatcounts = calloc(sizeof(int),grid_size*grid_size);
         srandom((unsigned)0);
-        for (int x=0;x<grid_size;x++)
+        for (unsigned int x=0;x<grid_size;x++)
         {
-            for (int y=0;y<grid_size;y++)
+            for (unsigned int y=0;y<grid_size;y++)
             {
-                for (int i=0;i<p.random.numberper;i++)
+                for (unsigned int i=0;i<p.random.numberper;i++)
                 {
-                    L.randconns[(x*grid_size+y)*p.random.numberper + i] =
-                        (randomconnection){
-                            .strength = p.random.str,
-                            .stdp_strength = Zero,
-                            .destination =
-                            {
-                                .x = (Neuron_coord)(((Compute_float)random() / (Compute_float)RAND_MAX) * (Compute_float)grid_size),
-                                .y = (Neuron_coord)(((Compute_float)random() / (Compute_float)RAND_MAX) * (Compute_float)grid_size),
-                            }
-                        };
+                    const randomconnection rc =
+                    {
+                        .strength = p.random.str,
+                        .stdp_strength = Zero,
+                        .destination =
+                        {
+                            .x = (Neuron_coord)(((Compute_float)random() / (Compute_float)RAND_MAX) * (Compute_float)grid_size),
+                            .y = (Neuron_coord)(((Compute_float)random() / (Compute_float)RAND_MAX) * (Compute_float)grid_size),
+                        }
+                    };
+                    L.randconns[(x*grid_size+y)*p.random.numberper + i] = rc;
+                    //the normal matrix stores by where they come from.  Also need to store where they got to.
+                    bigmat[(rc.destination.x*grid_size+rc.destination.y)*(int)p.random.numberper*(int)overkill_factor + bigmatcounts[rc.destination.x*grid_size+rc.destination.y]]=&L.randconns[(x*grid_size+y)*p.random.numberper + i];
+                    bigmatcounts[rc.destination.x*grid_size+rc.destination.y]++;
                 }
+            }
+        }
+        for (unsigned int x=0;x<grid_size;x++)
+        {
+            for (unsigned int y=0;y<grid_size;y++)
+            {
             }
         }
     }

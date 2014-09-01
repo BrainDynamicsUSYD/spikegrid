@@ -30,6 +30,8 @@ typedef struct layer
     Compute_float* const Extimecourse;    ///<store time course of Ex synapses
     Compute_float* const Intimecourse;    ///<store time course of In synapses
     randomconnection* randconns;                ///<stores random connections
+    randomconnection** randconns_reverse;
+    randomconnection*** randconns_reverse_lookup;
     lagstorage      firinglags;
     STDP_data*       STDP_data;
     parameters* P;                              ///<The parameters that we used to make the layer

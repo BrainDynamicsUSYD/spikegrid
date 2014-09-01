@@ -104,8 +104,6 @@ layer setuplayer(const parameters p)
         //creat a rather ridiculously sized matrix
         //allows for 10x the avg number of connections per point.  Incredibly wasteful.  It would be really nice to have some c++ vectors here
         const unsigned int overkill_factor = 10;
-        randomconnection** bigmat = malloc(sizeof(randomconnection*)*grid_size*grid_size*p.random.numberper*overkill_factor);
-        int* connections_tocount = calloc(sizeof(*connections_tocount),grid_size*grid_size);
         srandom((unsigned)0);
         for (unsigned int x=0;x<grid_size;x++)
         {

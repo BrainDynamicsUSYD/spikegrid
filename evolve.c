@@ -50,19 +50,19 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
         {
             Compute_float str = Zero;
             const int idx = x*grid_size + y;
-            int idx2 = 0;
-            while (L.firinglags.lags[idx*L.firinglags.lagsperpoint+idx2] != -1)
+            int numfirings = 0;
+            while (L.firinglags.lags[idx*L.firinglags.lagsperpoint+numfirings] != -1)
             {
-                Compute_float this_str = Synapse_timecourse(D,L.firinglags.lags[idx*L.firinglags.lagsperpoint + idx2] * Features.Timestep);
+                Compute_float this_str = Synapse_timecourse(D,L.firinglags.lags[idx*L.firinglags.lagsperpoint + numfirings] * Features.Timestep);
                 if (Features.STD == ON)
                 {
-                    this_str = this_str * STD_str(L.P->STD,x,y,time,L.firinglags.lags[idx*L.firinglags.lagsperpoint + idx2],L.std);
+                    this_str = this_str * STD_str(L.P->STD,x,y,time,L.firinglags.lags[idx*L.firinglags.lagsperpoint + numfirings],L.std);
                 }
                 str += this_str;
-                idx2++;
+                numfirings++;
             }
             if (Ion) {str = (-str);} //invert strength for inhib conns.
-            if (idx2 > 0) //only fire if we had a spike.
+            if (numfirings > 0) //only fire if we had a spike.
             {
                 evolvept_duallayer(x,y,L.connections,str,(Ion?gI:gE));
                 if (Features.STDP==ON)
@@ -138,6 +138,7 @@ Compute_float __attribute__((const,pure)) rhs_func  (const Compute_float V,const
 }
 
 ///Uses precalculated gE and gI to integrate the voltages forward through time.
+///Uses eulers method
 void CalcVoltages(const Compute_float* const __restrict__ Vinput,
         const Compute_float* const __restrict__ gE,
         const Compute_float* const __restrict__ gI,
@@ -147,10 +148,9 @@ void CalcVoltages(const Compute_float* const __restrict__ Vinput,
     for (int x=0;x<grid_size;x++)
     {
         for (int y=0;y<grid_size;y++)
-        { //step all neurons through time
+        { 
             const int idx = (x+couplerange)*conductance_array_size + y + couplerange; //index for gE/gI
             const int idx2=  x*grid_size+y;
-            // apply Euler method
             const Compute_float rhs = rhs_func(Vinput[idx2],gE[idx],gI[idx],C);
             Vout[idx2]=Vinput[idx2]+Features.Timestep*rhs;
         }
@@ -224,7 +224,7 @@ void StoreFiring(layer* L)
         for (int y=0;y<grid_size;y++)
         {
             const int test = x % step ==0 && y % step ==0;
-            if ((test && step > 0) || ((!test) && step<0))
+            if ((test && step > 0) || ((!test) && step<0)) //check if this is an active neuron
             {
                 const int baseidx=(x*grid_size+y)*L->firinglags.lagsperpoint;
                 modifyLags(&L->firinglags,baseidx);

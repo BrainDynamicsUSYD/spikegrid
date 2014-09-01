@@ -24,12 +24,9 @@
 /// @param maxval   The maximum value
 void randinit(Compute_float* input,const Compute_float minval,const Compute_float maxval)
 {
-    for (int x=0;x<grid_size;x++)
+    for (int x=0;x<grid_size*grid_size;x++)
     {
-        for (int y=0;y<grid_size;y++)
-        {
-            input[x*grid_size + y ] = ((Compute_float)random())/((Compute_float)RAND_MAX)*(maxval-minval)+minval;
-        }
+            input[x] = ((Compute_float)random())/((Compute_float)RAND_MAX)*(maxval-minval)+minval;
     }
 }
 ///Create an initial condition where all neurons have the same voltage except for the one in the middle
@@ -38,12 +35,9 @@ void randinit(Compute_float* input,const Compute_float minval,const Compute_floa
 /// @param mod_value The value for the middle neuron
 void Fixedinit(Compute_float* input, const Compute_float def_value,const Compute_float mod_value)
 {
-    for (int x=0;x<grid_size;x++)
+    for (int x=0;x<grid_size*grid_size;x++)
     {
-        for (int y=0;y<grid_size;y++)
-        {
-            input[x*grid_size + y ] = def_value;
-        }
+            input[x] = def_value;
     }
     input[grid_size*(grid_size/2) + (grid_size/2)] = mod_value;
 }

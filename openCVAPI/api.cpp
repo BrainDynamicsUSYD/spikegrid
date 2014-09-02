@@ -35,9 +35,9 @@ void SaveImage(const char* filename,const double* data,const double min,const do
 void getcolors(const double* data, const double min, const double max, const unsigned int size, uchar* red,uchar* blue,uchar* green)
 {
     Mat outmat = ProcessMatrix(data,min,max,size);
-    for(int i=0;i<size;i++)
+    for(unsigned int i=0;i<size;i++)
     {
-        for(int j=0;j<size;j++)
+        for(unsigned int j=0;j<size;j++)
         {
             Vec3b intensity = outmat.at<Vec3b>(i, j);
             blue[i*size+j]  = intensity.val[0];

@@ -59,12 +59,12 @@ static const parameters DualLayerModelIn =
     .couple =
     {
         .Layertype = DUALLAYER,
-        .Layer_parameters = 
+        .Layer_parameters =
         {
-            .dual = 
+            .dual =
             {
-                .W          = -0.39, //-0.40 //-0.57 //-0.70 //-1.25, 
-                .sigma      = 90, 
+                .W          = -0.39, //-0.40 //-0.57 //-0.70 //-1.25,
+                .sigma      = 90,
                 .synapse    = {.R=0.5,.D=2.0},
             }
         },
@@ -72,7 +72,7 @@ static const parameters DualLayerModelIn =
         .norm_type = None,
         .tref       = 5,
     },
-    .random = 
+    .random =
     {
         .numberper=10,
         .str = 0.8
@@ -85,14 +85,14 @@ static const parameters DualLayerModelIn =
 ///parameters for the excitatory layer of the double layer model
 static const parameters DualLayerModelEx =
 {
-    .couple =   
+    .couple =
     {
         .Layertype = DUALLAYER,
-        .Layer_parameters = 
+        .Layer_parameters =
         {
-            .dual =     
+            .dual =
             {
-                .W          =  0.20, 
+                .W          =  0.20,
                 .sigma      = 12,
                 .synapse    = {.R=0.5,.D=2.0},
             }
@@ -100,7 +100,7 @@ static const parameters DualLayerModelEx =
         .tref       = 5,
         .norm_type = None,
     },
-    .random = 
+    .random =
     {
         .numberper=2,
         .str = 0.8
@@ -112,10 +112,10 @@ static const parameters DualLayerModelEx =
     .output = {{ .output_method=PICTURE,.Output=5,.Delay=10}}
 };
 ///Some global features that can be turned on and off
-static const model_features Features = 
+static const model_features Features =
 {
     .STD        = ON,
-    .STDP		= ON, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep - 
+    .STDP		= ON, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep -
     .Random_connections = OFF,
     .Timestep   = 0.1,
     .Simlength  = 10000,

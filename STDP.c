@@ -99,7 +99,7 @@ void STDP_At_point(const int x, const int y,STDP_data* const data,STDP_data* con
 }
 void  DoSTDP(const Compute_float* const const_couples, const Compute_float* const const_couples2,
         STDP_data* data,const STDP_parameters S, STDP_data* const data2,const STDP_parameters S2,
-        randomconnection* rcs,const randconn_parameters* const rparams )
+        randconns_info* rcs,const randconn_parameters* const rparams )
 {
     if (S.STDP_on ==OFF) {return;}
     for (int x=0;x<grid_size;x++)
@@ -124,19 +124,20 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
                         STDP_At_point(x,y,data,data2,S,S2,i,j,const_couples,const_couples2);
                     }
                 }
-                //random connections away from (x,y) - these will be getting decreased
                 if (Features.Random_connections == ON)
                 {
                     const int basercidx = (x*grid_size+y) * (int)rparams->numberper ;
-                    //iterate over the rcs.
+                    //random connections away from (x,y) - these will be getting decreased
                     for (int i = 0;i<(int)rparams->numberper;i++)
                     {
-                        randomconnection rc    = rcs[basercidx + i];
+                        randomconnection rc    = rcs->randconns[basercidx + i];
                         const int destidx  = ((rc.destination.x * grid_size) + y)*data->lags.lagsperpoint;
                         const int destidx2 = ((rc.destination.x * grid_size) + y)*data2->lags.lagsperpoint;
                         STDP_change rcchange   = STDP_change_calc(destidx,destidx2,S,S2,data->lags.lags,data2->lags.lags);
                         rc.stdp_strength       = clamp(rc.stdp_strength-rcchange.Forward_strength,rc.strength,S.stdp_limit);
                     }
+                    //random connections to (x,y) - these will be getting increased
+                    for (int i=0;i<)
                 }
             }
         }

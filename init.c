@@ -100,6 +100,9 @@ layer setuplayer(const parameters p)
         const unsigned int overkill_factor = 10;
         randomconnection** bigmat = calloc(sizeof(randomconnection*),grid_size*grid_size*p.random.numberper*overkill_factor);
         unsigned int* bigmatcounts = calloc(sizeof(unsigned int),grid_size*grid_size);
+        int nonzcount;
+        Compute_float* interestingconns;
+        Non_zerocouplings(p.couple,&interestingconns,&nonzcount);
         srandom((unsigned)0);
         for (unsigned int x=0;x<grid_size;x++)
         {
@@ -109,7 +112,7 @@ layer setuplayer(const parameters p)
                 {
                     const randomconnection rc =
                     {
-                        .strength = p.random.str,
+                        .strength = p.random.str * interestingconns[random()%nonzcount],
                         .stdp_strength = Zero,
                         .destination =
                         {

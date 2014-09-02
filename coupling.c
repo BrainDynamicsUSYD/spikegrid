@@ -128,6 +128,24 @@ Compute_float* CreateCouplingMatrix(const couple_parameters c)
     }
     return Norm_couplematrix(c, matrix);
 }
+///Returns a list of nonzero couplings.  returns count 
+void Non_zerocouplings(const couple_parameters c,Compute_float** validconns,int* counts)
+{
+    Compute_float* couplemat = CreateCouplingMatrix(c);
+    Compute_float* interestingconns = malloc(sizeof(Compute_float)*couple_array_size*couple_array_size);
+    int count = 0;
+    for (int i=0;i<couple_array_size*couple_array_size;i++)
+    {
+        if (fabs(couplemat[i])>0)
+        {
+            interestingconns[count]=couplemat[i];
+            count++;
+        }
+    }
+    *validconns=interestingconns;
+    *counts = count;
+    free(couplemat);
+}
 ///Cache the shape of the spike
 ///In the conductance model, neurons emit spikes that decay gradually over time.  This function pre-calculates these strengths
 /// @param cap The maximum time to still add a spike @see setcap

@@ -20,6 +20,14 @@ typedef struct lagstorage
     const int   cap;
     const int   lagsperpoint;
 } lagstorage;
+typedef struct randconns_info
+{
+    randomconnection* randconns;                ///<stores random connections
+    randomconnection** randconns_reverse;   //reverse connections (might not be required?)
+    unsigned int* rev_pp;                   //no of to conns / point
+    randomconnection*** randconns_reverse_lookup; //lookup to randconns_reverse
+
+} randconns_info;
 typedef struct layer
 {
     Compute_float* const connections;     ///<Matrix of connections coming from a single point
@@ -29,10 +37,7 @@ typedef struct layer
     Compute_float* recoverys_out;               ///<Return value for recovery variable
     Compute_float* const Extimecourse;    ///<store time course of Ex synapses
     Compute_float* const Intimecourse;    ///<store time course of In synapses
-    randomconnection* randconns;                ///<stores random connections
-    randomconnection** randconns_reverse;
-    unsigned int* rev_pp;
-    randomconnection*** randconns_reverse_lookup;
+    randconns_info rcinfo;
     lagstorage      firinglags;
     STDP_data*       STDP_data;
     parameters* P;                              ///<The parameters that we used to make the layer

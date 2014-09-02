@@ -3,6 +3,7 @@
 #include <string.h>
 #include "paramheader.h"
 #include "mymath.h" //fabsf
+#include "layer.h"
 #include "STDP.h"
 #include <stdio.h>
 
@@ -126,9 +127,9 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
                 }
                 if (Features.Random_connections == ON)
                 {
-                    const int basercidx = (x*grid_size+y) * (int)rparams->numberper ;
+                    const unsigned int basercidx = (unsigned int)(x*grid_size+y) * rparams->numberper ;
                     //random connections away from (x,y) - these will be getting decreased
-                    for (int i = 0;i<(int)rparams->numberper;i++)
+                    for (unsigned int i = 0;i<rparams->numberper;i++)
                     {
                         randomconnection rc    = rcs->randconns[basercidx + i];
                         const int destidx  = ((rc.destination.x * grid_size) + y)*data->lags.lagsperpoint;
@@ -136,8 +137,17 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
                         STDP_change rcchange   = STDP_change_calc(destidx,destidx2,S,S2,data->lags.lags,data2->lags.lags);
                         rc.stdp_strength       = clamp(rc.stdp_strength-rcchange.Forward_strength,rc.strength,S.stdp_limit);
                     }
-                    //random connections to (x,y) - these will be getting increased
-                    for (int i=0;i<)
+                    //random connections to (x,y) - these will be getting increased - code is almost identical - except sign of change is reversed
+                   randomconnection** rcbase = rcs->randconns_reverse_lookup[x*grid_size+y];
+                   for (unsigned int i=0;i<rcs->rev_pp[x*grid_size+y];i++)
+                   {
+                       randomconnection rc = *rcbase[i];
+                       const int destidx  = ((rc.destination.x * grid_size) + y)*data->lags.lagsperpoint;
+                       const int destidx2 = ((rc.destination.x * grid_size) + y)*data2->lags.lagsperpoint;
+                       STDP_change rcchange   = STDP_change_calc(destidx,destidx2,S,S2,data->lags.lags,data2->lags.lags);
+                       rc.stdp_strength       = clamp(rc.stdp_strength+rcchange.Forward_strength,rc.strength,S.stdp_limit);
+                       //                                             ^ note plus sign (not minus)
+                   }
                 }
             }
         }

@@ -89,10 +89,7 @@ Compute_float* Norm_couplematrix(const couple_parameters c, Compute_float* const
 Compute_float __attribute__((const)) mexhat  (const Compute_float rsq,const singlelayer_parameters c){return c.WE*exp(-rsq/c.sigE)-c.WI*exp(-rsq/c.sigI);}
 /// Computes the exponentially decaying coupling function used in the double layer model
 Compute_float __attribute__((const)) expdecay(const Compute_float rsq,const duallayer_parameters d  ){return d.W *exp(-rsq/d.sigma);}
-
-//I tried changing this function so that it precomputes the multiplication by the spike shape.  However - it turns out that this actually made the code slower as it significantly increased the number of cache misses as well as memory bandwidth.
-///Creates the coupling matrix for a layer.
-Compute_float* CreateCouplingMatrix(const couple_parameters c)
+Compute_float* unnormedCouplingMat(const couple_parameters c)
 {
     Compute_float* matrix = calloc(sizeof(Compute_float),couple_array_size*couple_array_size); //matrix of coupling values
     int count=0;
@@ -126,12 +123,19 @@ Compute_float* CreateCouplingMatrix(const couple_parameters c)
             }
         }
     }
-    return Norm_couplematrix(c, matrix);
+    return matrix;
+
 }
-///Returns a list of nonzero couplings.  returns count 
+//I tried changing this function so that it precomputes the multiplication by the spike shape.  However - it turns out that this actually made the code slower as it significantly increased the number of cache misses as well as memory bandwidth.
+///Creates the coupling matrix for a layer.
+Compute_float* CreateCouplingMatrix(const couple_parameters c)
+{
+    return Norm_couplematrix(c, unnormedCouplingMat(c));
+}
+///Returns a list of nonzero couplings.  returns count - is based on unnormed couple matrix - useful trick
 void Non_zerocouplings(const couple_parameters c,Compute_float** validconns,int* counts)
 {
-    Compute_float* couplemat = CreateCouplingMatrix(c);
+    Compute_float* couplemat = unnormedCouplingMat(c);
     Compute_float* interestingconns = malloc(sizeof(Compute_float)*couple_array_size*couple_array_size);
     int count = 0;
     for (int i=0;i<couple_array_size*couple_array_size;i++)

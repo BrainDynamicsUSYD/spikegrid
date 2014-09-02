@@ -79,7 +79,7 @@ layer setuplayer(const parameters p)
             ((p.couple.Layer_parameters.dual.W>0)?Synapse_timecourse_cache((unsigned int)cap,p.couple.Layer_parameters.dual.synapse,Features.Timestep):NULL),
         .Intimecourse       = p.couple.Layertype==SINGLELAYER?Synapse_timecourse_cache((unsigned int)cap,p.couple.Layer_parameters.single.In,Features.Timestep):
             ((p.couple.Layer_parameters.dual.W<0)?Synapse_timecourse_cache((unsigned int)cap,p.couple.Layer_parameters.dual.synapse,Features.Timestep):NULL),
-        .randconns          = Features.Random_connections==ON?calloc(sizeof(randomconnection),(size_t)(grid_size*grid_size*p.random.numberper)):NULL,
+        .rcinfo = {.randconns          = Features.Random_connections==ON?calloc(sizeof(randomconnection),(size_t)(grid_size*grid_size*p.random.numberper)):NULL},
         .P                  = (parameters*)newdata(&p,sizeof(p)),
         .voltages           = calloc(sizeof(Compute_float),grid_size*grid_size),
         .voltages_out       = calloc(sizeof(Compute_float),grid_size*grid_size),
@@ -112,7 +112,7 @@ layer setuplayer(const parameters p)
                 {
                     const randomconnection rc =
                     {
-                        .strength = p.random.str * interestingconns[random()%nonzcount],
+                        .strength = p.random.str * interestingconns[random()%nonzcount] * (One - p.couple.normalization_parameters.glob_mult.GM),
                         .stdp_strength = Zero,
                         .destination =
                         {
@@ -120,9 +120,9 @@ layer setuplayer(const parameters p)
                             .y = (Neuron_coord)(((Compute_float)random() / (Compute_float)RAND_MAX) * (Compute_float)grid_size),
                         }
                     };
-                    L.randconns[(x*grid_size+y)*p.random.numberper + i] = rc;
+                    L.rcinfo.randconns[(x*grid_size+y)*p.random.numberper + i] = rc;
                     //the normal matrix stores by where they come from.  Also need to store where they got to.
-                    bigmat[(rc.destination.x*grid_size+rc.destination.y)*(int)p.random.numberper*(int)overkill_factor + (int)bigmatcounts[rc.destination.x*grid_size+rc.destination.y]]=&L.randconns[(x*grid_size+y)*p.random.numberper + i];
+                    bigmat[(rc.destination.x*grid_size+rc.destination.y)*(int)p.random.numberper*(int)overkill_factor + (int)bigmatcounts[rc.destination.x*grid_size+rc.destination.y]]=&L.rcinfo.randconns[(x*grid_size+y)*p.random.numberper + i];
                     bigmatcounts[rc.destination.x*grid_size+rc.destination.y]++;
                     if(bigmatcounts[rc.destination.x*grid_size+rc.destination.y] > overkill_factor)
                     {
@@ -150,9 +150,9 @@ layer setuplayer(const parameters p)
                 rev_pp[x*grid_size+y]=mycount;
             }
         }
-        L.rev_pp=rev_pp;
-        L.randconns_reverse=rev_conns;
-        L.randconns_reverse_lookup = rev_conns_lookup;
+        L.rcinfo.rev_pp=rev_pp;
+        L.rcinfo.randconns_reverse=rev_conns;
+        L.rcinfo.randconns_reverse_lookup = rev_conns_lookup;
     }
     return L;
 }

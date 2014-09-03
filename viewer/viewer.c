@@ -11,12 +11,21 @@ const int cols = 10;
 char* winname = "viewer0";
 char** dirnames;
 int upto=0;
-void mousecb(int event, int x,int y,int dummy,void* dummy2) 
+IplImage* dispimage;
+int printimagecount=0;
+void mousecb(int event, int x,int y,int dummy,void* dummy2)
 {
     if (event==CV_EVENT_LBUTTONDOWN)
     {
         int idx = (x/100)*cols+(y/100);
         printf("%s\n",dirnames[idx+upto]);
+    }
+    else if (event==CV_EVENT_RBUTTONDOWN)
+    {
+        char buf[100];
+        sprintf(buf,"still-%i.png",printimagecount);
+        cvSaveImage(buf,dispimage,NULL);
+        printimagecount++;
     }
 }
 int compare(const void* a, const void* b)
@@ -72,16 +81,16 @@ int main() {
         }
         if (size==0) {printf("No videos found\n");return(0);}
         IplImage* frame;
-        IplImage* dispimage = cvCreateImage(cvSize(size*rows,size*cols),8,3);
+        dispimage = cvCreateImage(cvSize(size*rows,size*cols),8,3);
         // display video frame by frame
-        while(1) 
+        while(1)
         {
             for (int i=0; i<vcount;i++)
             {
                 if (caps[i]) //only process frames where capture succeeded
                 {            //if the capture failed, just leave the square blank.
                     frame=cvQueryFrame(caps[i]);
-                    if (!frame) 
+                    if (!frame)
                     {
                         goto done; //here we have assumed once one video is done they all are, and we bail
                     }

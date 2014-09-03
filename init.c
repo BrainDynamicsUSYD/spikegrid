@@ -112,7 +112,7 @@ layer setuplayer(const parameters p)
                 {
                     const randomconnection rc =
                     {
-                        .strength = p.random.str * interestingconns[random()%nonzcount] * (One - p.couple.normalization_parameters.glob_mult.GM),
+                        .strength = interestingconns[random()%nonzcount] * (One - p.couple.normalization_parameters.glob_mult.GM),
                         .stdp_strength = Zero,
                         .destination =
                         {
@@ -124,9 +124,9 @@ layer setuplayer(const parameters p)
                     //the normal matrix stores by where they come from.  Also need to store where they got to.
                     bigmat[(rc.destination.x*grid_size+rc.destination.y)*(int)p.random.numberper*(int)overkill_factor + (int)bigmatcounts[rc.destination.x*grid_size+rc.destination.y]]=&L.rcinfo.randconns[(x*grid_size+y)*p.random.numberper + i];
                     bigmatcounts[rc.destination.x*grid_size+rc.destination.y]++;
-                    if(bigmatcounts[rc.destination.x*grid_size+rc.destination.y] > overkill_factor)
+                    if(bigmatcounts[rc.destination.x*grid_size+rc.destination.y] > overkill_factor*p.random.numberper)
                     {
-                        printf("Overkill factor is not large enough - please make it bigger\n");
+                        printf("Overkill factor is not large enough - please make it bigger at dx = %i dy = %i\n",rc.destination.x,rc.destination.y);
                         exit(EXIT_FAILURE);
                     }
                 }

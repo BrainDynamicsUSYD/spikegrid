@@ -69,12 +69,13 @@ static const parameters DualLayerModelIn =
             }
         },
 
-        .norm_type = None,
+        .norm_type = GlobalMultiplier,
+        .normalization_parameters = {.glob_mult = {.GM=0.1}},
         .tref       = 5,
     },
     .random =
     {
-        .numberper=10,
+        .numberper=175,
         .str = 0.8
     },
     STDparams,
@@ -98,11 +99,12 @@ static const parameters DualLayerModelEx =
             }
         },
         .tref       = 5,
-        .norm_type = None,
+        .norm_type = GlobalMultiplier,
+        .normalization_parameters = {.glob_mult = {.GM=0.l}},
     },
     .random =
     {
-        .numberper=2,
+        .numberper=530,
         .str = 0.8
     },
     STDparams,
@@ -116,7 +118,7 @@ static const model_features Features =
 {
     .STD        = ON,
     .STDP		= ON, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep -
-    .Random_connections = OFF,
+    .Random_connections = ON,
     .Timestep   = 0.1,
     .Simlength  = 10000,
     .job        = {.initcond = RAND_ZERO}
@@ -130,7 +132,7 @@ static const extinput Extinput =
 ///Parameters for conducting a parameter sweep.
 static const sweepable Sweep =
 {
-    .offset=offsetof(parameters,STD)+offsetof(STD_parameters,F) ,
+    .offset=offsetof(parameters,couple)+offsetof(couple_parameters,normalization_parameters) ,
     .minval = 0.0,
     .maxval = 1.0,
     .count = 100

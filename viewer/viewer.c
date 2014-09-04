@@ -100,7 +100,7 @@ int main() {
                 }
             }
             cvShowImage(winname,dispimage);
-            int c = cvWaitKey(33);
+            int c = cvWaitKey(10);
             if (c==27) break;
         }
 done:

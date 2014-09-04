@@ -44,7 +44,7 @@ static const parameters OneLayerModel = {.couple={0}}; //since unused - shortes 
     {                       \
         .stdp_limit=5.8,    \
         .stdp_tau=20,       \
-        .stdp_strength=0.0048,  \
+        .stdp_strength=0.02,  \
         .STDP_on=ON\
     }
 #define STDparams .STD= \
@@ -75,7 +75,7 @@ static const parameters DualLayerModelIn =
     },
     .random =
     {
-        .numberper=175,
+        .numberper=706,
         .str = 0.8
     },
     STDparams,
@@ -104,7 +104,7 @@ static const parameters DualLayerModelEx =
     },
     .random =
     {
-        .numberper=530,
+        .numberper=706,
         .str = 0.8
     },
     STDparams,

@@ -66,7 +66,7 @@ Compute_float* Norm_couplematrix(const couple_parameters c, Compute_float* const
             {
                 for (int i=0;i<couple_array_size*couple_array_size;i++)
                 {
-                    unnormed[i] *= c.normalization_parameters.glob_mult.GM;
+                    unnormed[i] = unnormed[i] * c.normalization_parameters.glob_mult.GM;
                 }
                 return unnormed;
             }

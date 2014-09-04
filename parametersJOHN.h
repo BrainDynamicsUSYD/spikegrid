@@ -4,7 +4,7 @@
 #define grid_size 100
 ///Total size of the grid
 ///Coupling range
-#define couplerange 25
+#define couplerange 15
 #ifndef PARAMETERS  //DO NOT REMOVE
 ///include guard
 #define PARAMETERS  //DO NOT REMOVE
@@ -42,9 +42,9 @@ static const parameters OneLayerModel = {.couple={0}}; //since unused - shortes 
 
 #define STDPparams .STDP=   \
     {                       \
-        .stdp_limit=5.8,    \
+        .stdp_limit=8.5,    \
         .stdp_tau=20,       \
-        .stdp_strength=0.02,  \
+        .stdp_strength=0.002,  \
         .STDP_on=ON\
     }
 #define STDparams .STD= \
@@ -63,15 +63,15 @@ static const parameters DualLayerModelIn =
         {
             .dual =
             {
-                .W          = -0.39, //-0.40 //-0.57 //-0.70 //-1.25,
+                .W          = -0.36, //-0.40 //-0.57 //-0.70 //-1.25,
                 .sigma      = 90,
                 .synapse    = {.R=0.5,.D=2.0},
             }
         },
 
         .norm_type = GlobalMultiplier,
-        .normalization_parameters = {.glob_mult = {.GM=0.1}},
-        .tref       = 5,
+        .normalization_parameters = {.glob_mult = {.GM=1.0}},
+        .tref       = 4,
     },
     .random =
     {
@@ -94,13 +94,13 @@ static const parameters DualLayerModelEx =
             .dual =
             {
                 .W          =  0.20,
-                .sigma      = 12,
+                .sigma      = 15,
                 .synapse    = {.R=0.5,.D=2.0},
             }
         },
-        .tref       = 5,
+        .tref       = 4,
         .norm_type = GlobalMultiplier,
-        .normalization_parameters = {.glob_mult = {.GM=0.l}},
+        .normalization_parameters = {.glob_mult = {.GM=1.0}},
     },
     .random =
     {
@@ -116,11 +116,11 @@ static const parameters DualLayerModelEx =
 ///Some global features that can be turned on and off
 static const model_features Features =
 {
-    .STD        = ON,
+    .STD        = OFF,
     .STDP		= ON, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep -
-    .Random_connections = ON,
+    .Random_connections = OFF,
     .Timestep   = 0.1,
-    .Simlength  = 10000,
+    .Simlength  = 100000,
     .job        = {.initcond = RAND_ZERO}
 };
 ///Constant external input to conductances

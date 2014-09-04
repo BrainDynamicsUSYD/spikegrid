@@ -178,7 +178,7 @@ void cvdisp (const char** const names, const int count)
     for (int i=0;i<count;i++)
     {
         output_s out = getOutputByName(names[i]);
-        const unsigned int size = (out.data.TA_data.size - (2*out.data.TA_data.offset));
+        const unsigned int size = (out.data.TA_data.size - (2*out.data.TA_data.offset))*out.data.TA_data.subgrid;
         Compute_float* data = taggedarrayTocomputearray(out.data.TA_data);
         PlotColored(out.name,data,out.data.TA_data.minval,out.data.TA_data.maxval,size);
         cvWaitKey(1);

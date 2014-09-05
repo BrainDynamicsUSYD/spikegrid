@@ -72,21 +72,21 @@ inline static int invertdist(int v) {return ((2*couplerange) - v);}
 void STDP_At_point(const int x, const int y,STDP_data* const data,STDP_data* const revdata,const STDP_parameters S,const STDP_parameters S2,const int xoffset,const int yoffset,
         const Compute_float* const const_couples,const Compute_float* const revconst_couples)
 {
+    const int wx = wrap(x+xoffset);
+    const int wy = wrap(y+yoffset);
     //calculate the indexes for the neuron we are connected to and compute the offsets
-    const int baseidx = (wrap(x+xoffset)*grid_size + wrap(y+yoffset)) * data->lags.lagsperpoint;
-    const int baseidx2 = (wrap(x+xoffset)*grid_size + wrap(y+yoffset)) * revdata->lags.lagsperpoint;
+    const int baseidx = (wx*grid_size + wy) * data->lags.lagsperpoint;
+    const int baseidx2 = (wx*grid_size + wy) * revdata->lags.lagsperpoint;
     STDP_change change = STDP_change_calc(baseidx,baseidx2,S,S2,data->lags.lags,revdata->lags.lags);
     if (change.valid==ON)
     {
         // the other neuron actually fired - so we can apply STDP - need to apply in two directions
         //calculate the offsets
-        const int px               = x+xoffset;
-        const int py               = y+yoffset;
         const int cdx              = xoffset + STDP_RANGE;
         const int cdy              = yoffset + STDP_RANGE;
         const int rx               = invertdist(cdx);
         const int ry               = invertdist(cdy);
-        const int fidx             = (px*grid_size+py)*STDP_array_size*STDP_array_size + cdx*STDP_array_size + cdy;
+        const int fidx             = (wx*grid_size+wy)*STDP_array_size*STDP_array_size + cdx*STDP_array_size + cdy;
         const int ridx             = (x*grid_size+y)  *STDP_array_size*STDP_array_size + rx *STDP_array_size + ry;
         data->connections[fidx]    = clamp(data->   connections[fidx] + change.Forward_strength  ,const_couples[   cdx*couple_array_size + cdy],S.stdp_limit);
         data->connections[ridx]    = clamp(data->   connections[ridx] - change.Forward_strength  ,const_couples[   cdx*couple_array_size + cdy],S.stdp_limit);

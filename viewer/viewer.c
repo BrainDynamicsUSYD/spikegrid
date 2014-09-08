@@ -83,8 +83,11 @@ int main() {
         IplImage* frame;
         dispimage = cvCreateImage(cvSize(size*rows,size*cols),8,3);
         // display video frame by frame
+        int c = 0;
         while(1)
         {
+            c++;
+            if (c%100 == 0) {printf("%i\n",c);}
             for (int i=0; i<vcount;i++)
             {
                 if (caps[i]) //only process frames where capture succeeded

@@ -9,8 +9,8 @@
 
 typedef struct
 {
-    Compute_float Forward_strength;
-    Compute_float Reverse_strength;
+    Compute_float Strength_increase;
+    Compute_float Strength_decrease;
     on_off        valid;
 } STDP_change;
 
@@ -46,22 +46,22 @@ inline static Compute_float clamp(Compute_float V,Compute_float target,Compute_f
 
 STDP_change STDP_change_calc (const int destneuronidx,const int destinotherlayeridx, const STDP_parameters S, const STDP_parameters S2,const int16_t* const lags,const int16_t* revlags)
 {
-    STDP_change ret = {.Forward_strength=Zero, .Reverse_strength=Zero,.valid=OFF};
+    STDP_change ret = {.Strength_increase=Zero, .Strength_decrease=Zero,.valid=OFF};
     int idx=0;
     while (lags[destneuronidx+idx] != -1) //connections within the layer
     {
-        ret.Forward_strength += STDP_strength(S,lags[destneuronidx+idx]);
-        ret.Reverse_strength += STDP_strength(S,lags[destneuronidx+idx]);
+        ret.Strength_decrease += STDP_strength(S,lags[destneuronidx+idx]);
+        ret.Strength_increase += STDP_strength(S,lags[destneuronidx+idx]);
         idx++;
         ret.valid = ON;
     }
     idx = 0;
     while (revlags[destinotherlayeridx+idx] != -1) //connections to the other layer.  This is way too complicated - but I tghink it should work
     {
-        ret.Reverse_strength += STDP_strength(S2,revlags[destneuronidx+idx]);
+        ret.Strength_increase += STDP_strength(S2,revlags[destneuronidx+idx]);
         //the connection from the other layer to the current layer uses the other layer parameters
         //slightly arbitrary but feels correct and maintains the sum of STDP=0 when window function is odd.
-        ret.Forward_strength += STDP_strength(S, revlags[destneuronidx+idx]); 
+        ret.Strength_decrease += STDP_strength(S, revlags[destneuronidx+idx]); 
         idx++;
     }
     return ret;
@@ -82,15 +82,15 @@ void STDP_At_point(const int x, const int y,STDP_data* const data,STDP_data* con
     {
         // the other neuron actually fired - so we can apply STDP - need to apply in two directions
         //calculate the offsets
-        const int cdx              = xoffset + STDP_RANGE;
-        const int cdy              = yoffset + STDP_RANGE;
+        const int cdx              = -xoffset + STDP_RANGE;
+        const int cdy              = -yoffset + STDP_RANGE;
         const int rx               = invertdist(cdx);
         const int ry               = invertdist(cdy);
         const int fidx             = (wx*grid_size+wy)*STDP_array_size*STDP_array_size + cdx*STDP_array_size + cdy;
         const int ridx             = (x*grid_size+y)  *STDP_array_size*STDP_array_size + rx *STDP_array_size + ry;
-        data->connections[fidx]    = clamp(data->   connections[fidx] + change.Forward_strength  ,const_couples[   cdx*couple_array_size + cdy],S.stdp_limit);
-        data->connections[ridx]    = clamp(data->   connections[ridx] - change.Forward_strength  ,const_couples[   cdx*couple_array_size + cdy],S.stdp_limit);
-        revdata->connections[ridx] = clamp(revdata->connections[ridx] - change.Reverse_strength  ,revconst_couples[cdx*couple_array_size + cdy],S2.stdp_limit);
+        data->connections[fidx]    = clamp(data->   connections[fidx] + change.Strength_increase  ,const_couples[   cdx*couple_array_size + cdy],S.stdp_limit);
+        data->connections[ridx]    = clamp(data->   connections[ridx] - change.Strength_decrease  ,const_couples[   cdx*couple_array_size + cdy],S.stdp_limit);
+        revdata->connections[ridx] = clamp(revdata->connections[ridx] - change.Strength_increase  ,revconst_couples[cdx*couple_array_size + cdy],S2.stdp_limit);
 
         if (fabs(data->connections[fidx]) > 1.0 || fabs(data->connections[ridx]) > 1.0)
         {

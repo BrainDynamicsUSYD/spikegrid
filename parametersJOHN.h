@@ -93,7 +93,7 @@ static const parameters DualLayerModelEx =
         {
             .dual =
             {
-                .W          =  0.20,
+                .W          =  0.215,
                 .sigma      = 15,
                 .synapse    = {.R=0.5,.D=2.0},
             }
@@ -132,10 +132,10 @@ static const extinput Extinput =
 ///Parameters for conducting a parameter sweep.
 static const sweepable Sweep =
 {
-    .offset=offsetof(parameters,couple)+offsetof(couple_parameters,normalization_parameters) ,
-    .minval = 0.0,
-    .maxval = 1.0,
-    .count = 100
+    .offset=offsetof(parameters,STDP)+offsetof(STDP_parameters,stdp_strength) ,
+    .minval = 0.005,
+    .maxval = 0.001,
+    .count = 40
 };
 
 #ifdef __clang__

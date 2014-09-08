@@ -153,6 +153,8 @@ layer setuplayer(const parameters p)
         L.rcinfo.rev_pp=rev_pp;
         L.rcinfo.randconns_reverse=rev_conns;
         L.rcinfo.randconns_reverse_lookup = rev_conns_lookup;
+        free(bigmat);
+        free(bigmatcounts);
     }
     return L;
 }

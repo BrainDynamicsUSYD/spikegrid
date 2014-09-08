@@ -6,8 +6,8 @@
 
 // initialize global variables
 const int maxjobs = 1000;
-const int rows = 10;
-const int cols = 10;
+const int rows = 7;
+const int cols = 7;
 char* winname = "viewer0";
 char** dirnames;
 int upto=0;

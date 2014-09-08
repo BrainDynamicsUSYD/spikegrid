@@ -44,7 +44,7 @@ static const parameters OneLayerModel = {.couple={0}}; //since unused - shortes 
     {                       \
         .stdp_limit=8.5,    \
         .stdp_tau=20,       \
-        .stdp_strength=0.002,  \
+        .stdp_strength=0.00075,  \
         .STDP_on=ON\
     }
 #define STDparams .STD= \
@@ -118,9 +118,9 @@ static const model_features Features =
 {
     .STD        = OFF,
     .STDP		= ON, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep -
-    .Random_connections = OFF,
+    .Random_connections = ON,
     .Timestep   = 0.1,
-    .Simlength  = 100000,
+    .Simlength  = 10000,
     .job        = {.initcond = RAND_ZERO}
 };
 ///Constant external input to conductances
@@ -132,10 +132,10 @@ static const extinput Extinput =
 ///Parameters for conducting a parameter sweep.
 static const sweepable Sweep =
 {
-    .offset=offsetof(parameters,STDP)+offsetof(STDP_parameters,stdp_strength) ,
-    .minval = 0.005,
-    .maxval = 0.001,
-    .count = 40
+    .offset=offsetof(parameters,couple)+offsetof(couple_parameters,normalization_parameters) ,
+    .minval = 0.000,
+    .maxval = 1,
+    .count = 100
 };
 
 #ifdef __clang__

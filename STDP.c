@@ -135,7 +135,7 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
                         const int destidx  = ((rc.destination.x * grid_size) + y)*data->lags.lagsperpoint;
                         const int destidx2 = ((rc.destination.x * grid_size) + y)*data2->lags.lagsperpoint;
                         STDP_change rcchange   = STDP_change_calc(destidx,destidx2,S,S2,data->lags.lags,data2->lags.lags);
-                        rc.stdp_strength       = clamp(rc.stdp_strength-rcchange.Forward_strength,rc.strength,S.stdp_limit);
+                        rc.stdp_strength       = clamp(rc.stdp_strength-rcchange.Strength_decrease,rc.strength,S.stdp_limit);
                     }
                     //random connections to (x,y) - these will be getting increased - code is almost identical - except sign of change is reversed
                    randomconnection** rcbase = rcs->randconns_reverse_lookup[x*grid_size+y];
@@ -145,7 +145,7 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
                        const int destidx  = ((rc.destination.x * grid_size) + y)*data->lags.lagsperpoint;
                        const int destidx2 = ((rc.destination.x * grid_size) + y)*data2->lags.lagsperpoint;
                        STDP_change rcchange   = STDP_change_calc(destidx,destidx2,S,S2,data->lags.lags,data2->lags.lags);
-                       rc.stdp_strength       = clamp(rc.stdp_strength+rcchange.Forward_strength,rc.strength,S.stdp_limit);
+                       rc.stdp_strength       = clamp(rc.stdp_strength+rcchange.Strength_increase,rc.strength,S.stdp_limit);
                        //                                             ^ note plus sign (not minus)
                    }
                 }

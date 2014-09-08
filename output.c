@@ -53,6 +53,7 @@ void outputToPng(const tagged_array input,const int idx,const unsigned int count
 #ifndef MATLAB
     SaveImage(fnamebuffer,actualdata,input.minval,input.maxval,size);
 #endif
+    free(actualdata);
 }
 ///TODO: Need to get a better way of detecting when rendering has finished
 void outputToConsole(const tagged_array input)
@@ -73,14 +74,13 @@ void outputToConsole(const tagged_array input)
         for (unsigned int j=0;j<size;j++)
         {
             int r = sprintf(upto,"\x1b[48;2;%i;%i;%im ",red[i*size+j],green[i*size+j],blue[i*size+j]);
-            upto += (r);
+            upto += r;
         }
         int q = sprintf(upto,"\x1b[0m\n");
         upto += q;
     }
     puts(buf); //output giant buffer in one go - should be faster
     usleep(50000);//let terminal catch up - nasty hacky solution
-    upto=buf;
     free(buf);free(red);free(green);free(blue);
 #endif
 }

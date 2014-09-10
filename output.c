@@ -13,6 +13,7 @@
 #include "output.h"
 #include "paramheader.h"
 #include "STDP.h"
+#include "lagstorage.h"
 ///Total number of things to be output - occasionally needs to be incremented
 #define output_count  18
 ///Holds the outputtable objects for the current model
@@ -120,14 +121,13 @@ void outputToText(const output_s input,const int idx)
             {
                 for (int j=0;j<grid_size;j++)
                 {
-                    if (input.data.Lag_data->lags[i*grid_size+j]==0) //check this
+                    if (CurrentShortestLag(input.data.Lag_data,(i*grid_size+j)*input.data.Lag_data->lagsperpoint) == 1)
                     {
                         fprintf(outfiles[idx],"%i,%i:",i,j);
                     }
                 }
             }
             fprintf(outfiles[idx],"\n");
-            printf("done text output\n");
             fflush(outfiles[idx]);
             break;
         }

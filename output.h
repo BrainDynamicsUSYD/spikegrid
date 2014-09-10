@@ -4,6 +4,7 @@
 #include "typedefs.h"
 typedef struct output_parameters output_parameters;
 typedef struct model model;
+typedef struct lagstorage lagstorage;
 ///used for storing arrays with their size.  Allows for the matlab_output (and other) function to take both the big and large arrays
 typedef struct {
     //we require volatile below as we don't want you to be able to write to an array using the pointer from the tagged array
@@ -19,7 +20,7 @@ typedef struct {
 ///The directory that we are outputting to
 char outdir [100];
 ///The type of data to output
-typedef enum {FLOAT_DATA=0} data_type;
+typedef enum {FLOAT_DATA=0,SPIKE_DATA=1} data_type;
 ///Holds data for outputtting in various ways
 typedef struct {
     const char name[10];            ///< a string identifier that is used to identify the output
@@ -27,6 +28,7 @@ typedef struct {
     const union
     {
         const tagged_array TA_data;
+        const lagstorage*  Lag_data;
     } data;                         ///< the data to return
 
 } output_s; //used so that matlab has string identifiers that correspond to a specific tagged_array

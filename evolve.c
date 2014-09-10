@@ -180,41 +180,6 @@ void CalcRecoverys(const Compute_float* const __restrict__ Vinput,
     }
 }
 
-void modifyLags(lagstorage* L,int baseidx)
-{
-    //first - increment the firing lags.
-    int idx = 0;
-    while (L->lags[baseidx+idx] != -1)
-    {
-        L->lags[baseidx+idx]++;
-        idx++;
-    }
-    if (L->lags[baseidx] == L->cap )//if first entry is at cap - remove and shuffle everything down
-    {
-        int idx2 = 0;
-        while (L->lags[baseidx+idx2] != -1) //move everthing down
-        {
-            L->lags[baseidx+idx2] = L->lags[baseidx+idx2+1];
-            idx2++;
-        }
-    }
-}
-
-void AddnewSpike(lagstorage* L,const int baseidx)
-{
-    //find the empty idx
-    int idx = 0;
-    while (L->lags[baseidx + idx] != -1)
-    {
-        idx++;
-    }
-    //and set it to 1 - this makes things work
-    L->lags[baseidx + idx]=1;
-    //and set the next one to -1 to mark the end of the array
-    L->lags[baseidx + idx+1]= -1;
-}
-
-
 ///Store current firing spikes also apply random spikes
 void StoreFiring(layer* L)
 {
@@ -260,12 +225,8 @@ void ResetVoltages(Compute_float* const __restrict Vout,const couple_parameters 
     {
         for (int y=0;y<grid_size;y++)
         {
-            int idx=0;
-            while (l.lags[(x*grid_size+y)*l.lagsperpoint+ idx] != -1)
-            {
-                idx++;
-            } //take the last entry - then check if in refrac period and set voltages
-            if (idx >0 && l.lags[(x*grid_size+y)*l.lagsperpoint + idx-1] <= trefrac_in_ts)
+            int baseidx = (x*grid_size+y)*l.lagsperpoint;
+            if (CurrentShortestLag(&l,baseidx) <= trefrac_in_ts)
             {
                 Vout[x*grid_size + y] = CP.Vrt;
             }
@@ -277,7 +238,7 @@ void tidylayer (layer* l,const unsigned int time,const Compute_float timemillis,
     // without recovery variable
     if (Features.Recovery==OFF)
     {
-        CalcVoltages(l->voltages,gE,gI,l->P->potential,l->voltages_out);
+        CalcVoltages(l->voltages,gE ,gI,l->P->potential,l->voltages_out);
         ResetVoltages(l->voltages_out,l->P->couple,l->firinglags,l->P->potential);
     }
     // with recovery variable (note no support for theta - no idea if they work together)

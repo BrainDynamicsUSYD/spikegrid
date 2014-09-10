@@ -1,9 +1,11 @@
 /// \file
 #ifndef LAYER
 #define LAYER
+#include "typedefs.h"
 #include "sizes.h"
 #include "enums.h"
 #include "coords.h"
+#include "lagstorage.h"
 typedef struct STD_data STD_data; //forward declare STD_data to make things cleaner - makes this file a little messier, but it makes it more obvious where things come from
 ///hold the requisite data for a layer that enables it to be evolved through time.
 typedef struct parameters parameters;
@@ -14,12 +16,7 @@ typedef struct randomconnection
     Compute_float   stdp_strength;
     coords          destination;
 } randomconnection;
-typedef struct lagstorage
-{
-    int16_t*    lags;
-    const int   cap;
-    const int   lagsperpoint;
-} lagstorage;
+
 typedef struct randconns_info
 {
     randomconnection* randconns;                ///<stores random connections

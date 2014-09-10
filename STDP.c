@@ -1,11 +1,10 @@
 /// \file
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 #include "paramheader.h"
 #include "mymath.h" //fabsf
-#include "layer.h"
 #include "STDP.h"
-#include <stdio.h>
 
 typedef struct
 {
@@ -14,11 +13,12 @@ typedef struct
     on_off        valid;
 } STDP_change;
 
+//gcc thinks that this can be const - but I think the read of timestep prevents this - not sure what is going on
 Compute_float __attribute__((pure)) STDP_strength(const STDP_parameters S,const Compute_float lag) //implicitrly assumed that the function is odd
 {
     return  S.stdp_strength * exp(-lag*Features.Timestep/S.stdp_tau);
 }
-int wrap (int n)
+int __attribute__((pure,const)) wrap (int n)
 {
     if (n<0) {return grid_size+n;}
     if (n>=grid_size) {return n-grid_size;}

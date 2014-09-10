@@ -14,7 +14,7 @@
 #include "paramheader.h"
 #include "STDP.h"
 ///Total number of things to be output - occasionally needs to be incremented
-#define output_count  17
+#define output_count  18
 ///Holds the outputtable objects for the current model
 output_s* Outputtable;
 ///Holds file* for the output types that output to a consistent file over time to save repeatedly calling fopen/fclose - mainly useful for ouputting ringbuffer stuff
@@ -114,6 +114,23 @@ void outputToText(const output_s input,const int idx)
             free(data);
             break;
         }
+        case SPIKE_DATA:
+        {
+            for (int i=0;i<grid_size;i++)
+            {
+                for (int j=0;j<grid_size;j++)
+                {
+                    if (input.data.Lag_data->lags[i*grid_size+j]==0) //check this
+                    {
+                        fprintf(outfiles[idx],"%i,%i:",i,j);
+                    }
+                }
+            }
+            fprintf(outfiles[idx],"\n");
+            printf("done text output\n");
+            fflush(outfiles[idx]);
+            break;
+        }
         default:
         printf("I don't know how to output this data\n");
 
@@ -208,6 +225,7 @@ void output_init(const model* const m)
         {"STDR2",       FLOAT_DATA, .data.TA_data={Features.STD==ON?m->layer2.std->R:NULL, grid_size, 0,             1,0,1}},
         {"STDP1",       FLOAT_DATA, .data.TA_data={Features.STDP==ON?m->layer1.STDP_data->connections:NULL,grid_size,0,couple_array_size,-0.01,0.01}},
         {"STDP2",       FLOAT_DATA, .data.TA_data={Features.STDP==ON?m->layer2.STDP_data->connections:NULL,grid_size,0,couple_array_size,-0.01,0.01}},
+        {"Spike1",      SPIKE_DATA, .data.Lag_data=&m->layer1.firinglags},
         {.name={0}}};         //a marker that we are at the end of the outputabbles list
     output_s* malloced = malloc(sizeof(output_s)*output_count);
     memcpy(malloced,outdata,sizeof(output_s)*output_count);

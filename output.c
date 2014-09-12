@@ -15,7 +15,7 @@
 #include "STDP.h"
 #include "lagstorage.h"
 ///Total number of things to be output - occasionally needs to be incremented
-#define output_count  18
+#define output_count  19
 ///Holds the outputtable objects for the current model
 output_s* Outputtable;
 ///Holds file* for the output types that output to a consistent file over time to save repeatedly calling fopen/fclose - mainly useful for ouputting ringbuffer stuff
@@ -226,6 +226,7 @@ void output_init(const model* const m)
         {"STDP1",       FLOAT_DATA, .data.TA_data={Features.STDP==ON?m->layer1.STDP_data->connections:NULL,grid_size,0,couple_array_size,-0.01,0.01}},
         {"STDP2",       FLOAT_DATA, .data.TA_data={Features.STDP==ON?m->layer2.STDP_data->connections:NULL,grid_size,0,couple_array_size,-0.01,0.01}},
         {"Spike1",      SPIKE_DATA, .data.Lag_data=&m->layer1.firinglags},
+        {"Spike2",      SPIKE_DATA, .data.Lag_data=&m->layer2.firinglags},
         {.name={0}}};         //a marker that we are at the end of the outputabbles list
     output_s* malloced = malloc(sizeof(output_s)*output_count);
     memcpy(malloced,outdata,sizeof(output_s)*output_count);

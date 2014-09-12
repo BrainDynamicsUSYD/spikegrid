@@ -25,7 +25,7 @@ export CVClibdir=$(shell pwd)/openCVAPI
 .PHONY: profile clean submit docs debug params matlabparams viewer ${VIEWERBIN}  force_look
 #binary
 ${BINARY}: ${SOURCES} *.h ${CVClibdir}
-	${CC} ${CFLAGS} ${opencvcflags}     ${SOURCES} -o ${BINARY} -L. ${LDFLAGS}  -l:libcv  ${opencvldflags}
+	${CC} -DOPENCV ${CFLAGS} ${opencvcflags}     ${SOURCES} -o ${BINARY} -L. ${LDFLAGS}  -l:libcv  ${opencvldflags}
 evolvegen.c: ${maskgen} whichparam.h param*.h
 	${maskgen} > evolvegen.c
 debug: ${SOURCE}

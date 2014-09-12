@@ -36,7 +36,7 @@ Compute_float* taggedarrayTocomputearray(const tagged_array input);
 void dooutput(const output_parameters* const m,const unsigned int t);
 output_s __attribute__((pure)) getOutputByName(const char* const name);
 void output_init(const model* const m);
-#ifndef MATLAB
+#ifdef OPENCV
 void cvdispInit(const char** const names,const int count);
 void cvdisp (const char** const names, const int count);
 #endif

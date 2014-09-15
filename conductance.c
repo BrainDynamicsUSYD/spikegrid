@@ -16,7 +16,10 @@
 #include "matlab_output.h"
 #include "paramheader.h"
 #include "layer.h"
-
+#ifdef ANDROID
+    #define APPNAME "myapp"
+    #include <android/log.h>
+#endif
 
 unsigned int mytime=0;  ///<< The current time step
 model* m;               ///< The model we are evolving through time
@@ -43,7 +46,10 @@ void step_(const Compute_float* const inpV,const Compute_float* const inpV2, con
         memcpy(m->layer2.voltages,inpV2,sizeof(Compute_float)*grid_size*grid_size);
         if (Features.Recovery==ON) {memcpy(m->layer2.recoverys,inpW,sizeof(Compute_float)*grid_size*grid_size);}
     }
+
+    __android_log_print(ANDROID_LOG_VERBOSE,APPNAME,"calling step1");
     step1(m,mytime);
+    __android_log_print(ANDROID_LOG_VERBOSE,APPNAME,"returned from step1");
 }
 
 void setuppointers(Compute_float** FirstV,Compute_float** SecondV, Compute_float** FirstW, Compute_float** SecondW,const Job* const job)
@@ -188,7 +194,9 @@ struct option long_options[] = {{"help",no_argument,0,'h'},{"generate",no_argume
 /// @param argv what the parameters actually are
 int main(int argc,char** argv) //useful for testing w/out matlab
 {
+#ifndef ANDROID
     feenableexcept(FE_INVALID | FE_OVERFLOW); //segfault on NaN and overflow.  Note - this cannot be used in matlab
+#endif
     parameters* newparam = NULL;
     parameters* newparamEx = NULL;
     parameters* newparamIn = NULL;
@@ -231,6 +239,7 @@ int main(int argc,char** argv) //useful for testing w/out matlab
                 break;
         }
     }
+
     const Job* job = &Features.job;
     if (job->next != NULL || (job->initcond==RAND_JOB && job->Voltage_or_count>1)) {jobnumber=0;} //if more than one job - then start at 0 - so that stuff goes in folders
     while (job != NULL)
@@ -282,4 +291,34 @@ int main(int argc,char** argv) //useful for testing w/out matlab
     }
     return(EXIT_SUCCESS);
 }
+#ifdef ANDROID
+#include <jni.h>
+JNIEXPORT jdoubleArray JNICALL Java_com_example_conductanceandroid_MainActivity_AndroidEntry(JNIEnv* env, jobject jboj)
+{
+    __android_log_print(ANDROID_LOG_VERBOSE,APPNAME,"starting code");
+    const Job* job = &Features.job;
+    srandom((unsigned)time(0));
+    //sets up the model code
+    m=setup(DualLayerModelIn,DualLayerModelEx,ModelType,0);
+    Compute_float *FirstV,*SecondV,*FirstW,*SecondW;
+    setuppointers(&FirstV,&SecondV,&FirstW,&SecondW,job);
+    //actually runs the model
+    __android_log_print(ANDROID_LOG_VERBOSE,APPNAME,"setup done");
+    while (mytime<Features.Simlength)
+    {
+
+        if (mytime%10==0){printf("%i\n",mytime);}
+        step_(FirstV,SecondV,FirstW,SecondW);//always fine to pass an extra argument here
+        //copy the output to be new input
+        memcpy ( FirstV, m->layer1.voltages_out, sizeof ( Compute_float)*grid_size*grid_size);
+        if(SecondV != NULL){memcpy(SecondV,m->layer2.voltages_out, sizeof(Compute_float)*grid_size*grid_size);}
+        if(FirstW != NULL) {memcpy(FirstW, m->layer1.recoverys_out,sizeof(Compute_float)*grid_size*grid_size);}
+        if(SecondW != NULL){memcpy(SecondW,m->layer2.recoverys_out,sizeof(Compute_float)*grid_size*grid_size);}
+    }
+    __android_log_print(ANDROID_LOG_VERBOSE,APPNAME,"model done");
+    jdoubleArray ret = (*env) ->NewDoubleArray(env,grid_size*grid_size);
+    (*env)->SetDoubleArrayRegion(env, ret, 0, grid_size*grid_size, SecondV );
+    return ret;
+}
+#endif
 #endif

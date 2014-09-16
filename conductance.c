@@ -47,9 +47,7 @@ void step_(const Compute_float* const inpV,const Compute_float* const inpV2, con
         if (Features.Recovery==ON) {memcpy(m->layer2.recoverys,inpW,sizeof(Compute_float)*grid_size*grid_size);}
     }
 
-    __android_log_print(ANDROID_LOG_VERBOSE,APPNAME,"calling step1");
     step1(m,mytime);
-    __android_log_print(ANDROID_LOG_VERBOSE,APPNAME,"returned from step1");
 }
 
 void setuppointers(Compute_float** FirstV,Compute_float** SecondV, Compute_float** FirstW, Compute_float** SecondW,const Job* const job)
@@ -293,21 +291,24 @@ int main(int argc,char** argv) //useful for testing w/out matlab
 }
 #ifdef ANDROID
 #include <jni.h>
+int android_setup_done=0;
+Compute_float *FirstV,*SecondV,*FirstW,*SecondW;
 JNIEXPORT jdoubleArray JNICALL Java_com_example_conductanceandroid_MainActivity_AndroidEntry(JNIEnv* env, jobject jboj)
 {
-    __android_log_print(ANDROID_LOG_VERBOSE,APPNAME,"starting code");
-    const Job* job = &Features.job;
-    srandom((unsigned)time(0));
-    //sets up the model code
-    m=setup(DualLayerModelIn,DualLayerModelEx,ModelType,0);
-    Compute_float *FirstV,*SecondV,*FirstW,*SecondW;
-    setuppointers(&FirstV,&SecondV,&FirstW,&SecondW,job);
-    //actually runs the model
-    __android_log_print(ANDROID_LOG_VERBOSE,APPNAME,"setup done");
-    while (mytime<Features.Simlength)
+    if (android_setup_done==0)
     {
-
-        if (mytime%10==0){printf("%i\n",mytime);}
+        android_setup_done=1;
+        __android_log_print(ANDROID_LOG_VERBOSE,APPNAME,"starting code");
+        const Job* job = &Features.job;
+        srandom((unsigned)time(0));
+        //sets up the model code
+        m=setup(DualLayerModelIn,DualLayerModelEx,ModelType,0);
+        setuppointers(&FirstV,&SecondV,&FirstW,&SecondW,job);
+        __android_log_print(ANDROID_LOG_VERBOSE,APPNAME,"setup done");
+    }
+    //actually runs the model
+    for (int i=0;i<5;i++)
+    {
         step_(FirstV,SecondV,FirstW,SecondW);//always fine to pass an extra argument here
         //copy the output to be new input
         memcpy ( FirstV, m->layer1.voltages_out, sizeof ( Compute_float)*grid_size*grid_size);
@@ -315,7 +316,6 @@ JNIEXPORT jdoubleArray JNICALL Java_com_example_conductanceandroid_MainActivity_
         if(FirstW != NULL) {memcpy(FirstW, m->layer1.recoverys_out,sizeof(Compute_float)*grid_size*grid_size);}
         if(SecondW != NULL){memcpy(SecondW,m->layer2.recoverys_out,sizeof(Compute_float)*grid_size*grid_size);}
     }
-    __android_log_print(ANDROID_LOG_VERBOSE,APPNAME,"model done");
     jdoubleArray ret = (*env) ->NewDoubleArray(env,grid_size*grid_size);
     (*env)->SetDoubleArrayRegion(env, ret, 0, grid_size*grid_size, SecondV );
     return ret;

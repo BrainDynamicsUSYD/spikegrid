@@ -9,6 +9,10 @@
 #include "mymath.h"
 #include "paramheader.h"
 #include "coupling.h"
+#ifdef ANDROID
+    #define APPNAME "myapp"
+    #include <android/log.h>
+#endif
 ///add conductance from a firing neuron to the gE and gI arrays (used in single layer model)
 void evolvept (const int x,const int y,const Compute_float* const __restrict connections,const Compute_float Estrmod,const Compute_float Istrmod,Compute_float* __restrict gE,Compute_float* __restrict gI)
 {
@@ -246,6 +250,7 @@ void tidylayer (layer* l,const unsigned int time,const Compute_float timemillis,
     {
         CalcRecoverys(l->voltages,l->recoverys,gE,gI,l->P->potential,l->P->recovery,l->voltages_out,l->recoverys_out);
     }
+    
     StoreFiring(l);
     dooutput(l->P->output,time);
     if (Features.Theta==ON)
@@ -270,6 +275,7 @@ void step1(model* m,const unsigned int time)
         m->gI[i] += Extinput.gI0;
     }
     //from this point the GE and GI are actually fixed - as a result there is no more layer interaction - so do things sequentially to each layer
+    
     tidylayer(&m->layer1,time,timemillis,m->gE,m->gI);
     if (m->NoLayers==DUALLAYER){tidylayer(&m->layer2,time,timemillis,m->gE,m->gI);}
     if (Features.STDP==ON)

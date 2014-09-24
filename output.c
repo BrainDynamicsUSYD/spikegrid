@@ -5,8 +5,8 @@
 #include <errno.h>
 #include <stdlib.h>
 #ifdef OPENCV
-    #include "cv.h"
-    #include "highgui.h"
+    #include "opencv/cv.h"
+    #include "opencv/highgui.h"
     #include "openCVAPI/api.h"
 #endif
 #include "STD.h"

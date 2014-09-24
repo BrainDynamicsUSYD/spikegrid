@@ -247,7 +247,9 @@ int main(int argc,char** argv) //useful for testing w/out matlab
             if (ModelType==SINGLELAYER) {m=setup(newparam!=NULL? (*newparam):OneLayerModel,newparam!=NULL? (*newparam):OneLayerModel,ModelType,jobnumber);} //pass the same layer as a double parameter
             else {m=setup(newparamIn!=NULL?*newparamIn:DualLayerModelIn,newparamEx!=NULL?*newparamEx:DualLayerModelEx,ModelType,jobnumber);}
 
+#ifdef OPENCV
             if (OpenCv==ON){ cvdispInit((const char*[]){"V1","V2","STDP1","STDP2"},2);}
+#endif
             Compute_float *FirstV,*SecondV,*FirstW,*SecondW;
             setuppointers(&FirstV,&SecondV,&FirstW,&SecondW,job);
             //actually runs the model
@@ -262,10 +264,12 @@ int main(int argc,char** argv) //useful for testing w/out matlab
                 if(FirstW != NULL) {memcpy(FirstW, m->layer1.recoverys_out,sizeof(Compute_float)*grid_size*grid_size);}
                 if(SecondW != NULL){memcpy(SecondW,m->layer2.recoverys_out,sizeof(Compute_float)*grid_size*grid_size);}
                 //do some opencv stuff
+#ifdef OPENCV
                 if(mytime % 40 ==0 && OpenCv == ON)
                 {
                     cvdisp((const char*[]){"V1","V2","STDP1","STDP2"},2);
                 }
+#endif
             }
             FreeIfNotNull(FirstV);
             FreeIfNotNull(SecondV);

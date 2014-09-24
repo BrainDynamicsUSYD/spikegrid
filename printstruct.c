@@ -13,6 +13,7 @@
 ///@param disp whether to display the output
 void printout_struct(const void* const invar, const char* const structname,const char* const dir,const int disp)
 {
+#ifndef ANDROID
     char dbx[160];
     sprintf(dbx, "echo 'p (%s)*%p\n' > gdbcmds", structname, invar );
     system(dbx);
@@ -25,5 +26,5 @@ void printout_struct(const void* const invar, const char* const structname,const
         sprintf(dbx, "cat %sstruct.dump",dir);
         system(dbx);
     }
-    return;
+#endif
 }

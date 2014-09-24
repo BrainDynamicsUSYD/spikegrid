@@ -111,15 +111,16 @@ static const parameters DualLayerModelEx =
     STDPparams,
     potparams,
     .skip=-2,
+    .output = {{ .output_method=PICTURE,.Output=5,.Delay=10}, {.output_method=TEXT, .Output=15,.Delay=1},{ .output_method=TEXT,.Output=5,.Delay=1}}
 };
 ///Some global features that can be turned on and off
 static const model_features Features =
 {
     .STD        = OFF,
-    .STDP		= OFF, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep -
+    .STDP		= ON, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep -
     .Random_connections = OFF,
     .Timestep   = 0.1,
-    .Simlength  = 10,
+    .Simlength  = 100000,
     .job        = {.initcond = RAND_ZERO}
 };
 ///Constant external input to conductances
@@ -134,7 +135,7 @@ static const sweepable Sweep =
     .offset=offsetof(parameters,couple)+offsetof(couple_parameters,normalization_parameters) ,
     .minval = 0.000,
     .maxval = 1,
-    .count = 100
+    .count = 40
 };
 
 #ifdef __clang__

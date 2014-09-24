@@ -5,9 +5,9 @@
 ///Total size of the grid
 ///Coupling range
 #define couplerange 15
-#ifndef PARAMATERS  //DO NOT REMOVE
+#ifndef PARAMETERS  //DO NOT REMOVE
 ///include guard
-#define PARAMATERS  //DO NOT REMOVE
+#define PARAMETERS  //DO NOT REMOVE
 //disable warnings about float conversion in this file only
 #ifdef __clang__
 #pragma clang diagnostic push
@@ -18,7 +18,6 @@
 #pragma GCC diagnostic ignored "-Wconversion"
 #endif
 //the following typedef must be before the include to get the right compute types
-#include "paramheader.h"
 ///Whether we are using the single or double layer model
 static const LayerNumbers ModelType = DUALLAYER;
 
@@ -43,9 +42,16 @@ static const parameters OneLayerModel = {.couple={0}}; //since unused - shortes 
 
 #define STDPparams .STDP=   \
     {                       \
-        .stdp_limit=0.5,    \
+        .stdp_limit=8.5,    \
         .stdp_tau=20,       \
-        .stdp_strength=0.01  \
+        .stdp_strength=0.00075,  \
+        .STDP_on=ON\
+    }
+#define STDparams .STD= \
+    {                   \
+        .U = 0.5,       \
+        .D = 0.2,      \
+        .F = 0.45      \
     }
 ///parameters for the inhibitory layer of the double layer model
 static const parameters DualLayerModelIn =
@@ -57,16 +63,24 @@ static const parameters DualLayerModelIn =
         {
             .dual =
             {
-                .W          = -0.79, //-0.40 //-0.57 //-0.70 //-1.25,
+                .W          = -0.36, //-0.40 //-0.57 //-0.70 //-1.25,
                 .sigma      = 90,
-                .synapse    = {.R=0.5,.D=7.0},
+                .synapse    = {.R=0.5,.D=2.0},
             }
         },
-        .norm_type = None,
-        .tref       = 5,
+
+        .norm_type = GlobalMultiplier,
+        .normalization_parameters = {.glob_mult = {.GM=1.0}},
+        .tref       = 4,
     },
-    potparams,
+    .random =
+    {
+        .numberper=706,
+        .str = 0.8
+    },
+    STDparams,
     STDPparams,
+    potparams,
     .skip=2,
 };
 ///parameters for the excitatory layer of the double layer model
@@ -79,39 +93,48 @@ static const parameters DualLayerModelEx =
         {
             .dual =
             {
-                .W          =  0.24,
-                .sigma      = 12,
+                .W          =  0.215,
+                .sigma      = 15,
                 .synapse    = {.R=0.5,.D=2.0},
             }
         },
-        .tref       = 5,
-        .norm_type = None,
+        .tref       = 4,
+        .norm_type = GlobalMultiplier,
+        .normalization_parameters = {.glob_mult = {.GM=1.0}},
     },
+    .random =
+    {
+        .numberper=706,
+        .str = 0.8
+    },
+    STDparams,
     STDPparams,
     potparams,
-    .skip=1,
-    .output = {{ .output_method=PICTURE,.Output=5,.Delay=10}, {.output_method=TEXT, .Output=15,.Delay=1}}
+    .skip=-2,
+    .output = {{ .output_method=PICTURE,.Output=5,.Delay=10}, {.output_method=TEXT, .Output=14,.Delay=1}}
 };
 ///Some global features that can be turned on and off
 static const model_features Features =
 {
-    .STDP		= OFF, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep -
-    .STD        = OFF, //               if we need any of these features we can make the changes then.
+    .STD        = OFF,
+    .STDP		= ON, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep -
+    .Random_connections = ON,
     .Timestep   = 0.1,
     .Simlength  = 10000,
+    .job        = {.initcond = RAND_ZERO}
 };
 ///Constant external input to conductances
 static const extinput Extinput =
 {
-    .gE0 = 0.015,
+    .gE0 = 0.014,
     .gI0 = 0.0,
 };
 ///Parameters for conducting a parameter sweep.
 static const sweepable Sweep =
 {
-    .offset=offsetof(parameters,couple)+offsetof(couple_parameters,Layer_parameters) +0+ /*offset in the union is always 0*/  + offsetof(duallayer_parameters,W),
-    .minval = 0.0,
-    .maxval = 1.0,
+    .offset=offsetof(parameters,couple)+offsetof(couple_parameters,normalization_parameters) ,
+    .minval = 0.000,
+    .maxval = 1,
     .count = 100
 };
 

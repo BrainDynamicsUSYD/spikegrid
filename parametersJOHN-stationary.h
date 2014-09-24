@@ -90,6 +90,7 @@ static const parameters DualLayerModelEx =
     STDPparams,
     potparams,
     .skip=1,
+    .output = {{ .output_method=PICTURE,.Output=5,.Delay=10}, {.output_method=TEXT, .Output=15,.Delay=1}}
 };
 ///Some global features that can be turned on and off
 static const model_features Features = 
@@ -97,7 +98,7 @@ static const model_features Features =
     .STDP		= OFF, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep - 
     .STD        = OFF, //               if we need any of these features we can make the changes then.
     .Timestep   = 0.1,
-    .Simlength  = 1000,
+    .Simlength  = 10000,
 };
 ///Constant external input to conductances
 static const extinput Extinput =

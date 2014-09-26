@@ -1,7 +1,6 @@
 /// \file
 #ifndef LAYER
 #define LAYER
-#include "typedefs.h"
 #include "sizes.h"
 #include "enums.h"
 #include "coords.h"

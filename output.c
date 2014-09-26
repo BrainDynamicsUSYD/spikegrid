@@ -64,9 +64,9 @@ void outputToConsole(const tagged_array input)
     char* upto = buf;
     const unsigned int size = (input.size - (2*input.offset))*input.subgrid;
     Compute_float* actualdata=taggedarrayTocomputearray(input);
-    uchar* red = malloc(sizeof(uchar)*size*size);
-    uchar* green = malloc(sizeof(uchar)*size*size);
-    uchar* blue = malloc(sizeof(uchar)*size*size);
+    unsigned char* red = malloc(sizeof(unsigned char)*size*size);
+    unsigned char* green = malloc(sizeof(unsigned char)*size*size);
+    unsigned char* blue = malloc(sizeof(unsigned char)*size*size);
     getcolors(actualdata,input.minval,input.maxval,size,red,blue,green);
     printf("\x1b[2J");
     for (unsigned int i=0;i<size;i++)

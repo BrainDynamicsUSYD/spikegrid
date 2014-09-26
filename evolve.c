@@ -218,18 +218,17 @@ void tidylayer (layer* l,const unsigned int time,const Compute_float timemillis,
         CalcVoltages(l->voltages,gE ,gI,l->P->potential,l->voltages_out);
         ResetVoltages(l->voltages_out,l->P->couple,&l->firinglags,l->P->potential);
     }
-    // with recovery variable (note no support for theta - no idea if they work together)
+    // with recovery variable
     else
     {
         CalcRecoverys(l->voltages,l->recoverys,gE,gI,l->P->potential,l->P->recovery,l->voltages_out,l->recoverys_out);
     }
-
     StoreFiring(l);
-    dooutput(l->P->output,time);
     if (Features.Theta==ON)
     {
         dotheta(l->voltages_out,l->P->theta,timemillis);
     }
+    dooutput(l->P->output,time);
 }
 ///Steps a model through 1 timestep - quite high-level function
 void step1(model* m,const unsigned int time)

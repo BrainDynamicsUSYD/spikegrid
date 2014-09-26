@@ -38,6 +38,8 @@ void step_(const Compute_float* const inpV,const Compute_float* const inpV2, con
         if(inpV2==NULL)                         {printf("missing second input voltage in dual-layer model");exit (EXIT_FAILURE);}
         if(Features.Recovery==ON && inpW2==NULL){printf("missing second recovery input in dual-layer model");exit(EXIT_FAILURE);}
     }
+
+    printf("a random voltage: %f %f\n",inpV[4],inpV2[3]);
     mytime++;
     memcpy(m->layer1.voltages,inpV,sizeof(Compute_float)*grid_size*grid_size);
     if (Features.Recovery==ON) {memcpy(m->layer1.recoverys,inpW,sizeof(Compute_float)*grid_size*grid_size);}
@@ -122,6 +124,14 @@ mxArray* FirstMatlabCall( )
     printf("setup done\n");
     return variables;
 }
+typedef struct mexmap
+{
+    const char* const name;
+    const char* const outname;
+    Compute_float** data;
+    const LayerNumbers Lno;
+    const on_off recovery;
+} mexmap;
 ///Matlab entry point. The pointers give access to the left and right hand sides of the function call.
 ///Note that it is required to assign a value to all entries on the left hand side of the equation.
 ///Dailing to do so will produce an error in matlab.
@@ -138,47 +148,37 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
     //step the model through time
     mxArray* variables = mxCreateStructMatrix(1,1,6,(const char*[]){"Vin","Vex","Win","Wex","Vsingle_layer","Wsingle_layer"});
     Compute_float *FirstV,*SecondV,*FirstW,*SecondW;
+    mexmap mexmappings[] = {
+        {"Vsingle_layer" , "V1"        , &FirstV  , SINGLELAYER , OFF} ,
+        {"Wsingle_layer" , "W1"        , &FirstW  , SINGLELAYER , ON}  ,
+        {"Vin"           , "V1"        , &FirstV  , DUALLAYER   , OFF} ,
+        {"Vex"           , "V2"        , &SecondV , DUALLAYER   , OFF} ,
+        {"Win"           , "Recovery1" , &FirstW  , DUALLAYER   , ON}  ,
+        {"Wex"           , "Recovery2" , &SecondW , DUALLAYER   , ON}  ,
+        {0               , 0           , 0        , 0           , 0}};
     //First - get inputs
-    if (ModelType==SINGLELAYER)
+    int i = 0;
+    while(mexmappings[i].name != NULL)
     {
-        FirstV = (Compute_float*) mxGetData(mxGetField(prhs[0],0,"Vsingle_layer"));
-        SecondV = NULL;
-        if (Features.Recovery==ON)
+        if (ModelType==mexmappings[i].Lno && (Features.Recovery==ON || Features.Recovery==mexmappings[i].recovery))
         {
-            FirstW = (Compute_float*) mxGetData(mxGetField(prhs[0],0,"Wsingle_layer"));
-            SecondW = NULL;
-        } else {FirstW=NULL;SecondW=NULL;}
+            printf("getting %s\n",mexmappings[i].name);
+            (*mexmappings[i].data) =(Compute_float* ) mxGetData(mxGetField(prhs[0],0,mexmappings[i].name));
+        }
+        i++;
     }
-    else
-    {
-        FirstV =  (Compute_float*) mxGetData(mxGetField(prhs[0],0,"Vin"));
-        SecondV = (Compute_float*) mxGetData(mxGetField(prhs[0],0,"Vex"));
-        if (Features.Recovery==ON)
-        {
-            FirstW  = (Compute_float*) mxGetData(mxGetField(prhs[0],0,"Win"));
-            SecondW = (Compute_float*) mxGetData(mxGetField(prhs[0],0,"Wex"));
-        } else {FirstW=NULL;SecondW=NULL;}
-    }
+    printf("a random voltage: %f %f\n",FirstV[4],SecondV[3]);
     //Actually step the model
     step_(FirstV,SecondV,FirstW,SecondW);
-    //Now assign the outputs
-    if (ModelType == SINGLELAYER)
+    i=0;
+    while(mexmappings[i].name != NULL)
     {
-        mxSetField(variables,0,"Vsingle_layer",outputToMxArray(getOutputByName("V1")));
-        if (Features.Recovery == ON)
+        if (ModelType==mexmappings[i].Lno && (Features.Recovery==ON || Features.Recovery==mexmappings[i].recovery))
         {
-            mxSetField(variables,0,"Wsingle_layer",outputToMxArray(getOutputByName("Recovery1")));
+            printf("setting %s %s\n",mexmappings[i].outname, mexmappings[i].name);
+            mxSetField(variables,0,mexmappings[i].name,outputToMxArray(getOutputByName(mexmappings[i].outname)));
         }
-    }
-    else
-    {
-        mxSetField(variables,0,"Vex",outputToMxArray(getOutputByName("V2")));
-        mxSetField(variables,0,"Vin",outputToMxArray(getOutputByName("V1")));
-        if (Features.Recovery == ON)
-        {
-            mxSetField(variables,0,"Wex",outputToMxArray(getOutputByName("Recovery2")));
-            mxSetField(variables,0,"Win",outputToMxArray(getOutputByName("Recovery1")));
-        }
+        i++;
     }
     plhs[0] = variables;
     outputExtraThings(plhs,nrhs,prhs);
@@ -192,7 +192,7 @@ struct option long_options[] = {{"help",no_argument,0,'h'},{"generate",no_argume
 /// @param argv what the parameters actually are
 int main(int argc,char** argv) //useful for testing w/out matlab
 {
-#ifndef ANDROID
+#ifndef ANDROID //android doesn't support this function
     feenableexcept(FE_INVALID | FE_OVERFLOW); //segfault on NaN and overflow.  Note - this cannot be used in matlab
 #endif
     parameters* newparam = NULL;

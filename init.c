@@ -88,9 +88,9 @@ layer setuplayer(const parameters p)
     };
     for (int x = 0;x<grid_size;x++)
     {
-        for (int    y = 0;y<grid_size;y++)
+        for (int y = 0;y<grid_size;y++)
         {
-            L.firinglags.lags[(x*grid_size+y)*L.firinglags.lagsperpoint]=-1;
+            L.firinglags.lags[(x*grid_size+y)*L.firinglags.lagsperpoint]= -1;
         }
     }
     if (Features.Random_connections == ON)
@@ -177,8 +177,8 @@ model* setup(const parameters p,const parameters p2,const LayerNumbers lcount, i
     char buf[100];
     sprintf(buf,"%s/struct.dump",outdir);
     remove(buf);//cleanup the old struct file
-    printout_struct(&p,"parameters",outdir,0);     //save the first parameters object
-    printout_struct(&p2,"parameters",outdir,1);    //save the second parameters object and display everything
+   // printout_struct(&p,"parameters",outdir,0);     //save the first parameters object
+   // printout_struct(&p2,"parameters",outdir,1);    //save the second parameters object and display everything
     const layer l1  = setuplayer(p);
     const layer l2  = lcount==DUALLAYER?setuplayer(p2):l1;
     const model m   = {.layer1=l1,.layer2=l2,.NoLayers=lcount};

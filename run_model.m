@@ -3,8 +3,8 @@ exit=0;
 compile;
 time=1;
 %outputs={ 'STDU1','STDU2' };
-outputs={ 'STDP1','STDP2' };
-%outputs={};
+%outputs={ 'STDP1','STDP2' };
+outputs={};
 %initial call
 [V, out1] = conductance('dummy',outputs);
 global k
@@ -42,10 +42,10 @@ while time<5000
         set(hVi,'CData',V.Vin);
         set(hT,'String',sprintf('Time: %.1f',time));
         for i=1:length(out1)
-            set(h(i),'CData',out1{i}.data);  
+            set(h(i),'CData',out1{i}.data);
         end
         drawnow;
-    else
+    else %when not plotting only get minimal info out for speed
         [V, out1] =conductance(V,{});
     end
     if (k==1)

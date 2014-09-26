@@ -152,7 +152,7 @@ void CalcVoltages(const Compute_float* const __restrict__ Vinput,
     for (int x=0;x<grid_size;x++)
     {
         for (int y=0;y<grid_size;y++)
-        { 
+        {
             const int idx = (x+couplerange)*conductance_array_size + y + couplerange; //index for gE/gI
             const int idx2=  x*grid_size+y;
             const Compute_float rhs = rhs_func(Vinput[idx2],gE[idx],gI[idx],C);
@@ -222,15 +222,15 @@ void StoreFiring(layer* L)
     }
 }
 ///Cleans up voltages for neurons that are in the refractory state
-void ResetVoltages(Compute_float* const __restrict Vout,const couple_parameters C,const lagstorage l,const conductance_parameters CP)
+void ResetVoltages(Compute_float* const __restrict Vout,const couple_parameters C,const lagstorage* const  l,const conductance_parameters CP)
 {
     const int trefrac_in_ts =(int) ((Compute_float)C.tref / Features.Timestep);
     for (int x=0;x<grid_size;x++)
     {
         for (int y=0;y<grid_size;y++)
         {
-            int baseidx = (x*grid_size+y)*l.lagsperpoint;
-            if (CurrentShortestLag(&l,baseidx) <= trefrac_in_ts)
+            int baseidx = (x*grid_size+y)*l->lagsperpoint;
+            if (CurrentShortestLag(l,baseidx) <= trefrac_in_ts)
             {
                 Vout[x*grid_size + y] = CP.Vrt;
             }
@@ -243,14 +243,14 @@ void tidylayer (layer* l,const unsigned int time,const Compute_float timemillis,
     if (Features.Recovery==OFF)
     {
         CalcVoltages(l->voltages,gE ,gI,l->P->potential,l->voltages_out);
-        ResetVoltages(l->voltages_out,l->P->couple,l->firinglags,l->P->potential);
+        ResetVoltages(l->voltages_out,l->P->couple,&l->firinglags,l->P->potential);
     }
     // with recovery variable (note no support for theta - no idea if they work together)
     else
     {
         CalcRecoverys(l->voltages,l->recoverys,gE,gI,l->P->potential,l->P->recovery,l->voltages_out,l->recoverys_out);
     }
-    
+
     StoreFiring(l);
     dooutput(l->P->output,time);
     if (Features.Theta==ON)
@@ -275,7 +275,7 @@ void step1(model* m,const unsigned int time)
         m->gI[i] += Extinput.gI0;
     }
     //from this point the GE and GI are actually fixed - as a result there is no more layer interaction - so do things sequentially to each layer
-    
+
     tidylayer(&m->layer1,time,timemillis,m->gE,m->gI);
     if (m->NoLayers==DUALLAYER){tidylayer(&m->layer2,time,timemillis,m->gE,m->gI);}
     if (Features.STDP==ON)

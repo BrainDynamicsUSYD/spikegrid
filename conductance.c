@@ -175,19 +175,8 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
 #else
 ///Structure which holds the command line options that the program recognises
 struct option long_options[] = {{"help",no_argument,0,'h'},{"generate",no_argument,0,'g'},{"sweep",required_argument,0,'s'},{"nocv",no_argument,0,'n'},{0,0,0,0}};
-///Main function for the entire program
-/// @param argc number of cmdline args
-/// @param argv what the parameters actually are
-int main(int argc,char** argv) //useful for testing w/out matlab
+void processopts (int argc,char** argv,parameters** newparam,parameters** newparamEx,parameters** newparamIn,on_off* OpenCv)
 {
-#ifndef ANDROID //android doesn't support this function
-    feenableexcept(FE_INVALID | FE_OVERFLOW); //segfault on NaN and overflow.  Note - this cannot be used in matlab
-#endif
-    parameters* newparam = NULL;
-    parameters* newparamEx = NULL;
-    parameters* newparamIn = NULL;
-    setvbuf(stdout,NULL,_IONBF,0);
-    on_off OpenCv=ON;
     while (1)
     {
         int option_index=0;
@@ -211,20 +200,35 @@ int main(int argc,char** argv) //useful for testing w/out matlab
                     printf("doing sweep index %i\n",jobnumber);
                     if (ModelType == SINGLELAYER)
                     {
-                           newparam = GetNthParam(OneLayerModel,Sweep,(unsigned int)jobnumber);
+                        *newparam = GetNthParam(OneLayerModel,Sweep,(unsigned int)jobnumber);
                     }
                     else
                     {
-                           newparamEx = GetNthParam(DualLayerModelEx,Sweep,(unsigned int)jobnumber);
-                           newparamIn = GetNthParam(DualLayerModelIn,Sweep,(unsigned int)jobnumber);
+                        *newparamEx = GetNthParam(DualLayerModelEx,Sweep,(unsigned int)jobnumber);
+                        *newparamIn = GetNthParam(DualLayerModelIn,Sweep,(unsigned int)jobnumber);
                     }
                 }
                 break;
             case 'n':
-                OpenCv = OFF;
+                *OpenCv = OFF;
                 break;
         }
     }
+}
+///Main function for the entire program
+/// @param argc number of cmdline args
+/// @param argv what the parameters actually are
+int main(int argc,char** argv) //useful for testing w/out matlab
+{
+#ifndef ANDROID //android doesn't support this function
+    feenableexcept(FE_INVALID | FE_OVERFLOW); //segfault on NaN and overflow.  Note - this cannot be used in matlab
+#endif
+    parameters* newparam = NULL;
+    parameters* newparamEx = NULL;
+    parameters* newparamIn = NULL;
+    setvbuf(stdout,NULL,_IONBF,0);
+    on_off OpenCv=ON;
+    processopts(argc,argv,&newparam,&newparamEx,&newparamIn,&OpenCv);
 
     const Job* job = &Features.job;
     if (job->next != NULL || (job->initcond==RAND_JOB && job->Voltage_or_count>1)) {jobnumber=0;} //if more than one job - then start at 0 - so that stuff goes in folders

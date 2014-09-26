@@ -95,33 +95,6 @@ mxArray* CreateInitialValues(const Compute_float minval, const Compute_float max
     return vals;
 }
 
-mxArray* FirstMatlabCall( )
-{
-    srandom((unsigned)time(0));
-    if (ModelType==SINGLELAYER) {m=setup(OneLayerModel,OneLayerModel,ModelType,jobnumber);} //pass the same layer as a double parameter
-    else {m=setup(DualLayerModelIn,DualLayerModelEx,ModelType,jobnumber);}
-    //set up initial voltage matrix - we need a different number if we are in single or double layer model - so encase the voltages in a struct
-    mxArray* variables = mxCreateStructMatrix(1,1,6,(const char*[]){"Vin","Vex","Win","Wex","Vsingle_layer","Wsingle_layer"});
-    if (ModelType==SINGLELAYER)
-    {
-        mxSetField(variables,0,"Vsingle_layer",CreateInitialValues(OneLayerModel.potential.Vrt,OneLayerModel.potential.Vpk));
-        if (Features.Recovery==ON)
-            {mxSetField(variables,0,"Wsingle_layer",CreateInitialValues(Zero,Zero));}
-    }
-    else if (ModelType==DUALLAYER)
-    {
-        mxSetField(variables,0,"Vin",CreateInitialValues(DualLayerModelIn.potential.Vrt,DualLayerModelIn.potential.Vpk));
-        mxSetField(variables,0,"Vex",CreateInitialValues(DualLayerModelEx.potential.Vrt,DualLayerModelEx.potential.Vpk));
-        if (Features.Recovery==ON)
-        {
-            mxSetField(variables,0,"Win",CreateInitialValues(Zero,Zero));
-            mxSetField(variables,0,"Wex",CreateInitialValues(Zero,Zero));
-        }
-    }
-    ///Now - do some dummy outputs of the other elements so that the graphs can be set up.
-    printf("setup done\n");
-    return variables;
-}
 typedef struct mexmap
 {
     const char* const name;
@@ -129,6 +102,8 @@ typedef struct mexmap
     Compute_float** data;
     const LayerNumbers Lno;
     const on_off recovery;
+    Compute_float init_min;
+    Compute_float init_max;
 } mexmap;
 ///Matlab entry point. The pointers give access to the left and right hand sides of the function call.
 ///Note that it is required to assign a value to all entries on the left hand side of the equation.
@@ -136,45 +111,58 @@ typedef struct mexmap
 void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
 {
     if (nrhs!=nlhs) {printf("We need the same number of parameters on the left and right hand side\n");return;}
-    if (setup_done==0)
-    {
-        plhs[0]=FirstMatlabCall();
-        outputExtraThings(plhs,nrhs,prhs);
-        setup_done=1;
-        return;
-    }
-    //step the model through time
-    mxArray* variables = mxCreateStructMatrix(1,1,6,(const char*[]){"Vin","Vex","Win","Wex","Vsingle_layer","Wsingle_layer"});
     Compute_float *FirstV,*SecondV,*FirstW,*SecondW;
     mexmap mexmappings[] = {
-        {"Vsingle_layer" , "V1"        , &FirstV  , SINGLELAYER , OFF} ,
-        {"Wsingle_layer" , "W1"        , &FirstW  , SINGLELAYER , ON}  ,
-        {"Vin"           , "V1"        , &FirstV  , DUALLAYER   , OFF} ,
-        {"Vex"           , "V2"        , &SecondV , DUALLAYER   , OFF} ,
-        {"Win"           , "Recovery1" , &FirstW  , DUALLAYER   , ON}  ,
-        {"Wex"           , "Recovery2" , &SecondW , DUALLAYER   , ON}  ,
-        {0               , 0           , 0        , 0           , 0}};
-    //First - get inputs
-    int i = 0;
-    while(mexmappings[i].name != NULL)
+        //name in matlab , outputtable , pointer  , when which layer , is recovery variable , initial min value              , initial max value
+        {"Vsingle_layer" , "V1"        , &FirstV  , SINGLELAYER      , OFF                  , OneLayerModel.potential.Vrt    , OneLayerModel.potential.Vpk}    ,
+        {"Wsingle_layer" , "W1"        , &FirstW  , SINGLELAYER      , ON                   , Zero                           , Zero}                           ,
+        {"Vin"           , "V1"        , &FirstV  , DUALLAYER        , OFF                  , DualLayerModelIn.potential.Vrt , DualLayerModelIn.potential.Vpk} ,
+        {"Vex"           , "V2"        , &SecondV , DUALLAYER        , OFF                  , DualLayerModelEx.potential.Vrt , DualLayerModelEx.potential.Vpk} ,
+        {"Win"           , "Recovery1" , &FirstW  , DUALLAYER        , ON                   , Zero                           , Zero}                           ,
+        {"Wex"           , "Recovery2" , &SecondW , DUALLAYER        , ON                   , Zero                           , Zero}                           ,
+        {0               , 0           , 0        , 0                , 0                    , 0                              , 0}};
+    mxArray* variables = mxCreateStructMatrix(1,1,6,(const char*[]){"Vin","Vex","Win","Wex","Vsingle_layer","Wsingle_layer"});
+    if (setup_done==0)
     {
-        if (ModelType==mexmappings[i].Lno && (Features.Recovery==ON || Features.Recovery==mexmappings[i].recovery))
+        srandom((unsigned)time(0));
+        if (ModelType==SINGLELAYER) {m=setup(OneLayerModel,OneLayerModel,ModelType,jobnumber);} //pass the same layer as a double parameter
+        else {m=setup(DualLayerModelIn,DualLayerModelEx,ModelType,jobnumber);}
+        int i = 0;
+        while(mexmappings[i].name != NULL)
         {
-            (*mexmappings[i].data) =(Compute_float* ) mxGetData(mxGetField(prhs[0],0,mexmappings[i].name));
+            if (ModelType==mexmappings[i].Lno && (Features.Recovery==ON || Features.Recovery==mexmappings[i].recovery))
+            {
+                mxSetField(variables,0,mexmappings[i].name,CreateInitialValues(mexmappings[i].init_min,mexmappings[i].init_max));
+            }
+            i++;
         }
-        i++;
+        setup_done=1;
     }
-    //Actually step the model
-    step_(FirstV,SecondV,FirstW,SecondW);
-    //set outputs
-    i=0;
-    while(mexmappings[i].name != NULL)
+    else
     {
-        if (ModelType==mexmappings[i].Lno && (Features.Recovery==ON || Features.Recovery==mexmappings[i].recovery))
+        //step the model through time
+        //First - get inputs
+        int i = 0;
+        while(mexmappings[i].name != NULL)
         {
-            mxSetField(variables,0,mexmappings[i].name,outputToMxArray(getOutputByName(mexmappings[i].outname)));
+            if (ModelType==mexmappings[i].Lno && (Features.Recovery==ON || Features.Recovery==mexmappings[i].recovery))
+            {
+                (*mexmappings[i].data) =(Compute_float* ) mxGetData(mxGetField(prhs[0],0,mexmappings[i].name));
+            }
+            i++;
         }
-        i++;
+        //Actually step the model
+        step_(FirstV,SecondV,FirstW,SecondW);
+        //set outputs
+        i=0;
+        while(mexmappings[i].name != NULL)
+        {
+            if (ModelType==mexmappings[i].Lno && (Features.Recovery==ON || Features.Recovery==mexmappings[i].recovery))
+            {
+                mxSetField(variables,0,mexmappings[i].name,outputToMxArray(getOutputByName(mexmappings[i].outname)));
+            }
+            i++;
+        }
     }
     plhs[0] = variables;
     outputExtraThings(plhs,nrhs,prhs);
@@ -289,6 +277,7 @@ int main(int argc,char** argv) //useful for testing w/out matlab
 #include <jni.h>
 int android_setup_done=0;
 Compute_float *FirstV,*SecondV,*FirstW,*SecondW;
+//nice riduclously long function name
 JNIEXPORT jdoubleArray JNICALL Java_com_example_conductanceandroid_MainActivity_AndroidEntry(JNIEnv* env, jobject jboj)
 {
     if (android_setup_done==0)

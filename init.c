@@ -26,7 +26,7 @@ void randinit(Compute_float* input,const Compute_float minval,const Compute_floa
 {
     for (int x=0;x<grid_size*grid_size;x++)
     {
-            input[x] = ((Compute_float)random())/((Compute_float)RAND_MAX)*(maxval-minval)+minval;
+            input[x] = ((Compute_float)(random()))/((Compute_float)RAND_MAX)*(maxval-minval)+minval;
     }
 }
 ///Create an initial condition where all neurons have the same voltage except for the one in the middle
@@ -116,8 +116,8 @@ layer setuplayer(const parameters p)
                         .stdp_strength = Zero,
                         .destination =
                         {
-                            .x = (Neuron_coord)(((Compute_float)random() / (Compute_float)RAND_MAX) * (Compute_float)grid_size),
-                            .y = (Neuron_coord)(((Compute_float)random() / (Compute_float)RAND_MAX) * (Compute_float)grid_size),
+                            .x = (Neuron_coord)(((Compute_float)(random()) / (Compute_float)RAND_MAX) * (Compute_float)grid_size),
+                            .y = (Neuron_coord)(((Compute_float)(random()) / (Compute_float)RAND_MAX) * (Compute_float)grid_size),
                         }
                     };
                     L.rcinfo.randconns[(x*grid_size+y)*p.random.numberper + i] = rc;

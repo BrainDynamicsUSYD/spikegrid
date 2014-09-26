@@ -208,7 +208,7 @@ void StoreFiring(layer* L)
                 AddnewSpike(&L->firinglags,baseidx);
                 if (Features.STDP==ON) {AddnewSpike(&L->STDP_data->lags,(x*grid_size+y)*L->STDP_data->lags.lagsperpoint);}
                 }//add random spikes
-                else if (((Compute_float)random())/((Compute_float)RAND_MAX) <
+                else if (((Compute_float)(random()))/((Compute_float)RAND_MAX) <
                         (L->P->potential.rate*((Compute_float)0.001)*Features.Timestep))
                 {
                     L->voltages_out[x*grid_size+y]=L->P->potential.Vpk+(Compute_float)0.1;//make sure it fires - the neuron will actually fire next timestep

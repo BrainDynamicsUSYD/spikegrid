@@ -9,6 +9,7 @@
 #include "mymath.h"
 #include "paramheader.h"
 #include "coupling.h"
+#include "model.h"
 #ifdef ANDROID
     #define APPNAME "myapp"
     #include <android/log.h>
@@ -231,6 +232,7 @@ void tidylayer (layer* l,const unsigned int time,const Compute_float timemillis,
     dooutput(l->P->output,time);
 }
 ///Steps a model through 1 timestep - quite high-level function
+///This is the only function in the file that needs model.h
 void step1(model* m,const unsigned int time)
 {
     const Compute_float timemillis = ((Compute_float)time) * Features.Timestep ;

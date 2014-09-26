@@ -13,6 +13,7 @@
 #include "output.h"
 #include "paramheader.h"
 #include "STDP.h"
+#include "model.h"
 ///Total number of things to be output - occasionally needs to be incremented
 #define output_count  19
 ///Holds the outputtable objects for the current model

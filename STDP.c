@@ -5,7 +5,8 @@
 #include "paramheader.h"
 #include "mymath.h" //fabsf
 #include "STDP.h"
-
+#include "layer.h"
+#include "sizes.h"
 typedef struct
 {
     Compute_float Strength_increase;

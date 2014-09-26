@@ -12,6 +12,7 @@
 #include "paramheader.h"
 #include "STDP.h"
 #include "evolvegen.h"
+#include "model.h"
 #define max(a,b) \
     ({ __typeof__ (a) _a = (a);\
        __typeof__ (b) _b = (b); \

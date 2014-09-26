@@ -1,7 +1,7 @@
 /// \file
 #include <stdlib.h>
 #include "output.h"
-#include "layer.h"
+#include "model.h"
 ///Free a pointer if it is not null
 ///@param v pointer to free
 void FreeIfNotNull(void* v)
@@ -29,7 +29,7 @@ void CleanupLayer(layer* l)
 ///Free all memory used by a model
 ///@param m model to clean up
 void CleanupModel(model* m)
-{ 
+{
     CleanupLayer(&m->layer1);
     if (m->NoLayers==DUALLAYER)
     {

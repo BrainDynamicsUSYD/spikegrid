@@ -15,7 +15,7 @@
 #include "yossarian.h"
 #include "matlab_output.h"
 #include "paramheader.h"
-#include "layer.h"
+#include "model.h"
 #ifdef ANDROID
     #define APPNAME "myapp"
     #include <android/log.h>
@@ -122,6 +122,7 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
         {"Win"           , "Recovery1" , &FirstW  , DUALLAYER        , ON                   , Zero                           , Zero}                           ,
         {"Wex"           , "Recovery2" , &SecondW , DUALLAYER        , ON                   , Zero                           , Zero}                           ,
         {0               , 0           , 0        , 0                , 0                    , 0                              , 0}};
+    //the entries in this array are the first column of the previous array
     mxArray* variables = mxCreateStructMatrix(1,1,6,(const char*[]){"Vin","Vex","Win","Wex","Vsingle_layer","Wsingle_layer"});
     if (setup_done==0)
     {

@@ -50,6 +50,7 @@ void step_(const Compute_float* const inpV,const Compute_float* const inpV2, con
     step1(m,mytime);
 }
 
+//I am not a huge fan of this function.  A nicer version would be good.
 void setuppointers(Compute_float** FirstV,Compute_float** SecondV, Compute_float** FirstW, Compute_float** SecondW,const Job* const job)
 {
     *FirstV = calloc(sizeof(Compute_float),grid_size*grid_size);
@@ -94,7 +95,6 @@ mxArray* CreateInitialValues(const Compute_float minval, const Compute_float max
     randinit(datavals,minval,maxval);
     return vals;
 }
-
 typedef struct mexmap
 {
     const char* const name;
@@ -105,6 +105,7 @@ typedef struct mexmap
     Compute_float init_min;
     Compute_float init_max;
 } mexmap;
+
 ///Matlab entry point. The pointers give access to the left and right hand sides of the function call.
 ///Note that it is required to assign a value to all entries on the left hand side of the equation.
 ///Dailing to do so will produce an error in matlab.

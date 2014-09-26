@@ -13,34 +13,7 @@
     #define APPNAME "myapp"
     #include <android/log.h>
 #endif
-///add conductance from a firing neuron to the gE and gI arrays (used in single layer model)
-void evolvept (const int x,const int y,const Compute_float* const __restrict connections,const Compute_float Estrmod,const Compute_float Istrmod,Compute_float* __restrict gE,Compute_float* __restrict gI)
-{
-    for (int i = 0; i < couple_array_size;i++)
-    {
-        const int outoff = (x + i)*conductance_array_size +y;//as gE and gI are larger than the neuron grid size, don't have to worry about wrapping
-        for (int j = 0 ; j<couple_array_size;j++)
-        {
-            const int coupleidx = i*couple_array_size + j;
-            if (connections[coupleidx] > 0)
-            {
-                gE[outoff+j] += connections[coupleidx]*Estrmod;
-            }
-            else
-            {
-                gI[outoff+j] += -(connections[coupleidx]*Istrmod);
-            }
-        }
-    }
-}
 
-//when STDP is turned off, gcc will warn about this function needing const. It is wrong
-///Add conductances in the presence of STDP
-void evolvept_STDP  (const int x,const  int y,const Compute_float* const __restrict connections_STDP,const Compute_float Estrmod,const Compute_float Istrmod,Compute_float* __restrict gE,Compute_float* __restrict gI)
-{
-    if (Features.STDP == OFF) {return;}
-    evolvept(x,y,&(connections_STDP[(x*grid_size +y)*couple_array_size*couple_array_size]),Estrmod,Istrmod,gE,gI);
-}
 ///Adds the effect of the spikes that have fired in the past to the gE and gI arrays as appropriate
 /// currently, single layer doesn't work (correctly)
 void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restrict__ gI,const unsigned int time)
@@ -68,7 +41,7 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
             if (Ion) {str = (-str);} //invert strength for inhib conns.
             if (numfirings > 0) //only fire if we had a spike.
             {
-                evolvept_duallayer(x,y,L.connections,str,(Ion?gI:gE));
+                evolvept_duallayer(x,y,L.connections,str,(Ion?gI:gE)); //side note evolvegen doesn't currently work with singlelayer - should probably fix
                 if (Features.STDP==ON)
                 {
                     evolvept_duallayer_STDP(x,y,L.connections,L.STDP_data->connections,str,(Ion?gI:gE));

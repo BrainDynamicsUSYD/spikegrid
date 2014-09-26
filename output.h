@@ -22,7 +22,7 @@ char outdir [100];
 ///The type of data to output
 typedef enum {FLOAT_DATA=0,SPIKE_DATA=1} data_type;
 ///Holds data for outputtting in various ways
-typedef struct {
+typedef struct output_s {
     const char name[10];            ///< a string identifier that is used to identify the output
     const data_type data_type;      ///< The type of data to output
     const union
@@ -36,9 +36,6 @@ Compute_float* taggedarrayTocomputearray(const tagged_array input);
 void dooutput(const output_parameters* const m,const unsigned int t);
 output_s __attribute__((pure)) getOutputByName(const char* const name);
 void output_init(const model* const m);
-#ifdef OPENCV
-void cvdispInit(const char** const names,const int count);
-void cvdisp (const char** const names, const int count);
-#endif
+
 void CleanupOutput();
 #endif //OUTPUT

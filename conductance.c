@@ -7,13 +7,12 @@
 #include <fenv.h>   //for some debugging
 #include <stdio.h>
 #include <time.h>
-#include "output.h"
+#include "gui.h"
 #include "cleanup.h"
 #include "evolve.h"
 #include "newparam.h"
 #include "init.h"
 #include "yossarian.h"
-#include "matlab_output.h"
 #include "paramheader.h"
 #include "model.h"
 #ifdef ANDROID
@@ -87,6 +86,9 @@ void setuppointers(Compute_float** FirstV,Compute_float** SecondV, Compute_float
 }
 
 #ifdef MATLAB
+//The easeiest way to get data out with matlab is to use outputtomxarray and the easiest way to use that is with getoutputbyname.  Getoutputbyname is in output.h so include it.
+#include "matlab_output.h"
+#include "output.h"
 int setup_done=0;
 mxArray* CreateInitialValues(const Compute_float minval, const Compute_float maxval)
 {
@@ -98,7 +100,7 @@ mxArray* CreateInitialValues(const Compute_float minval, const Compute_float max
 typedef struct mexmap
 {
     const char* const name;
-    const char* const outname;
+    const char* outname;
     Compute_float** data;
     const LayerNumbers Lno;
     const on_off recovery;

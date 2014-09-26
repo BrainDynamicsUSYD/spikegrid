@@ -38,8 +38,6 @@ void step_(const Compute_float* const inpV,const Compute_float* const inpV2, con
         if(inpV2==NULL)                         {printf("missing second input voltage in dual-layer model");exit (EXIT_FAILURE);}
         if(Features.Recovery==ON && inpW2==NULL){printf("missing second recovery input in dual-layer model");exit(EXIT_FAILURE);}
     }
-
-    printf("a random voltage: %f %f\n",inpV[4],inpV2[3]);
     mytime++;
     memcpy(m->layer1.voltages,inpV,sizeof(Compute_float)*grid_size*grid_size);
     if (Features.Recovery==ON) {memcpy(m->layer1.recoverys,inpW,sizeof(Compute_float)*grid_size*grid_size);}
@@ -162,20 +160,18 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
     {
         if (ModelType==mexmappings[i].Lno && (Features.Recovery==ON || Features.Recovery==mexmappings[i].recovery))
         {
-            printf("getting %s\n",mexmappings[i].name);
             (*mexmappings[i].data) =(Compute_float* ) mxGetData(mxGetField(prhs[0],0,mexmappings[i].name));
         }
         i++;
     }
-    printf("a random voltage: %f %f\n",FirstV[4],SecondV[3]);
     //Actually step the model
     step_(FirstV,SecondV,FirstW,SecondW);
+    //set outputs
     i=0;
     while(mexmappings[i].name != NULL)
     {
         if (ModelType==mexmappings[i].Lno && (Features.Recovery==ON || Features.Recovery==mexmappings[i].recovery))
         {
-            printf("setting %s %s\n",mexmappings[i].outname, mexmappings[i].name);
             mxSetField(variables,0,mexmappings[i].name,outputToMxArray(getOutputByName(mexmappings[i].outname)));
         }
         i++;

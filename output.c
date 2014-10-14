@@ -45,14 +45,16 @@ Compute_float* taggedarrayTocomputearray(const tagged_array input)
 ///convert a tagged array to a PNG.  Paths are auto-calculated
 void outputToPng(const tagged_array input,const int idx,const unsigned int count)
 {
+#ifdef OPENCV
     char fnamebuffer[30];
     const unsigned int size = (input.size - (2*input.offset))*input.subgrid;
     Compute_float* actualdata=taggedarrayTocomputearray(input);
     sprintf(fnamebuffer,"%s/%i-%i.png",outdir,idx,count);
-#ifdef OPENCV
     SaveImage(fnamebuffer,actualdata,input.minval,input.maxval,size);
-#endif
     free(actualdata);
+#else
+    printf("Using PNG outout without opencv is not possible")
+#endif
 }
 ///TODO: Need to get a better way of detecting when rendering has finished
 void outputToConsole(const tagged_array input)
@@ -81,6 +83,8 @@ void outputToConsole(const tagged_array input)
     puts(buf); //output giant buffer in one go - should be faster
     usleep(50000);//let terminal catch up - nasty hacky solution
     free(buf);free(red);free(green);free(blue);
+#else
+    printf("Using console output requires opencv (to get the color mappings)")
 #endif
 }
 ///Send an outputtable to a text file

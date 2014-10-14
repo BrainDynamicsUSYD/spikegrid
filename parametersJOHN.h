@@ -44,7 +44,7 @@ static const parameters OneLayerModel = {.couple={0}}; //since unused - shortes 
     {                       \
         .stdp_limit=8.5,    \
         .stdp_tau=20,       \
-        .stdp_strength=0.00075,  \
+        .stdp_strength=0.000075,  \
         .STDP_on=ON\
     }
 #define STDparams .STD= \
@@ -118,9 +118,9 @@ static const model_features Features =
 {
     .STD        = OFF,
     .STDP		= ON, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep -
-    .Random_connections = OFF,
+    .Random_connections = ON,
     .Timestep   = 0.1,
-    .Simlength  = 100000,
+    .Simlength  = 1000000,
     .job        = {.initcond = RAND_ZERO}
 };
 ///Constant external input to conductances

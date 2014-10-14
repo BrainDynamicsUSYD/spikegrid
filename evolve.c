@@ -213,13 +213,11 @@ void ResetVoltages(Compute_float* const __restrict Vout,const couple_parameters 
 }
 void tidylayer (layer* l,const unsigned int time,const Compute_float timemillis,const Compute_float* const gE,const Compute_float* const gI)
 {
-    // without recovery variable
     if (Features.Recovery==OFF)
     {
         CalcVoltages(l->voltages,gE ,gI,l->P->potential,l->voltages_out);
         ResetVoltages(l->voltages_out,l->P->couple,&l->firinglags,l->P->potential);
     }
-    // with recovery variable
     else
     {
         CalcRecoverys(l->voltages,l->recoverys,gE,gI,l->P->potential,l->P->recovery,l->voltages_out,l->recoverys_out);

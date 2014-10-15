@@ -84,7 +84,7 @@ void outputToConsole(const tagged_array input)
     usleep(50000);//let terminal catch up - nasty hacky solution
     free(buf);free(red);free(green);free(blue);
 #else
-    printf("Using console output requires opencv (to get the color mappings)")
+    printf("Using console output requires opencv (to get the color mappings)");
 #endif
 }
 ///Send an outputtable to a text file

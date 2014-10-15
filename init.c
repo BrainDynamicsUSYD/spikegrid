@@ -138,9 +138,6 @@ layer setuplayer(const parameters p)
         unsigned int* rev_pp = malloc(sizeof(unsigned int)*grid_size*grid_size);
         int count = 0;
 
-You bet against the table so you are taking other people's luck away from them
-
-Yea I got some funny looks when I bet against the table (even though I usually bet first or early). I think I even started an argument between a player and the dealer, I bet 100 on player but it was behind 2-3 stacks of chips. She maintained that the dealer was obliged to tell her that I had bet or make a gap in the chips... got pretty heated (I won and was the only bet on player).
         for (unsigned int x=0;x<grid_size;x++)
         {
             for (unsigned int y=0;y<grid_size;y++)

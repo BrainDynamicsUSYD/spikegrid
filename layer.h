@@ -25,6 +25,10 @@ typedef struct randconns_info
     randomconnection*** randconns_reverse_lookup; //lookup to randconns_reverse - triple pointers are fun
 
 } randconns_info;
+//making some of these arrays fixed rather than pointers would be nice
+//it would probably improve cache access.
+//However, there would be issues - some functions pass layer rather than layer* which
+//would cause problems (segfaults that are stack overflows)
 typedef struct layer
 {
     Compute_float* const connections;     ///<Matrix of connections coming from a single point

@@ -18,7 +18,6 @@
 /// currently, single layer doesn't work (correctly)
 void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restrict__ gI,const unsigned int time)
 {
-    const decay_parameters D = L.P->couple.Layer_parameters.dual.synapse;
     for (int y=0;y<grid_size;y++)
     {
         for (int x=0;x<grid_size;x++)

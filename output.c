@@ -9,7 +9,7 @@
 #endif
 #include "STD.h"
 #include "output.h"
-#include "paramheader.h"
+#include "paramheader.h" //needed because we can define output_parameters structs in the config file
 #include "STDP.h"
 #include "model.h"
 ///Total number of things to be output - occasionally needs to be incremented

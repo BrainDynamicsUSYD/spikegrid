@@ -67,12 +67,7 @@ layer setuplayer(const parameters p)
     const int flagcount = (int)(cap/trefrac_in_ts) + 2;
     layer L =
     {
-        .firinglags         =
-        {
-            .lags         = calloc(sizeof(int16_t),grid_size*grid_size*(size_t)flagcount),
-            .cap          = cap,
-            .lagsperpoint = flagcount
-        },
+        .firinglags         = lagstorage_init(flagcount,cap),
         .STDP_data          = Features.STDP==ON?STDP_init(p.STDP,trefrac_in_ts):NULL,
         .connections        = CreateCouplingMatrix(p.couple),
         .std                = Features.STD==ON?STD_init(p.STD):NULL,
@@ -94,13 +89,6 @@ layer setuplayer(const parameters p)
         .recoverys_out      = Features.Recovery==ON?calloc(sizeof(Compute_float),grid_size*grid_size):NULL,
         .Layer_is_inhibitory = p.couple.Layertype==DUALLAYER && p.couple.Layer_parameters.dual.W<0,
     };
-    for (int x = 0;x<grid_size;x++)
-    { //initialize firing lags - essentially sets up an initial condition with no spikes in the past.  If you wanted spikes before the start of the simulation - change this
-        for (int y = 0;y<grid_size;y++)
-        {
-            L.firinglags.lags[(x*grid_size+y)*L.firinglags.lagsperpoint]= -1;
-        }
-    }
     if (Features.Random_connections == ON)
     {
         //creat a rather ridiculously sized matrix

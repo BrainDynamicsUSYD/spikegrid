@@ -53,7 +53,7 @@ void outputToPng(const tagged_array input,const int idx,const unsigned int count
     SaveImage(fnamebuffer,actualdata,input.minval,input.maxval,size);
     free(actualdata);
 #else
-    printf("Using PNG outout without opencv is not possible")
+    printf("Using PNG outout without opencv is not possible");
 #endif
 }
 ///TODO: Need to get a better way of detecting when rendering has finished

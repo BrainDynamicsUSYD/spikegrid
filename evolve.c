@@ -8,7 +8,6 @@
 #include "STD.h"
 #include "mymath.h"
 #include "paramheader.h"
-#include "coupling.h"
 #include "model.h"
 #ifdef ANDROID
     #define APPNAME "myapp"
@@ -19,8 +18,6 @@
 /// currently, single layer doesn't work (correctly)
 void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restrict__ gI,const unsigned int time)
 {
- //   const int Eon = L.Extimecourse!=NULL; //does this layer have excitation
-    const int Ion = L.Intimecourse!=NULL; //and inhibition
     const decay_parameters D = L.P->couple.Layer_parameters.dual.synapse;
     for (int y=0;y<grid_size;y++)
     {
@@ -31,7 +28,7 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
             int numfirings = 0;
             while (L.firinglags.lags[idx*L.firinglags.lagsperpoint+numfirings] != -1)
             {
-                Compute_float this_str = Synapse_timecourse(D,L.firinglags.lags[idx*L.firinglags.lagsperpoint + numfirings] * Features.Timestep);
+                Compute_float this_str =L.Mytimecourse[L.firinglags.lags[idx*L.firinglags.lagsperpoint + numfirings]];
                 if (Features.STD == ON)
                 {
                     this_str = this_str * STD_str(L.P->STD,x,y,time,L.firinglags.lags[idx*L.firinglags.lagsperpoint + numfirings],L.std);
@@ -39,13 +36,13 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
                 str += this_str;
                 numfirings++;
             }
-            if (Ion) {str = (-str);} //invert strength for inhib conns.
+            if (L.Layer_is_inhibitory) {str = (-str);} //invert strength for inhib conns.
             if (numfirings > 0) //only fire if we had a spike.
             {
-                evolvept_duallayer(x,y,L.connections,str,(Ion?gI:gE)); //side note evolvegen doesn't currently work with singlelayer - should probably fix
+                evolvept_duallayer(x,y,L.connections,str,(L.Layer_is_inhibitory?gI:gE)); //side note evolvegen doesn't currently work with singlelayer - should probably fix
                 if (Features.STDP==ON)
                 {
-                    evolvept_duallayer_STDP(x,y,L.connections,L.STDP_data->connections,str,(Ion?gI:gE));
+                    evolvept_duallayer_STDP(x,y,L.connections,L.STDP_data->connections,str,(L.Layer_is_inhibitory?gI:gE));
                 }
             }
             if (Features.Random_connections == ON)
@@ -55,7 +52,7 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
                 {
                     const randomconnection rc = L.rcinfo.randconns[randbase+i];
                     const int condindex = (rc.destination.x + couplerange) * conductance_array_size + rc.destination.y + couplerange;
-                    if (Ion) {gI[condindex] += str * rc.strength;}
+                    if (L.Layer_is_inhibitory) {gI[condindex] += str * rc.strength;}
                     else  {gE[condindex] += str * rc.strength;}
                 }
             }

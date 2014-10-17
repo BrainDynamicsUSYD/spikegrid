@@ -76,16 +76,23 @@ layer setuplayer(const parameters p)
         .STDP_data          = Features.STDP==ON?STDP_init(p.STDP,trefrac_in_ts):NULL,
         .connections        = CreateCouplingMatrix(p.couple),
         .std                = Features.STD==ON?STD_init(p.STD):NULL,
-        .Extimecourse       = p.couple.Layertype==SINGLELAYER?Synapse_timecourse_cache((unsigned int)cap,p.couple.Layer_parameters.single.Ex,Features.Timestep):
-            ((p.couple.Layer_parameters.dual.W>0)?Synapse_timecourse_cache((unsigned int)cap,p.couple.Layer_parameters.dual.synapse,Features.Timestep):NULL),
-        .Intimecourse       = p.couple.Layertype==SINGLELAYER?Synapse_timecourse_cache((unsigned int)cap,p.couple.Layer_parameters.single.In,Features.Timestep):
-            ((p.couple.Layer_parameters.dual.W<0)?Synapse_timecourse_cache((unsigned int)cap,p.couple.Layer_parameters.dual.synapse,Features.Timestep):NULL),
-        .rcinfo = {.randconns          = Features.Random_connections==ON?calloc(sizeof(randomconnection),(size_t)(grid_size*grid_size*p.random.numberper)):NULL},
+        .Extimecourse       = p.couple.Layertype==SINGLELAYER?
+            Synapse_timecourse_cache((unsigned int)cap,p.couple.Layer_parameters.single.Ex,Features.Timestep):NULL,
+        .Intimecourse       = p.couple.Layertype==SINGLELAYER?
+            Synapse_timecourse_cache((unsigned int)cap,p.couple.Layer_parameters.single.In,Features.Timestep):NULL,
+        .Mytimecourse       = p.couple.Layertype==DUALLAYER?
+           Synapse_timecourse_cache((unsigned int)cap,p.couple.Layer_parameters.dual.synapse,Features.Timestep):NULL,
+        .rcinfo =
+            {
+                .randconns          = Features.Random_connections==ON?
+                    calloc(sizeof(randomconnection),(size_t)(grid_size*grid_size*p.random.numberper)):NULL
+            },
         .P                  = (parameters*)newdata(&p,sizeof(p)),
         .voltages           = calloc(sizeof(Compute_float),grid_size*grid_size),
         .voltages_out       = calloc(sizeof(Compute_float),grid_size*grid_size),
         .recoverys          = Features.Recovery==ON?calloc(sizeof(Compute_float),grid_size*grid_size):NULL,
         .recoverys_out      = Features.Recovery==ON?calloc(sizeof(Compute_float),grid_size*grid_size):NULL,
+        .Layer_is_inhibitory = p.couple.Layertype==DUALLAYER && p.couple.Layer_parameters.dual.W<0,
     };
     for (int x = 0;x<grid_size;x++)
     { //initialize firing lags - essentially sets up an initial condition with no spikes in the past.  If you wanted spikes before the start of the simulation - change this

@@ -1,7 +1,6 @@
 /// \file
 #include "layer.h"
 #include "sizes.h"
-#include "enums.h"
 ///Allows for having multiple layers and simulating them
 typedef struct model
 {

@@ -15,6 +15,7 @@
 #include "yossarian.h"
 #include "paramheader.h"
 #include "model.h"
+#include "output.h"
 #ifdef ANDROID
     #define APPNAME "myapp"
     #include <android/log.h>
@@ -45,8 +46,12 @@ void step_(const Compute_float* const inpV,const Compute_float* const inpV2, con
         memcpy(m->layer2.voltages,inpV2,sizeof(Compute_float)*grid_size*grid_size);
         if (Features.Recovery==ON) {memcpy(m->layer2.recoverys,inpW,sizeof(Compute_float)*grid_size*grid_size);}
     }
-
     step1(m,mytime);
+    dooutput(m->layer1.P->output,mytime);
+    if (ModelType==DUALLAYER)
+    {
+        dooutput(m->layer2.P->output,mytime);
+    }
 }
 
 //I am not a huge fan of this function.  A nicer version would be good.
@@ -88,7 +93,6 @@ void setuppointers(Compute_float** FirstV,Compute_float** SecondV, Compute_float
 #ifdef MATLAB
 //The easeiest way to get data out with matlab is to use outputtomxarray and the easiest way to use that is with getoutputbyname.  Getoutputbyname is in output.h so include it.
 #include "matlab_output.h"
-#include "output.h"
 int setup_done=0;
 mxArray* CreateInitialValues(const Compute_float minval, const Compute_float maxval)
 {

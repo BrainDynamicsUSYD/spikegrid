@@ -1,11 +1,10 @@
-ifeq ($(CC),cc)
+ifeq ($(CC),clang)
+	export CFLAGS= -g -Wno-padded -Wno-missing-prototypes -Wno-missing-variable-declarations -Weverything -pedantic --std=gnu11 -Ofast -Wno-documentation-unknown-command -Wno-covered-switch-default
+else #gcc
 	optflags=  -Ofast -msse -msse2 -msse3 -funsafe-loop-optimizations -mtune=native -march=native  -floop-interchange -ftree-loop-optimize -floop-strip-mine -floop-block -flto  -fassociative-math -fno-signed-zeros -freciprocal-math -ffinite-math-only -fno-trapping-math -ftree-vectorize
 	extrawarnings=-Wstrict-aliasing -fstrict-aliasing   -Wshadow  -Wconversion -Wdouble-promotion -Wformat=2 -Wunused -Wuninitialized -Wfloat-equal -Wunsafe-loop-optimizations -Wcast-qual -Wcast-align -Wwrite-strings -Wjump-misses-init -Wlogical-op  -Wvector-operation-performance -Wno-pragmas
 	extraextrawarnings=-Wsuggest-attribute=pure -Wsuggest-attribute=const -Wsuggest-attribute=noreturn -Wstrict-overflow=4
 	export CFLAGS=-g -ggdb -Wall -Wextra -std=gnu11 ${optflags} ${extrawarnings} ${extraextrawarnings}
-else #clang
-	export CFLAGS= -g -Wno-padded -Wno-missing-prototypes -Wno-missing-variable-declarations -Weverything -pedantic --std=gnu11 -Ofast -Wno-documentation-unknown-command -Wno-covered-switch-default
-
 endif
 export opencvcflags=$(shell pkg-config --cflags opencv)
 export opencvldflags=$(shell pkg-config --libs opencv)

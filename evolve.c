@@ -2,7 +2,6 @@
 #include <string.h> //memset
 #include <stdlib.h> //random
 #include "theta.h"
-#include "output.h"
 #include "STDP.h"
 #include "evolvegen.h"
 #include "STD.h"
@@ -207,7 +206,7 @@ void ResetVoltages(Compute_float* const __restrict Vout,const couple_parameters 
         }
     }
 }
-void tidylayer (layer* l,const unsigned int time,const Compute_float timemillis,const Compute_float* const gE,const Compute_float* const gI)
+void tidylayer (layer* l,const Compute_float timemillis,const Compute_float* const gE,const Compute_float* const gI)
 {
     if (Features.Recovery==OFF)
     {
@@ -223,7 +222,6 @@ void tidylayer (layer* l,const unsigned int time,const Compute_float timemillis,
     {
         dotheta(l->voltages_out,l->P->theta,timemillis);
     }
-    dooutput(l->P->output,time);
 }
 ///Steps a model through 1 timestep - quite high-level function
 ///This is the only function in the file that needs model.h
@@ -244,8 +242,8 @@ void step1(model* m,const unsigned int time)
     }
     //from this point the GE and GI are actually fixed - as a result there is no more layer interaction - so do things sequentially to each layer
 
-    tidylayer(&m->layer1,time,timemillis,m->gE,m->gI);
-    if (m->NoLayers==DUALLAYER){tidylayer(&m->layer2,time,timemillis,m->gE,m->gI);}
+    tidylayer(&m->layer1,timemillis,m->gE,m->gI);
+    if (m->NoLayers==DUALLAYER){tidylayer(&m->layer2,timemillis,m->gE,m->gI);}
     if (Features.STDP==ON)
     {
         DoSTDP(m->layer1.connections,m->layer2.connections,m->layer1.STDP_data,m->layer1.P->STDP, m->layer2.STDP_data,m->layer2.P->STDP,&m->layer1.rcinfo,&m->layer1.P->random);

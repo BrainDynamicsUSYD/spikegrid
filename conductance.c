@@ -178,13 +178,13 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
 }
 #else
 ///Structure which holds the command line options that the program recognises
-struct option long_options[] = {{"help",no_argument,0,'h'},{"generate",no_argument,0,'g'},{"sweep",required_argument,0,'s'},{"nocv",no_argument,0,'n'},{0,0,0,0}};
+struct option long_options[] = {{"help",no_argument,0,'h'},{"generate",no_argument,0,'g'},{"sweep",required_argument,0,'s'},{"nocv",no_argument,0,'n'},{"nosegfault",no_argument,0,'f'},{0,0,0,0}};
 void processopts (int argc,char** argv,parameters** newparam,parameters** newparamEx,parameters** newparamIn,on_off* OpenCv)
 {
     while (1)
     {
         int option_index=0;
-        int c=getopt_long(argc,argv,"hgns:",long_options,&option_index);
+        int c=getopt_long(argc,argv,"hgnsf:",long_options,&option_index);
         if (c==-1) {break;} //end of options
         switch (c)
         {
@@ -216,6 +216,8 @@ void processopts (int argc,char** argv,parameters** newparam,parameters** newpar
             case 'n':
                 *OpenCv = OFF;
                 break;
+            case 'f':
+                exit(EXIT_SUCCESS);
         }
     }
 }

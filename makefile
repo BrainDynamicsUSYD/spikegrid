@@ -17,7 +17,7 @@ CFLAGS += ${SPEEDFLAG}
 export CXXFLAGS:=${CFLAGS}
 CFLAGS += --std=gnu11 ${cspecificwarnings}
 #conductance.c always needs to be first - this ensures that the mexfile gets the right name
-SOURCES= conductance.c coupling.c  STDP.c STD.c output.c evolve.c  newparam.c yossarian.c init.c theta.c printstruct.c matlab_output.c cleanup.c evolvegen.c lagstorage.c gui.c
+SOURCES= conductance.c coupling.c  STDP.c STD.c output.c evolve.c  newparam.c yossarian.c init.c theta.c printstruct.c matlab_output.c cleanup.c evolvegen.c lagstorage.c gui.c 
 BINARY=./a.out
 VERSION_HASH = $(shell git rev-parse HEAD)
 export VIEWERBIN=$(shell pwd)/watch
@@ -26,10 +26,12 @@ export maskgen=$(shell pwd)/mask
 export CVClibdir=$(shell pwd)/openCVAPI
 .PHONY: profile clean submit docs debug params matlabparams viewer ${VIEWERBIN}  force_look
 #binary
-${BINARY}: ${SOURCES} *.h ${CVClibdir}
+${BINARY}: ${SOURCES} *.h whichparam.h ${CVClibdir}
 	${CC} -DOPENCV ${CFLAGS} ${opencvcflags}     ${SOURCES} -o ${BINARY} -L. ${LDFLAGS}  -l:libcv  ${opencvldflags}
-evolvegen.c: ${maskgen} whichparam.h param*.h
+evolvegen.c: ${maskgen} whichparam.h config/*
 	${maskgen} > evolvegen.c
+whichparam.h:
+	./setupparam.sh
 debug: ${SOURCE}
 	${CC} ${DEBUGFLAGS} ${SOURCES} -o ${BINARY} ${LDFLAGS}
 mediumopt:
@@ -37,7 +39,7 @@ mediumopt:
 TEST:
 	rm -rf jobtest/*
 	mv whichparam.h whichparambackup.h #backup config choice
-	echo -e '#warning "using canonical parameters"\n#include "parametersCANONICAL.h"' > whichparam.h
+	echo -e '#include "config/parametersCANONICAL.h"' > whichparam.h
 	$(MAKE) evolvegen.c
 	$(MAKE) ${CVClibdir}
 	${CC} -DOPENCV ${CFLAGS} ${opencvcflags} -fno-omit-frame-pointer ${SOURCES} -o ${BINARY} ${LDFLAGS} -l:libcv ${opencvldflags}

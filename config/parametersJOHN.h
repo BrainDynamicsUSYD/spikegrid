@@ -70,7 +70,7 @@ static const parameters DualLayerModelIn =
         },
 
         .norm_type = GlobalMultiplier,
-        .normalization_parameters = {.glob_mult = {.GM=1.0}},
+        .normalization_parameters = {.glob_mult = {.GM=0.0}},
         .tref       = 4,
     },
     .random =
@@ -100,7 +100,7 @@ static const parameters DualLayerModelEx =
         },
         .tref       = 4,
         .norm_type = GlobalMultiplier,
-        .normalization_parameters = {.glob_mult = {.GM=1.0}},
+        .normalization_parameters = {.glob_mult = {.GM=0.0}},
     },
     .random =
     {
@@ -117,7 +117,7 @@ static const parameters DualLayerModelEx =
 static const model_features Features =
 {
     .STD        = OFF,
-    .STDP		= ON, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep -
+    .STDP		= OFF, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep -
     .Random_connections = ON,
     .Timestep   = 0.1,
     .Simlength  = 1000000,

@@ -1,4 +1,5 @@
 /// \file
+#warning "using canonical parameters"
 #include <stddef.h> //offsetof
 //these first few parameters actually escape into the paramheader file through magic
 #define grid_size 80
@@ -17,7 +18,7 @@
 #pragma GCC diagnostic ignored "-Wconversion"
 #endif
 //the following typedef must be before the include to get the right compute types
-#include "paramheader.h"
+#include "../paramheader.h"
 ///Whether we are using the single or double layer model
 static const LayerNumbers ModelType = DUALLAYER;
 

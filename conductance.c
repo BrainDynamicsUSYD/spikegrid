@@ -193,14 +193,15 @@ void processopts (int argc,char** argv,parameters** newparam,parameters** newpar
                         "   -h --help print this message\n"
                         "   -g --generate generate a yossarian config file\n"
                         "   -n --nocv disable open cv viewer\n"
-                        "   -s --sweep N do the nth element of a sweep\n");
+                        "   -s --sweep N do the nth element of a sweep\n"
+                        "   -f --nosegfault prevents almost all segfaults");
                 exit(EXIT_SUCCESS);
             case 'g':
                 createyossarianfile("yossarian.csh",Sweep);
                 exit(EXIT_SUCCESS);
             case 's':
-                {
-                    jobnumber=atoi(optarg);
+                   {
+                        jobnumber=atoi(optarg);
                     printf("doing sweep index %i\n",jobnumber);
                     if (ModelType == SINGLELAYER)
                     {

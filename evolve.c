@@ -130,6 +130,7 @@ void CalcVoltages(const Compute_float* const __restrict__ Vinput,
     }
 }
 ///Uses precalculated gE and gI to integrate the voltages and recoverys forward through time. This uses the Euler method
+//this should probably take a struct as input - way too many arguments
 void CalcRecoverys(const Compute_float* const __restrict__ Vinput,
         const Compute_float* const __restrict__ Winput,
         const Compute_float* const __restrict__ gE,
@@ -174,8 +175,8 @@ void StoreFiring(layer* L)
                     {
                         L->recoverys_out[x*grid_size+y]+=L->P->recovery.Wrt;
                     }
-                AddnewSpike(&L->firinglags,baseidx);
-                if (Features.STDP==ON) {AddnewSpike(&L->STDP_data->lags,(x*grid_size+y)*L->STDP_data->lags.lagsperpoint);}
+                    AddnewSpike(&L->firinglags,baseidx);
+                    if (Features.STDP==ON) {AddnewSpike(&L->STDP_data->lags,(x*grid_size+y)*L->STDP_data->lags.lagsperpoint);}
                 }//add random spikes
                 else if (((Compute_float)(random()))/((Compute_float)RAND_MAX) <
                         (L->P->potential.rate*((Compute_float)0.001)*Features.Timestep))
@@ -194,15 +195,12 @@ void StoreFiring(layer* L)
 void ResetVoltages(Compute_float* const __restrict Vout,const couple_parameters C,const lagstorage* const  l,const conductance_parameters CP)
 {
     const int trefrac_in_ts =(int) ((Compute_float)C.tref / Features.Timestep);
-    for (int x=0;x<grid_size;x++)
+    for (int i=0;i<grid_size*grid_size;i++)
     {
-        for (int y=0;y<grid_size;y++)
+        int baseidx = i*l->lagsperpoint;
+        if (CurrentShortestLag(l,baseidx) <= trefrac_in_ts)
         {
-            int baseidx = (x*grid_size+y)*l->lagsperpoint;
-            if (CurrentShortestLag(l,baseidx) <= trefrac_in_ts)
-            {
-                Vout[x*grid_size + y] = CP.Vrt;
-            }
+            Vout[i] = CP.Vrt;
         }
     }
 }

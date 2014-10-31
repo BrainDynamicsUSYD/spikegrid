@@ -1,3 +1,6 @@
+##########
+#set up some variables for compiling
+##########
 ifeq ($(CC),clang)
 	export CFLAGS= -g -Wno-padded -Wno-missing-prototypes -Wno-missing-variable-declarations -Weverything -pedantic  -Ofast -Wno-documentation-unknown-command -Wno-covered-switch-default
 else #gcc
@@ -7,27 +10,32 @@ else #gcc
 	export CFLAGS=-g -ggdb -Wall -Wextra  ${optflags} ${extrawarnings} ${extraextrawarnings}
 	cspecificwarnings= -Wjump-misses-init
 endif
+export DEFINES=-DOPENCV
 export opencvcflags=$(shell pkg-config --cflags opencv)
 export opencvldflags=$(shell pkg-config --libs opencv)
 export DEBUGFLAGS= -g -std=gnu11
 #export SPEEDFLAG=-DFAST #comment out this line for double instead of float (will make code slower)
 export CLIBFLAGS= -fPIC -shared
 export LDFLAGS= -lm -g
-CFLAGS += ${SPEEDFLAG}
-export CXXFLAGS:=${CFLAGS}
+CFLAGS += ${SPEEDFLAG} ${DEFINES}
+export CXXFLAGS:=${CFLAGS} #use := to create an actual copy
 CFLAGS += --std=gnu11 ${cspecificwarnings}
+CXXFLAGS += --std=c++11
 #conductance.c always needs to be first - this ensures that the mexfile gets the right name
-SOURCES= conductance.c coupling.c  STDP.c STD.c output.c evolve.c  newparam.c yossarian.c init.c theta.c printstruct.c matlab_output.c cleanup.c evolvegen.c lagstorage.c gui.c 
+SOURCES= conductance.c coupling.c  STDP.c STD.c output.c evolve.c  newparam.c yossarian.c init.c theta.c printstruct.c matlab_output.c cleanup.c evolvegen.c lagstorage.c gui.c tagged_array.c
 BINARY=./a.out
 VERSION_HASH = $(shell git rev-parse HEAD)
 export VIEWERBIN=$(shell pwd)/watch
 export CVClib=$(shell pwd)/libcv
+export outlib=$(shell pwd)/out.o
 export maskgen=$(shell pwd)/mask
 export CVClibdir=$(shell pwd)/openCVAPI
 .PHONY: profile clean submit docs debug params matlabparams viewer ${VIEWERBIN}  force_look
-#binary
-${BINARY}: ${SOURCES} *.h whichparam.h ${CVClibdir}
-	${CC} -DOPENCV ${CFLAGS} ${opencvcflags}     ${SOURCES} -o ${BINARY} -L. ${LDFLAGS}  -l:libcv  ${opencvldflags}
+###########
+#Actually compile
+###########
+${BINARY}: ${SOURCES} *.h whichparam.h ${CVClibdir} ${outlib}
+	${CC} ${CFLAGS} ${opencvcflags}     ${SOURCES} out.o -o ${BINARY} -L. ${LDFLAGS}  -l:libcv   ${opencvldflags}
 evolvegen.c: ${maskgen} whichparam.h config/*
 	${maskgen} > evolvegen.c
 whichparam.h:
@@ -36,13 +44,13 @@ debug: ${SOURCE}
 	${CC} ${DEBUGFLAGS} ${SOURCES} -o ${BINARY} ${LDFLAGS}
 mediumopt:
 	${CC} -g -std=gnu99 ${SOURCES} -o ${BINARY} ${LDFLAGS}
-TEST:
+TEST: ${outlib} ${CVClib}
 	rm -rf jobtest/*
 	mv whichparam.h whichparambackup.h #backup config choice
 	echo -e '#include "config/parametersCANONICAL.h"' > whichparam.h
 	$(MAKE) evolvegen.c
 	$(MAKE) ${CVClibdir}
-	${CC} -DOPENCV ${CFLAGS} ${opencvcflags} -fno-omit-frame-pointer ${SOURCES} -o ${BINARY} ${LDFLAGS} -l:libcv ${opencvldflags}
+	${CC}  ${CFLAGS} ${opencvcflags} -fno-omit-frame-pointer ${SOURCES} out.o -o ${BINARY} ${LDFLAGS} -l:libcv ${opencvldflags}
 	mv whichparambackup.h whichparam.h #restore config choice
 	time ./a.out -n
 	mv job-{0..5} jobtest
@@ -62,7 +70,7 @@ yossarian.csh: ${BINARY}
 submit: yossarian.csh
 	qsub yossarian.csh
 clean:
-	-rm -f ${BINARY} ${CVClib} ${maskgen} evolvegen.c
+	-rm -f ${BINARY} ${CVClib} ${maskgen} ${outlib} evolvegen.c
 	-rm -rf html
 #.m files
 compile.m: makefile
@@ -72,9 +80,11 @@ compileslow.m: makefile
 #movie viewer
 viewer: ${VIEWERBIN}
 ${VIEWERBIN} :
-	cd viewer && $(MAKE) ${VIEWERBIN}
+	$(MAKE) -C viewer ${VIEWERBIN}
 ${CVClibdir} : force_look
 	$(MAKE) -C openCVAPI ${CVClib}
 ${CVClib} : ${CVClibdir}
 ${maskgen} : force_look
 	$(MAKE) -C maskgen ${maskgen}
+${outlib}: force_look
+	$(MAKE) -C out ${outlib}

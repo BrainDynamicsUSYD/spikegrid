@@ -13,6 +13,7 @@
 #include "STDP.h"
 #include "evolvegen.h"
 #include "model.h"
+#include "out/out.h"
 #define max(a,b) \
     ({ __typeof__ (a) _a = (a);\
        __typeof__ (b) _b = (b); \
@@ -189,5 +190,7 @@ model* setup(const parameters p,const parameters p2,const LayerNumbers lcount, i
     if (!strcmp(buffer,"headnode.physics.usyd.edu.au")) {printf("DON'T RUN THIS CODE ON HEADNODE\n");exit(EXIT_FAILURE);}
     free(buffer);
     output_init(m2);
+    MakeOutputs(p.output);
+    if (lcount==DUALLAYER) {MakeOutputs(p2.output);}
     return m2;
 }

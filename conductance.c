@@ -16,6 +16,7 @@
 #include "paramheader.h"
 #include "model.h"
 #include "output.h"
+#include "out/out.h"
 #ifdef ANDROID
     #define APPNAME "myapp"
     #include <android/log.h>
@@ -47,10 +48,11 @@ void step_(const Compute_float* const inpV,const Compute_float* const inpV2, con
         if (Features.Recovery==ON) {memcpy(m->layer2.recoverys,inpW,sizeof(Compute_float)*grid_size*grid_size);}
     }
     step1(m,mytime);
-    dooutput(m->layer1.P->output,mytime);
+    DoOutputs(mytime);
+    //dooutput(m->layer1.P->output,mytime);
     if (ModelType==DUALLAYER)
     {
-        dooutput(m->layer2.P->output,mytime);
+     //   dooutput(m->layer2.P->output,mytime);
     }
 }
 

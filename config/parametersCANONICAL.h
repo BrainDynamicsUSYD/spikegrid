@@ -144,32 +144,32 @@ static const parameters DualLayerModelEx =
     .output=
     {
         {
-            .output_method=PICTURE,
+            .method=PICTURE,
             .Output=0, //gE
             .Delay=5
         },
         {
-            .output_method=PICTURE,
+            .method=PICTURE,
             .Output=1,//gI
             .Delay=5
         },
         {
-            .output_method=TEXT,
+            .method=TEXT,
             .Output=2,//coupling1
             .Delay=1000
         },
         {
-            .output_method=TEXT,
+            .method=TEXT,
             .Output=3,//coupling2
             .Delay=1000
         },
         {
-            .output_method=PICTURE,
+            .method=PICTURE,
             .Output=4,//V1
             .Delay=5
         },
         {
-            .output_method=PICTURE,
+            .method=PICTURE,
             .Output=5,//V2
             .Delay=5
         },

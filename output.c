@@ -15,31 +15,10 @@
 ///Total number of things to be output - occasionally needs to be incremented
 #define output_count  19
 ///Holds the outputtable objects for the current model
-output_s* Outputtable;
 ///Holds file* for the output types that output to a consistent file over time to save repeatedly calling fopen/fclose - mainly useful for ouputting ringbuffer stuff
 FILE* outfiles[output_count];
 ///Extracts the actual information out of a tagged array and converts it to a simple square matrix
-Compute_float* taggedarrayTocomputearray(const tagged_array input)
-{
-    const unsigned int size = (input.size - (2*input.offset));
-    Compute_float * ret = calloc(sizeof(*ret),size*size*input.subgrid*input.subgrid);
-    for (unsigned int i=0;i<size;i++)
-    {
-        for (unsigned int j=0;j<size;j++)
-        {
-            for (unsigned int k=0;k<input.subgrid;k++)
-            {
-                for (unsigned int l=0;l<input.subgrid;l++)
-                {
-                    //this part reshuffles the matrix so that it looks better when you do a plot in matlab.  The subgrid stuff is mainly used for STDP where there is a matrix associated with each point
-                    const Compute_float val =  input.data[((i+input.offset)*input.size + j + input.offset)*input.subgrid*input.subgrid + k*input.subgrid + l ];
-                    ret[(i*input.subgrid+k)*size*input.subgrid +j*input.subgrid+l]=val;//this at least appears to bee correct
-                }
-            }
-        }
-    }
-    return ret;
-}
+
 
 /// number of PNG's outputted.  Used to keep track of the next filename to use
 ///convert a tagged array to a PNG.  Paths are auto-calculated
@@ -99,7 +78,7 @@ void outputToText(const output_s input,const int idx)
         outfiles[idx]=fopen(buf,"w");
         if (outfiles[idx]==NULL) {printf("fopen failed on %s error is %s\n",buf,strerror(errno));}
     }
-    switch (input.data_type)
+    switch (input.datatype)
     {
         case FLOAT_DATA:
         {
@@ -142,22 +121,22 @@ void outputToText(const output_s input,const int idx)
 void dooutput(const output_parameters* const m,const unsigned int t)
 {
     int i = 0;
-    while (m[i].output_method != NO_OUTPUT)
+    while (m[i].method != NO_OUTPUT)
     {
         if (t % m[i].Delay==0)
         {
             //clang gives a warning about NO_output not being handled here - safe to ignore
-            switch (m[i].output_method)
+            switch (m[i].method)
             {
                 case PICTURE:
-                    if (Outputtable[m[i].Output].data_type == FLOAT_DATA) { outputToPng(Outputtable[m[i].Output].data.TA_data,i,t/m[i].Delay);}
+                    if (Outputtable[m[i].Output].datatype == FLOAT_DATA) { outputToPng(Outputtable[m[i].Output].data.TA_data,i,t/m[i].Delay);}
                     else {printf("can't output a ringbuffer to a picture\n");}
                     break;
                 case TEXT:
                     outputToText(Outputtable[m[i].Output],i);
                     break;
                 case CONSOLE:
-                    if (Outputtable[m[i].Output].data_type == FLOAT_DATA) { outputToConsole(Outputtable[m[i].Output].data.TA_data);}
+                    if (Outputtable[m[i].Output].datatype == FLOAT_DATA) { outputToConsole(Outputtable[m[i].Output].data.TA_data);}
                     else {printf("can't output a ringbuffer to the console\n");}
                     break;
                 default:
@@ -191,7 +170,8 @@ void output_init(const model* const m)
     //WHEN YOU ADD SOMETHING - INCREASE OUTPUT_COUNT AT TOP OF FILE;
     //ALSO - only add things to the end of the array
     output_s* outdata=(output_s[]){ //note - neat feature - missing elements initailized to 0
-        //Name          data type                  actual data                size                    offset         subgrid,minval,maxval
+        //Name          data type                  actual data                size                    offset     8bz634
+        //subgrid,minval,maxval
         {"gE",          FLOAT_DATA, .data.TA_data={m->gE,                     conductance_array_size, couplerange,   1,0,2}}, //gE is a 'large' matrix - as it wraps around the edges
         {"gI",          FLOAT_DATA, .data.TA_data={m->gI,                     conductance_array_size, couplerange,   1,0,2}}, //gI is a 'large' matrix - as it wraps around the edges
         {"Coupling1",   FLOAT_DATA, .data.TA_data={m->layer1.connections,     couple_array_size,      0,             1,-0.5,0.5}}, //return the coupling matrix of layer 1 //TODO: fix min and max values
@@ -216,7 +196,7 @@ void output_init(const model* const m)
 ///Cleans up memory and file handles that are used by the outputtables object
 void CleanupOutput()
 {
-    for (int i=0;i<output_count;i++)
+    for (int i=0;i<output_count;i++)    
     {
         if (outfiles[i] != NULL)
         {

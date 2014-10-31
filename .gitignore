@@ -43,3 +43,5 @@ mask
 cvlib
 libcv
 /.project
+*.o
+local_output/*

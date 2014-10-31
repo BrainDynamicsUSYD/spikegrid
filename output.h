@@ -1,21 +1,18 @@
 /// \file
 #ifndef OUTPUT
 #define OUTPUT
+#include "enums.h"
 #include "typedefs.h"
+#include "tagged_array.h"
 typedef struct output_parameters output_parameters;
 typedef struct model model;
 typedef struct lagstorage lagstorage;
-///used for storing arrays with their size.  Allows for the matlab_output (and other) function to take both the big and large arrays
-typedef struct {
-    //we require volatile below as we don't want you to be able to write to an array using the pointer from the tagged array
-    //however, other parts of the code could modify the underlying array, so use volatile to force reads
-    const volatile Compute_float* const data; ///< the actual data
-    const unsigned int size;                  ///< the total dimensions
-    const unsigned int offset;                ///< offset (used by the gE and gI matrices
-    const unsigned int subgrid;               ///< used when there is a subgrid within the grid - currently the only example is STDP.  The default value of this should be 1 - often not implemented
-    const Compute_float minval;               ///< minimum value in array (for a colorbar - currently unused)
-    const Compute_float maxval;               ///< maximum value in array (for a colorbar - currently unused)
-} tagged_array;
+typedef struct output_parameters
+{
+    const output_method method;  ///< Are we outputting something
+    const unsigned int Output;          ///< What will be outputted
+    const unsigned int Delay;           ///< how often to output it
+} output_parameters;
 
 ///The directory that we are outputting to
 char outdir [100];
@@ -24,7 +21,7 @@ typedef enum {FLOAT_DATA=0,SPIKE_DATA=1} data_type;
 ///Holds data for outputtting in various ways
 typedef struct output_s {
     const char name[10];            ///< a string identifier that is used to identify the output
-    const data_type data_type;      ///< The type of data to output
+    const data_type datatype;      ///< The type of data to output
     const union
     {
         const tagged_array TA_data;
@@ -36,6 +33,6 @@ Compute_float* taggedarrayTocomputearray(const tagged_array input);
 void dooutput(const output_parameters* const m,const unsigned int t);
 output_s __attribute__((pure)) getOutputByName(const char* const name);
 void output_init(const model* const m);
-
 void CleanupOutput();
+output_s* Outputtable;
 #endif //OUTPUT

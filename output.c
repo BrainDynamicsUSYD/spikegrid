@@ -20,52 +20,7 @@ FILE* outfiles[output_count];
 ///Extracts the actual information out of a tagged array and converts it to a simple square matrix
 
 
-/// number of PNG's outputted.  Used to keep track of the next filename to use
-///convert a tagged array to a PNG.  Paths are auto-calculated
-void outputToPng(const tagged_array input,const int idx,const unsigned int count)
-{
-#ifdef OPENCV
-    char fnamebuffer[30];
-    const unsigned int size = (input.size - (2*input.offset))*input.subgrid;
-    Compute_float* actualdata=taggedarrayTocomputearray(input);
-    sprintf(fnamebuffer,"%s/%i-%i.png",outdir,idx,count);
-    SaveImage(fnamebuffer,actualdata,input.minval,input.maxval,size);
-    free(actualdata);
-#else
-    printf("Using PNG outout without opencv is not possible");
-#endif
-}
-///TODO: Need to get a better way of detecting when rendering has finished
-void outputToConsole(const tagged_array input)
-{
-#ifdef OPENCV
-    if (!isatty(fileno(stdout))) {return;} //if we are not outputting to a terminal - dont show pictures on console - need to add matlab detection
-    char* buf = malloc(sizeof(char)*1000*1000);//should be plenty
-    char* upto = buf;
-    const unsigned int size = (input.size - (2*input.offset))*input.subgrid;
-    Compute_float* actualdata=taggedarrayTocomputearray(input);
-    unsigned char* red = malloc(sizeof(unsigned char)*size*size);
-    unsigned char* green = malloc(sizeof(unsigned char)*size*size);
-    unsigned char* blue = malloc(sizeof(unsigned char)*size*size);
-    getcolors(actualdata,input.minval,input.maxval,size,red,blue,green);
-    printf("\x1b[2J");
-    for (unsigned int i=0;i<size;i++)
-    {
-        for (unsigned int j=0;j<size;j++)
-        {
-            int r = sprintf(upto,"\x1b[48;2;%i;%i;%im ",red[i*size+j],green[i*size+j],blue[i*size+j]);
-            upto += r;
-        }
-        int q = sprintf(upto,"\x1b[0m\n");
-        upto += q;
-    }
-    puts(buf); //output giant buffer in one go - should be faster
-    usleep(50000);//let terminal catch up - nasty hacky solution
-    free(buf);free(red);free(green);free(blue);
-#else
-    printf("Using console output requires opencv (to get the color mappings)");
-#endif
-}
+
 ///Send an outputtable to a text file
 ///@param input     the outputtable object to output
 ///@param idx       the index of the outputtable so that if multiple objects are output, files have consistent naming
@@ -80,22 +35,6 @@ void outputToText(const output_s input,const int idx)
     }
     switch (input.datatype)
     {
-        case FLOAT_DATA:
-        {
-            Compute_float* const data = taggedarrayTocomputearray(input.data.TA_data);
-            const unsigned int size = input.data.TA_data.size - (2*input.data.TA_data.offset);
-            for (unsigned int i=0;i<size;i++)
-            {
-                for (unsigned int j=0;j<size;j++)
-                {
-                    fprintf(outfiles[idx],"%f,",data[i*size+j]);
-                }
-                fprintf(outfiles[idx],"\n");
-            }
-            fflush(outfiles[idx]);//prevents stalling in matlab
-            free(data);
-            break;
-        }
         case SPIKE_DATA:
         {
             for (int i=0;i<grid_size;i++)
@@ -117,35 +56,7 @@ void outputToText(const output_s input,const int idx)
 
     }
 }
-///High level function to do output
-void dooutput(const output_parameters* const m,const unsigned int t)
-{
-    int i = 0;
-    while (m[i].method != NO_OUTPUT)
-    {
-        if (t % m[i].Delay==0)
-        {
-            //clang gives a warning about NO_output not being handled here - safe to ignore
-            switch (m[i].method)
-            {
-                case PICTURE:
-                    if (Outputtable[m[i].Output].datatype == FLOAT_DATA) { outputToPng(Outputtable[m[i].Output].data.TA_data,i,t/m[i].Delay);}
-                    else {printf("can't output a ringbuffer to a picture\n");}
-                    break;
-                case TEXT:
-                    outputToText(Outputtable[m[i].Output],i);
-                    break;
-                case CONSOLE:
-                    if (Outputtable[m[i].Output].datatype == FLOAT_DATA) { outputToConsole(Outputtable[m[i].Output].data.TA_data);}
-                    else {printf("can't output a ringbuffer to the console\n");}
-                    break;
-                default:
-                    printf("unknown output method\n");
-            }
-        }
-        i++;
-    }
-}
+
 ///Finds an output which matches the given name - case sensitive
 ///@param name the name of the outputtable
 output_s __attribute__((pure)) getOutputByName(const char* const name)

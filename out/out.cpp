@@ -3,35 +3,18 @@
 #include <string.h>
 #include <errno.h>
 #include <vector>
+#include <unistd.h>
 #include "stdio.h"
-#include "../openCVAPI/api.h"
+#include "../openCVAPI/api.h" //this is c++
 extern "C"
 {
-#include "../output.h"
+#include "../output.h" //but this is C
 }
-#include "out.h"
-class Output
-{
-    int interval;
-    public:
-        Output(int intervalin) {interval=intervalin;};
-        virtual void DoOutput() {};
-        int GetInterval() const {return interval;};
-};
-
+#include "out.h" //and this is c++ again.
 std::vector<Output*> outvec;
-class PNGoutput : public Output
-{
-    int idx,count;
-    const tagged_array* data;
-    public:
-        PNGoutput(int,int,const tagged_array* );
-        void DoOutput() ;
-};
 
-PNGoutput::PNGoutput(int idxin ,const int intervalin,const tagged_array* datain) : Output(intervalin)
+PNGoutput::PNGoutput(int idxin ,const int intervalin,const tagged_array* datain) : Output(intervalin,idxin)
 {
-   idx=idxin;
    data=datain;
    count=0;
 }
@@ -43,25 +26,16 @@ void PNGoutput::DoOutput()
     char fnamebuffer[30];
     const unsigned int size = tagged_array_size(*data)*data->subgrid;
     Compute_float* actualdata=taggedarrayTocomputearray(*data);
-    sprintf(fnamebuffer,"%s/%i-%i.png",outdir,idx,count);
+    sprintf(fnamebuffer,"%s/%i-%i.png",outdir,this->GetIdx(),count);
     SaveImage(fnamebuffer,actualdata,data->minval,data->maxval,size);
     free(actualdata);
 #else
     printf("Using PNG outout without opencv is not possible\n");
 #endif
 }
-class TextOutput : public Output
+
+TextOutput::TextOutput(int idxin ,const int intervalin,const tagged_array* datain) : Output(intervalin,idxin)
 {
-    FILE* f;
-    int idx,count;
-    const tagged_array* data;
-    public:
-        TextOutput(int,int,const tagged_array* );
-        virtual void DoOutput() ;
-};
-TextOutput::TextOutput(int idxin ,const int intervalin,const tagged_array* datain) : Output(intervalin)
-{
-   idx=idxin;
    data=datain;
    char buf[100];
    sprintf(buf,"%s/%i.txt",outdir,idxin);
@@ -83,6 +57,41 @@ void TextOutput::DoOutput()
     fflush(f);//prevents stalling in matlab
     free(actualdata);
 }
+ConsoleOutput::ConsoleOutput(int idxin,const int intervalin,const tagged_array* datain) : Output(intervalin,idxin)
+{
+    data=datain;
+}
+void ConsoleOutput::DoOutput()
+{
+    #ifdef OPENCV
+    if (!isatty(fileno(stdout))) {return;} //if we are not outputting to a terminal - dont show pictures on console - need to add matlab detection
+    char* buf = (char*)malloc(sizeof(char)*1000*1000);//should be plenty
+    char* upto = buf;
+    const unsigned int size = tagged_array_size(*data)*data->subgrid;
+    Compute_float* actualdata=taggedarrayTocomputearray(*data);
+    unsigned char* red   = (unsigned char*)malloc(sizeof(unsigned char)*size*size);
+    unsigned char* green = (unsigned char*)malloc(sizeof(unsigned char)*size*size);
+    unsigned char* blue  = (unsigned char*)malloc(sizeof(unsigned char)*size*size);
+    getcolors(actualdata,data->minval,data->maxval,size,red,blue,green);
+    printf("\x1b[2J");
+    for (unsigned int i=0;i<size;i++)
+    {
+        for (unsigned int j=0;j<size;j++)
+        {
+            int r = sprintf(upto,"\x1b[48;2;%i;%i;%im ",red[i*size+j],green[i*size+j],blue[i*size+j]);
+            upto += r;
+        }
+        int q = sprintf(upto,"\x1b[0m\n");
+        upto += q;
+    }
+    puts(buf); //output giant buffer in one go - should be faster
+    usleep(50000);//let terminal catch up - nasty hacky solution
+    free(buf);free(red);free(green);free(blue);
+#else
+    printf("Using console output requires opencv (to get the color mappings)");
+#endif
+
+}
 void MakeOutputs(const output_parameters* const m)
 {
     int i = 0;
@@ -99,6 +108,9 @@ void MakeOutputs(const output_parameters* const m)
                 out = new TextOutput(i,m[i].Delay,&Outputtable[m[i].Output].data.TA_data);
                 outvec.push_back(out);
                 break;
+            case CONSOLE:
+                out = new ConsoleOutput(i,m[i].Delay,&Outputtable[m[i].Output].data.TA_data);
+                break;
             default:
                 break;
         }
@@ -107,7 +119,7 @@ void MakeOutputs(const output_parameters* const m)
 }
 void DoOutputs(const unsigned int time)
 {
-    for (int i=0;i<outvec.size();i++)
+    for (size_t i=0;i<outvec.size();i++)
     {
         if  ((time % outvec[i]->GetInterval()) == 0)
         {outvec[i]->DoOutput();}
@@ -115,9 +127,9 @@ void DoOutputs(const unsigned int time)
 }
 void CleanupOutputs()
 {
-    for (int i=0;i<outvec.size();i++)
+    for (size_t i=0;i<outvec.size();i++)
     {
-        delete outvec[i];
+        delete outvec[i]; //this is hideous code that produces a warning.  But who cares.
     }
-    outvec.clear();
+    outvec.clear(); //this is the more important bit - the memory occupied by the various output objects is comparitively tiny.
 }

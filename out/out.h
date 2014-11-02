@@ -11,7 +11,7 @@ class Output
 };
 class PNGoutput : public Output
 {
-    int count;
+    int count=0;
     const tagged_array* data;
     public:
         PNGoutput(int,int,const tagged_array* );
@@ -19,8 +19,9 @@ class PNGoutput : public Output
 };
 class TextOutput : public Output
 {
-    FILE* f;
     const tagged_array* data;
+    protected:
+        FILE* f;
     public:
         TextOutput(int,int,const tagged_array* );
         virtual void DoOutput() ;
@@ -30,6 +31,13 @@ class ConsoleOutput: public Output
     const tagged_array* data;
     public:
         ConsoleOutput(int,int,const tagged_array*);
+        virtual void DoOutput();
+};
+class SpikeOutput: public TextOutput
+{
+    const lagstorage* data;
+    public:
+        SpikeOutput(int,int,const lagstorage*);
         virtual void DoOutput();
 };
 extern "C" {

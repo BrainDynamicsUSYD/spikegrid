@@ -9,6 +9,8 @@
 extern "C"
 {
 #include "../output.h" //but this is C
+#include "../sizes.h"
+#include "../lagstorage.h"
 }
 #include "out.h" //and this is c++ again.
 std::vector<Output*> outvec;
@@ -16,7 +18,6 @@ std::vector<Output*> outvec;
 PNGoutput::PNGoutput(int idxin ,const int intervalin,const tagged_array* datain) : Output(intervalin,idxin)
 {
    data=datain;
-   count=0;
 }
 void PNGoutput::DoOutput()
 {
@@ -90,6 +91,25 @@ void ConsoleOutput::DoOutput()
 #else
     printf("Using console output requires opencv (to get the color mappings)");
 #endif
+}
+SpikeOutput::SpikeOutput(int idxin,const int intervalin, const lagstorage* datain) : TextOutput(idxin,intervalin,NULL)
+{
+    data=datain;
+}
+void SpikeOutput::DoOutput()
+{
+    for (int i=0;i<grid_size;i++)
+    {
+        for (int j=0;j<grid_size;j++)
+        {
+            if (CurrentShortestLag(data,(i*grid_size+j)*data->lagsperpoint) == 1)
+            {
+                fprintf(f,"%i,%i:",i,j);
+            }
+        }
+    }
+    fprintf(f,"\n");
+    fflush(f);
 
 }
 void MakeOutputs(const output_parameters* const m)
@@ -110,6 +130,9 @@ void MakeOutputs(const output_parameters* const m)
                 break;
             case CONSOLE:
                 out = new ConsoleOutput(i,m[i].Delay,&Outputtable[m[i].Output].data.TA_data);
+                break;
+            case SPIKES:
+                out = new SpikeOutput(i,m[i].Delay,Outputtable[m[i].Output].data.Lag_data);
                 break;
             default:
                 break;

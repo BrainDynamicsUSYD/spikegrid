@@ -1,61 +1,14 @@
 /// \file
 #include <string.h>
-#include <unistd.h>
 #include <stdio.h>
-#include <errno.h>
 #include <stdlib.h>
-#ifdef OPENCV
-    #include "openCVAPI/api.h"
-#endif
 #include "STD.h"
-#include "output.h"
 #include "paramheader.h" //needed because we can define output_parameters structs in the config file
 #include "STDP.h"
 #include "model.h"
+#include "output.h"
 ///Total number of things to be output - occasionally needs to be incremented
 #define output_count  19
-///Holds the outputtable objects for the current model
-///Holds file* for the output types that output to a consistent file over time to save repeatedly calling fopen/fclose - mainly useful for ouputting ringbuffer stuff
-FILE* outfiles[output_count];
-///Extracts the actual information out of a tagged array and converts it to a simple square matrix
-
-
-
-///Send an outputtable to a text file
-///@param input     the outputtable object to output
-///@param idx       the index of the outputtable so that if multiple objects are output, files have consistent naming
-void outputToText(const output_s input,const int idx)
-{
-    if (outfiles[idx]==NULL)
-    {
-        char buf[100];
-        sprintf(buf,"%s/%i.txt",outdir,idx);
-        outfiles[idx]=fopen(buf,"w");
-        if (outfiles[idx]==NULL) {printf("fopen failed on %s error is %s\n",buf,strerror(errno));}
-    }
-    switch (input.datatype)
-    {
-        case SPIKE_DATA:
-        {
-            for (int i=0;i<grid_size;i++)
-            {
-                for (int j=0;j<grid_size;j++)
-                {
-                    if (CurrentShortestLag(input.data.Lag_data,(i*grid_size+j)*input.data.Lag_data->lagsperpoint) == 1)
-                    {
-                        fprintf(outfiles[idx],"%i,%i:",i,j);
-                    }
-                }
-            }
-            fprintf(outfiles[idx],"\n");
-            fflush(outfiles[idx]);
-            break;
-        }
-        default:
-        printf("I don't know how to output this data\n");
-
-    }
-}
 
 ///Finds an output which matches the given name - case sensitive
 ///@param name the name of the outputtable
@@ -107,14 +60,6 @@ void output_init(const model* const m)
 ///Cleans up memory and file handles that are used by the outputtables object
 void CleanupOutput()
 {
-    for (int i=0;i<output_count;i++)    
-    {
-        if (outfiles[i] != NULL)
-        {
-            fclose(outfiles[i]);
-            outfiles[i]=NULL;
-        }
-    }
     free(Outputtable);//also cleanup outputtables
     Outputtable=NULL;
 }

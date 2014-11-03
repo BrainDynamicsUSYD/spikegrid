@@ -1,15 +1,18 @@
 /// \file
 #ifdef __cplusplus
+///generic class for outputting an object.
+///you probably want to inhereit from this for a new output method
 class Output
 {
-    int interval;
-    int idx;
+    int interval; /// <- how often to output data
+    int idx;      /// <- used to store a prefix for the output file
     public:
         Output(int intervalin,int idxin) {interval=intervalin;idx=idxin;};
         virtual void DoOutput() {};
         int GetInterval() const {return interval;};
         int GetIdx() const {return idx;};
 };
+/// outputs to series of pictures
 class PNGoutput : public Output
 {
     int count=0;

@@ -1,3 +1,4 @@
+/// \file
 #ifndef TAGGEDARRAY
 #define TAGGEDARRAY
 #include <stdlib.h>

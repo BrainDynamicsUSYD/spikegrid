@@ -3,7 +3,7 @@
 #define PARAMHEADER
 #include "typedefs.h"
 #include "enums.h"
-#include "output.h"
+#include "cppparamheader.h" //I am not a huge fan of this particular include - but unfortuneately it is the simplest solutionit is the simplest solutiontypedef struct
 typedef struct
 {
     const Compute_float WE; ///<total strength of excitatory connections

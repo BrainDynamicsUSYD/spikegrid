@@ -1,3 +1,4 @@
+/// \file
 #ifdef __cplusplus
 class Output
 {

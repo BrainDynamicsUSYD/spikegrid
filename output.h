@@ -2,17 +2,11 @@
 #ifndef OUTPUT
 #define OUTPUT
 #include "enums.h"
-#include "typedefs.h"
 #include "tagged_array.h"
 typedef struct output_parameters output_parameters;
 typedef struct model model;
 typedef struct lagstorage lagstorage;
-typedef struct output_parameters
-{
-    const output_method method;  ///< Are we outputting something
-    const unsigned int Output;          ///< What will be outputted
-    const unsigned int Delay;           ///< how often to output it
-} output_parameters;
+
 
 ///The directory that we are outputting to
 char outdir [100];

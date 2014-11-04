@@ -3,9 +3,7 @@
 fname='local_output/1.txt';
 fid=fopen(fname);
 tline=fgetl(fid);
-mylen=200;
-mydata=[];
-for figno=1:64
+for figno=1:16
     lines={};
     count=1;
     %read in all spikes as (x1,x2,.....) (y1,y2,....)
@@ -18,7 +16,7 @@ for figno=1:64
         lines{count}=[data{1}+1, data{2}+1];
         count = count+1;
         tline=fgetl(fid);
-        if (count==mylen)
+        if (count==200)
             break;
         end
     end
@@ -38,44 +36,54 @@ for figno=1:64
         end
     end
 
-    fc = zeros(100);
+    ty=1;
+    tx=1;
+    count = 1;
     for x=1:100
         for y=1:100
             e=spiketimes(x,y);
             elem=e{1};
-            fc(x,y)=length(elem);
-        end
-    end
-    figure(1)
-    subaxis(16,4,figno,'Padding',0,'Spacing',0)
-    valid=[];
-    sz=size(fc);
-    count=1;
-    for x=1:100
-        for y=1:100
-            if (mod(x,2)~=0 ||  mod(y,2)~=0)
-                valid(count)=sub2ind(sz,x,y);
-                count=count+1;
+            if length(elem) > count
+                count=length(elem);
+                tx=x;
+                ty=y;
             end
         end
     end
-    reshaped = reshape(fc,1,100*100);
-    reshaped = reshaped(valid);
-   % reshaped = reshaped(reshaped ~= 0);
-    mymax=mylen/30;
-
-    if(length(reshaped) == 0)
-        continue
+    tf=spiketimes(tx,ty);
+    tfire=tf{1};
+    diffs=zeros(100);
+    for x=1:100
+        for y=1:100
+            this_tfire=tfire;
+            e=spiketimes(x,y);
+            elem=e{1};
+            diffs(x,y)=var(diff(elem));
+            deltas=[];
+            for c=1:length(tfire)
+                t=elem(elem<this_tfire(c)) - this_tfire(c);
+                elem=elem(elem>=this_tfire(c));
+                deltas=[deltas (-t)];
+            end
+            if length(deltas) > 1
+                diffs(x,y)=mean(deltas);
+            else
+                diffs(x,y)=Inf;
+            end
+        end
     end
-    mydata(figno)=var(reshaped);
-    ksdensity(reshaped,linspace(0,mymax,211),'bandwidth',0.5);
-    xlim([0 mymax])
-    ylim([0 0.8])
-    set(gca,'XTickLabel',[])
-    set(gca,'YTickLabel',[])
+    subaxis(8,2,figno)
+    reshaped = reshape(diffs,1,100*100);
+    [sorted,ind] = sort(reshaped);
+    for x=1:20:(100*70)
+        spikes = spiketimes(ind(x));
+        elem=spikes{1};
+        scatter(elem,ones(length(elem),1)*(x),'k.');
+        hold on
+    end
+    scatter(tfire,ones(length(tfire),1));
+    title(sprintf('%s',fname))
     drawnow
     hold off
 end
-figure(2)
-plot(mydata);
 fclose(fid);

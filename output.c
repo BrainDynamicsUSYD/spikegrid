@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "STD.h"
-#include "paramheader.h" //needed because we can define output_parameters structs in the config file
+#include "paramheader.h" //needed because some of the max/min values are obtained from parameters
 #include "STDP.h"
 #include "model.h"
 #include "output.h"
@@ -28,6 +28,7 @@ output_s __attribute__((pure)) getOutputByName(const char* const name)
 }
 
 ///Set up the outputtables for a given model
+///This function should probably move to the C++ code
 ///@param m the model we are going to output stuff from
 void output_init(const model* const m)
 {

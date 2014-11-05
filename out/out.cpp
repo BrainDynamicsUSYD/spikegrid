@@ -10,6 +10,7 @@
 extern "C"
 {
 #include "../output.h" //but this is C
+#include "../cppparamheader.h"
 #include "../sizes.h"
 #include "../lagstorage.h"
 }

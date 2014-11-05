@@ -63,7 +63,7 @@ static const parameters DualLayerModelIn =
         {
             .dual =
             {
-                .W          = -0.36, //-0.40 //-0.57 //-0.70 //-1.25,
+                .W          = -0.46, //-0.40 //-0.57 //-0.70 //-1.25,
                 .sigma      = 90,
                 .synapse    = {.R=0.5,.D=2.0},
             }
@@ -93,7 +93,7 @@ static const parameters DualLayerModelEx =
         {
             .dual =
             {
-                .W          =  0.215,
+                .W          =  0.26,
                 .sigma      = 15,
                 .synapse    = {.R=0.5,.D=2.0},
             }
@@ -126,7 +126,7 @@ static const model_features Features =
 ///Constant external input to conductances
 static const extinput Extinput =
 {
-    .gE0 = 0.014,
+    .gE0 = 0.012,
     .gI0 = 0.0,
 };
 ///Parameters for conducting a parameter sweep.

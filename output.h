@@ -3,7 +3,6 @@
 #define OUTPUT
 #include "enums.h"
 #include "tagged_array.h"
-typedef struct output_parameters output_parameters;
 typedef struct model model;
 typedef struct lagstorage lagstorage;
 
@@ -23,8 +22,6 @@ typedef struct output_s {
     } data;                         ///< the data to return
 
 } output_s; //used so that matlab has string identifiers that correspond to a specific tagged_array
-Compute_float* taggedarrayTocomputearray(const tagged_array input);
-void dooutput(const output_parameters* const m,const unsigned int t);
 output_s __attribute__((pure)) getOutputByName(const char* const name);
 void output_init(const model* const m);
 void CleanupOutput();

@@ -204,6 +204,7 @@ void ResetVoltages(Compute_float* const __restrict Vout,const couple_parameters 
         }
     }
 }
+#include "imread/imread.h"
 void tidylayer (layer* l,const Compute_float timemillis,const Compute_float* const gE,const Compute_float* const gI)
 {
     if (Features.Recovery==OFF)
@@ -220,6 +221,7 @@ void tidylayer (layer* l,const Compute_float timemillis,const Compute_float* con
     {
         dotheta(l->voltages_out,l->P->theta,timemillis);
     }
+    ApplyStim(l->voltages_out,timemillis);
 }
 ///Steps a model through 1 timestep - quite high-level function
 ///This is the only function in the file that needs model.h

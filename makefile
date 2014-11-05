@@ -28,14 +28,14 @@ VERSION_HASH = $(shell git rev-parse HEAD)
 export VIEWERBIN=$(shell pwd)/watch
 export CVClib=$(shell pwd)/libcv
 export outlib=$(shell pwd)/out.o
+export imreadlib=$(shell pwd)/imread.o
 export maskgen=$(shell pwd)/mask
-export CVClibdir=$(shell pwd)/openCVAPI
 .PHONY: profile clean submit docs debug params matlabparams viewer ${VIEWERBIN}  force_look
 ###########
 #Actually compile
 ###########
-${BINARY}: ${SOURCES} *.h whichparam.h ${CVClibdir} ${outlib}
-	${CC} ${CFLAGS} ${opencvcflags}     ${SOURCES} out.o -o ${BINARY} -L. ${LDFLAGS}  -l:libcv   ${opencvldflags}
+${BINARY}: ${SOURCES} *.h whichparam.h ${CVClib} ${outlib} ${imreadlib}
+	${CC} ${CFLAGS} ${opencvcflags}     ${SOURCES} ${outlib} ${imreadlib} -o ${BINARY} -L. ${LDFLAGS}  -l:${CVClib}   ${opencvldflags}
 evolvegen.c: ${maskgen} whichparam.h config/*
 	${maskgen} > evolvegen.c
 whichparam.h:
@@ -49,8 +49,8 @@ TEST: ${outlib} ${CVClib}
 	mv whichparam.h whichparambackup.h #backup config choice
 	echo -e '#include "config/parametersCANONICAL.h"' > whichparam.h
 	$(MAKE) evolvegen.c
-	$(MAKE) ${CVClibdir}
-	${CC}  ${CFLAGS} ${opencvcflags} -fno-omit-frame-pointer ${SOURCES} out.o -o ${BINARY} ${LDFLAGS} -l:libcv ${opencvldflags}
+	$(MAKE) ${CVClib}
+	${CC}  ${CFLAGS} ${opencvcflags} -fno-omit-frame-pointer ${SOURCES} out.o -o ${BINARY} ${LDFLAGS} -l:${CVClib} ${opencvldflags}
 	mv whichparambackup.h whichparam.h #restore config choice
 	time ./a.out -n
 	mv job-{0..5} jobtest
@@ -81,10 +81,12 @@ compileslow.m: makefile
 viewer: ${VIEWERBIN}
 ${VIEWERBIN} :
 	$(MAKE) -C viewer ${VIEWERBIN}
-${CVClibdir} : force_look
+	#libs
+${CVClib} : force_look
 	$(MAKE) -C openCVAPI ${CVClib}
-${CVClib} : ${CVClibdir}
 ${maskgen} : force_look
 	$(MAKE) -C maskgen ${maskgen}
 ${outlib}: force_look
 	$(MAKE) -C out ${outlib}
+${imreadlib}: force_look
+	$(MAKE) -C imread ${imreadlib}

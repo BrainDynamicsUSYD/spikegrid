@@ -186,7 +186,7 @@ void processopts (int argc,char** argv,parameters** newparam,parameters** newpar
     while (1)
     {
         int option_index=0;
-        int c=getopt_long(argc,argv,"hgnsf:",long_options,&option_index);
+        int c=getopt_long(argc,argv,"hgns:f",long_options,&option_index);
         if (c==-1) {break;} //end of options
         switch (c)
         {
@@ -202,8 +202,8 @@ void processopts (int argc,char** argv,parameters** newparam,parameters** newpar
                 createyossarianfile("yossarian.csh",Sweep);
                 exit(EXIT_SUCCESS);
             case 's':
-                   {
-                        jobnumber=atoi(optarg);
+                {
+                    jobnumber=atoi(optarg);
                     printf("doing sweep index %i\n",jobnumber);
                     if (ModelType == SINGLELAYER)
                     {

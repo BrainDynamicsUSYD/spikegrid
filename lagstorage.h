@@ -9,6 +9,7 @@ typedef struct lagstorage
     const int   lagsperpoint;
 } lagstorage;
 
+lagstorage lagstorage_init(const int flagcount,const int cap);
 void AddnewSpike(lagstorage* L,const int baseidx);
 void modifyLags(lagstorage* L,int baseidx);
 int16_t __attribute__((const,pure)) CurrentShortestLag(const lagstorage* const L,const int baseidx);

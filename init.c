@@ -12,6 +12,8 @@
 #include "paramheader.h"
 #include "STDP.h"
 #include "evolvegen.h"
+#include "model.h"
+#include "out/out.h"
 #define max(a,b) \
     ({ __typeof__ (a) _a = (a);\
        __typeof__ (b) _b = (b); \
@@ -26,7 +28,7 @@ void randinit(Compute_float* input,const Compute_float minval,const Compute_floa
 {
     for (int x=0;x<grid_size*grid_size;x++)
     {
-            input[x] = ((Compute_float)random())/((Compute_float)RAND_MAX)*(maxval-minval)+minval;
+            input[x] = ((Compute_float)(random()))/((Compute_float)RAND_MAX)*(maxval-minval)+minval;
     }
 }
 ///Create an initial condition where all neurons have the same voltage except for the one in the middle
@@ -66,33 +68,31 @@ layer setuplayer(const parameters p)
     const int flagcount = (int)(cap/trefrac_in_ts) + 2;
     layer L =
     {
-        .firinglags         =
-        {
-            .lags         = calloc(sizeof(int16_t),grid_size*grid_size*(size_t)flagcount),
-            .cap          = cap,
-            .lagsperpoint = flagcount
-        },
+        .firinglags         = lagstorage_init(flagcount,cap),
         .STDP_data          = Features.STDP==ON?STDP_init(p.STDP,trefrac_in_ts):NULL,
         .connections        = CreateCouplingMatrix(p.couple),
         .std                = Features.STD==ON?STD_init(p.STD):NULL,
-        .Extimecourse       = p.couple.Layertype==SINGLELAYER?Synapse_timecourse_cache((unsigned int)cap,p.couple.Layer_parameters.single.Ex,Features.Timestep):
-            ((p.couple.Layer_parameters.dual.W>0)?Synapse_timecourse_cache((unsigned int)cap,p.couple.Layer_parameters.dual.synapse,Features.Timestep):NULL),
-        .Intimecourse       = p.couple.Layertype==SINGLELAYER?Synapse_timecourse_cache((unsigned int)cap,p.couple.Layer_parameters.single.In,Features.Timestep):
-            ((p.couple.Layer_parameters.dual.W<0)?Synapse_timecourse_cache((unsigned int)cap,p.couple.Layer_parameters.dual.synapse,Features.Timestep):NULL),
-        .rcinfo = {.randconns          = Features.Random_connections==ON?calloc(sizeof(randomconnection),(size_t)(grid_size*grid_size*p.random.numberper)):NULL},
+        .Extimecourse       = p.couple.Layertype==SINGLELAYER?
+            Synapse_timecourse_cache((unsigned int)cap,p.couple.Layer_parameters.single.Ex,Features.Timestep):NULL,
+        .Intimecourse       = p.couple.Layertype==SINGLELAYER?
+            Synapse_timecourse_cache((unsigned int)cap,p.couple.Layer_parameters.single.In,Features.Timestep):NULL,
+        .Mytimecourse       = p.couple.Layertype==DUALLAYER?
+           Synapse_timecourse_cache((unsigned int)cap,p.couple.Layer_parameters.dual.synapse,Features.Timestep):NULL,
+        .rcinfo =
+            {
+                .randconns          = Features.Random_connections==ON?
+                    calloc(sizeof(randomconnection),(size_t)(grid_size*grid_size*p.random.numberper)):NULL
+            },
         .P                  = (parameters*)newdata(&p,sizeof(p)),
         .voltages           = calloc(sizeof(Compute_float),grid_size*grid_size),
         .voltages_out       = calloc(sizeof(Compute_float),grid_size*grid_size),
         .recoverys          = Features.Recovery==ON?calloc(sizeof(Compute_float),grid_size*grid_size):NULL,
         .recoverys_out      = Features.Recovery==ON?calloc(sizeof(Compute_float),grid_size*grid_size):NULL,
+        .Layer_is_inhibitory = p.couple.Layertype==DUALLAYER && p.couple.Layer_parameters.dual.W<0,
     };
-    for (int x = 0;x<grid_size;x++)
-    {
-        for (int    y = 0;y<grid_size;y++)
-        {
-            L.firinglags.lags[(x*grid_size+y)*L.firinglags.lagsperpoint]=-1;
-        }
-    }
+    //the next section deals with setup for random connsections.  It is quite messy and long.
+    //much of this complexity is involved with allowing access to the random connections in efficient ways
+    //(particularly when STDP is included in the model)
     if (Features.Random_connections == ON)
     {
         //creat a rather ridiculously sized matrix
@@ -116,8 +116,8 @@ layer setuplayer(const parameters p)
                         .stdp_strength = Zero,
                         .destination =
                         {
-                            .x = (Neuron_coord)(((Compute_float)random() / (Compute_float)RAND_MAX) * (Compute_float)grid_size),
-                            .y = (Neuron_coord)(((Compute_float)random() / (Compute_float)RAND_MAX) * (Compute_float)grid_size),
+                            .x = (Neuron_coord)(((Compute_float)(random()) / (Compute_float)RAND_MAX) * (Compute_float)grid_size),
+                            .y = (Neuron_coord)(((Compute_float)(random()) / (Compute_float)RAND_MAX) * (Compute_float)grid_size),
                         }
                     };
                     L.rcinfo.randconns[(x*grid_size+y)*p.random.numberper + i] = rc;
@@ -136,6 +136,7 @@ layer setuplayer(const parameters p)
         randomconnection*** rev_conns_lookup = malloc(sizeof(randomconnection**)*grid_size*grid_size);
         unsigned int* rev_pp = malloc(sizeof(unsigned int)*grid_size*grid_size);
         int count = 0;
+
         for (unsigned int x=0;x<grid_size;x++)
         {
             for (unsigned int y=0;y<grid_size;y++)
@@ -177,8 +178,8 @@ model* setup(const parameters p,const parameters p2,const LayerNumbers lcount, i
     char buf[100];
     sprintf(buf,"%s/struct.dump",outdir);
     remove(buf);//cleanup the old struct file
-    printout_struct(&p,"parameters",outdir,0);     //save the first parameters object
-    printout_struct(&p2,"parameters",outdir,1);    //save the second parameters object and display everything
+   // printout_struct(&p,"parameters",outdir,0);     //save the first parameters object
+   // printout_struct(&p2,"parameters",outdir,1);    //save the second parameters object and display everything
     const layer l1  = setuplayer(p);
     const layer l2  = lcount==DUALLAYER?setuplayer(p2):l1;
     const model m   = {.layer1=l1,.layer2=l2,.NoLayers=lcount};
@@ -189,5 +190,7 @@ model* setup(const parameters p,const parameters p2,const LayerNumbers lcount, i
     if (!strcmp(buffer,"headnode.physics.usyd.edu.au")) {printf("DON'T RUN THIS CODE ON HEADNODE\n");exit(EXIT_FAILURE);}
     free(buffer);
     output_init(m2);
+    MakeOutputs(p.output);
+    if (lcount==DUALLAYER) {MakeOutputs(p2.output);}
     return m2;
 }

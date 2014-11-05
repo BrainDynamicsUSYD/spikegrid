@@ -2,48 +2,21 @@
 #include <string.h> //memset
 #include <stdlib.h> //random
 #include "theta.h"
-#include "output.h"
 #include "STDP.h"
 #include "evolvegen.h"
 #include "STD.h"
 #include "mymath.h"
 #include "paramheader.h"
-#include "coupling.h"
-///add conductance from a firing neuron to the gE and gI arrays (used in single layer model)
-void evolvept (const int x,const int y,const Compute_float* const __restrict connections,const Compute_float Estrmod,const Compute_float Istrmod,Compute_float* __restrict gE,Compute_float* __restrict gI)
-{
-    for (int i = 0; i < couple_array_size;i++)
-    {
-        const int outoff = (x + i)*conductance_array_size +y;//as gE and gI are larger than the neuron grid size, don't have to worry about wrapping
-        for (int j = 0 ; j<couple_array_size;j++)
-        {
-            const int coupleidx = i*couple_array_size + j;
-            if (connections[coupleidx] > 0)
-            {
-                gE[outoff+j] += connections[coupleidx]*Estrmod;
-            }
-            else
-            {
-                gI[outoff+j] += -(connections[coupleidx]*Istrmod);
-            }
-        }
-    }
-}
+#include "model.h"
+#ifdef ANDROID
+    #define APPNAME "myapp"
+    #include <android/log.h>
+#endif
 
-//when STDP is turned off, gcc will warn about this function needing const. It is wrong
-///Add conductances in the presence of STDP
-void evolvept_STDP  (const int x,const  int y,const Compute_float* const __restrict connections_STDP,const Compute_float Estrmod,const Compute_float Istrmod,Compute_float* __restrict gE,Compute_float* __restrict gI)
-{
-    if (Features.STDP == OFF) {return;}
-    evolvept(x,y,&(connections_STDP[(x*grid_size +y)*couple_array_size*couple_array_size]),Estrmod,Istrmod,gE,gI);
-}
 ///Adds the effect of the spikes that have fired in the past to the gE and gI arrays as appropriate
 /// currently, single layer doesn't work (correctly)
 void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restrict__ gI,const unsigned int time)
 {
- //   const int Eon = L.Extimecourse!=NULL; //does this layer have excitation
-    const int Ion = L.Intimecourse!=NULL; //and inhibition
-    const decay_parameters D = L.P->couple.Layer_parameters.dual.synapse;
     for (int y=0;y<grid_size;y++)
     {
         for (int x=0;x<grid_size;x++)
@@ -53,7 +26,7 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
             int numfirings = 0;
             while (L.firinglags.lags[idx*L.firinglags.lagsperpoint+numfirings] != -1)
             {
-                Compute_float this_str = Synapse_timecourse(D,L.firinglags.lags[idx*L.firinglags.lagsperpoint + numfirings] * Features.Timestep);
+                Compute_float this_str =L.Mytimecourse[L.firinglags.lags[idx*L.firinglags.lagsperpoint + numfirings]];
                 if (Features.STD == ON)
                 {
                     this_str = this_str * STD_str(L.P->STD,x,y,time,L.firinglags.lags[idx*L.firinglags.lagsperpoint + numfirings],L.std);
@@ -61,13 +34,13 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
                 str += this_str;
                 numfirings++;
             }
-            if (Ion) {str = (-str);} //invert strength for inhib conns.
+            if (L.Layer_is_inhibitory) {str = (-str);} //invert strength for inhib conns.
             if (numfirings > 0) //only fire if we had a spike.
             {
-                evolvept_duallayer(x,y,L.connections,str,(Ion?gI:gE));
+                evolvept_duallayer(x,y,L.connections,str,(L.Layer_is_inhibitory?gI:gE)); //side note evolvegen doesn't currently work with singlelayer - should probably fix
                 if (Features.STDP==ON)
                 {
-                    evolvept_duallayer_STDP(x,y,L.connections,L.STDP_data->connections,str,(Ion?gI:gE));
+                    evolvept_duallayer_STDP(x,y,L.connections,L.STDP_data->connections,str,(L.Layer_is_inhibitory?gI:gE));
                 }
             }
             if (Features.Random_connections == ON)
@@ -77,7 +50,7 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
                 {
                     const randomconnection rc = L.rcinfo.randconns[randbase+i];
                     const int condindex = (rc.destination.x + couplerange) * conductance_array_size + rc.destination.y + couplerange;
-                    if (Ion) {gI[condindex] += str * rc.strength;}
+                    if (L.Layer_is_inhibitory) {gI[condindex] += str * rc.strength;}
                     else  {gE[condindex] += str * rc.strength;}
                 }
             }
@@ -148,7 +121,7 @@ void CalcVoltages(const Compute_float* const __restrict__ Vinput,
     for (int x=0;x<grid_size;x++)
     {
         for (int y=0;y<grid_size;y++)
-        { 
+        {
             const int idx = (x+couplerange)*conductance_array_size + y + couplerange; //index for gE/gI
             const int idx2=  x*grid_size+y;
             const Compute_float rhs = rhs_func(Vinput[idx2],gE[idx],gI[idx],C);
@@ -157,6 +130,7 @@ void CalcVoltages(const Compute_float* const __restrict__ Vinput,
     }
 }
 ///Uses precalculated gE and gI to integrate the voltages and recoverys forward through time. This uses the Euler method
+//this should probably take a struct as input - way too many arguments
 void CalcRecoverys(const Compute_float* const __restrict__ Vinput,
         const Compute_float* const __restrict__ Winput,
         const Compute_float* const __restrict__ gE,
@@ -201,10 +175,10 @@ void StoreFiring(layer* L)
                     {
                         L->recoverys_out[x*grid_size+y]+=L->P->recovery.Wrt;
                     }
-                AddnewSpike(&L->firinglags,baseidx);
-                if (Features.STDP==ON) {AddnewSpike(&L->STDP_data->lags,(x*grid_size+y)*L->STDP_data->lags.lagsperpoint);}
+                    AddnewSpike(&L->firinglags,baseidx);
+                    if (Features.STDP==ON) {AddnewSpike(&L->STDP_data->lags,(x*grid_size+y)*L->STDP_data->lags.lagsperpoint);}
                 }//add random spikes
-                else if (((Compute_float)random())/((Compute_float)RAND_MAX) <
+                else if (((Compute_float)(random()))/((Compute_float)RAND_MAX) <
                         (L->P->potential.rate*((Compute_float)0.001)*Features.Timestep))
                 {
                     L->voltages_out[x*grid_size+y]=L->P->potential.Vpk+(Compute_float)0.1;//make sure it fires - the neuron will actually fire next timestep
@@ -218,42 +192,39 @@ void StoreFiring(layer* L)
     }
 }
 ///Cleans up voltages for neurons that are in the refractory state
-void ResetVoltages(Compute_float* const __restrict Vout,const couple_parameters C,const lagstorage l,const conductance_parameters CP)
+void ResetVoltages(Compute_float* const __restrict Vout,const couple_parameters C,const lagstorage* const  l,const conductance_parameters CP)
 {
     const int trefrac_in_ts =(int) ((Compute_float)C.tref / Features.Timestep);
-    for (int x=0;x<grid_size;x++)
+    for (int i=0;i<grid_size*grid_size;i++)
     {
-        for (int y=0;y<grid_size;y++)
+        int baseidx = i*l->lagsperpoint;
+        if (CurrentShortestLag(l,baseidx) <= trefrac_in_ts)
         {
-            int baseidx = (x*grid_size+y)*l.lagsperpoint;
-            if (CurrentShortestLag(&l,baseidx) <= trefrac_in_ts)
-            {
-                Vout[x*grid_size + y] = CP.Vrt;
-            }
+            Vout[i] = CP.Vrt;
         }
     }
 }
-void tidylayer (layer* l,const unsigned int time,const Compute_float timemillis,const Compute_float* const gE,const Compute_float* const gI)
+#include "imread/imread.h"
+void tidylayer (layer* l,const Compute_float timemillis,const Compute_float* const gE,const Compute_float* const gI)
 {
-    // without recovery variable
     if (Features.Recovery==OFF)
     {
         CalcVoltages(l->voltages,gE ,gI,l->P->potential,l->voltages_out);
-        ResetVoltages(l->voltages_out,l->P->couple,l->firinglags,l->P->potential);
+        ResetVoltages(l->voltages_out,l->P->couple,&l->firinglags,l->P->potential);
     }
-    // with recovery variable (note no support for theta - no idea if they work together)
     else
     {
         CalcRecoverys(l->voltages,l->recoverys,gE,gI,l->P->potential,l->P->recovery,l->voltages_out,l->recoverys_out);
     }
     StoreFiring(l);
-    dooutput(l->P->output,time);
     if (Features.Theta==ON)
     {
         dotheta(l->voltages_out,l->P->theta,timemillis);
     }
+    ApplyStim(l->voltages_out,timemillis);
 }
 ///Steps a model through 1 timestep - quite high-level function
+///This is the only function in the file that needs model.h
 void step1(model* m,const unsigned int time)
 {
     const Compute_float timemillis = ((Compute_float)time) * Features.Timestep ;
@@ -270,8 +241,9 @@ void step1(model* m,const unsigned int time)
         m->gI[i] += Extinput.gI0;
     }
     //from this point the GE and GI are actually fixed - as a result there is no more layer interaction - so do things sequentially to each layer
-    tidylayer(&m->layer1,time,timemillis,m->gE,m->gI);
-    if (m->NoLayers==DUALLAYER){tidylayer(&m->layer2,time,timemillis,m->gE,m->gI);}
+
+    tidylayer(&m->layer1,timemillis,m->gE,m->gI);
+    if (m->NoLayers==DUALLAYER){tidylayer(&m->layer2,timemillis,m->gE,m->gI);}
     if (Features.STDP==ON)
     {
         DoSTDP(m->layer1.connections,m->layer2.connections,m->layer1.STDP_data,m->layer1.P->STDP, m->layer2.STDP_data,m->layer2.P->STDP,&m->layer1.rcinfo,&m->layer1.P->random);

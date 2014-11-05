@@ -3,7 +3,7 @@
 #define PARAMHEADER
 #include "typedefs.h"
 #include "enums.h"
-
+#include "cppparamheader.h" //I am not a huge fan of this particular include - but unfortuneately it is the simplest solutionit is the simplest solutiontypedef struct
 typedef struct
 {
     const Compute_float WE; ///<total strength of excitatory connections
@@ -107,12 +107,13 @@ typedef struct STD_parameters
 } STD_parameters;
 
 ///Parameters for outputting movies
-typedef struct output_parameters
+/*typedef struct output_parameters
 {
     const output_method output_method;  ///< Are we outputting something
     const unsigned int Output;          ///< What will be outputted
     const unsigned int Delay;           ///< how often to output it
 } output_parameters;
+*/
 ///Parameters for a subthreshold wave (not necersarrily theta)
 typedef struct theta_parameters
 {

@@ -1,7 +1,9 @@
 /// \file
-#include "layer.h"
+#include "lagstorage.h"
+#include "typedefs.h"
 typedef struct STDP_parameters STDP_parameters;
 typedef struct randconn_parameters randconn_parameters;
+typedef struct randconns_info randconns_info;
 typedef struct STDP_data
 {
     lagstorage lags;

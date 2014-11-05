@@ -44,7 +44,7 @@ static const parameters OneLayerModel = {.couple={0}}; //since unused - shortes 
     {                       \
         .stdp_limit=8.5,    \
         .stdp_tau=20,       \
-        .stdp_strength=0.00075,  \
+        .stdp_strength=0.000075,  \
         .STDP_on=ON\
     }
 #define STDparams .STD= \
@@ -111,16 +111,16 @@ static const parameters DualLayerModelEx =
     STDPparams,
     potparams,
     .skip=-2,
-    .output = {{ .output_method=PICTURE,.Output=5,.Delay=10}, {.output_method=TEXT, .Output=15,.Delay=1},{ .output_method=TEXT,.Output=5,.Delay=1}}
+    .output = {{ .method=PICTURE,.Output=5,.Delay=10}, {.method=TEXT, .Output=15,.Delay=1},{ .method=TEXT,.Output=5,.Delay=1}}
 };
 ///Some global features that can be turned on and off
 static const model_features Features =
 {
     .STD        = OFF,
-    .STDP		= ON, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep -
-    .Random_connections = ON,
+    .STDP		= OFF, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep -
+    .Random_connections = OFF,
     .Timestep   = 0.1,
-    .Simlength  = 10000,
+    .Simlength  = 1000000,
     .job        = {.initcond = RAND_ZERO}
 };
 ///Constant external input to conductances

@@ -7,16 +7,20 @@
 #include <fenv.h>   //for some debugging
 #include <stdio.h>
 #include <time.h>
-#include "output.h"
+#include "gui.h"
 #include "cleanup.h"
 #include "evolve.h"
 #include "newparam.h"
 #include "init.h"
 #include "yossarian.h"
-#include "matlab_output.h"
 #include "paramheader.h"
-#include "layer.h"
-
+#include "model.h"
+#include "output.h"
+#include "out/out.h"
+#ifdef ANDROID
+    #define APPNAME "myapp"
+    #include <android/log.h>
+#endif
 
 unsigned int mytime=0;  ///<< The current time step
 model* m;               ///< The model we are evolving through time
@@ -44,8 +48,15 @@ void step_(const Compute_float* const inpV,const Compute_float* const inpV2, con
         if (Features.Recovery==ON) {memcpy(m->layer2.recoverys,inpW,sizeof(Compute_float)*grid_size*grid_size);}
     }
     step1(m,mytime);
+    DoOutputs(mytime);
+    //dooutput(m->layer1.P->output,mytime);
+    if (ModelType==DUALLAYER)
+    {
+     //   dooutput(m->layer2.P->output,mytime);
+    }
 }
 
+//I am not a huge fan of this function.  A nicer version would be good.
 void setuppointers(Compute_float** FirstV,Compute_float** SecondV, Compute_float** FirstW, Compute_float** SecondW,const Job* const job)
 {
     *FirstV = calloc(sizeof(Compute_float),grid_size*grid_size);
@@ -82,6 +93,8 @@ void setuppointers(Compute_float** FirstV,Compute_float** SecondV, Compute_float
 }
 
 #ifdef MATLAB
+//The easeiest way to get data out with matlab is to use outputtomxarray and the easiest way to use that is with getoutputbyname.  Getoutputbyname is in output.h so include it.
+#include "matlab_output.h"
 int setup_done=0;
 mxArray* CreateInitialValues(const Compute_float minval, const Compute_float maxval)
 {
@@ -90,90 +103,75 @@ mxArray* CreateInitialValues(const Compute_float minval, const Compute_float max
     randinit(datavals,minval,maxval);
     return vals;
 }
-
-mxArray* FirstMatlabCall( )
+typedef struct mexmap
 {
-    srandom((unsigned)time(0));
-    if (ModelType==SINGLELAYER) {m=setup(OneLayerModel,OneLayerModel,ModelType,jobnumber);} //pass the same layer as a double parameter
-    else {m=setup(DualLayerModelIn,DualLayerModelEx,ModelType,jobnumber);}
-    //set up initial voltage matrix - we need a different number if we are in single or double layer model - so encase the voltages in a struct
-    mxArray* variables = mxCreateStructMatrix(1,1,6,(const char*[]){"Vin","Vex","Win","Wex","Vsingle_layer","Wsingle_layer"});
-    if (ModelType==SINGLELAYER)
-    {
-        mxSetField(variables,0,"Vsingle_layer",CreateInitialValues(OneLayerModel.potential.Vrt,OneLayerModel.potential.Vpk));
-        if (Features.Recovery==ON)
-            {mxSetField(variables,0,"Wsingle_layer",CreateInitialValues(Zero,Zero));}
-    }
-    else if (ModelType==DUALLAYER)
-    {
-        mxSetField(variables,0,"Vin",CreateInitialValues(DualLayerModelIn.potential.Vrt,DualLayerModelIn.potential.Vpk));
-        mxSetField(variables,0,"Vex",CreateInitialValues(DualLayerModelEx.potential.Vrt,DualLayerModelEx.potential.Vpk));
-        if (Features.Recovery==ON)
-        {
-            mxSetField(variables,0,"Win",CreateInitialValues(Zero,Zero));
-            mxSetField(variables,0,"Wex",CreateInitialValues(Zero,Zero));
-        }
-    }
-    ///Now - do some dummy outputs of the other elements so that the graphs can be set up.
-    printf("setup done\n");
-    return variables;
-}
+    const char* const name;
+    const char* outname;
+    Compute_float** data;
+    const LayerNumbers Lno;
+    const on_off recovery;
+    Compute_float init_min;
+    Compute_float init_max;
+} mexmap;
+
 ///Matlab entry point. The pointers give access to the left and right hand sides of the function call.
 ///Note that it is required to assign a value to all entries on the left hand side of the equation.
 ///Dailing to do so will produce an error in matlab.
 void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
 {
     if (nrhs!=nlhs) {printf("We need the same number of parameters on the left and right hand side\n");return;}
+    Compute_float *FirstV,*SecondV,*FirstW,*SecondW;
+    mexmap mexmappings[] = {
+        //name in matlab , outputtable , pointer  , when which layer , is recovery variable , initial min value              , initial max value
+        {"Vsingle_layer" , "V1"        , &FirstV  , SINGLELAYER      , OFF                  , OneLayerModel.potential.Vrt    , OneLayerModel.potential.Vpk}    ,
+        {"Wsingle_layer" , "W1"        , &FirstW  , SINGLELAYER      , ON                   , Zero                           , Zero}                           ,
+        {"Vin"           , "V1"        , &FirstV  , DUALLAYER        , OFF                  , DualLayerModelIn.potential.Vrt , DualLayerModelIn.potential.Vpk} ,
+        {"Vex"           , "V2"        , &SecondV , DUALLAYER        , OFF                  , DualLayerModelEx.potential.Vrt , DualLayerModelEx.potential.Vpk} ,
+        {"Win"           , "Recovery1" , &FirstW  , DUALLAYER        , ON                   , Zero                           , Zero}                           ,
+        {"Wex"           , "Recovery2" , &SecondW , DUALLAYER        , ON                   , Zero                           , Zero}                           ,
+        {0               , 0           , 0        , 0                , 0                    , 0                              , 0}};
+    //the entries in this array are the first column of the previous array
+    mxArray* variables = mxCreateStructMatrix(1,1,6,(const char*[]){"Vin","Vex","Win","Wex","Vsingle_layer","Wsingle_layer"});
     if (setup_done==0)
     {
-        plhs[0]=FirstMatlabCall();
-        outputExtraThings(plhs,nrhs,prhs);
-        setup_done=1;
-        return;
-    }
-    //step the model through time
-    mxArray* variables = mxCreateStructMatrix(1,1,6,(const char*[]){"Vin","Vex","Win","Wex","Vsingle_layer","Wsingle_layer"});
-    Compute_float *FirstV,*SecondV,*FirstW,*SecondW;
-    //First - get inputs
-    if (ModelType==SINGLELAYER)
-    {
-        FirstV = (Compute_float*) mxGetData(mxGetField(prhs[0],0,"Vsingle_layer"));
-        SecondV = NULL;
-        if (Features.Recovery==ON)
+        srandom((unsigned)time(0));
+        if (ModelType==SINGLELAYER) {m=setup(OneLayerModel,OneLayerModel,ModelType,jobnumber);} //pass the same layer as a double parameter
+        else {m=setup(DualLayerModelIn,DualLayerModelEx,ModelType,jobnumber);}
+        int i = 0;
+        while(mexmappings[i].name != NULL)
         {
-            FirstW = (Compute_float*) mxGetData(mxGetField(prhs[0],0,"Wsingle_layer"));
-            SecondW = NULL;
-        } else {FirstW=NULL;SecondW=NULL;}
-    }
-    else
-    {
-        FirstV =  (Compute_float*) mxGetData(mxGetField(prhs[0],0,"Vin"));
-        SecondV = (Compute_float*) mxGetData(mxGetField(prhs[0],0,"Vex"));
-        if (Features.Recovery==ON)
-        {
-            FirstW  = (Compute_float*) mxGetData(mxGetField(prhs[0],0,"Win"));
-            SecondW = (Compute_float*) mxGetData(mxGetField(prhs[0],0,"Wex"));
-        } else {FirstW=NULL;SecondW=NULL;}
-    }
-    //Actually step the model
-    step_(FirstV,SecondV,FirstW,SecondW);
-    //Now assign the outputs
-    if (ModelType == SINGLELAYER)
-    {
-        mxSetField(variables,0,"Vsingle_layer",outputToMxArray(getOutputByName("V1")));
-        if (Features.Recovery == ON)
-        {
-            mxSetField(variables,0,"Wsingle_layer",outputToMxArray(getOutputByName("Recovery1")));
+            if (ModelType==mexmappings[i].Lno && (Features.Recovery==ON || Features.Recovery==mexmappings[i].recovery))
+            {
+                mxSetField(variables,0,mexmappings[i].name,CreateInitialValues(mexmappings[i].init_min,mexmappings[i].init_max));
+            }
+            i++;
         }
+        setup_done=1;
     }
     else
     {
-        mxSetField(variables,0,"Vex",outputToMxArray(getOutputByName("V2")));
-        mxSetField(variables,0,"Vin",outputToMxArray(getOutputByName("V1")));
-        if (Features.Recovery == ON)
+        //step the model through time
+        //First - get inputs
+        int i = 0;
+        while(mexmappings[i].name != NULL)
         {
-            mxSetField(variables,0,"Wex",outputToMxArray(getOutputByName("Recovery2")));
-            mxSetField(variables,0,"Win",outputToMxArray(getOutputByName("Recovery1")));
+            if (ModelType==mexmappings[i].Lno && (Features.Recovery==ON || Features.Recovery==mexmappings[i].recovery))
+            {
+                (*mexmappings[i].data) =(Compute_float* ) mxGetData(mxGetField(prhs[0],0,mexmappings[i].name));
+            }
+            i++;
+        }
+        //Actually step the model
+        step_(FirstV,SecondV,FirstW,SecondW);
+        //set outputs
+        i=0;
+        while(mexmappings[i].name != NULL)
+        {
+            if (ModelType==mexmappings[i].Lno && (Features.Recovery==ON || Features.Recovery==mexmappings[i].recovery))
+            {
+                mxSetField(variables,0,mexmappings[i].name,outputToMxArray(getOutputByName(mexmappings[i].outname)));
+            }
+            i++;
         }
     }
     plhs[0] = variables;
@@ -182,22 +180,13 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
 }
 #else
 ///Structure which holds the command line options that the program recognises
-struct option long_options[] = {{"help",no_argument,0,'h'},{"generate",no_argument,0,'g'},{"sweep",required_argument,0,'s'},{"nocv",no_argument,0,'n'},{0,0,0,0}};
-///Main function for the entire program
-/// @param argc number of cmdline args
-/// @param argv what the parameters actually are
-int main(int argc,char** argv) //useful for testing w/out matlab
+struct option long_options[] = {{"help",no_argument,0,'h'},{"generate",no_argument,0,'g'},{"sweep",required_argument,0,'s'},{"nocv",no_argument,0,'n'},{"nosegfault",no_argument,0,'f'},{0,0,0,0}};
+void processopts (int argc,char** argv,parameters** newparam,parameters** newparamEx,parameters** newparamIn,on_off* OpenCv)
 {
-    feenableexcept(FE_INVALID | FE_OVERFLOW); //segfault on NaN and overflow.  Note - this cannot be used in matlab
-    parameters* newparam = NULL;
-    parameters* newparamEx = NULL;
-    parameters* newparamIn = NULL;
-    setvbuf(stdout,NULL,_IONBF,0);
-    on_off OpenCv=ON;
     while (1)
     {
         int option_index=0;
-        int c=getopt_long(argc,argv,"hgns:",long_options,&option_index);
+        int c=getopt_long(argc,argv,"hgnsf:",long_options,&option_index);
         if (c==-1) {break;} //end of options
         switch (c)
         {
@@ -206,31 +195,50 @@ int main(int argc,char** argv) //useful for testing w/out matlab
                         "   -h --help print this message\n"
                         "   -g --generate generate a yossarian config file\n"
                         "   -n --nocv disable open cv viewer\n"
-                        "   -s --sweep N do the nth element of a sweep\n");
+                        "   -s --sweep N do the nth element of a sweep\n"
+                        "   -f --nosegfault prevents almost all segfaults");
                 exit(EXIT_SUCCESS);
             case 'g':
                 createyossarianfile("yossarian.csh",Sweep);
                 exit(EXIT_SUCCESS);
             case 's':
-                {
-                    jobnumber=atoi(optarg);
+                   {
+                        jobnumber=atoi(optarg);
                     printf("doing sweep index %i\n",jobnumber);
                     if (ModelType == SINGLELAYER)
                     {
-                           newparam = GetNthParam(OneLayerModel,Sweep,(unsigned int)jobnumber);
+                        *newparam = GetNthParam(OneLayerModel,Sweep,(unsigned int)jobnumber);
                     }
                     else
                     {
-                           newparamEx = GetNthParam(DualLayerModelEx,Sweep,(unsigned int)jobnumber);
-                           newparamIn = GetNthParam(DualLayerModelIn,Sweep,(unsigned int)jobnumber);
+                        *newparamEx = GetNthParam(DualLayerModelEx,Sweep,(unsigned int)jobnumber);
+                        *newparamIn = GetNthParam(DualLayerModelIn,Sweep,(unsigned int)jobnumber);
                     }
                 }
                 break;
             case 'n':
-                OpenCv = OFF;
+                *OpenCv = OFF;
                 break;
+            case 'f':
+                exit(EXIT_SUCCESS);
         }
     }
+}
+///Main function for the entire program
+/// @param argc number of cmdline args
+/// @param argv what the parameters actually are
+int main(int argc,char** argv) //useful for testing w/out matlab
+{
+#ifndef ANDROID //android doesn't support this function
+    feenableexcept(FE_INVALID | FE_OVERFLOW); //segfault on NaN and overflow.  Note - this cannot be used in matlab
+#endif
+    parameters* newparam = NULL;
+    parameters* newparamEx = NULL;
+    parameters* newparamIn = NULL;
+    setvbuf(stdout,NULL,_IONBF,0);
+    on_off OpenCv=ON;
+    processopts(argc,argv,&newparam,&newparamEx,&newparamIn,&OpenCv);
+
     const Job* job = &Features.job;
     if (job->next != NULL || (job->initcond==RAND_JOB && job->Voltage_or_count>1)) {jobnumber=0;} //if more than one job - then start at 0 - so that stuff goes in folders
     while (job != NULL)
@@ -282,4 +290,37 @@ int main(int argc,char** argv) //useful for testing w/out matlab
     }
     return(EXIT_SUCCESS);
 }
+#ifdef ANDROID
+#include <jni.h>
+int android_setup_done=0;
+Compute_float *FirstV,*SecondV,*FirstW,*SecondW;
+//nice riduclously long function name
+JNIEXPORT jdoubleArray JNICALL Java_com_example_conductanceandroid_MainActivity_AndroidEntry(JNIEnv* env, jobject jboj)
+{
+    if (android_setup_done==0)
+    {
+        android_setup_done=1;
+        __android_log_print(ANDROID_LOG_VERBOSE,APPNAME,"starting code");
+        const Job* job = &Features.job;
+        srandom((unsigned)time(0));
+        //sets up the model code
+        m=setup(DualLayerModelIn,DualLayerModelEx,ModelType,0);
+        setuppointers(&FirstV,&SecondV,&FirstW,&SecondW,job);
+        __android_log_print(ANDROID_LOG_VERBOSE,APPNAME,"setup done");
+    }
+    //actually runs the model
+    for (int i=0;i<5;i++)
+    {
+        step_(FirstV,SecondV,FirstW,SecondW);//always fine to pass an extra argument here
+        //copy the output to be new input
+        memcpy ( FirstV, m->layer1.voltages_out, sizeof ( Compute_float)*grid_size*grid_size);
+        if(SecondV != NULL){memcpy(SecondV,m->layer2.voltages_out, sizeof(Compute_float)*grid_size*grid_size);}
+        if(FirstW != NULL) {memcpy(FirstW, m->layer1.recoverys_out,sizeof(Compute_float)*grid_size*grid_size);}
+        if(SecondW != NULL){memcpy(SecondW,m->layer2.recoverys_out,sizeof(Compute_float)*grid_size*grid_size);}
+    }
+    jdoubleArray ret = (*env) ->NewDoubleArray(env,grid_size*grid_size);
+    (*env)->SetDoubleArrayRegion(env, ret, 0, grid_size*grid_size, SecondV );
+    return ret;
+}
+#endif
 #endif

@@ -111,7 +111,7 @@ static const parameters DualLayerModelEx =
     STDPparams,
     potparams,
     .skip=-2,
-    .output = {{ .method=PICTURE,.Output=5,.Delay=10}, {.method=TEXT, .Output=15,.Delay=1},{ .method=TEXT,.Output=5,.Delay=1}}
+    .output = {{ .method=PICTURE,.Output=5,.Delay=10} }
 };
 ///Some global features that can be turned on and off
 static const model_features Features =
@@ -120,7 +120,7 @@ static const model_features Features =
     .STDP		= OFF, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep -
     .Random_connections = OFF,
     .Timestep   = 0.1,
-    .Simlength  = 1000000,
+    .Simlength  = 5000,
     .job        = {.initcond = SINGLE_SPIKE, .Voltage_or_count = -70}
 };
 ///Constant external input to conductances

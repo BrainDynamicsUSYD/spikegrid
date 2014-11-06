@@ -25,9 +25,9 @@ static const LayerNumbers ModelType = DUALLAYER;
 ///Parameters for the single layer model
 static const parameters OneLayerModel = {.couple={0}}; //since unused - shortes possible definition that produces no warnings
 
-#define potparams  .potential =     \
-    {                               \
-        .type    =                  \
+#define potparams .potential =     \
+    {                                  \
+        .type    =                     \
         {                           \
             .type = LIF,            \
         },                          \
@@ -63,7 +63,7 @@ static const parameters DualLayerModelIn =
         {
             .dual =
             {
-                .W          = -0.46, //-0.40 //-0.57 //-0.70 //-1.25,
+                .W          = -0.5, //-0.40 //-0.57 //-0.70 //-1.25,
                 .sigma      = 90,
                 .synapse    = {.R=0.5,.D=2.0},
             }
@@ -71,7 +71,7 @@ static const parameters DualLayerModelIn =
 
         .norm_type = GlobalMultiplier,
         .normalization_parameters = {.glob_mult = {.GM=1.0}},
-        .tref       = 4,
+        .tref       = 5,
     },
     .random =
     {
@@ -93,12 +93,12 @@ static const parameters DualLayerModelEx =
         {
             .dual =
             {
-                .W          =  0.26,
+                .W          =  0.29,
                 .sigma      = 15,
                 .synapse    = {.R=0.5,.D=2.0},
             }
         },
-        .tref       = 4,
+        .tref       = 5,
         .norm_type = GlobalMultiplier,
         .normalization_parameters = {.glob_mult = {.GM=1.0}},
     },
@@ -121,12 +121,12 @@ static const model_features Features =
     .Random_connections = OFF,
     .Timestep   = 0.1,
     .Simlength  = 1000000,
-    .job        = {.initcond = RAND_ZERO}
+    .job        = {.initcond = SINGLE_SPIKE, .Voltage_or_count = -70}
 };
 ///Constant external input to conductances
 static const extinput Extinput =
 {
-    .gE0 = 0.012,
+    .gE0 = 0.013,
     .gI0 = 0.0,
 };
 ///Parameters for conducting a parameter sweep.

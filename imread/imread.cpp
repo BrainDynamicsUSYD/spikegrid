@@ -28,7 +28,7 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis)
             {
                 voltsin[x*grid_size+y]=-100;
             }
-            else if ( abs(timemillis-50.0)<.01 && pixel == cv::Vec3b(0,0,255))
+            else if ( abs(timemillis-80.0)<.01 && pixel == cv::Vec3b(0,0,255))
             {
                 voltsin[x*grid_size+y]=100;
             }

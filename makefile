@@ -22,7 +22,7 @@ export CXXFLAGS:=${CFLAGS} #use := to create an actual copy
 CFLAGS += --std=gnu11 ${cspecificwarnings}
 CXXFLAGS += --std=c++11
 #conductance.c always needs to be first - this ensures that the mexfile gets the right name
-SOURCES= conductance.c coupling.c  STDP.c STD.c output.c evolve.c  newparam.c yossarian.c init.c theta.c printstruct.c matlab_output.c cleanup.c evolvegen.c lagstorage.c gui.c tagged_array.c
+SOURCES= conductance.c coupling.c  STDP.c STD.c output.c evolve.c  newparam.c yossarian.c init.c theta.c printstruct.c  cleanup.c evolvegen.c lagstorage.c gui.c tagged_array.c
 BINARY=./a.out
 VERSION_HASH = $(shell git rev-parse HEAD)
 export VIEWERBIN=$(shell pwd)/watch
@@ -30,12 +30,14 @@ export CVClib=$(shell pwd)/libcv
 export outlib=$(shell pwd)/out.o
 export imreadlib=$(shell pwd)/imread.o
 export maskgen=$(shell pwd)/mask
+
+OFILES=${imreadlib} ${outlib}
 .PHONY: profile clean submit docs debug params matlabparams viewer ${VIEWERBIN}  force_look
 ###########
 #Actually compile
 ###########
-${BINARY}: ${SOURCES} *.h whichparam.h ${CVClib} ${outlib} ${imreadlib}
-	${CC} ${CFLAGS} ${opencvcflags}     ${SOURCES} ${outlib} ${imreadlib} -o ${BINARY} -L. ${LDFLAGS}  -l:${CVClib}   ${opencvldflags}
+${BINARY}: ${SOURCES} *.h whichparam.h ${CVClib} ${OFILES}
+	${CC} ${CFLAGS} ${opencvcflags}     ${SOURCES} ${OFILES} -o ${BINARY} -L. ${LDFLAGS}  -l:${CVClib}   ${opencvldflags}
 evolvegen.c: ${maskgen} whichparam.h config/*
 	${maskgen} > evolvegen.c
 whichparam.h:
@@ -50,7 +52,7 @@ TEST: ${outlib} ${CVClib}
 	echo -e '#include "config/parametersCANONICAL.h"' > whichparam.h
 	$(MAKE) evolvegen.c
 	$(MAKE) ${CVClib}
-	${CC}  ${CFLAGS} ${opencvcflags} -fno-omit-frame-pointer ${SOURCES} out.o -o ${BINARY} ${LDFLAGS} -l:${CVClib} ${opencvldflags}
+	${CC}  ${CFLAGS} ${opencvcflags} -fno-omit-frame-pointer ${SOURCES} ${OFILES} -o ${BINARY} ${LDFLAGS} -l:${CVClib} ${opencvldflags}
 	mv whichparambackup.h whichparam.h #restore config choice
 	time ./a.out -n
 	mv job-{0..5} jobtest
@@ -70,7 +72,7 @@ yossarian.csh: ${BINARY}
 submit: yossarian.csh
 	qsub yossarian.csh
 clean:
-	-rm -f ${BINARY} ${CVClib} ${maskgen} ${outlib} evolvegen.c
+	-rm -f ${BINARY} ${CVClib} ${maskgen}  evolvegen.c ${OFILES}
 	-rm -rf html
 #.m files
 compile.m: makefile

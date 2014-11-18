@@ -9,7 +9,8 @@
 #include "../openCVAPI/api.h" //this is c++
 extern "C"
 {
-#include "../output.h" //but this is C
+#include "../tagged_array.h"
+#include "../output.h" //but this is C 
 #include "../cppparamheader.h"
 #include "../sizes.h"
 #include "../lagstorage.h"
@@ -123,15 +124,15 @@ void MakeOutputs(const output_parameters* const m)
         switch (m[i].method)
         {
             case PICTURE:
-                out = new PNGoutput(i,m[i].Delay,&Outputtable[m[i].Output].data.TA_data);
+                out = new PNGoutput(i,m[i].Delay,Outputtable[m[i].Output].data.TA_data);
                 outvec.push_back(out);
                 break;
             case TEXT:
-                out = new TextOutput(i,m[i].Delay,&Outputtable[m[i].Output].data.TA_data);
+                out = new TextOutput(i,m[i].Delay,Outputtable[m[i].Output].data.TA_data);
                 outvec.push_back(out);
                 break;
             case CONSOLE:
-                out = new ConsoleOutput(i,m[i].Delay,&Outputtable[m[i].Output].data.TA_data);
+                out = new ConsoleOutput(i,m[i].Delay,Outputtable[m[i].Output].data.TA_data);
                 break;
             case SPIKES:
                 out = new SpikeOutput(i,m[i].Delay,Outputtable[m[i].Output].data.Lag_data);

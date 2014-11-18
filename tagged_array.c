@@ -1,6 +1,4 @@
 /// \file
-#ifndef TAGGEDARRAY
-#define TAGGEDARRAY
 #include <stdlib.h>
 #include "tagged_array.h"
 unsigned int __attribute__((const)) tagged_array_size(const tagged_array in)
@@ -30,4 +28,3 @@ Compute_float* taggedarrayTocomputearray(const tagged_array input)
     return ret;
 }
 
-#endif

@@ -1,7 +1,7 @@
 /// \file
 #include "typedefs.h"
 ///used for storing arrays with their size.  Allows for the matlab_output (and other) function to take both the big and large arrays
-typedef struct {
+typedef struct tagged_array{
     //we require volatile below as we don't want you to be able to write to an array using the pointer from the tagged array
     //however, other parts of the code could modify the underlying array, so use volatile to force reads
     const volatile Compute_float* const data; ///< the actual data

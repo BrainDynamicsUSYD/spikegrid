@@ -52,6 +52,8 @@ TEST: ${outlib} ${CVClib}
 	echo -e '#include "config/parametersCANONICAL.h"' > whichparam.h
 	$(MAKE) evolvegen.c
 	$(MAKE) ${CVClib}
+	$(MAKE) ${outlib}
+	$(MAKE) ${imreadlib}
 	${CC}  ${CFLAGS} ${opencvcflags} -fno-omit-frame-pointer ${SOURCES} ${OFILES} -o ${BINARY} ${LDFLAGS} -l:${CVClib} ${opencvldflags}
 	mv whichparambackup.h whichparam.h #restore config choice
 	time ./a.out -n

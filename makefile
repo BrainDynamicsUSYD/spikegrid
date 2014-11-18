@@ -76,14 +76,14 @@ clean:
 	-rm -rf html
 #.m files
 compile.m: makefile
-	echo "mex CFLAGS=\"-fPIC -shared ${CFLAGS} -DMATLAB \" LDFLAGS=\"${LDFLAGS} -shared\" ${SOURCES}"  > compile.m
+	echo "mex CFLAGS=\"-fPIC -shared ${CFLAGS} -DMATLAB \" LDFLAGS=\"${LDFLAGS} ${opencvldflags} -shared\" ${SOURCES} ${OFILES}"  > compile.m
 compileslow.m: makefile
-	echo "mex CFLAGS=\"-fPIC -shared ${DEBUGFLAGS}  -DMATLAB \" LDFLAGS=\"${LDFLAGS} -shared\" ${SOURCES}" > compileslow.m
+	echo "mex CFLAGS=\"-fPIC -shared ${DEBUGFLAGS}  -DMATLAB \" LDFLAGS=\"${LDFLAGS} ${opencvldflags} -shared\" ${SOURCES} ${OFILES}" > compileslow.m
 #movie viewer
 viewer: ${VIEWERBIN}
 ${VIEWERBIN} :
 	$(MAKE) -C viewer ${VIEWERBIN}
-	#libs
+#libs / o files / generated source
 ${CVClib} : force_look
 	$(MAKE) -C openCVAPI ${CVClib}
 ${maskgen} : force_look

@@ -146,7 +146,7 @@ typedef struct Job
     const struct Job* const next; ///< this is a linked list, so treat it like one
 } Job;
 ///Global switches to enable/disable features.  Also holds some model-independent parameters
-typedef struct
+typedef struct model_features
 {
     const on_off Recovery;          ///< Is recovery enables
 	const on_off STDP;              ///< Is STDP enabled
@@ -156,6 +156,7 @@ typedef struct
     const Compute_float Timestep;   ///< The timestep in the model
     const unsigned int Simlength;   ///< total number of timesteps to run
     const Job job;                  ///< the jobs we are going to run
+    const on_off ImageStim;         ///< whether to use an image based stimulus.
 } model_features;
 
 ///Structure that holds all the parameters for a layer

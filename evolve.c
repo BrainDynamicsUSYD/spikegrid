@@ -221,7 +221,10 @@ void tidylayer (layer* l,const Compute_float timemillis,const Compute_float* con
     {
         dotheta(l->voltages_out,l->P->theta,timemillis);
     }
-    ApplyStim(l->voltages_out,timemillis);
+    if (Features.ImageStim==ON)
+    {
+        ApplyStim(l->voltages_out,timemillis);
+    }
 }
 ///Steps a model through 1 timestep - quite high-level function
 ///This is the only function in the file that needs model.h

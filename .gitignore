@@ -45,3 +45,4 @@ libcv
 /.project
 *.o
 local_output/*
+.nfs*

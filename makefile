@@ -1,4 +1,9 @@
 ##########
+#Makefile options:
+#########
+#export SPEEDFLAG=-DFAST #comment out this line for double instead of float (will make code slower)
+export DEFINES=-DOPENCV
+##########
 #set up some variables for compiling
 ##########
 ifeq ($(CC),clang)
@@ -10,17 +15,28 @@ else #gcc
 	export CFLAGS=-g -ggdb -Wall -Wextra  ${optflags} ${extrawarnings} ${extraextrawarnings}
 	cspecificwarnings= -Wjump-misses-init
 endif
+#now when we are using matlab, everything is way too hard
+#this is mainly because matlab ships its own opencv libraries.
+#There are several problems with this:
+# 1. The matlab version is old and doesn't have all libraries
+# 2. Using any of my installed opencv libs will make the code not run.
+#So there is a rather ridiculous amount of hackery here
+
+#First find where matlab is - we need to use readlink and then dirname as matlab is almost always symlinked
 export matlabdir=$(shell dirname $$(readlink -f $$(which matlab)))
+#these C and ld flags are stolen from mex-v
 export MATLABCFLAGS= -DMX_COMPAT_32 -D_GNU_SOURCE -DMATLAB_MEX_FILE -DMATLAB -I"${matlabdir}/../extern/include" -I"${matlabdir}/../simulink/include"
 export MATLABLDFLAGS=  -L"${matlabdir}/glnxa64" -lmx -lmex -lmat -lm -lstdc++
-export DEFINES=-DOPENCV
-export opencvcflags=$(shell  pkg-config --cflags opencv)
-
-export opencvldflags=$(shell pkg-config --libs opencv |   sed 's/\-lopencv_ocl//g'  | sed 's/\-lopencv_superres//g' )
+#here some hackery - use pkg-config to learn the names of the libs but then find to only get the ones matlab has a copy of
+export matlabopencvldflags=$(shell for x in $$(pkg-config --libs opencv); do  find ${matlabdir}/glnxa64/ -name $$(basename -- $$x)\*  ; done)
+#have to set rpath in the linker to get the right libs to link.  Also add in the extra flags
+export matlabopencvldflags:= -Wl,-rpath -Wl,${matlabdir} ${matlabopencvldflags} $(shell pkg-config --libs-only-l opencv)
+#set up some non-matlab variables
 export DEBUGFLAGS= -g -std=gnu11
-#export SPEEDFLAG=-DFAST #comment out this line for double instead of float (will make code slower)
 export CLIBFLAGS= -fPIC -shared
 export LDFLAGS= -lm -g
+export opencvcflags=$(shell  pkg-config --cflags opencv)
+export opencvldflags=$(shell  pkg-config --libs opencv)
 CFLAGS += ${SPEEDFLAG} ${DEFINES}
 export CXXFLAGS:=${CFLAGS} #use := to create an actual copy
 CFLAGS += --std=gnu11 ${cspecificwarnings}
@@ -42,11 +58,12 @@ OFILES=${imreadlib} ${outlib}
 ###########
 ${BINARY}: ${SOURCES} *.h whichparam.h ${CVClib} ${OFILES}
 	${CC} ${CFLAGS} ${opencvcflags}     ${SOURCES} ${OFILES} -o ${BINARY} -L. ${LDFLAGS}  -l:${CVClib}   ${opencvldflags}
-conductance.mexa64: CFLAGS +=  ${MATLABCFLAGS}
-conductance.mexa64: CXXFLAGS +=  ${MATLABCFLAGS}
+conductance.mexa64: CFLAGS +=   ${MATLABCFLAGS}
+conductance.mexa64: CXXFLAGS += ${MATLABCFLAGS}
 conductance.mexa64: LDFLAGS +=  ${MATLABLDFLAGS}
+conductance.mexa64: opencvldflags =  ${matlabopencvldflags}
 conductance.mexa64:  ${SOURCES} *.h whichparam.h ${CVClib} ${OFILES}
-	${CC} -fpic ${CFLAGS} ${MATLABCFLAGS} ${opencvcflags}     ${SOURCES} ${OFILES} -o conductance.mexa64 -L. ${CLIBFLAGS} ${LDFLAGS}  -l:${CVClib}   ${opencvldflags} ${MATLABLDFLAGS}
+	${CC} -fpic ${CFLAGS} ${MATLABCFLAGS} ${opencvcflags}     ${SOURCES} ${OFILES} -o conductance.mexa64 -L. ${CLIBFLAGS} ${LDFLAGS}  -l:${CVClib}   ${opencvldflags}
 evolvegen.c: ${maskgen} whichparam.h config/*
 	${maskgen} > evolvegen.c
 whichparam.h:

@@ -6,9 +6,9 @@
 ///Total size of the grid
 ///Coupling range
 #define couplerange 15
-#ifndef PARAMATERS  //DO NOT REMOVE
+#ifndef PARAMETERS  //DO NOT REMOVE
 ///include guard
-#define PARAMATERS  //DO NOT REMOVE
+#define PARAMETERS  //DO NOT REMOVE
 #ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wconversion"
@@ -18,20 +18,20 @@
 #pragma GCC diagnostic ignored "-Wconversion"
 #endif
 //the following typedef must be before the include to get the right compute types
-#include "../paramheader.h"
+//#include "../paramheader.h"
 ///Whether we are using the single or double layer model
 static const LayerNumbers ModelType = DUALLAYER;
 
 //Fun note - with the right optimisations GCC actually will pull these constants inline (for example disassemble evolvept_STDP with STDP off)
 ///Parameters for the single layer model
-static const parameters OneLayerModel = 
+static const parameters OneLayerModel =
 {
     .couple =
     {
         .Layertype = SINGLELAYER,
-        .Layer_parameters = 
+        .Layer_parameters =
         {
-            .single = 
+            .single =
             {
                 .WE     = 0.41,                 //excitatory coupling strength
                 .sigE   = 14,                   //char. length for Ex symapses (int / float?)
@@ -44,12 +44,12 @@ static const parameters OneLayerModel =
         .tref   = 5,
         .norm_type = None,
     },
-    .potential = 
+    .potential =
     {
-        .type    = 
+        .type    =
         {
             .type = LIF,
-            .extra = 
+            .extra =
             {
                 .EIF={.Vth=-55,.Dpk=1}
             }
@@ -70,25 +70,25 @@ static const parameters DualLayerModelIn =
     .couple =
     {
         .Layertype = DUALLAYER,
-        .Layer_parameters = 
+        .Layer_parameters =
         {
-            .dual = 
+            .dual =
             {
                 .connectivity = HOMOGENEOUS,   //EXPONENTIAL or HOMOGENEOUS
-                .W            = -0.30, 
-                .sigma        = 60, 
+                .W            = -0.30,
+                .sigma        = 60,
                 .synapse      = {.R=0.5,.D=7.0},
             }
         },
         .norm_type = None,
         .tref       = 5,
     },
-    .potential = 
+    .potential =
     {
-        .type    = 
+        .type    =
         {
             .type = LIF,
-            .extra = 
+            .extra =
             {
                 .EIF={.Vth=-55,.Dpk=1}
             }
@@ -100,21 +100,21 @@ static const parameters DualLayerModelIn =
         .Vin     = -80,                  //In reversal potential
         .glk     = 0.05,                 //leak current
         .rate = 0,
-    },    
+    },
     .skip = 2,
 };
 ///parameters for the excitatory layer of the double layer model
 static const parameters DualLayerModelEx =
 {
-    .couple =   
+    .couple =
     {
         .Layertype = DUALLAYER,
-        .Layer_parameters = 
+        .Layer_parameters =
         {
-            .dual =     
+            .dual =
             {
-                .connectivity = EXPONENTIAL,   
-                .W            = 0.23, 
+                .connectivity = EXPONENTIAL,
+                .W            = 0.23,
                 .sigma        = 12,
                 .synapse      = {.R=0.5,.D=2.0},
             }
@@ -122,12 +122,12 @@ static const parameters DualLayerModelEx =
         .tref       = 5,
         .norm_type = None,
     },
-    .potential = 
+    .potential =
     {
-        .type    = 
+        .type    =
         {
             .type = LIF,
-            .extra = 
+            .extra =
             {
                 .EIF={.Vth=-55,.Dpk=1}
             }
@@ -183,10 +183,10 @@ static const extinput Extinput =
     .gI0 = 0,
 };
 ///Some global features that can be turned on and off
-static const model_features Features = 
+static const model_features Features =
 {
     .Recovery   = OFF,
-    .STDP		= OFF, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep - 
+    .STDP		= OFF, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep -
     .STD        = OFF,  //if we need any of these features we can make the changes then.
     .Theta      = OFF,
     .Timestep   = 0.1, // Works in like with 0.1 for midpoint. But if gE too small should addition be smaller too???
@@ -195,7 +195,7 @@ static const model_features Features =
     {
         .initcond=SINGLE_SPIKE,
         .Voltage_or_count = -50, //superthreshold
-        .next =  
+        .next =
         &(Job){
             .initcond=SINGLE_SPIKE,
             .Voltage_or_count=-55.1, //subthreshold

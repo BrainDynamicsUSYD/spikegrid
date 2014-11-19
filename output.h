@@ -2,10 +2,9 @@
 #ifndef OUTPUT
 #define OUTPUT
 #include "enums.h"
-#include "tagged_array.h"
 typedef struct model model;
 typedef struct lagstorage lagstorage;
-
+typedef struct tagged_array tagged_array;
 
 ///The directory that we are outputting to
 char outdir [100];
@@ -13,11 +12,11 @@ char outdir [100];
 typedef enum {FLOAT_DATA=0,SPIKE_DATA=1} data_type;
 ///Holds data for outputtting in various ways
 typedef struct output_s {
-    const char name[10];            ///< a string identifier that is used to identify the output
+    const char name[20];            ///< a string identifier that is used to identify the output
     const data_type datatype;      ///< The type of data to output
     const union
     {
-        const tagged_array TA_data;
+        const tagged_array* TA_data;
         const lagstorage*  Lag_data;
     } data;                         ///< the data to return
 

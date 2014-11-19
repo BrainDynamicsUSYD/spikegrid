@@ -1,7 +1,7 @@
 /// \file
 #include "typedefs.h"
 ///used for storing arrays with their size.  Allows for the matlab_output (and other) function to take both the big and large arrays
-typedef struct {
+typedef struct tagged_array{
     //we require volatile below as we don't want you to be able to write to an array using the pointer from the tagged array
     //however, other parts of the code could modify the underlying array, so use volatile to force reads
     const volatile Compute_float* const data; ///< the actual data
@@ -12,5 +12,5 @@ typedef struct {
     const Compute_float maxval;               ///< maximum value in array (for a colorbar - currently unused)
 } tagged_array;
 Compute_float* taggedarrayTocomputearray(const tagged_array input);
-
-unsigned int __attribute__((const)) tagged_array_size(const tagged_array in);
+unsigned int __attribute__((const)) tagged_array_size_(const tagged_array in);
+tagged_array* tagged_array_new(const volatile Compute_float* const data_, const unsigned int size_, const unsigned int offset_, const unsigned int subgrid_, const Compute_float minval_, const Compute_float maxval_);

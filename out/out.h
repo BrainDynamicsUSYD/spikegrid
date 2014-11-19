@@ -21,11 +21,17 @@ class PNGoutput : public Output
         PNGoutput(int,int,const tagged_array* );
         void DoOutput() ;
 };
-class TextOutput : public Output
+class SingleFileOutput : public Output
 {
-    const tagged_array* data;
     protected:
         FILE* f;
+    public:
+        SingleFileOutput(int,int );
+        virtual void DoOutput() {};
+};
+class TextOutput : public SingleFileOutput
+{
+    const tagged_array* data;
     public:
         TextOutput(int,int,const tagged_array* );
         virtual void DoOutput() ;
@@ -37,7 +43,7 @@ class ConsoleOutput: public Output
         ConsoleOutput(int,int,const tagged_array*);
         virtual void DoOutput();
 };
-class SpikeOutput: public TextOutput
+class SpikeOutput: public SingleFileOutput
 {
     const lagstorage* data;
     public:
@@ -50,6 +56,11 @@ typedef struct output_parameters output_parameters;
 void DoOutputs(const unsigned int time);
 void MakeOutputs(const output_parameters* const m);
 void CleanupOutputs();
+#ifdef MATLAB
+#include "../matlab_includes.h"
+void outputExtraThings(mxArray* plhs[],int nrhs,const mxArray* prhs[]);
+mxArray* outputToMxArray (const output_s input);
+#endif
 #ifdef __cplusplus
 	}
 #endif

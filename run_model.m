@@ -1,6 +1,5 @@
 exit=0;
-!make evolvegen.c
-compile;
+!make conductance.mexa64
 time=1;
 %outputs={ 'STDU1','STDU2' };
 %outputs={ 'STDP1','STDP2' };

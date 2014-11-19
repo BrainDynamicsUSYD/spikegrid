@@ -9,6 +9,7 @@
 #include "../openCVAPI/api.h" //this is c++
 extern "C"
 {
+#include "../tagged_array.h"
 #include "../output.h" //but this is C
 #include "../cppparamheader.h"
 #include "../sizes.h"
@@ -23,11 +24,10 @@ PNGoutput::PNGoutput(int idxin ,const int intervalin,const tagged_array* datain)
 }
 void PNGoutput::DoOutput()
 {
-
 #ifdef OPENCV
     count++;
     char fnamebuffer[30];
-    const unsigned int size = tagged_array_size(*data)*data->subgrid;
+    const unsigned int size = tagged_array_size_(*data)*data->subgrid;
     Compute_float* actualdata=taggedarrayTocomputearray(*data);
     sprintf(fnamebuffer,"%s/%i-%i.png",outdir,this->GetIdx(),count);
     SaveImage(fnamebuffer,actualdata,data->minval,data->maxval,size);
@@ -37,18 +37,18 @@ void PNGoutput::DoOutput()
 #endif
 }
 
-TextOutput::TextOutput(int idxin ,const int intervalin,const tagged_array* datain) : Output(intervalin,idxin)
+SingleFileOutput::SingleFileOutput(int idxin ,const int intervalin) : Output(intervalin,idxin)
 {
-   data=datain;
    char buf[100];
    sprintf(buf,"%s/%i.txt",outdir,idxin);
    f=fopen(buf,"w");
    if (f==NULL) {printf("fopen failed for %s error is %s\n",buf,strerror(errno));}
 }
+TextOutput::TextOutput(int idxin,const int intervalin,const tagged_array* datain) : SingleFileOutput(idxin,intervalin) {data=datain;}
 void TextOutput::DoOutput()
 {
     Compute_float* actualdata = taggedarrayTocomputearray(*data);
-    const unsigned int size = tagged_array_size(*data);
+    const unsigned int size = tagged_array_size_(*data);
     for (unsigned int i=0;i<size;i++)
     {
         for (unsigned int j=0;j<size;j++)
@@ -70,7 +70,7 @@ void ConsoleOutput::DoOutput()
     if (!isatty(fileno(stdout))) {return;} //if we are not outputting to a terminal - dont show pictures on console - need to add matlab detection
     char* buf = (char*)malloc(sizeof(char)*1000*1000);//should be plenty
     char* upto = buf;
-    const unsigned int size = tagged_array_size(*data)*data->subgrid;
+    const unsigned int size = tagged_array_size_(*data)*data->subgrid;
     Compute_float* actualdata=taggedarrayTocomputearray(*data);
     unsigned char* red   = (unsigned char*)malloc(sizeof(unsigned char)*size*size);
     unsigned char* green = (unsigned char*)malloc(sizeof(unsigned char)*size*size);
@@ -94,10 +94,7 @@ void ConsoleOutput::DoOutput()
     printf("Using console output requires opencv (to get the color mappings)");
 #endif
 }
-SpikeOutput::SpikeOutput(int idxin,const int intervalin, const lagstorage* datain) : TextOutput(idxin,intervalin,NULL)
-{
-    data=datain;
-}
+SpikeOutput::SpikeOutput(int idxin,const int intervalin, const lagstorage* datain) : SingleFileOutput(idxin,intervalin) {data=datain;}
 void SpikeOutput::DoOutput()
 {
     for (int i=0;i<grid_size;i++)
@@ -123,15 +120,15 @@ void MakeOutputs(const output_parameters* const m)
         switch (m[i].method)
         {
             case PICTURE:
-                out = new PNGoutput(i,m[i].Delay,&Outputtable[m[i].Output].data.TA_data);
+                out = new PNGoutput(i,m[i].Delay,Outputtable[m[i].Output].data.TA_data);
                 outvec.push_back(out);
                 break;
             case TEXT:
-                out = new TextOutput(i,m[i].Delay,&Outputtable[m[i].Output].data.TA_data);
+                out = new TextOutput(i,m[i].Delay,Outputtable[m[i].Output].data.TA_data);
                 outvec.push_back(out);
                 break;
             case CONSOLE:
-                out = new ConsoleOutput(i,m[i].Delay,&Outputtable[m[i].Output].data.TA_data);
+                out = new ConsoleOutput(i,m[i].Delay,Outputtable[m[i].Output].data.TA_data);
                 break;
             case SPIKES:
                 out = new SpikeOutput(i,m[i].Delay,Outputtable[m[i].Output].data.Lag_data);
@@ -158,3 +155,65 @@ void CleanupOutputs()
     }
     outvec.clear(); //this is the more important bit - the memory occupied by the various output objects is comparitively tiny.
 }
+//So here is a problem - All the outputs are set up to essentially return `void`.
+//However, we really need to return something for matlab.
+//Also, it is possible that the matlab outputs change over time
+//As a result, there is currently not a class for the matlab outputs - this could change in the future
+#ifdef MATLAB
+#include "../matlab_includes.h"
+//When using matlab, we want to be able to output just about any array of stuff.  This function does the work
+mxArray* outputToMxArray (const output_s input)
+{
+    switch (input.datatype)
+    {
+        case FLOAT_DATA:
+            {
+                const tagged_array* const data = input.data.TA_data;
+                const unsigned int size = tagged_array_size_(*data)*data->subgrid;
+                mxArray* ret = mxCreateNumericMatrix((int)size,(int)size,MatlabDataType(),mxREAL); //matlab has signed ints for array sizes - really?
+                Compute_float* dataptr =  (Compute_float*)mxGetData(ret);
+                Compute_float* actualdata = taggedarrayTocomputearray(*data);
+                memcpy(dataptr,actualdata,sizeof(Compute_float)*size*size);
+                free(actualdata);
+                return ret;
+            }
+        default:
+            printf("don't know how to return that data\n");
+            return NULL;
+    }
+}
+mxArray* outputToMxStruct(const output_s input)
+{
+    const char* fieldnames[] = {"data","min","max"};
+    mxArray* output = mxCreateStructMatrix(1,1,3,fieldnames);
+    mxArray* minarr = mxCreateNumericMatrix(1,1,MatlabDataType(),mxREAL);
+    Compute_float* minptr = (Compute_float*)mxGetData(minarr);
+    mxArray* maxarr = mxCreateNumericMatrix(1,1,MatlabDataType(),mxREAL);
+    Compute_float* maxptr = (Compute_float*)mxGetData(maxarr);
+    if (input.datatype==FLOAT_DATA) //ringbuffer data doesn't really have a min/max
+    {
+        maxptr[0]=input.data.TA_data->maxval;
+        minptr[0]=input.data.TA_data->minval;
+    }
+    else {minptr[0]=Zero;maxptr[0]=Zero;}
+    mxSetField(output,0,"data",outputToMxArray(input));
+    mxSetField(output,0,"min",minarr);
+    mxSetField(output,0,"max",maxarr);
+    return output;
+}
+void outputExtraThings(mxArray* plhs[],int nrhs,const mxArray* prhs[])
+{
+    //error checking
+    if (nrhs != 2) {printf("Need exactly two entries on the RHS of the MATLAB call - not outputting anything");}
+    if (mxGetClassID(prhs[1]) != mxCELL_CLASS) {printf("rhs parameter 1 is of wrong type - needs to be cell\n");return;}
+    const mwSize numparams = (mwSize)mxGetNumberOfElements(prhs[1]);
+    const mwSize nparams[] = {numparams};
+    plhs[1] = mxCreateCellArray(1,nparams);
+    for (int i=0;i<numparams;i++)
+    {
+        char* data=(char*)malloc(sizeof(char)*1024); //should be big enough
+        mxGetString(mxGetCell(prhs[1],i),data,1023);
+        mxSetCell(plhs[1],i,outputToMxStruct(getOutputByName(data)));
+    }
+}
+#endif

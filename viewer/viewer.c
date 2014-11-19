@@ -64,6 +64,10 @@ int main() {
     CvCapture* caps[rows*cols];
     int vididx = 0;
     int iterations = 0;
+    int fourcc = CV_FOURCC('H','F','Y','U') /*use huffyuv codec (same used to encode input videos) */;
+    const char* fnameout = "out.avi";
+    CvVideoWriter* vidwrite=cvCreateVideoWriter(
+            fnameout,fourcc,60.0 /*fps*/,cvSize(100*rows,100*cols),1 /*color*/);
     while (vididx < dirno)
     {
         int vcount=0;
@@ -103,6 +107,7 @@ int main() {
                 }
             }
             cvShowImage(winname,dispimage);
+            cvWriteFrame(vidwrite,dispimage);
             int c = cvWaitKey(10);
             if (c==27) break;
         }
@@ -114,5 +119,6 @@ done:
         }
         iterations++;
     }
+    cvReleaseVideoWriter(&vidwrite);
     return(0);
 }

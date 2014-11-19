@@ -38,20 +38,20 @@ void output_init(const model* const m)
     output_s* outdata=(output_s[]){ //note - neat feature - missing elements initailized to 0
         //Name          data type                  actual data                size                    offset     8bz634
         //subgrid,minval,maxval
-        {"gE",          FLOAT_DATA, .data.TA_data=&(tagged_array){.data=m->gE,                     conductance_array_size, couplerange,   1,0,2}}, //gE is a 'large' matrix - as it wraps around the edges
-        {"gI",          FLOAT_DATA, .data.TA_data=&(tagged_array){m->gI,                     conductance_array_size, couplerange,   1,0,2}}, //gI is a 'large' matrix - as it wraps around the edges
-        {"Coupling1",   FLOAT_DATA, .data.TA_data=&(tagged_array){m->layer1.connections,     couple_array_size,      0,             1,-0.5,0.5}}, //return the coupling matrix of layer 1 //TODO: fix min and max values
-        {"Coupling2",   FLOAT_DATA, .data.TA_data=&(tagged_array){m->layer2.connections,     couple_array_size,      0,             1,-0.5,0.5}}, //return the coupling matrix of layer 2
-        {"V1",          FLOAT_DATA, .data.TA_data=&(tagged_array){m->layer1.voltages_out,    grid_size,              0,             1,m->layer1.P->potential.Vin,m->layer1.P->potential.Vpk}},
-        {"V2",          FLOAT_DATA, .data.TA_data=&(tagged_array){m->layer2.voltages_out,    grid_size,              0,             1,m->layer2.P->potential.Vin,m->layer2.P->potential.Vpk}},
-        {"Recovery1",   FLOAT_DATA, .data.TA_data=&(tagged_array){m->layer1.recoverys_out,   grid_size,              0,             1,0,100}}, //TODO: ask adam for max and min recovery values
-        {"Recovery2",   FLOAT_DATA, .data.TA_data=&(tagged_array){m->layer2.recoverys_out,   grid_size,              0,             1,0,100}}, //TODO: ask adam for max and min recovery values
-        {"STDU1",       FLOAT_DATA, .data.TA_data=&(tagged_array){Features.STD==ON?m->layer1.std->U:NULL, grid_size, 0,             1,0,1}},
-        {"STDR1",       FLOAT_DATA, .data.TA_data=&(tagged_array){Features.STD==ON?m->layer1.std->R:NULL, grid_size, 0,             1,0,1}},
-        {"STDU2",       FLOAT_DATA, .data.TA_data=&(tagged_array){Features.STD==ON?m->layer2.std->U:NULL, grid_size, 0,             1,0,1}},
-        {"STDR2",       FLOAT_DATA, .data.TA_data=&(tagged_array){Features.STD==ON?m->layer2.std->R:NULL, grid_size, 0,             1,0,1}},
-        {"STDP1",       FLOAT_DATA, .data.TA_data=&(tagged_array){Features.STDP==ON?m->layer1.STDP_data->connections:NULL,grid_size,0,couple_array_size,-0.01,0.01}},
-        {"STDP2",       FLOAT_DATA, .data.TA_data=&(tagged_array){Features.STDP==ON?m->layer2.STDP_data->connections:NULL,grid_size,0,couple_array_size,-0.01,0.01}},
+        {"gE",          FLOAT_DATA, .data.TA_data=tagged_array_new(m->gE,                     conductance_array_size, couplerange,   1,0,2)}, //gE is a 'large' matrix - as it wraps around the edges
+        {"gI",          FLOAT_DATA, .data.TA_data=tagged_array_new(m->gI,                     conductance_array_size, couplerange,   1,0,2)}, //gI is a 'large' matrix - as it wraps around the edges
+        {"Coupling1",   FLOAT_DATA, .data.TA_data=tagged_array_new(m->layer1.connections,     couple_array_size,      0,             1,-0.5,0.5)}, //return the coupling matrix of layer 1 //TODO: fix min and max values
+        {"Coupling2",   FLOAT_DATA, .data.TA_data=tagged_array_new(m->layer2.connections,     couple_array_size,      0,             1,-0.5,0.5)}, //return the coupling matrix of layer 2
+        {"V1",          FLOAT_DATA, .data.TA_data=tagged_array_new(m->layer1.voltages_out,    grid_size,              0,             1,m->layer1.P->potential.Vin,m->layer1.P->potential.Vpk)},
+        {"V2",          FLOAT_DATA, .data.TA_data=tagged_array_new(m->layer2.voltages_out,    grid_size,              0,             1,m->layer2.P->potential.Vin,m->layer2.P->potential.Vpk)},
+        {"Recovery1",   FLOAT_DATA, .data.TA_data=tagged_array_new(m->layer1.recoverys_out,   grid_size,              0,             1,0,100)}, //TODO: ask adam for max and min recovery values
+        {"Recovery2",   FLOAT_DATA, .data.TA_data=tagged_array_new(m->layer2.recoverys_out,   grid_size,              0,             1,0,100)}, //TODO: ask adam for max and min recovery values
+        {"STDU1",       FLOAT_DATA, .data.TA_data=tagged_array_new(Features.STD==ON?m->layer1.std->U:NULL, grid_size, 0,             1,0,1)},
+        {"STDR1",       FLOAT_DATA, .data.TA_data=tagged_array_new(Features.STD==ON?m->layer1.std->R:NULL, grid_size, 0,             1,0,1)},
+        {"STDU2",       FLOAT_DATA, .data.TA_data=tagged_array_new(Features.STD==ON?m->layer2.std->U:NULL, grid_size, 0,             1,0,1)},
+        {"STDR2",       FLOAT_DATA, .data.TA_data=tagged_array_new(Features.STD==ON?m->layer2.std->R:NULL, grid_size, 0,             1,0,1)},
+        {"STDP1",       FLOAT_DATA, .data.TA_data=tagged_array_new(Features.STDP==ON?m->layer1.STDP_data->connections:NULL,grid_size,0,couple_array_size,-0.01,0.01)},
+        {"STDP2",       FLOAT_DATA, .data.TA_data=tagged_array_new(Features.STDP==ON?m->layer2.STDP_data->connections:NULL,grid_size,0,couple_array_size,-0.01,0.01)},
         {"Spike1",      SPIKE_DATA, .data.Lag_data=&m->layer1.firinglags},
         {"Spike2",      SPIKE_DATA, .data.Lag_data=&m->layer2.firinglags},
         {.name={0}}};         //a marker that we are at the end of the outputabbles list

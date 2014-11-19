@@ -1,5 +1,6 @@
 /// \file
 #include <stdlib.h>
+#include <string.h>
 #include "tagged_array.h"
 unsigned int __attribute__((const)) tagged_array_size_(const tagged_array in)
 {
@@ -26,5 +27,12 @@ Compute_float* taggedarrayTocomputearray(const tagged_array input)
         }
     }
     return ret;
+}
+tagged_array* tagged_array_new(const volatile Compute_float* const data_, const unsigned int size_, const unsigned int offset_, const unsigned int subgrid_, const Compute_float minval_, const Compute_float maxval_)
+{
+    tagged_array T = {.data=data_,.size=size_,.offset=offset_,.subgrid=subgrid_,.minval=minval_,.maxval=maxval_};
+    tagged_array* r = malloc(sizeof(*r));
+    memcpy(r,&T,sizeof(*r));
+    return r;
 }
 

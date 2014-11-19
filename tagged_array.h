@@ -13,4 +13,4 @@ typedef struct tagged_array{
 } tagged_array;
 Compute_float* taggedarrayTocomputearray(const tagged_array input);
 
-unsigned int __attribute__((const)) tagged_array_size(const tagged_array in);
+unsigned int __attribute__((const)) tagged_array_size_(const tagged_array in);

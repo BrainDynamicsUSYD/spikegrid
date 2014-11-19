@@ -10,14 +10,18 @@ else #gcc
 	export CFLAGS=-g -ggdb -Wall -Wextra  ${optflags} ${extrawarnings} ${extraextrawarnings}
 	cspecificwarnings= -Wjump-misses-init
 endif
+#init-Wl,--version-script,"/usr/local/MATLAB/R2014b/extern/lib/glnxa64/mexFunction.map"
+export MATLABCFLAGS= -DMX_COMPAT_32 -D_GNU_SOURCE -DMATLAB_MEX_FILE -DMATLAB -I"/usr/local/MATLAB/R2014b/extern/include" -I"/usr/local/MATLAB/R2014b/simulink/include"
+export MATLABLDFLAGS=  -L"/usr/local/MATLAB/R2014b/bin/glnxa64" -lmx -lmex -lmat -lm -lstdc++
 export DEFINES=-DOPENCV
-export opencvcflags=$(shell pkg-config --cflags opencv)
-export opencvldflags=$(shell pkg-config --libs opencv)
+export opencvcflags=$(shell  pkg-config --cflags opencv)
+
+export opencvldflags=$(shell pkg-config --libs opencv |   sed 's/\-lopencv_ocl//g'  | sed 's/\-lopencv_superres//g' )
 export DEBUGFLAGS= -g -std=gnu11
 #export SPEEDFLAG=-DFAST #comment out this line for double instead of float (will make code slower)
 export CLIBFLAGS= -fPIC -shared
 export LDFLAGS= -lm -g
-CFLAGS += ${SPEEDFLAG} ${DEFINES}
+CFLAGS += ${SPEEDFLAG} ${DEFINES} ${MATLABCFLAGS}
 export CXXFLAGS:=${CFLAGS} #use := to create an actual copy
 CFLAGS += --std=gnu11 ${cspecificwarnings}
 CXXFLAGS += --std=c++11
@@ -38,6 +42,8 @@ OFILES=${imreadlib} ${outlib}
 ###########
 ${BINARY}: ${SOURCES} *.h whichparam.h ${CVClib} ${OFILES}
 	${CC} ${CFLAGS} ${opencvcflags}     ${SOURCES} ${OFILES} -o ${BINARY} -L. ${LDFLAGS}  -l:${CVClib}   ${opencvldflags}
+conductance.mexa64:  ${SOURCES} *.h whichparam.h ${CVClib} ${OFILES}
+	${CC} -fpic ${CFLAGS} ${MATLABCFLAGS} ${opencvcflags}     ${SOURCES} ${OFILES} -o conductance.mexa64 -L. ${CLIBFLAGS} ${LDFLAGS}  -l:${CVClib}   ${opencvldflags} ${MATLABLDFLAGS}
 evolvegen.c: ${maskgen} whichparam.h config/*
 	${maskgen} > evolvegen.c
 whichparam.h:

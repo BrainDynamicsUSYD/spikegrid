@@ -5,14 +5,14 @@ ifeq ($(CC),clang)
 	export CFLAGS= -g -Wno-padded -Wno-missing-prototypes -Wno-missing-variable-declarations -Weverything -pedantic  -Ofast -Wno-documentation-unknown-command -Wno-covered-switch-default
 else #gcc
 	optflags=  -Ofast -msse -msse2 -msse3 -funsafe-loop-optimizations -mtune=native -march=native  -floop-interchange -ftree-loop-optimize -floop-strip-mine -floop-block -flto  -fassociative-math -fno-signed-zeros -freciprocal-math -ffinite-math-only -fno-trapping-math -ftree-vectorize
-	extrawarnings=-Wstrict-aliasing -fstrict-aliasing   -Wshadow  -Wconversion -Wdouble-promotion -Wformat=2 -Wunused -Wuninitialized -Wfloat-equal -Wunsafe-loop-optimizations -Wcast-qual -Wcast-align -Wwrite-strings  -Wlogical-op  -Wvector-operation-performance -Wno-pragmas 
+	extrawarnings=-Wstrict-aliasing -fstrict-aliasing   -Wshadow  -Wconversion -Wdouble-promotion -Wformat=2 -Wunused -Wuninitialized -Wfloat-equal -Wunsafe-loop-optimizations -Wcast-qual -Wcast-align -Wwrite-strings  -Wlogical-op  -Wvector-operation-performance -Wno-pragmas
 	extraextrawarnings=-Wsuggest-attribute=pure -Wsuggest-attribute=const -Wsuggest-attribute=noreturn -Wstrict-overflow=4
 	export CFLAGS=-g -ggdb -Wall -Wextra  ${optflags} ${extrawarnings} ${extraextrawarnings}
 	cspecificwarnings= -Wjump-misses-init
 endif
-#init-Wl,--version-script,"/usr/local/MATLAB/R2014b/extern/lib/glnxa64/mexFunction.map"
-export MATLABCFLAGS= -DMX_COMPAT_32 -D_GNU_SOURCE -DMATLAB_MEX_FILE -DMATLAB -I"/usr/local/MATLAB/R2014b/extern/include" -I"/usr/local/MATLAB/R2014b/simulink/include"
-export MATLABLDFLAGS=  -L"/usr/local/MATLAB/R2014b/bin/glnxa64" -lmx -lmex -lmat -lm -lstdc++
+export matlabdir=$(shell dirname $$(readlink -f $$(which matlab)))
+export MATLABCFLAGS= -DMX_COMPAT_32 -D_GNU_SOURCE -DMATLAB_MEX_FILE -DMATLAB -I"${matlabdir}/../extern/include" -I"${matlabdir}/../simulink/include"
+export MATLABLDFLAGS=  -L"${matlabdir}/glnxa64" -lmx -lmex -lmat -lm -lstdc++
 export DEFINES=-DOPENCV
 export opencvcflags=$(shell  pkg-config --cflags opencv)
 
@@ -21,7 +21,7 @@ export DEBUGFLAGS= -g -std=gnu11
 #export SPEEDFLAG=-DFAST #comment out this line for double instead of float (will make code slower)
 export CLIBFLAGS= -fPIC -shared
 export LDFLAGS= -lm -g
-CFLAGS += ${SPEEDFLAG} ${DEFINES} ${MATLABCFLAGS}
+CFLAGS += ${SPEEDFLAG} ${DEFINES}
 export CXXFLAGS:=${CFLAGS} #use := to create an actual copy
 CFLAGS += --std=gnu11 ${cspecificwarnings}
 CXXFLAGS += --std=c++11
@@ -42,6 +42,9 @@ OFILES=${imreadlib} ${outlib}
 ###########
 ${BINARY}: ${SOURCES} *.h whichparam.h ${CVClib} ${OFILES}
 	${CC} ${CFLAGS} ${opencvcflags}     ${SOURCES} ${OFILES} -o ${BINARY} -L. ${LDFLAGS}  -l:${CVClib}   ${opencvldflags}
+conductance.mexa64: CFLAGS +=  ${MATLABCFLAGS}
+conductance.mexa64: CXXFLAGS +=  ${MATLABCFLAGS}
+conductance.mexa64: LDFLAGS +=  ${MATLABLDFLAGS}
 conductance.mexa64:  ${SOURCES} *.h whichparam.h ${CVClib} ${OFILES}
 	${CC} -fpic ${CFLAGS} ${MATLABCFLAGS} ${opencvcflags}     ${SOURCES} ${OFILES} -o conductance.mexa64 -L. ${CLIBFLAGS} ${LDFLAGS}  -l:${CVClib}   ${opencvldflags} ${MATLABLDFLAGS}
 evolvegen.c: ${maskgen} whichparam.h config/*

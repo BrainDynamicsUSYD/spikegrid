@@ -6,7 +6,11 @@
 #include <string>
 #include <stdint.h>
 #include "imread.h"
+extern "C"
+{
 #include "../sizes.h"
+}
+
 cv::Mat ReadImage()
 {
     std::string path= "input_maps/test.png";
@@ -14,9 +18,10 @@ cv::Mat ReadImage()
     return m;
 }
 cv::Mat imcache; //elements have type Vec3b
-void ApplyStim(Compute_float* voltsin,const Compute_float timemillis)
+void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimulus_parameters S)
 {
     cv::Mat m = ReadImage();
+    const Compute_float timemodper = fmod(timemillis,S.timeperiod);
    // std::cout << timemillis << std::endl;
     for (int x=0;x<grid_size;x++)
     {
@@ -28,11 +33,14 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis)
             {
                 voltsin[x*grid_size+y]=-100;
             }
-            else if ( abs(timemillis-80.0)<.01 && pixel == cv::Vec3b(0,0,255))
+            else if ( abs(timemodper-80.0)<.01 && pixel == cv::Vec3b(0,0,255))
             {
                 voltsin[x*grid_size+y]=100;
             }
-
+            else if ( abs(timemodper-80.0 + S.lag)<.01 && pixel == cv::Vec3b(255,0,0))
+            {
+                voltsin[x*grid_size+y]=100;
+            }
         }
     }
 }

@@ -134,6 +134,8 @@ typedef struct
     const Compute_float gI0;    ///< constant input to gI
 } extinput;
 
+
+
 struct Job;
 ///Within a single run of the program it is possible to run multiple different tasks.
 ///For example, you can run several jobs with random initial conditions,
@@ -171,6 +173,7 @@ typedef struct parameters
     const recovery_parameters recovery;         ///<parameters controlling recovery (alternative to refractory time)
     const int skip;                             ///<Number of neurons to skip over in the layer setting skip=2 will produce 4-1 ratio of neurons to a layer with skip=1
     const randconn_parameters random;           ///<parameters controlling random connectivity
+    const Stimulus_parameters Stim;             ///< Holds parameters for localized stimulus
 } parameters;
 
 /// On yossarian this is used for a parameter sweep

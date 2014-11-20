@@ -1,7 +1,7 @@
 /// \file
 #include <stddef.h> //offsetof
 //these first few parameters actually escape into the paramheader file through magic
-#define grid_size 100
+#define grid_size 300
 ///Total size of the grid
 ///Coupling range
 #define couplerange 15
@@ -55,7 +55,7 @@ static const parameters OneLayerModel = {.couple={0}}; //since unused - shortes 
     }
 #define Stimparams .Stim=\
 {\
-    .timeperiod=200,\
+    .timeperiod=1000,\
     .lag=10,\
 }
 ///parameters for the inhibitory layer of the double layer model
@@ -118,16 +118,16 @@ static const parameters DualLayerModelEx =
     potparams,
     .skip=-2,
     Stimparams,
- //   .output = {{ .method=PICTURE,.Output=5,.Delay=10} }
+    .output = {{ .method=PICTURE,.Output=5,.Delay=10} }
 };
 ///Some global features that can be turned on and off
 static const model_features Features =
 {
     .STD        = OFF,
-    .STDP		= OFF, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep -
+    .STDP		= ON, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep -
     .Random_connections = OFF,
     .Timestep   = 0.1,
-    .Simlength  = 5000,
+    .Simlength  = 1000000,
     .ImageStim  = ON,
     .job        = {.initcond = SINGLE_SPIKE, .Voltage_or_count = -70}
 };
@@ -140,10 +140,10 @@ static const extinput Extinput =
 ///Parameters for conducting a parameter sweep.
 static const sweepable Sweep =
 {
-    .offset=offsetof(parameters,couple)+offsetof(couple_parameters,normalization_parameters) ,
+    .offset=offsetof(parameters,Stim)+offsetof(Stimulus_parameters,lag) ,
     .minval = 0.000,
-    .maxval = 1,
-    .count = 40
+    .maxval = 100,
+    .count = 100
 };
 
 #ifdef __clang__

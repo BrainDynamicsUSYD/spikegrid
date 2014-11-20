@@ -8,7 +8,7 @@ typedef struct output_parameters
     const unsigned int Output;          ///< What will be outputted
     const unsigned int Delay;           ///< how often to output it
 } output_parameters;
-typedef struct 
+typedef struct
 {
     const Compute_float timeperiod;
     const Compute_float lag;

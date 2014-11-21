@@ -36,7 +36,7 @@ int compare(const void* a, const void* b)
     int ib = atoi(cb+4);
     return ia-ib;
 }
-int main() {
+int main(int argc,char** argv) {
     //scan directory
     dirnames = malloc(sizeof(char*)*maxjobs);
     int dirno=0;
@@ -57,9 +57,12 @@ int main() {
     printf("Found all directories");
     qsort(dirnames,dirno,sizeof(char*),compare);
     //set up window
+    if (argc>1)
+    {
     cvNamedWindow(winname,CV_WINDOW_AUTOSIZE);
     cvMoveWindow(winname,0,0);
     cvSetMouseCallback(winname,mousecb,0);
+    }
     int size;
     CvCapture* caps[rows*cols];
     int vididx = 0;
@@ -94,9 +97,9 @@ int main() {
             if (c%100 == 0) {printf("%i\n",c);}
             for (int i=0; i<vcount;i++)
             {
-                if (caps[i]) //only process frames where capture succeeded
+                if  (caps[i]) //only process frames where capture succeeded
                 {            //if the capture failed, just leave the square blank.
-                    frame=cvQueryFrame(caps[i]);
+                     frame=cvQueryFrame(caps[i]);
                     if (!frame)
                     {
                         goto done; //here we have assumed once one video is done they all are, and we bail
@@ -106,10 +109,14 @@ int main() {
                     cvResetImageROI(dispimage);
                 }
             }
-            cvShowImage(winname,dispimage);
-            cvWriteFrame(vidwrite,dispimage);
-            int c = cvWaitKey(10);
+            int c=0;
+            if (argc>1)
+            {
+                cvShowImage(winname,dispimage);
+                c = cvWaitKey(10);
+            }
             if (c==27) break;
+            cvWriteFrame(vidwrite,dispimage);
         }
 done:
         // free memory

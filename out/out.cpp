@@ -36,7 +36,25 @@ void PNGoutput::DoOutput()
     printf("Using PNG outout without opencv is not possible\n");
 #endif
 }
-
+VidOutput::VidOutput(int idxin ,const int intervalin,const tagged_array* datain) : Output(intervalin,idxin)
+{
+    char buf[100];
+    sprintf(buf,"%s/%i.avi",outdir,idxin);
+    int fourcc = CV_FOURCC('H','F','Y','U');
+    writer = new cv::VideoWriter(buf,fourcc,60,cvSize(grid_size,grid_size),true);
+   data=datain;
+}
+void VidOutput::DoOutput()
+{
+#ifdef OPENCV
+    const unsigned int size = tagged_array_size_(*data)*data->subgrid;
+    Compute_float* actualdata=taggedarrayTocomputearray(*data);
+    cv::Mat m =ProcessMatrix(actualdata,data->minval,data->maxval,size);
+    free(actualdata);
+#else
+    printf("Using PNG outout without opencv is not possible\n");
+#endif
+}
 SingleFileOutput::SingleFileOutput(int idxin ,const int intervalin) : Output(intervalin,idxin)
 {
    char buf[100];
@@ -132,6 +150,9 @@ void MakeOutputs(const output_parameters* const m)
                 break;
             case SPIKES:
                 out = new SpikeOutput(i,m[i].Delay,Outputtable[m[i].Output].data.Lag_data);
+                break;
+            case VIDEO:
+                out = new VidOutput(i,m[i].Delay,Outputtable[m[i].Output].data.TA_data);
                 break;
             default:
                 break;

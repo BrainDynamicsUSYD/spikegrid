@@ -1,5 +1,7 @@
 /// \file
 #ifdef __cplusplus
+#include "opencv2/core/core.hpp" //core opencv
+#include "opencv2/highgui/highgui.hpp" //for video writer
 ///generic class for outputting an object.
 ///you probably want to inhereit from this for a new output method
 class Output
@@ -28,6 +30,14 @@ class SingleFileOutput : public Output
     public:
         SingleFileOutput(int,int );
         virtual void DoOutput() {};
+};
+class VidOutput: public Output //This class probably needs a destructor to end the video.  Vlc will probably handle the file just fine though.
+{
+    const tagged_array* data;
+    const cv::VideoWriter* writer;
+    public:
+        VidOutput(int,int,const tagged_array*);
+        void DoOutput();
 };
 class TextOutput : public SingleFileOutput
 {

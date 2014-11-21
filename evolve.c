@@ -236,7 +236,10 @@ void step1(model* m,const unsigned int time)
     // Add spiking input to the conductances
     AddSpikes(m->layer1,m->gE,m->gI,time);
     if (m->NoLayers==DUALLAYER) {AddSpikes(m->layer2,m->gE,m->gI,time);}
-    fixboundary(m->gE,m->gI);
+    if (Features.Disablewrapping==OFF)
+    {
+        fixboundary(m->gE,m->gI);
+    }
     // Add constant input to the conductances
     for (int i = 0;i < conductance_array_size*conductance_array_size;i++)
     {

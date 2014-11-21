@@ -129,7 +129,8 @@ static const model_features Features =
     .Timestep   = 0.1,
     .Simlength  = 1000000,
     .ImageStim  = ON,
-    .job        = {.initcond = SINGLE_SPIKE, .Voltage_or_count = -70}
+    .job        = {.initcond = SINGLE_SPIKE, .Voltage_or_count = -70},
+    .Disablewrapping = ON,
 };
 ///Constant external input to conductances
 static const extinput Extinput =

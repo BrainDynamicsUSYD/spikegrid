@@ -159,6 +159,7 @@ typedef struct model_features
     const unsigned int Simlength;   ///< total number of timesteps to run
     const Job job;                  ///< the jobs we are going to run
     const on_off ImageStim;         ///< whether to use an image based stimulus.
+    const on_off Disablewrapping;   ///< disable wrapping in the model.  TODO: could be implemented in a more efficient way.  Currently just
 } model_features;
 
 ///Structure that holds all the parameters for a layer

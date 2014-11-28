@@ -45,6 +45,8 @@ CXXFLAGS += --std=c++11
 SOURCES= conductance.c coupling.c  STDP.c STD.c output.c evolve.c  newparam.c yossarian.c init.c theta.c printstruct.c  cleanup.c evolvegen.c lagstorage.c gui.c tagged_array.c
 BINARY=./a.out
 VERSION_HASH = $(shell git rev-parse HEAD)
+export CONFIG=whichparam.h config/*
+export CONFIG-SUBD=$(shell pwd)/whichparam.h $(shell pwd)/config/*
 export VIEWERBIN=$(shell pwd)/watch
 export CVClib=$(shell pwd)/libcv
 export outlib=$(shell pwd)/out.o
@@ -56,7 +58,7 @@ OFILES=${imreadlib} ${outlib}
 ###########
 #Actually compile
 ###########
-${BINARY}: ${SOURCES} *.h whichparam.h ${CVClib} ${OFILES}
+${BINARY}: ${SOURCES} *.h  ${CVClib} ${OFILES} ${CONFIG}
 	${CC} ${CFLAGS} ${opencvcflags}     ${SOURCES} ${OFILES} -o ${BINARY} -L. ${LDFLAGS}  -l:${CVClib}   ${opencvldflags}
 conductance.mexa64: CFLAGS +=   ${MATLABCFLAGS}
 conductance.mexa64: CXXFLAGS += ${MATLABCFLAGS}
@@ -114,9 +116,9 @@ ${VIEWERBIN} :
 #libs / o files / generated source
 ${CVClib} : force_look
 	$(MAKE) -C openCVAPI ${CVClib}
-${maskgen} : force_look
+${maskgen} : force_look ${CONFIG}
 	$(MAKE) -C maskgen ${maskgen}
-${outlib}: force_look
+${outlib}: force_look ${CONFIG}
 	$(MAKE) -C out ${outlib}
-${imreadlib}: force_look
+${imreadlib}: force_look ${CONFIG}
 	$(MAKE) -C imread ${imreadlib}

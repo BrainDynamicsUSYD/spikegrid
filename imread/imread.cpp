@@ -41,6 +41,10 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
             {
                 voltsin[x*grid_size+y]=100;
             }
+            else if (timemodper < 5)
+            {
+                voltsin[x*grid_size+y]=-100;
+            }
         }
     }
 }

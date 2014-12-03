@@ -42,9 +42,9 @@ static const parameters OneLayerModel = {.couple={0}}; //since unused - shortes 
 
 #define STDPparams .STDP=   \
     {                       \
-        .stdp_limit=8.5,    \
+        .stdp_limit=1.5,    \
         .stdp_tau=20,       \
-        .stdp_strength=0.0006,  \
+        .stdp_strength=0.00055,  \
         .STDP_on=ON\
     }
 #define STDparams .STD= \
@@ -55,8 +55,8 @@ static const parameters OneLayerModel = {.couple={0}}; //since unused - shortes 
     }
 #define Stimparams .Stim=\
 {\
-    .timeperiod=180,\
-    .lag=10,\
+    .timeperiod=220,\
+    .lag=55,\
 }
 ///parameters for the inhibitory layer of the double layer model
 static const parameters DualLayerModelIn =
@@ -99,8 +99,8 @@ static const parameters DualLayerModelEx =
         {
             .dual =
             {
-                .W          =  0.32,
-                .sigma      = 15,
+                .W          =  0.25,
+                .sigma      = 20,
                 .synapse    = {.R=0.5,.D=2.0},
             }
         },

@@ -10,24 +10,24 @@ extern "C"
 {
 #include "../sizes.h"
 }
-
+bool cached=false;
+cv::Mat imcache; //elements have type Vec3b
 cv::Mat ReadImage()
 {
     std::string path= "input_maps/test.png";
     cv::Mat m =cv::imread(path); //the pixels are stored with type cv::Vec3b - third element is red.  0 is black, 255 is white?
     return m;
 }
-cv::Mat imcache; //elements have type Vec3b
 void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimulus_parameters S)
 {
-    cv::Mat m = ReadImage();
+    if (cached==false) {imcache=ReadImage();cached=true;}
     const Compute_float timemodper = fmod(timemillis,S.timeperiod);
    // std::cout << timemillis << std::endl;
     for (int x=0;x<grid_size;x++)
     {
         for (int y=0;y<grid_size;y++)
         {
-            cv::Vec3b pixel = m.at<cv::Vec3b>(x,y);
+            cv::Vec3b pixel = imcache.at<cv::Vec3b>(x,y);
      //       std::cout << pixel << std::endl;
             if (pixel == cv::Vec3b(0,0,0))
             {

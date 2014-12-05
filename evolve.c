@@ -8,6 +8,7 @@
 #include "mymath.h"
 #include "paramheader.h"
 #include "model.h"
+#include "localstim.h"
 #ifdef ANDROID
     #define APPNAME "myapp"
     #include <android/log.h>
@@ -233,6 +234,13 @@ void step1(model* m,const unsigned int time)
     const Compute_float timemillis = ((Compute_float)time) * Features.Timestep ;
     memset(m->gE,0,sizeof(Compute_float)*conductance_array_size*conductance_array_size); //zero the gE/gI matrices so they can be reused for this timestep
     memset(m->gI,0,sizeof(Compute_float)*conductance_array_size*conductance_array_size);
+    if (Features.LocalStim==ON)
+    {
+        ApplyLocalBoost(m->gE,25,25);
+        ApplyLocalBoost(m->gE,25,75);
+        ApplyLocalBoost(m->gE,75,25);
+        ApplyLocalBoost(m->gE,75,75);
+    }
     // Add spiking input to the conductances
     AddSpikes(m->layer1,m->gE,m->gI,time);
     if (m->NoLayers==DUALLAYER) {AddSpikes(m->layer2,m->gE,m->gI,time);}

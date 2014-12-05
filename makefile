@@ -42,28 +42,30 @@ export CXXFLAGS:=${CFLAGS} #use := to create an actual copy
 CFLAGS += --std=gnu11 ${cspecificwarnings}
 CXXFLAGS += --std=c++11
 #conductance.c always needs to be first - this ensures that the mexfile gets the right name
-SOURCES= conductance.c coupling.c  STDP.c STD.c output.c evolve.c  newparam.c yossarian.c init.c theta.c printstruct.c  cleanup.c evolvegen.c lagstorage.c gui.c tagged_array.c
+SOURCES= conductance.c coupling.c  STDP.c STD.c output.c evolve.c newparam.c yossarian.c init.c theta.c printstruct.c cleanup.c evolvegen.c lagstorage.c gui.c tagged_array.c localstim.c
 BINARY=./a.out
 VERSION_HASH = $(shell git rev-parse HEAD)
+export CONFIG=whichparam.h config/*
+export CONFIG-SUBD=$(shell pwd)/whichparam.h $(shell pwd)/config/*
 export VIEWERBIN=$(shell pwd)/watch
-export CVClib=$(shell pwd)/libcv
+export CVClib=$(shell pwd)/cv.o
 export outlib=$(shell pwd)/out.o
 export imreadlib=$(shell pwd)/imread.o
 export maskgen=$(shell pwd)/mask
 
-OFILES=${imreadlib} ${outlib}
-.PHONY: profile clean submit docs debug params matlabparams viewer ${VIEWERBIN}  force_look
+OFILES=${imreadlib} ${outlib} ${CVClib}
+.PHONY: profile clean submit docs debug params matlabparams viewer ${VIEWERBIN}  force_look TEST
 ###########
 #Actually compile
 ###########
-${BINARY}: ${SOURCES} *.h whichparam.h ${CVClib} ${OFILES}
-	${CC} ${CFLAGS} ${opencvcflags}     ${SOURCES} ${OFILES} -o ${BINARY} -L. ${LDFLAGS}  -l:${CVClib}   ${opencvldflags}
+${BINARY}: ${SOURCES} *.h ${OFILES} ${CONFIG}
+	${CC} ${CFLAGS} ${opencvcflags}     ${SOURCES} ${OFILES} -o ${BINARY} -L. ${LDFLAGS}   ${opencvldflags}
 conductance.mexa64: CFLAGS +=   ${MATLABCFLAGS}
 conductance.mexa64: CXXFLAGS += ${MATLABCFLAGS}
 conductance.mexa64: LDFLAGS +=  ${MATLABLDFLAGS}
 conductance.mexa64: opencvldflags =  ${matlabopencvldflags}
-conductance.mexa64:  ${SOURCES} *.h whichparam.h ${CVClib} ${OFILES}
-	${CC} -fpic ${CFLAGS} ${MATLABCFLAGS} ${opencvcflags}     ${SOURCES} ${OFILES} -o conductance.mexa64 -L. ${CLIBFLAGS} ${LDFLAGS}  -l:${CVClib}   ${opencvldflags}
+conductance.mexa64:  ${SOURCES} ${CONFIG} ${OFILES}
+	${CC} -fpic ${CFLAGS} ${MATLABCFLAGS} ${opencvcflags}     ${SOURCES} ${OFILES} -o conductance.mexa64 -L. ${CLIBFLAGS} ${LDFLAGS} ${opencvldflags}
 evolvegen.c: ${maskgen} whichparam.h config/*
 	${maskgen} > evolvegen.c
 whichparam.h:
@@ -72,7 +74,7 @@ debug: ${SOURCE}
 	${CC} ${DEBUGFLAGS} ${SOURCES} -o ${BINARY} ${LDFLAGS}
 mediumopt:
 	${CC} -g -std=gnu99 ${SOURCES} -o ${BINARY} ${LDFLAGS}
-TEST: ${outlib} ${CVClib}
+TEST: 
 	rm -rf jobtest/*
 	mv whichparam.h whichparambackup.h #backup config choice
 	echo -e '#include "config/parametersCANONICAL.h"' > whichparam.h
@@ -80,7 +82,7 @@ TEST: ${outlib} ${CVClib}
 	$(MAKE) ${CVClib}
 	$(MAKE) ${outlib}
 	$(MAKE) ${imreadlib}
-	${CC}  ${CFLAGS} ${opencvcflags} -fno-omit-frame-pointer ${SOURCES} ${OFILES} -o ${BINARY} ${LDFLAGS} -l:${CVClib} ${opencvldflags}
+	${CC}  ${CFLAGS} ${opencvcflags} -fno-omit-frame-pointer ${SOURCES} ${OFILES} -o ${BINARY} ${LDFLAGS}  ${opencvldflags}
 	mv whichparambackup.h whichparam.h #restore config choice
 	time ./a.out -n
 	mv job-{0..5} jobtest
@@ -100,7 +102,7 @@ yossarian.csh: ${BINARY}
 submit: yossarian.csh
 	qsub yossarian.csh
 clean:
-	-rm -f ${BINARY} ${CVClib} ${maskgen}  evolvegen.c ${OFILES}
+	-rm -f ${BINARY}  ${maskgen}  evolvegen.c ${OFILES}
 	-rm -rf html
 #.m files
 compile.m: makefile
@@ -114,9 +116,9 @@ ${VIEWERBIN} :
 #libs / o files / generated source
 ${CVClib} : force_look
 	$(MAKE) -C openCVAPI ${CVClib}
-${maskgen} : force_look
+${maskgen} : force_look ${CONFIG}
 	$(MAKE) -C maskgen ${maskgen}
-${outlib}: force_look
+${outlib}: force_look ${CONFIG}
 	$(MAKE) -C out ${outlib}
-${imreadlib}: force_look
+${imreadlib}: force_look ${CONFIG}
 	$(MAKE) -C imread ${imreadlib}

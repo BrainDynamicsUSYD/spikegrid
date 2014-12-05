@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <string>
+#include <cstdbool>
 #include <stdint.h>
 #include "imread.h"
 extern "C"
@@ -22,6 +23,10 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
 {
     cv::Mat m = ReadImage();
     const Compute_float timemodper = fmod(timemillis,S.timeperiod);
+    const bool stim1 = abs(timemodper-80.0)<.01;
+    const bool stim2 =  abs(timemodper-80.0 + S.lag)<.01;
+    if (stim1) {std::cout<< "stim1" << std::endl;}
+    if (stim2) {std::cout<< "stim2" << std::endl;}
    // std::cout << timemillis << std::endl;
     for (int x=0;x<grid_size;x++)
     {
@@ -33,11 +38,11 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
             {
                 voltsin[x*grid_size+y]=-100;
             }
-            else if ( abs(timemodper-80.0)<.01 && pixel == cv::Vec3b(0,0,255))
+            else if ( stim1 && pixel == cv::Vec3b(0,0,255))
             {
                 voltsin[x*grid_size+y]=100;
             }
-            else if ( abs(timemodper-80.0 + S.lag)<.01 && pixel == cv::Vec3b(255,0,0))
+            else if (stim2 && pixel == cv::Vec3b(255,0,0))
             {
                 voltsin[x*grid_size+y]=100;
             }

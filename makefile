@@ -64,6 +64,12 @@ conductance.mexa64: LDFLAGS +=  ${MATLABLDFLAGS}
 conductance.mexa64: opencvldflags =  ${matlabopencvldflags}
 conductance.mexa64:  ${SOURCES} *.h whichparam.h ${CVClib} ${OFILES}
 	${CC} -fpic ${CFLAGS} ${MATLABCFLAGS} ${opencvcflags}     ${SOURCES} ${OFILES} -o conductance.mexa64 -L. ${CLIBFLAGS} ${LDFLAGS}  -l:${CVClib}   ${opencvldflags}
+ADAM: CFLAGS +=   ${MATLABCFLAGS}
+ADAM: CXXFLAGS += ${MATLABCFLAGS}
+ADAM: LDFLAGS +=  ${MATLABLDFLAGS}
+ADAM: opencvldflags =  ${matlabopencvldflags}
+ADAM: ${SOURCES} *.h whichparam.h ${CVClib} ${OFILES}
+	${CC} ${CFLAGS} ${opencvcflags}     ${SOURCES} ${OFILES} -o ${BINARY} -L. ${LDFLAGS}  -l:${CVClib}   ${opencvldflags}
 evolvegen.c: ${maskgen} whichparam.h config/*
 	${maskgen} > evolvegen.c
 whichparam.h:

@@ -160,6 +160,7 @@ typedef struct model_features
     const Job job;                  ///< the jobs we are going to run
     const on_off ImageStim;         ///< whether to use an image based stimulus.
     const on_off Disablewrapping;   ///< disable wrapping in the model.  TODO: could be implemented in a more efficient way.  Currently just
+    const on_off LocalStim;         ///< Is the local stimulus on
 } model_features;
 
 ///Structure that holds all the parameters for a layer

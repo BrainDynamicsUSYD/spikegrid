@@ -1,2 +1,2 @@
 ${CVClib}: api.cpp
-	${CXX} ${CXXFLAGS} -g -fpic -Wall -Wextra  ${opencvcflags} api.cpp -o ${CVClib} -shared  ${LDFLAGS} ${opencvldflags} 
+	${CXX} ${CXXFLAGS} -fpic ${opencvcflags} api.cpp -o ${CVClib} -shared

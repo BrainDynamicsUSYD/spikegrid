@@ -159,10 +159,7 @@ layer setuplayer(const parameters p)
     return L;
 }
 
-
 ///The idea here is that "one-off" setup occurs here, whilst per-layer setup occurs in setuplayer
-// No idea wtf this function is doing - Adam.
-
 model* setup(const parameters p,const parameters p2,const LayerNumbers lcount, int jobnumber)
 {
     check(); //check evolvegen   is correct

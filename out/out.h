@@ -44,21 +44,21 @@ class TextOutput : public SingleFileOutput
     const tagged_array* data;
     public:
         TextOutput(int,int,const tagged_array* );
-        virtual void DoOutput() ;
+        void DoOutput() ;
 };
 class ConsoleOutput: public Output
 {
     const tagged_array* data;
     public:
         ConsoleOutput(int,int,const tagged_array*);
-        virtual void DoOutput();
+        void DoOutput();
 };
 class SpikeOutput: public SingleFileOutput
 {
     const lagstorage* data;
     public:
         SpikeOutput(int,int,const lagstorage*);
-        virtual void DoOutput();
+        void DoOutput();
 };
 extern "C" {
 #endif

@@ -2,9 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h> //gethostname
-#include <sys/stat.h>
 #include <stdio.h>
-#include <sys/types.h>
 #include "coupling.h"
 #include "output.h"
 #include "printstruct.h"
@@ -14,6 +12,7 @@
 #include "evolvegen.h"
 #include "model.h"
 #include "out/out.h"
+#include "utils.h"
 #define max(a,b) \
     ({ __typeof__ (a) _a = (a);\
        __typeof__ (b) _b = (b); \
@@ -159,21 +158,32 @@ layer setuplayer(const parameters p)
     }
     return L;
 }
+
+
 ///The idea here is that "one-off" setup occurs here, whilst per-layer setup occurs in setuplayer
 // No idea wtf this function is doing - Adam.
+
 model* setup(const parameters p,const parameters p2,const LayerNumbers lcount, int jobnumber)
 {
     check(); //check evolvegen   is correct
     if (jobnumber <0)
     {
         sprintf(outdir,"output/");
-        mkdir(outdir,S_IRWXU);
     }
     else
     {
-        sprintf(outdir,"job-%i/",jobnumber);
-        mkdir(outdir,S_IRWXU);
+        // Here it is... add the extra file.
+        if (strlen(Features.Outprefix)==0)
+        {
+            sprintf(outdir,"job-%i/",jobnumber);
+        }
+        else
+        {
+            sprintf(outdir,"%s/%s/job-%i/",getenv("HOME"),Features.Outprefix,jobnumber);
+        }
     }
+    recursive_mkdir(outdir);
+
     printf("outdir is %s\n",outdir);
     char buf[100];
     sprintf(buf,"%s/struct.dump",outdir);

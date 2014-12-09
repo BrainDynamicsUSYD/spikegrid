@@ -236,10 +236,10 @@ void step1(model* m,const unsigned int time)
     memset(m->gI,0,sizeof(Compute_float)*conductance_array_size*conductance_array_size);
     if (Features.LocalStim==ON)
     {
-        ApplyLocalBoost(m->gE,25,25);
-        ApplyLocalBoost(m->gE,25,75);
-        ApplyLocalBoost(m->gE,75,25);
-        ApplyLocalBoost(m->gE,75,75);
+        if (time %1000 < 250) {ApplyLocalBoost(m->gE,20,20);}
+        else if (time % 1000 < 500) {ApplyLocalBoost(m->gE,20,60);}
+        else if (time % 1000 < 750) {ApplyLocalBoost(m->gE,60,20);}
+        else  {ApplyLocalBoost(m->gE,60,60);}
     }
     // Add spiking input to the conductances
     AddSpikes(m->layer1,m->gE,m->gI,time);

@@ -25,12 +25,13 @@ void cvdisp (const char** const names, const int count)
             fcoords* d = taggedArrayCOM(*out.data.TA_data);
             Compute_float* R = malloc(sizeof(Compute_float)*smallsize*smallsize);
             Compute_float* G = malloc(sizeof(Compute_float)*smallsize*smallsize);
+            const Compute_float fsize = (Compute_float)smallsize * 2.0;
             for (unsigned int a=0;a<smallsize;a++)
             {
                 for (unsigned int b=0;b<smallsize;b++)
                 {
-                    R[a*smallsize+b]=d[a*smallsize+b].x/100 +0.5;
-                    G[a*smallsize+b]=d[a*smallsize+b].y/100 +0.5;
+                    R[a*smallsize+b]=d[a*smallsize+b].x/fsize +0.5;
+                    G[a*smallsize+b]=d[a*smallsize+b].y/fsize +0.5;
                 }
             }
             PlotWithColors(R,G,smallsize,out.name);

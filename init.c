@@ -176,7 +176,7 @@ model* setup(const parameters p,const parameters p2,const LayerNumbers lcount, i
         }
         else
         {
-            sprintf(outdir,"%s/%s/job-%i/",getenv("HOME"),Features.Outprefix,jobnumber);
+            sprintf(outdir,"/%s/%s/job-%i/",getenv("HOME"),Features.Outprefix,jobnumber);
         }
     }
     recursive_mkdir(outdir);

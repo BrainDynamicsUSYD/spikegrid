@@ -1,1 +1,1 @@
-void recursive_mkdir(char* dirname);
+void recursive_mkdir(const char* const dirname);

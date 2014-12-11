@@ -174,6 +174,7 @@ void StoreFiring(layer* L)
                 {
                     if (Features.Recovery==ON) //reset recovery if needed
                     {
+                        L->voltages_out[x*grid_size+y]=L->P->potential.Vrt;                    //does voltage also need to be reset like this?
                         L->recoverys_out[x*grid_size+y]+=L->P->recovery.Wrt;
                     }
                     AddnewSpike(&L->firinglags,baseidx);

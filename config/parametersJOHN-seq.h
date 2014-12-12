@@ -1,7 +1,7 @@
 /// \file
 #include <stddef.h> //offsetof
 //these first few parameters actually escape into the paramheader file through magic
-#define grid_size 300
+#define grid_size 100
 ///Total size of the grid
 ///Coupling range
 #define couplerange 25
@@ -118,7 +118,7 @@ static const parameters DualLayerModelEx =
     potparams,
     .skip=-2,
     Stimparams,
-    .output = {{ .method=PICTURE,.Output=5,.Delay=10} }
+//    .output = {{ .method=PICTURE,.Output=5,.Delay=10} }
 };
 ///Some global features that can be turned on and off
 static const model_features Features =
@@ -128,7 +128,7 @@ static const model_features Features =
     .Random_connections = OFF,
     .Timestep   = 0.1,
     .Simlength  = 1000000,
-    .ImageStim  = ON,
+    .ImageStim  = OFF,
     .job        = {.initcond = SINGLE_SPIKE, .Voltage_or_count = -70},
     .Disablewrapping = ON,
 };

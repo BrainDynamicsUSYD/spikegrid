@@ -28,6 +28,7 @@ Compute_float* taggedarrayTocomputearray(const tagged_array input)
     }
     return ret;
 }
+///look I can write a constructor for an object in C
 tagged_array* tagged_array_new(const volatile Compute_float* const data_, const unsigned int size_, const unsigned int offset_, const unsigned int subgrid_, const Compute_float minval_, const Compute_float maxval_)
 {
     tagged_array T = {.data=data_,.size=size_,.offset=offset_,.subgrid=subgrid_,.minval=minval_,.maxval=maxval_};
@@ -36,3 +37,36 @@ tagged_array* tagged_array_new(const volatile Compute_float* const data_, const 
     return r;
 }
 
+fcoords COM_small(const volatile Compute_float* const data,const unsigned int smallsize)
+{
+    fcoords ret = {.x=Zero, .y=Zero};
+    Compute_float sum = Zero;
+    for (unsigned int i=0;i<smallsize;i++)
+    {
+        for (unsigned int j=0;j<smallsize;j++)
+        {
+            ret.x += data[i*smallsize+j]*i;
+            ret.x += data[i*smallsize+j]*j;
+            sum += data[i*smallsize+j];
+        }
+    }
+    ret.x -= sum*smallsize;
+    ret.y -= sum*smallsize;
+    return ret;
+}
+
+fcoords* taggedArrayCOM(const tagged_array in)
+{
+    const unsigned int size = tagged_array_size_(in);
+    fcoords* out = calloc(sizeof(fcoords),size*size);
+    for (unsigned int i=0;i<size;i++)
+    {
+        for (unsigned int j=0;j<size;j++)
+        {
+
+            const volatile Compute_float* data =  &in.data[((i+in.offset)*in.size + j + in.offset)*in.subgrid*in.subgrid];
+            out[i*size+j] = COM_small(data,in.subgrid);
+        }
+    }
+    return out;
+}

@@ -6,8 +6,8 @@
 
 // initialize global variables
 const int maxjobs = 1000;
-const int rows = 10;
-const int cols = 10;
+const int rows = 3;
+const int cols = 3;
 char* winname = "viewer0";
 char** dirnames;
 int upto=0;
@@ -57,7 +57,7 @@ int main(int argc,char** argv) {
     printf("Found all directories");
     qsort(dirnames,dirno,sizeof(char*),compare);
     //set up window
-    if (argc>1)
+    if (argc==1)
     {
     cvNamedWindow(winname,CV_WINDOW_AUTOSIZE);
     cvMoveWindow(winname,0,0);
@@ -70,7 +70,7 @@ int main(int argc,char** argv) {
     int fourcc = CV_FOURCC('H','F','Y','U') /*use huffyuv codec (same used to encode input videos) */;
     const char* fnameout = "out.avi";
     CvVideoWriter* vidwrite=cvCreateVideoWriter(
-            fnameout,fourcc,60.0 /*fps*/,cvSize(100*rows,100*cols),1 /*color*/);
+            fnameout,fourcc,60.0 /*fps*/,cvSize(300*rows,300*cols),1 /*color*/);
     while (vididx < dirno)
     {
         int vcount=0;
@@ -110,7 +110,7 @@ int main(int argc,char** argv) {
                 }
             }
             int c=0;
-            if (argc>1)
+            if (argc==1)
             {
                 cvShowImage(winname,dispimage);
                 c = cvWaitKey(10);

@@ -21,7 +21,8 @@ cv::Mat imcache; //elements have type Vec3b
 void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimulus_parameters S)
 {
     cv::Mat m = ReadImage();
-    const Compute_float timemodper = fmod(timemillis,S.timeperiod);
+    const Compute_float actperiod = S.timeperiod + S.lag;
+    const Compute_float timemodper = fmod(timemillis,actperiod);
    // std::cout << timemillis << std::endl;
     for (int x=0;x<grid_size;x++)
     {

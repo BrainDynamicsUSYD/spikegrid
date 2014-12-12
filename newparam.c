@@ -20,7 +20,10 @@ parameters* modparam(const parameters* input,const int offset, const void* newda
 ///Parameters are self explanatory
 Compute_float __attribute__((const)) nthvalue (const Compute_float min,const Compute_float max,const unsigned int count,const unsigned int n)
 {
-    return min+(max-min)*(Compute_float)n/(Compute_float)count;
+	if (count==0)
+		{return min;}
+    else
+    	{return min+(max-min)*(Compute_float)n/(Compute_float)count;}
 }
 
 /// Gets the nth parameter in a sweep.

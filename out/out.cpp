@@ -147,12 +147,15 @@ void MakeOutputs(const output_parameters* const m)
                 break;
             case CONSOLE:
                 out = new ConsoleOutput(i,m[i].Delay,Outputtable[m[i].Output].data.TA_data);
+                outvec.push_back(out);
                 break;
             case SPIKES:
                 out = new SpikeOutput(i,m[i].Delay,Outputtable[m[i].Output].data.Lag_data);
+                outvec.push_back(out);
                 break;
             case VIDEO:
                 out = new VidOutput(i,m[i].Delay,Outputtable[m[i].Output].data.TA_data);
+                outvec.push_back(out);
                 break;
             default:
                 break;

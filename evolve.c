@@ -148,7 +148,7 @@ void CalcRecoverys(const Compute_float* const __restrict__ Vinput,
             const int idx = (x+couplerange)*conductance_array_size + y + couplerange; //index for gE/gI
             const int idx2 = x*grid_size+y;       //index for voltage/recovery
             const Compute_float rhsV=rhs_func(Vinput[idx2],gE[idx],gI[idx],C)-Winput[idx2];
-            const Compute_float rhsW=R.Wcv*(R.Wir*(Vinput[idx2]-R.Wrt) - Winput[idx2]);
+            const Compute_float rhsW=R.Wcv*(R.Wir*(Vinput[idx2]-C.Vlk) - Winput[idx2]);
             Vout[idx2] = Vinput[idx2] + Features.Timestep*rhsV;
             Wout[idx2] = Winput[idx2] + Features.Timestep*rhsW;
         }
@@ -174,6 +174,7 @@ void StoreFiring(layer* L)
                 {
                     if (Features.Recovery==ON) //reset recovery if needed
                     {
+                        L->voltages_out[x*grid_size+y]=L->P->potential.Vrt;                    //does voltage also need to be reset like this?
                         L->recoverys_out[x*grid_size+y]+=L->P->recovery.Wrt;
                     }
                     AddnewSpike(&L->firinglags,baseidx);

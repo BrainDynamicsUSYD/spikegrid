@@ -64,7 +64,10 @@ layer setuplayer(const parameters p)
     if (p.couple.Layertype==SINGLELAYER) {cap=(int)max(setcap(p.couple.Layer_parameters.single.Ex,min_effect,Features.Timestep),setcap(p.couple.Layer_parameters.single.In,min_effect,Features.Timestep));}
     else                                 {cap=(int)setcap(p.couple.Layer_parameters.dual.synapse,min_effect,Features.Timestep);}
     const int trefrac_in_ts =(int) ((Compute_float)p.couple.tref / Features.Timestep);
-    const int flagcount = (int)(cap/trefrac_in_ts) + 2;
+    //const int flagcount = cap;
+    int flagcount;
+    if (Features.Recovery == ON) {flagcount = cap;} //this needs a comment
+    else {flagcount = (int)(cap/trefrac_in_ts) + 2;} //this needs a comment
     layer L =
     {
         .firinglags         = lagstorage_init(flagcount,cap),
@@ -160,23 +163,32 @@ layer setuplayer(const parameters p)
 }
 
 ///The idea here is that "one-off" setup occurs here, whilst per-layer setup occurs in setuplayer
-model* setup(const parameters p,const parameters p2,const LayerNumbers lcount, int jobnumber)
+model* setup(const parameters p,const parameters p2,const LayerNumbers lcount,const int jobnumber,const int yossarianjobnumber)
 {
     check(); //check evolvegen   is correct
-    if (jobnumber <0)
+    if (jobnumber <0 && yossarianjobnumber <0)
     {
         sprintf(outdir,"output/");
     }
     else
     {
-        // Here it is... add the extra file.
-        if (strlen(Features.Outprefix)==0)
+        char nostring[100];
+        if (jobnumber <0)
         {
-            sprintf(outdir,"job-%i/",jobnumber);
+            sprintf(nostring,"%i",yossarianjobnumber);
         }
         else
         {
-            sprintf(outdir,"/%s/%s/job-%i/",getenv("HOME"),Features.Outprefix,jobnumber);
+         sprintf(nostring,"%i-%i",yossarianjobnumber,jobnumber);   
+        }
+        // Here it is... add the extra file.
+        if (strlen(Features.Outprefix)==0)
+        {
+            sprintf(outdir,"job-%s/",nostring);
+        }
+        else
+        {
+            sprintf(outdir,"%s/%s/job-%s/",getenv("HOME"),Features.Outprefix,nostring);
         }
     }
     recursive_mkdir(outdir);

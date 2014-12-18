@@ -45,7 +45,7 @@ void step_(const Compute_float* const inpV,const Compute_float* const inpV2, con
     if (ModelType==DUALLAYER)
     {
         memcpy(m->layer2.voltages,inpV2,sizeof(Compute_float)*grid_size*grid_size);
-        if (Features.Recovery==ON) {memcpy(m->layer2.recoverys,inpW,sizeof(Compute_float)*grid_size*grid_size);}
+        if (Features.Recovery==ON) {memcpy(m->layer2.recoverys,inpW2,sizeof(Compute_float)*grid_size*grid_size);}
     }
     step1(m,mytime);
     DoOutputs(mytime);

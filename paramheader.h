@@ -60,7 +60,7 @@ typedef struct couple_parameters
         Multsep_parameters mult_sep;
 
     } normalization_parameters;         ///<holds data for different normalization methods
-    const int tref     ;                ///<refractory time
+    const Compute_float tref     ;                ///<refractory time
 } couple_parameters;
 ///Contains parameters which control the Voltage dynamics of neurons
 typedef struct
@@ -157,6 +157,7 @@ typedef struct model_features
     const on_off Random_connections;///< Is random connectivity enabled?
     const Compute_float Timestep;   ///< The timestep in the model
     const unsigned int Simlength;   ///< total number of timesteps to run
+    const char Outprefix[100];      ///< Sweep prefix
     const Job job;                  ///< the jobs we are going to run
     const on_off ImageStim;         ///< whether to use an image based stimulus.
     const on_off Disablewrapping;   ///< disable wrapping in the model.  TODO: could be implemented in a more efficient way.  Currently just

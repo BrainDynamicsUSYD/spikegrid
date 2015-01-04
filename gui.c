@@ -21,7 +21,7 @@ void cvdisp (const char** const names, const int count)
         const unsigned int size = tagged_array_size_(*out.data.TA_data)*out.data.TA_data->subgrid;
         Compute_float* data = taggedarrayTocomputearray(*out.data.TA_data);
         PlotColored(out.name,data,out.data.TA_data->minval,out.data.TA_data->maxval,size);
-        cvWaitKey(1);
+        cvWaitKey(100);
         free(data);
     }
 }

@@ -26,6 +26,7 @@ endif
 export matlabdir=$(shell dirname $$(readlink -f $$(which matlab)))
 #these C and ld flags are stolen from mex-v
 export MATLABCFLAGS= -DMX_COMPAT_32 -D_GNU_SOURCE -DMATLAB_MEX_FILE -DMATLAB -I"${matlabdir}/../extern/include" -I"${matlabdir}/../simulink/include"
+export ADAMMATLABCFLAGS= -DMX_COMPAT_32 -D_GNU_SOURCE -DMATLAB_MEX_FILE -I"${matlabdir}/../extern/include" -I"${matlabdir}/../simulink/include"
 export MATLABLDFLAGS=  -L"${matlabdir}/glnxa64" -lmx -lmex -lmat -lm -lstdc++
 #here some hackery - use pkg-config to learn the names of the libs but then find to only get the ones matlab has a copy of
 export matlabopencvldflags=$(shell for x in $$(pkg-config --libs opencv); do  find ${matlabdir}/glnxa64/ -name $$(basename -- $$x)\*  ; done)
@@ -42,7 +43,7 @@ export CXXFLAGS:=${CFLAGS} #use := to create an actual copy
 CFLAGS += --std=gnu11 ${cspecificwarnings}
 CXXFLAGS += --std=c++11
 #conductance.c always needs to be first - this ensures that the mexfile gets the right name
-SOURCES= conductance.c coupling.c  STDP.c STD.c output.c evolve.c newparam.c yossarian.c init.c theta.c printstruct.c cleanup.c evolvegen.c lagstorage.c gui.c tagged_array.c localstim.c
+SOURCES= conductance.c coupling.c  STDP.c STD.c output.c evolve.c newparam.c yossarian.c init.c theta.c printstruct.c cleanup.c evolvegen.c lagstorage.c gui.c tagged_array.c localstim.c utils.c
 BINARY=./a.out
 VERSION_HASH = $(shell git rev-parse HEAD)
 export CONFIG=whichparam.h config/*
@@ -64,10 +65,16 @@ conductance.mexa64: CFLAGS +=   ${MATLABCFLAGS}
 conductance.mexa64: CXXFLAGS += ${MATLABCFLAGS}
 conductance.mexa64: LDFLAGS +=  ${MATLABLDFLAGS}
 conductance.mexa64: opencvldflags =  ${matlabopencvldflags}
-conductance.mexa64:  ${SOURCES} ${CONFIG} ${OFILES}
+conductance.mexa64:  ${SOURCES} *.h whichparam.h ${OFILES}
 	${CC} -fpic ${CFLAGS} ${MATLABCFLAGS} ${opencvcflags}     ${SOURCES} ${OFILES} -o conductance.mexa64 -L. ${CLIBFLAGS} ${LDFLAGS} ${opencvldflags}
 evolvegen.c: ${maskgen} whichparam.h config/*
 	${maskgen} > evolvegen.c
+ADAM: CFLAGS +=   ${ADAMMATLABCFLAGS}
+ADAM: CXXFLAGS += ${MATLABCFLAGS}
+ADAM: LDFLAGS +=  ${MATLABLDFLAGS}
+ADAM: opencvldflags =  ${matlabopencvldflags}
+ADAM: ${SOURCES} *.h ${OFILES} ${CONFIG}
+	${CC} ${CFLAGS} ${opencvcflags} ${SOURCES} ${OFILES} -o ${BINARY} -L. ${LDFLAGS} ${opencvldflags}
 whichparam.h:
 	./setupparam.sh
 debug: ${SOURCE}

@@ -148,7 +148,7 @@ void CalcRecoverys(const Compute_float* const __restrict__ Vinput,
             const int idx = (x+couplerange)*conductance_array_size + y + couplerange; //index for gE/gI
             const int idx2 = x*grid_size+y;       //index for voltage/recovery
             const Compute_float rhsV=rhs_func(Vinput[idx2],gE[idx],gI[idx],C)-Winput[idx2];
-            const Compute_float rhsW=R.Wcv*(R.Wir*(Vinput[idx2]-R.Wrt) - Winput[idx2]);
+            const Compute_float rhsW=R.Wcv*(R.Wir*(Vinput[idx2]-C.Vlk) - Winput[idx2]);
             Vout[idx2] = Vinput[idx2] + Features.Timestep*rhsV;
             Wout[idx2] = Winput[idx2] + Features.Timestep*rhsW;
         }
@@ -174,6 +174,7 @@ void StoreFiring(layer* L)
                 {
                     if (Features.Recovery==ON) //reset recovery if needed
                     {
+                        L->voltages_out[x*grid_size+y]=L->P->potential.Vrt;                    //does voltage also need to be reset like this?
                         L->recoverys_out[x*grid_size+y]+=L->P->recovery.Wrt;
                     }
                     AddnewSpike(&L->firinglags,baseidx);
@@ -236,10 +237,10 @@ void step1(model* m,const unsigned int time)
     memset(m->gI,0,sizeof(Compute_float)*conductance_array_size*conductance_array_size);
     if (Features.LocalStim==ON)
     {
-        ApplyLocalBoost(m->gE,25,25);
-        ApplyLocalBoost(m->gE,25,75);
-        ApplyLocalBoost(m->gE,75,25);
-        ApplyLocalBoost(m->gE,75,75);
+        if (time %1000 < 250) {ApplyLocalBoost(m->gE,20,20);}
+        else if (time % 1000 < 500) {ApplyLocalBoost(m->gE,20,60);}
+        else if (time % 1000 < 750) {ApplyLocalBoost(m->gE,60,20);}
+        else  {ApplyLocalBoost(m->gE,60,60);}
     }
     // Add spiking input to the conductances
     AddSpikes(m->layer1,m->gE,m->gI,time);

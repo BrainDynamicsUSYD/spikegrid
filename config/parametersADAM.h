@@ -1,13 +1,13 @@
 /// \file
 #include <stddef.h> //offsetof
 //these first few parameters actually escape into the paramheader file through magic
-#define grid_size 80
+#define grid_size 100
 ///Total size of the grid
 ///Coupling range
 #define couplerange 15
-#ifndef PARAMATERS  //DO NOT REMOVE
+#ifndef PARAMETERS  //DO NOT REMOVE
 ///include guard
-#define PARAMATERS  //DO NOT REMOVE
+#define PARAMETERS  //DO NOT REMOVE
 #ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wconversion"
@@ -17,7 +17,6 @@
 #pragma GCC diagnostic ignored "-Wconversion"
 #endif
 //the following typedef must be before the include to get the right compute types
-#include "paramheader.h"
 ///Whether we are using the single or double layer model
 static const LayerNumbers ModelType = DUALLAYER;
 
@@ -67,34 +66,7 @@ static const parameters OneLayerModel =
         .Wir = -1,
         .Wcv = 0.08
     },
-    .STDP = 
-    {
-        .stdp_limit     = 0.1,
-        .stdp_tau       = 20,
-        .stdp_strength  = 0.0004
-    }, 
-    .STD =
-    {
-        .U  = 0.5,
-        .D  = 0.11,
-        .F  = 0.005
-    },
-    .Movie = 
-    {
-        .MakeMovie = OFF,
-        .Delay = 10,
-    },
-    .theta = 
-    {
-        .strength    = 5.0,
-        .period     = 0.2,
-    },
     .skip=1,
-    .output = 
-    {   
-        .Switch   = OFF,
-        .Filename = "one_spikes.txt"
-    },
 };
 ///parameters for the inhibitory layer of the double layer model
 static const parameters DualLayerModelIn =
@@ -139,35 +111,7 @@ static const parameters DualLayerModelIn =
         .Wir = -1,
         .Wcv = 0.08
     },
-    .STDP = 
-    {
-        .stdp_limit     = 0.1,
-        .stdp_tau       = 20,
-        .stdp_strength  = 0.0004
-    }, 
-    .STD =
-    {
-        .U  = 0.5,
-        .D  = 0.2,
-        .F  = 0.45
-    },
-    .Movie = 
-    {
-        .MakeMovie = OFF,
-        .Output = 0,
-        .Delay = 10,
-    },
-    .theta = 
-    {
-        .strength    = 5.0,
-        .period     = 0.2,
-    },
     .skip = 2,
-    .output = 
-    { 
-        .Switch   = OFF,
-        .Filename = "inh_spikes.txt"
-    },
 };
 ///parameters for the excitatory layer of the double layer model
 static const parameters DualLayerModelEx =
@@ -212,41 +156,14 @@ static const parameters DualLayerModelEx =
         .Wir = -1,
         .Wcv = 0.08
     },
-    .STDP = 
-    {
-        .stdp_limit     = 0.1,
-        .stdp_tau       = 20,
-        .stdp_strength  = 0.0004
-    }, 
-    .STD =
-    {
-        .U  = 0.5,
-        .D  = 0.2,
-        .F  = 0.45
-    },
-    .Movie = 
-    {
-        .MakeMovie = ON,
-        .Output = 5,
-        .Delay = 50,
-    },
-    .theta = 
-    {
-        .strength    = 5.0,
-        .period     = 0.2,
-    },
     .skip = 1,
-    .output = 
-    {
-        .Switch    = ON,
-        .Filename  = "exc_spikes.txt"
-    },
+    .output = {{ .method=PICTURE,.Output=5,.Delay=10}}
 };
 ///Constant external input to conductances
 static const extinput Extinput =
 {
     .gE0 = 0.015,
-    .gI0 = 0,
+    .gI0 = 0.002,
 };
 ///Some global features that can be turned on and off
 static const model_features Features = 
@@ -254,16 +171,16 @@ static const model_features Features =
     .Recovery   = OFF,
     .STDP		= OFF, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep - 
     .STD        = OFF,  //if we need any of these features we can make the changes then.
-    .Output     = OFF,
     .Theta      = OFF,
     .Timestep   = 0.1, // Works in like with 0.1 for midpoint. But if gE too small should addition be smaller too???
     .Simlength  = 1e5,
-    .trial      = 1, //if you want to run multiple trials for the same set of variables, can sweep this
+    .Outprefix  = "nowichangedit",  // Make empty to keep in current directory 
 };
 ///Parameters for conducting a parameter sweep.
 static const sweepable Sweep =
 {
-    .offset=offsetof(parameters,couple)+offsetof(couple_parameters,Layer_parameters) +0+ /*offset in the union is always 0*/  + offsetof(duallayer_parameters,W),
+    .offset=offsetof(parameters,couple)+offsetof(couple_parameters,Layer_parameters)+offsetof(duallayer_parameters,W),
+    //.offset=offsetof(parameters,recovery)+offsetof(recovery_parameters,Wrt),
     .minval = 0.01,
     .maxval = 1,
     .count = 10

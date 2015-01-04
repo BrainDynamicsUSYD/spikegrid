@@ -15,7 +15,6 @@
 #include "yossarian.h"
 #include "paramheader.h"
 #include "model.h"
-#include "output.h"
 #include "out/out.h"
 #ifdef ANDROID
     #define APPNAME "myapp"
@@ -49,11 +48,6 @@ void step_(const Compute_float* const inpV,const Compute_float* const inpV2, con
     }
     step1(m,mytime);
     DoOutputs(mytime);
-    //dooutput(m->layer1.P->output,mytime);
-    if (ModelType==DUALLAYER)
-    {
-     //   dooutput(m->layer2.P->output,mytime);
-    }
 }
 
 //I am not a huge fan of this function.  A nicer version would be good.

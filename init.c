@@ -209,7 +209,6 @@ model* setup(const parameters p,const parameters p2,const LayerNumbers lcount,co
     if (!strcmp(buffer,"headnode.physics.usyd.edu.au")) {printf("DON'T RUN THIS CODE ON HEADNODE\n");exit(EXIT_FAILURE);}
     free(buffer);
     output_init(m2);
-    MakeOutputs(p.output);
-    if (lcount==DUALLAYER) {MakeOutputs(p2.output);}
+    MakeOutputs(Features.output);
     return m2;
 }

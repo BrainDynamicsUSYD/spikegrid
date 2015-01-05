@@ -4,7 +4,7 @@
 #define grid_size 100
 ///Total size of the grid
 ///Coupling range
-#define couplerange 15
+#define couplerange 25
 #ifndef PARAMETERS  //DO NOT REMOVE
 ///include guard
 #define PARAMETERS  //DO NOT REMOVE
@@ -25,9 +25,9 @@ static const LayerNumbers ModelType = DUALLAYER;
 ///Parameters for the single layer model
 static const parameters OneLayerModel = {.couple={0}}; //since unused - shortes possible definition that produces no warnings
 
-#define potparams  .potential =     \
-    {                               \
-        .type    =                  \
+#define potparams .potential =     \
+    {                                  \
+        .type    =                     \
         {                           \
             .type = LIF,            \
         },                          \
@@ -42,10 +42,23 @@ static const parameters OneLayerModel = {.couple={0}}; //since unused - shortes 
 
 #define STDPparams .STDP=   \
     {                       \
-        .stdp_limit=0.5,    \
+        .stdp_limit=1.5,    \
         .stdp_tau=20,       \
-        .stdp_strength=0.01  \
+        .stdp_strength=0.00055,  \
+        .STDP_on=ON\
     }
+#define STDparams .STD= \
+    {                   \
+        .U = 0.5,       \
+        .D = 0.2,      \
+        .F = 0.45      \
+    }
+#define Stimparams .Stim=\
+{\
+    .timeperiod=220,\
+    .lag=55,\
+}
+//#define SWEEP (prop,v,min,max)
 ///parameters for the inhibitory layer of the double layer model
 static const parameters DualLayerModelIn =
 {
@@ -56,60 +69,82 @@ static const parameters DualLayerModelIn =
         {
             .dual =
             {
-                .W          = -0.79, //-0.40 //-0.57 //-0.70 //-1.25,
+                .W          = -0.5, //-0.40 //-0.57 //-0.70 //-1.25,
                 .sigma      = 90,
-                .synapse    = {.R=0.5,.D=7.0},
+                .synapse    = {.R=0.5,.D=2.0},
             }
         },
-        .norm_type = None,
+
+        .norm_type = GlobalMultiplier,
+        .normalization_parameters = {.glob_mult = {.GM=1.0}},
         .tref       = 5,
     },
-    potparams,
+    .random =
+    {
+        .numberper={int t=1; 100},
+        .str = 0.8
+    },
+    STDparams,
     STDPparams,
+    potparams,
+    Stimparams,
     .skip=2,
 };
 ///parameters for the excitatory layer of the double layer model
 static const parameters DualLayerModelEx =
 {
-    .couple =
+    .couple =   
     {
         .Layertype = DUALLAYER,
         .Layer_parameters =
         {
             .dual =
             {
-                .W          =  0.24,
-                .sigma      = 12,
+                .W          =  0.25,
+                .sigma      = 20,
                 .synapse    = {.R=0.5,.D=2.0},
             }
         },
         .tref       = 5,
-        .norm_type = None,
+        .norm_type = GlobalMultiplier,
+        .normalization_parameters = {.glob_mult = {.GM=1.0}},
     },
+    .random =
+    {
+        .numberper=706,
+        .str = 0.8
+    },
+    STDparams,
     STDPparams,
     potparams,
-    .skip=1,
+    .skip=-2,
+    Stimparams,
+//    .output = {{ .method=PICTURE,.Output=5,.Delay=10} }
 };
 ///Some global features that can be turned on and off
 static const model_features Features =
 {
-    .STDP		= OFF, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep -
-    .STD        = OFF, //               if we need any of these features we can make the changes then.
+    .STD        = OFF,
+    .STDP		= ON, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep -
+    .Random_connections = OFF,
     .Timestep   = 0.1,
-    .Simlength  = 10000,
+    .Simlength  = 1000000,
+    .ImageStim  = OFF,
+    .job        = {.initcond = SINGLE_SPIKE, .Voltage_or_count = -70},
+    .Disablewrapping = ON,
 };
 ///Constant external input to conductances
 static const extinput Extinput =
 {
-    .gE0 = 0.015,
-    .gI0 = 0.0,
+    .gE0 = 0.000,
+    .gI0 = 0.15,
 };
 ///Parameters for conducting a parameter sweep.
 static const sweepable Sweep =
 {
-    .offset=offsetof(parameters,couple)+offsetof(couple_parameters,Layer_parameters) +0+ /*offset in the union is always 0*/  + offsetof(duallayer_parameters,W),
-    .minval = 0.0,
-    .maxval = 1.0,
+    .offset=offsetof(parameters,Stim)+offsetof(Stimulus_parameters,lag) ,
+    .minval = 0.000,
+    .maxval = 100,
     .count = 100
 };
 

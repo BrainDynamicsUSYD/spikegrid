@@ -40,9 +40,9 @@ void cvdisp (const char** const names, const int count)
         {
             Compute_float* data = taggedarrayTocomputearray(*out.data.TA_data);
             PlotColored(out.name,data,out.data.TA_data->minval,out.data.TA_data->maxval,size);
-        free(data);
+            free(data);
         }
-        cvWaitKey(1);
+        cvWaitKey(100);
     }
 }
 #endif

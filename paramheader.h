@@ -106,14 +106,6 @@ typedef struct STD_parameters
     const Compute_float F;  ///<facilitation timescale
 } STD_parameters;
 
-///Parameters for outputting movies
-/*typedef struct output_parameters
-{
-    const output_method output_method;  ///< Are we outputting something
-    const unsigned int Output;          ///< What will be outputted
-    const unsigned int Delay;           ///< how often to output it
-} output_parameters;
-*/
 ///Parameters for a subthreshold wave (not necersarrily theta)
 typedef struct theta_parameters
 {
@@ -162,6 +154,7 @@ typedef struct model_features
     const on_off ImageStim;         ///< whether to use an image based stimulus.
     const on_off Disablewrapping;   ///< disable wrapping in the model.  TODO: could be implemented in a more efficient way.  Currently just
     const on_off LocalStim;         ///< Is the local stimulus on
+    const output_parameters output[10];         ///<What things do you want to output 10 outputs should be enough (but limit is arbitrary)
 } model_features;
 
 ///Structure that holds all the parameters for a layer
@@ -171,7 +164,6 @@ typedef struct parameters
     const conductance_parameters potential;     ///<parameters controlling the potential; dynamics of neurons
     const STDP_parameters STDP;                 ///<parameters controlling STDP
     const STD_parameters STD;                   ///<parameters controlling STD
-    const output_parameters output[10];         ///<What things do you want to output 10 outputs should be enough (but limit is arbitrary)
     const theta_parameters theta;               ///<parameters controling theta wave
     const recovery_parameters recovery;         ///<parameters controlling recovery (alternative to refractory time)
     const int skip;                             ///<Number of neurons to skip over in the layer setting skip=2 will produce 4-1 ratio of neurons to a layer with skip=1

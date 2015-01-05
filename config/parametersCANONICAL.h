@@ -141,6 +141,38 @@ static const parameters DualLayerModelEx =
         .rate = 0,
     },
     .skip = 1,
+
+};
+///Constant external input to conductances
+static const extinput Extinput =
+{
+    .gE0 = 0.015,
+    .gI0 = 0,
+};
+///Some global features that can be turned on and off
+static const model_features Features =
+{
+    .Recovery   = OFF,
+    .STDP		= OFF, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep -
+    .STD        = OFF,  //if we need any of these features we can make the changes then.
+    .Theta      = OFF,
+    .Timestep   = 0.1, // Works in like with 0.1 for midpoint. But if gE too small should addition be smaller too???
+    .Simlength  = 2e3,
+    .job=
+    {
+        .initcond=SINGLE_SPIKE,
+        .Voltage_or_count = -50, //superthreshold
+        .next =
+        &(Job){
+            .initcond=SINGLE_SPIKE,
+            .Voltage_or_count=-55.1, //subthreshold
+            .next =
+            &(Job){
+                .initcond=RAND_JOB,  //random - run a few times to be sure
+                .Voltage_or_count = 4,
+            }
+        }
+    },
     .output=
     {
         {
@@ -173,38 +205,6 @@ static const parameters DualLayerModelEx =
             .Output=5,//V2
             .Delay=5
         },
-    }
-
-};
-///Constant external input to conductances
-static const extinput Extinput =
-{
-    .gE0 = 0.015,
-    .gI0 = 0,
-};
-///Some global features that can be turned on and off
-static const model_features Features =
-{
-    .Recovery   = OFF,
-    .STDP		= OFF, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep -
-    .STD        = OFF,  //if we need any of these features we can make the changes then.
-    .Theta      = OFF,
-    .Timestep   = 0.1, // Works in like with 0.1 for midpoint. But if gE too small should addition be smaller too???
-    .Simlength  = 2e3,
-    .job=
-    {
-        .initcond=SINGLE_SPIKE,
-        .Voltage_or_count = -50, //superthreshold
-        .next =
-        &(Job){
-            .initcond=SINGLE_SPIKE,
-            .Voltage_or_count=-55.1, //subthreshold
-            .next =
-            &(Job){
-                .initcond=RAND_JOB,  //random - run a few times to be sure
-                .Voltage_or_count = 4,
-            }
-        }
     }
 };
 ///Parameters for conducting a parameter sweep.

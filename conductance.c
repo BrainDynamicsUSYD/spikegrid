@@ -35,7 +35,7 @@ void step_(const Compute_float* const inpV,const Compute_float* const inpV2, con
     if (Features.Recovery==ON && inpW==NULL){printf("missing first recovery input");exit(EXIT_FAILURE);}
     if (ModelType==DUALLAYER)
     {
-        if(inpV2==NULL)                         {printf("missing second input voltage in dual-layer model");exit (EXIT_FAILURE);}
+        if(inpV2==NULL)                         {printf("missing second input voltage in dual-layer model"); exit(EXIT_FAILURE);}
         if(Features.Recovery==ON && inpW2==NULL){printf("missing second recovery input in dual-layer model");exit(EXIT_FAILURE);}
     }
     mytime++;
@@ -53,7 +53,7 @@ void step_(const Compute_float* const inpV,const Compute_float* const inpV2, con
 //I am not a huge fan of this function.  A nicer version would be good.
 void setuppointers(Compute_float** FirstV,Compute_float** SecondV, Compute_float** FirstW, Compute_float** SecondW,const Job* const job)
 {
-    *FirstV = calloc(sizeof(Compute_float),grid_size*grid_size);
+    *FirstV = calloc(sizeof(Compute_float),grid_size*grid_size); //we always need the voltage in the first layer
     if (ModelType==SINGLELAYER)
     {
         *SecondV = NULL;
@@ -223,7 +223,9 @@ void processopts (int argc,char** argv,parameters** newparam,parameters** newpar
 /// @param argv what the parameters actually are
 int main(int argc,char** argv) //useful for testing w/out matlab
 {
-#ifndef ANDROID //android doesn't support this function
+    const char* CVDisplay[] = {"V1","V2","STDP1","STDP2"}; //list of possible variables to show
+    const int CVNumWindows=2;                              //and how many to show
+#ifndef ANDROID //android doesn't support this function - note the error is that this will fail at linking so it needs to hide in the #if
     feenableexcept(FE_INVALID | FE_OVERFLOW); //segfault on NaN and overflow.  Note - this cannot be used in matlab
 #endif
     parameters* newparam = NULL;
@@ -250,7 +252,7 @@ int main(int argc,char** argv) //useful for testing w/out matlab
             else {m=setup(newparamIn!=NULL?*newparamIn:DualLayerModelIn,newparamEx!=NULL?*newparamEx:DualLayerModelEx,ModelType,jobnumber);}
 
 #ifdef OPENCV
-            if (OpenCv==ON){ cvdispInit((const char*[]){"V1","V2","STDP1","STDP2"},2);}
+            if (OpenCv==ON){ cvdispInit(CVDisplay,CVNumWindows);}
 #endif
             Compute_float *FirstV,*SecondV,*FirstW,*SecondW;
             setuppointers(&FirstV,&SecondV,&FirstW,&SecondW,job);
@@ -269,7 +271,7 @@ int main(int argc,char** argv) //useful for testing w/out matlab
 #ifdef OPENCV
                 if(mytime % 40 ==0 && OpenCv == ON)
                 {
-                    cvdisp((const char*[]){"V1","V2","STDP1","STDP2"},2);
+                    cvdisp(CVDisplay,CVNumWindows);
                 }
 #endif
             }

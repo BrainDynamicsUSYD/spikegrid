@@ -24,6 +24,7 @@
 unsigned int mytime=0;  ///<< The current time step
 model* m;               ///< The model we are evolving through time
 int jobnumber=-1;        ///< The current job number - used for pics directory etc
+int yossarianjobnumber=-1;
 //DO NOT CALL THIS FUNCTION "step" - this causes a weird collision in matlab that results in segfaults.  Incredibly fun to debug
 ///Function that steps the model through time (high level).
 /// @param inpV the input voltages
@@ -197,16 +198,16 @@ void processopts (int argc,char** argv,parameters** newparam,parameters** newpar
                 exit(EXIT_SUCCESS);
             case 's':
                 {
-                    jobnumber=atoi(optarg);
-                    printf("doing sweep index %i\n",jobnumber);
+                    yossarianjobnumber=atoi(optarg);
+                    printf("doing sweep index %i\n",yossarianjobnumber);
                     if (ModelType == SINGLELAYER)
                     {
-                        *newparam = GetNthParam(OneLayerModel,Sweep,(unsigned int)jobnumber);
+                        *newparam = GetNthParam(OneLayerModel,Sweep,(unsigned int)yossarianjobnumber);
                     }
                     else
                     {
-                        *newparamEx = GetNthParam(DualLayerModelEx,Sweep,(unsigned int)jobnumber);
-                        *newparamIn = GetNthParam(DualLayerModelIn,Sweep,(unsigned int)jobnumber);
+                        *newparamEx = GetNthParam(DualLayerModelEx,Sweep,(unsigned int)yossarianjobnumber);
+                        *newparamIn = GetNthParam(DualLayerModelIn,Sweep,(unsigned int)yossarianjobnumber);
                     }
                 }
                 break;
@@ -248,8 +249,8 @@ int main(int argc,char** argv) //useful for testing w/out matlab
             else if(job->initcond==RAND_JOB)   {srandom((unsigned)c);}
             else if(job->initcond==RAND_ZERO)  {srandom((unsigned)0);}
             //sets up the model code
-            if (ModelType==SINGLELAYER) {m=setup(newparam!=NULL? (*newparam):OneLayerModel,newparam!=NULL? (*newparam):OneLayerModel,ModelType,jobnumber);} //pass the same layer as a double parameter
-            else {m=setup(newparamIn!=NULL?*newparamIn:DualLayerModelIn,newparamEx!=NULL?*newparamEx:DualLayerModelEx,ModelType,jobnumber);}
+            if (ModelType==SINGLELAYER) {m=setup(newparam!=NULL? (*newparam):OneLayerModel,newparam!=NULL? (*newparam):OneLayerModel,ModelType,jobnumber,yossarianjobnumber);} //pass the same layer as a double parameter
+            else {m=setup(newparamIn!=NULL?*newparamIn:DualLayerModelIn,newparamEx!=NULL?*newparamEx:DualLayerModelEx,ModelType,jobnumber,yossarianjobnumber);}
 
 #ifdef OPENCV
             if (OpenCv==ON){ cvdispInit(CVDisplay,CVNumWindows);}

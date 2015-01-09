@@ -178,6 +178,8 @@ typedef struct sweepable
     const Compute_float maxval; ///< the maximum value of the parameter
     const int offset;           ///< the offset into the parameters object of the value to modify
     const unsigned int count;   ///< the number of jobs to create - spacing of parameter is linear between maxval and minval
+    const on_off SweepEx;
+    const on_off SweepIn;
 } sweepable;
 #include "whichparam.h"
 #endif

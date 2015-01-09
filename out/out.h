@@ -34,7 +34,7 @@ class SingleFileOutput : public Output
 class VidOutput: public Output //This class probably needs a destructor to end the video.  Vlc will probably handle the file just fine though.
 {
     const tagged_array* data;
-    const cv::VideoWriter* writer;
+    cv::VideoWriter* writer;
     public:
         VidOutput(int,int,const tagged_array*);
         void DoOutput();

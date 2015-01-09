@@ -3,7 +3,7 @@
 #define LAYER
 #include "lagstorage.h"
 #include "typedefs.h"
-#include "enums.h"
+#include "enums.h" //needed at least for the is-inhibitory flag
 typedef struct STD_data STD_data; //forward declare STD_data to make things cleaner - makes this file a little messier, but it makes it more obvious where things come from
 ///hold the requisite data for a layer that enables it to be evolved through time.
 typedef struct parameters parameters;
@@ -40,10 +40,10 @@ typedef struct layer
     Compute_float* const Intimecourse;    ///<store time course of In synapses
     Compute_float* const Mytimecourse;    ///<store time course of synapses in dual layer case
     randconns_info rcinfo;
-    lagstorage      firinglags;
-    STDP_data*       STDP_data;
-    parameters* P;                              ///<The parameters that we used to make the layer
-    STD_data* std;                               ///<Some info that is needed for STD
+    lagstorage     firinglags;
+    STDP_data*     STDP_data;
+    parameters*    P;                              ///<The parameters that we used to make the layer
+    STD_data*      std;                               ///<Some info that is needed for STD
     const on_off Layer_is_inhibitory;
 } layer;
 #endif

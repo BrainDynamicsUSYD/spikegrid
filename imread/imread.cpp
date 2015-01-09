@@ -5,7 +5,6 @@
 #include <iostream>
 #include <string>
 #include <cstdbool>
-#include <stdint.h>
 #include "imread.h"
 extern "C"
 {

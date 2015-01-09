@@ -88,7 +88,7 @@ void setuppointers(Compute_float** FirstV,Compute_float** SecondV, Compute_float
 
 #ifdef MATLAB
 //The easeiest way to get data out with matlab is to use outputtomxarray and the easiest way to use that is with getoutputbyname.  Getoutputbyname is in output.h so include it.
-#include "matlab_output.h"
+//#include "matlab_output.h"
 int setup_done=0;
 mxArray* CreateInitialValues(const Compute_float minval, const Compute_float maxval)
 {

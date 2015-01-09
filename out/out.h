@@ -34,7 +34,7 @@ class SingleFileOutput : public Output
 class VidOutput: public Output //This class probably needs a destructor to end the video.  Vlc will probably handle the file just fine though.
 {
     const tagged_array* data;
-    const cv::VideoWriter* writer;
+    cv::VideoWriter* writer;
     public:
         VidOutput(int,int,const tagged_array*);
         void DoOutput();
@@ -68,6 +68,7 @@ void MakeOutputs(const output_parameters* const m);
 void CleanupOutputs();
 #ifdef MATLAB
 #include "../matlab_includes.h"
+#include "../output.h"
 void outputExtraThings(mxArray* plhs[],int nrhs,const mxArray* prhs[]);
 mxArray* outputToMxArray (const output_s input);
 #endif

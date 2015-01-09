@@ -1,5 +1,5 @@
 /// \file
-#include "layer.h"
+#include "layer.h" //would be nice if this wasn't needed
 #include "sizes.h"
 ///Allows for having multiple layers and simulating them
 typedef struct model

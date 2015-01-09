@@ -42,7 +42,7 @@ VidOutput::VidOutput(int idxin ,const int intervalin,const tagged_array* datain)
     sprintf(buf,"%s/%i.avi",outdir,idxin);
     int fourcc = CV_FOURCC('H','F','Y','U');
     writer = new cv::VideoWriter(buf,fourcc,60,cvSize(grid_size,grid_size),true);
-   data=datain;
+    data=datain;
 }
 void VidOutput::DoOutput()
 {
@@ -50,6 +50,7 @@ void VidOutput::DoOutput()
     const unsigned int size = tagged_array_size_(*data)*data->subgrid;
     Compute_float* actualdata=taggedarrayTocomputearray(*data);
     cv::Mat m =ProcessMatrix(actualdata,data->minval,data->maxval,size);
+    writer->write(m);
     free(actualdata);
 #else
     printf("Using PNG outout without opencv is not possible\n");

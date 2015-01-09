@@ -8,6 +8,7 @@
 const int maxjobs = 1000;
 const int rows = 3;
 const int cols = 3;
+const int gridsize = 100;
 char* winname = "viewer0";
 char** dirnames;
 int upto=0;
@@ -17,12 +18,12 @@ void mousecb(int event, int x,int y,int dummy,void* dummy2)
 {
     if (event==CV_EVENT_LBUTTONDOWN)
     {
-        int idx = (x/100)*cols+(y/100);
+        int idx = (x/gridsize)*cols+(y/gridsize);
         printf("%s\n",dirnames[idx+upto]);
     }
     else if (event==CV_EVENT_RBUTTONDOWN)
     {
-        char buf[100];
+        char buf[gridsize];
         sprintf(buf,"still-%i.png",printimagecount);
         cvSaveImage(buf,dispimage,NULL);
         printimagecount++;
@@ -40,7 +41,7 @@ int main(int argc,char** argv) {
     //scan directory
     dirnames = malloc(sizeof(char*)*maxjobs);
     int dirno=0;
-    DIR* d = opendir(".");
+    DIR* d = opendir("."); // Possible candidate
     struct dirent* dir;
     if (d)
     {

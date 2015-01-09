@@ -68,6 +68,7 @@ void MakeOutputs(const output_parameters* const m);
 void CleanupOutputs();
 #ifdef MATLAB
 #include "../matlab_includes.h"
+#include "../output.h"
 void outputExtraThings(mxArray* plhs[],int nrhs,const mxArray* prhs[]);
 mxArray* outputToMxArray (const output_s input);
 #endif

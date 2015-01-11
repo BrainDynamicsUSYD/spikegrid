@@ -9,6 +9,7 @@
 #include "paramheader.h"
 #include "model.h"
 #include "localstim.h"
+#include "animal.h"
 #ifdef ANDROID
     #define APPNAME "myapp"
     #include <android/log.h>
@@ -241,6 +242,11 @@ void step1(model* m,const unsigned int time)
         else if (time % 1000 < 500) {ApplyLocalBoost(m->gE,20,60);}
         else if (time % 1000 < 750) {ApplyLocalBoost(m->gE,60,20);}
         else  {ApplyLocalBoost(m->gE,60,60);}
+    }
+    if(Features.UseAnimal==ON)
+    {
+        MoveAnimal(m->animal,timemillis);
+        AnimalEffects(*m->animal,m->gE);
     }
     // Add spiking input to the conductances
     AddSpikes(m->layer1,m->gE,m->gI,time);

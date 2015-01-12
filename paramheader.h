@@ -155,6 +155,7 @@ typedef struct model_features
     const on_off Disablewrapping;   ///< disable wrapping in the model.  TODO: could be implemented in a more efficient way.  Currently just
     const on_off LocalStim;         ///< Is the local stimulus on
     const output_parameters output[10];         ///<What things do you want to output 10 outputs should be enough (but limit is arbitrary)
+    const on_off UseAnimal;
 } model_features;
 
 ///Structure that holds all the parameters for a layer

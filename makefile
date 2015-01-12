@@ -7,9 +7,9 @@ export DEFINES=-DOPENCV
 #set up some variables for compiling
 ##########
 ifeq ($(CC),clang)
-	export CFLAGS= -g -Wno-padded -Wno-missing-prototypes -Wno-missing-variable-declarations -Weverything -pedantic  -Ofast -Wno-documentation-unknown-command -Wno-covered-switch-default
+	export CFLAGS= -g -Wno-padded -Wno-missing-p	rototypes -Wno-missing-variable-declarations -Weverything -pedantic  -Ofast -Wno-documentation-unknown-command -Wno-covered-switch-default
 else #gcc
-	optflags=  -Ofast -msse -msse2 -msse3 -funsafe-loop-optimizations -mtune=native -march=native  -floop-interchange -ftree-loop-optimize -floop-strip-mine -floop-block -flto  -fassociative-math -fno-signed-zeros -freciprocal-math -ffinite-math-only -fno-trapping-math -ftree-vectorize
+	optflags=  -Ofast -msse -msse2 -msse3 -fu	nsafe-loop-optimizations -mtune=native -march=native  -floop-interchange -ftree-loop-optimize -floop-strip-mine -floop-block -flto  -fassociative-math -fno-signed-zeros -freciprocal-math -ffinite-math-only -fno-trapping-math -ftree-vectorize
 	extrawarnings=-Wstrict-aliasing -fstrict-aliasing   -Wshadow  -Wconversion -Wdouble-promotion -Wformat=2 -Wunused -Wuninitialized -Wfloat-equal -Wunsafe-loop-optimizations -Wcast-qual -Wcast-align -Wwrite-strings  -Wlogical-op  -Wvector-operation-performance -Wno-pragmas
 	extraextrawarnings=-Wsuggest-attribute=pure -Wsuggest-attribute=const -Wsuggest-attribute=noreturn -Wstrict-overflow=4
 	export CFLAGS=-g -ggdb -Wall -Wextra  ${optflags} ${extrawarnings} ${extraextrawarnings}
@@ -34,6 +34,7 @@ export matlabopencvldflags=$(shell for x in $$(pkg-config --libs opencv); do  fi
 export matlabopencvldflags:= -Wl,-rpath -Wl,${matlabdir} ${matlabopencvldflags} $(shell pkg-config --libs-only-l opencv)
 #set up some non-matlab variables
 export DEBUGFLAGS= -g -std=gnu11
+export CXXDEBUGFLAGS= -g --std=c++11
 export CLIBFLAGS= -fPIC -shared
 export LDFLAGS= -lm -g
 export opencvcflags=$(shell  pkg-config --cflags opencv)
@@ -43,7 +44,7 @@ export CXXFLAGS:=${CFLAGS} #use := to create an actual copy
 CFLAGS += --std=gnu11 ${cspecificwarnings}
 CXXFLAGS += --std=c++11
 #conductance.c always needs to be first - this ensures that the mexfile gets the right name
-SOURCES= conductance.c coupling.c  STDP.c STD.c output.c evolve.c newparam.c yossarian.c init.c theta.c printstruct.c cleanup.c evolvegen.c lagstorage.c gui.c tagged_array.c localstim.c utils.c
+SOURCES= conductance.c coupling.c  STDP.c STD.c output.c evolve.c newparam.c yossarian.c init.c theta.c printstruct.c cleanup.c evolvegen.c lagstorage.c gui.c tagged_array.c localstim.c utils.c animal.c
 BINARY=./a.out
 VERSION_HASH = $(shell git rev-parse HEAD)
 export CONFIG=whichparam.h config/*
@@ -77,8 +78,9 @@ ADAM: ${SOURCES} *.h ${OFILES} ${CONFIG}
 	${CC} ${CFLAGS} ${opencvcflags} ${SOURCES} ${OFILES} -o ${BINARY} -L. ${LDFLAGS} ${opencvldflags}
 whichparam.h:
 	./setupparam.sh
-debug: ${SOURCE}
-	${CC} ${DEBUGFLAGS} ${SOURCES} -o ${BINARY} ${LDFLAGS}
+debug: CFLAGS = ${DEBUGFLAGS}
+debug: CXXFLAGS = ${CXXDEBUGFLAGS}
+debug: ${BINARY}
 mediumopt:
 	${CC} -g -std=gnu99 ${SOURCES} -o ${BINARY} ${LDFLAGS}
 TEST: 

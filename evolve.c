@@ -9,6 +9,7 @@
 #include "paramheader.h"
 #include "model.h"
 #include "localstim.h"
+#include "animal.h"
 #ifdef ANDROID
     #define APPNAME "myapp"
     #include <android/log.h>
@@ -38,8 +39,11 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
             if (L.Layer_is_inhibitory) {str = (-str);} //invert strength for inhib conns.
             if (numfirings > 0) //only fire if we had a spike.
             {
-                evolvept_duallayer(x,y,L.connections,str,(L.Layer_is_inhibitory?gI:gE)); //side note evolvegen doesn't currently work with singlelayer - should probably fix
-                if (Features.STDP==ON)
+                if (Features.STDP==OFF)
+                {
+                    evolvept_duallayer(x,y,L.connections,str,(L.Layer_is_inhibitory?gI:gE)); //side note evolvegen doesn't currently work with singlelayer - should probably fix
+                }
+                else
                 {
                     evolvept_duallayer_STDP(x,y,L.connections,L.STDP_data->connections,str,(L.Layer_is_inhibitory?gI:gE));
                 }
@@ -241,6 +245,11 @@ void step1(model* m,const unsigned int time)
         else if (time % 1000 < 500) {ApplyLocalBoost(m->gE,20,60);}
         else if (time % 1000 < 750) {ApplyLocalBoost(m->gE,60,20);}
         else  {ApplyLocalBoost(m->gE,60,60);}
+    }
+    if(Features.UseAnimal==ON)
+    {
+        MoveAnimal(m->animal,timemillis);
+        AnimalEffects(*m->animal,m->gE);
     }
     // Add spiking input to the conductances
     AddSpikes(m->layer1,m->gE,m->gI,time);

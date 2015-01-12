@@ -8,7 +8,6 @@ typedef struct STD_data STD_data; //forward declare STD_data to make things clea
 ///hold the requisite data for a layer that enables it to be evolved through time.
 typedef struct parameters parameters;
 typedef struct STDP_data STDP_data;
-
 typedef struct coords {Neuron_coord x; /**<x coord*/Neuron_coord y;/**<y coord*/} coords;
 typedef struct randomconnection
 {
@@ -40,10 +39,10 @@ typedef struct layer
     Compute_float* const Intimecourse;    ///<store time course of In synapses
     Compute_float* const Mytimecourse;    ///<store time course of synapses in dual layer case
     randconns_info rcinfo;
-    lagstorage     firinglags;
-    STDP_data*     STDP_data;
-    parameters*    P;                              ///<The parameters that we used to make the layer
-    STD_data*      std;                               ///<Some info that is needed for STD
+    lagstorage      firinglags;
+    STDP_data*      STDP_data;
+    parameters*     P;                              ///<The parameters that we used to make the layer
+    STD_data*       std;                               ///<Some info that is needed for STD
     const on_off Layer_is_inhibitory;
 } layer;
 #endif

@@ -13,6 +13,7 @@
 #include "model.h"
 #include "out/out.h"
 #include "utils.h"
+#include "animal.h"
 #define max(a,b) \
     ({ __typeof__ (a) _a = (a);\
        __typeof__ (b) _b = (b); \
@@ -201,7 +202,7 @@ model* setup(const parameters p,const parameters p2,const LayerNumbers lcount,co
    // printout_struct(&p2,"parameters",outdir,1);    //save the second parameters object and display everything
     const layer l1  = setuplayer(p);
     const layer l2  = lcount==DUALLAYER?setuplayer(p2):l1;
-    const model m   = {.layer1=l1,.layer2=l2,.NoLayers=lcount};
+    const model m   = {.layer1=l1,.layer2=l2,.NoLayers=lcount,.animal=calloc(sizeof(animal),1)};
     model* m2       = malloc(sizeof(m));
     memcpy(m2,&m,sizeof(m));
     char* buffer = malloc(1024);

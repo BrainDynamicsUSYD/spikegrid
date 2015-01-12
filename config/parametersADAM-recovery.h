@@ -173,8 +173,8 @@ static const model_features Features =
     .Theta      = OFF,
     .Timestep   = 0.05, // Works in like with 0.1 for midpoint. But if gE too small should addition be smaller too???
     .Simlength  = 1e4,
-    .Outprefix  = "testout",  // Make empty to keep in current directory
-    .output = {{ .method=TEXT,.Output=0,.Delay=20}, { .method=TEXT,.Output=1,.Delay=20}, { .method=TEXT,.Output=5,.Delay=20}, { .method=TEXT,.Output=7,.Delay=20}, { .method=SPIKES, .Output=15, .Delay=1}}, 
+    .Outprefix  = "",  // Make empty to keep in current directory
+    .output = {{ .method=VIDEO,.Output=5,.Delay=20}, { .method=PICTURE,.Output=5,.Delay=20}}, 
     // .job=
     // { 
     //     .initcond=RAND_JOB,  //random - run a few times to be sure
@@ -188,7 +188,7 @@ static const sweepable Sweep =
     .offset=offsetof(parameters,recovery)+offsetof(recovery_parameters,Wcv),
     .minval = 0,
     .maxval = 0.5,
-    .count = 25,
+    .count = 50,
     .SweepEx = ON,
     .SweepIn = ON,
 };

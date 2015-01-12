@@ -39,8 +39,11 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
             if (L.Layer_is_inhibitory) {str = (-str);} //invert strength for inhib conns.
             if (numfirings > 0) //only fire if we had a spike.
             {
-                evolvept_duallayer(x,y,L.connections,str,(L.Layer_is_inhibitory?gI:gE)); //side note evolvegen doesn't currently work with singlelayer - should probably fix
-                if (Features.STDP==ON)
+                if (Features.STDP==OFF)
+                {
+                    evolvept_duallayer(x,y,L.connections,str,(L.Layer_is_inhibitory?gI:gE)); //side note evolvegen doesn't currently work with singlelayer - should probably fix
+                }
+                else
                 {
                     evolvept_duallayer_STDP(x,y,L.connections,L.STDP_data->connections,str,(L.Layer_is_inhibitory?gI:gE));
                 }

@@ -8,8 +8,8 @@ void AnimalEffects(const animal a,Compute_float* gE)
 }
 void MoveAnimal(animal* a, const Compute_float timemillis)
 {
-    const Compute_float rad = (Compute_float)grid_size/3.0;
-    const Compute_float period = 10.0;
+    const Compute_float rad = (Compute_float)grid_size/3.0; //use 3 here to avoid any issues with the boundary
+    const Compute_float period = 30.0;
     a->X=(Compute_float)(grid_size/2) + rad*sin(timemillis/period);
     a->Y=(Compute_float)(grid_size/2) + rad*cos(timemillis/period);
 }

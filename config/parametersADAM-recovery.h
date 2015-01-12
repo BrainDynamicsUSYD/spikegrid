@@ -172,9 +172,10 @@ static const model_features Features =
     .STD        = OFF,  //if we need any of these features we can make the changes then.
     .Theta      = OFF,
     .Timestep   = 0.05, // Works in like with 0.1 for midpoint. But if gE too small should addition be smaller too???
-    .Simlength  = 1e4,
+    .Simlength  = 2e4,
     .Outprefix  = "",  // Make empty to keep in current directory
     .output = {{ .method=VIDEO,.Output=5,.Delay=20}, { .method=PICTURE,.Output=5,.Delay=20}}, 
+    //.output = {{ .method=PICTURE,.Output=5,.Delay=20}}, 
     // .job=
     // { 
     //     .initcond=RAND_JOB,  //random - run a few times to be sure
@@ -185,11 +186,12 @@ static const model_features Features =
 static const sweepable Sweep =
 {
     //.offset=offsetof(parameters,couple)+offsetof(couple_parameters,Layer_parameters)+offsetof(duallayer_parameters,W),
-    .offset=offsetof(parameters,recovery)+offsetof(recovery_parameters,Wcv),
-    .minval = 0,
-    .maxval = 0.5,
-    .count = 50,
-    .SweepEx = ON,
+    .offset=offsetof(parameters,couple)+offsetof(couple_parameters,Layer_parameters)+offsetof(duallayer_parameters,synapse)+offsetof(decay_parameters,D),
+    //.offset=offsetof(parameters,recovery)+offsetof(recovery_parameters,Wcv),
+    .minval = 1,
+    .maxval = 10,
+    .count = 49,
+    .SweepEx = OFF,
     .SweepIn = ON,
 };
 

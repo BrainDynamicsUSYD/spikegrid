@@ -78,11 +78,6 @@ layer setuplayer(const parameters p)
             Synapse_timecourse_cache((unsigned int)cap,p.couple.Layer_parameters.single.In,Features.Timestep):NULL,
         .Mytimecourse       = p.couple.Layertype==DUALLAYER?
            Synapse_timecourse_cache((unsigned int)cap,p.couple.Layer_parameters.dual.synapse,Features.Timestep):NULL,
-        .rcinfo =
-            {
-                .randconns          = Features.Random_connections==ON?
-                    calloc(sizeof(randomconnection),(size_t)(grid_size*grid_size*p.random.numberper)):NULL
-            },
         .P                  = (parameters*)newdata(&p,sizeof(p)),
         .voltages           = calloc(sizeof(Compute_float),grid_size*grid_size),
         .voltages_out       = calloc(sizeof(Compute_float),grid_size*grid_size),

@@ -48,7 +48,7 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
                     evolvept_duallayer_STDP(x,y,L.connections,L.STDP_data->connections,str,(L.Layer_is_inhibitory?gI:gE));
                 }
             }
-            if (Features.Random_connections == ON)
+            if (Features.Random_connections == ON && Features.RCS_fromOne == OFF || (x==0 && y==0))
             {
                 const int randbase = (x*grid_size+y)*(int)L.P->random.numberper;
                 for (int i=0;i<(int)L.P->random.numberper;i++)

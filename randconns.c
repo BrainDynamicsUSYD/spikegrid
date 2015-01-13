@@ -7,6 +7,7 @@
 randconns_info init_randconns(const randconn_parameters rparam,const couple_parameters couple)
 {
     randconns_info rcinfo;
+    rcinfo.randconns= calloc(sizeof(randomconnection),(size_t)(grid_size*grid_size*rparam.numberper));
     //creat a rather ridiculously sized matrix
     //allows for 10x the avg number of connections per point.  Incredibly wasteful.  It would be really nice to have some c++ vectors here
     const unsigned int overkill_factor = 10;
@@ -16,30 +17,34 @@ randconns_info init_randconns(const randconn_parameters rparam,const couple_para
     Compute_float* interestingconns;
     Non_zerocouplings(couple,&interestingconns,&nonzcount);
     srandom((unsigned)0);
+    const Compute_float Strmod = Features.RCS_fromOne==ON?One:(One - couple.normalization_parameters.glob_mult.GM);
     for (unsigned int x=0;x<grid_size;x++)
     {
         for (unsigned int y=0;y<grid_size;y++)
         {
-            for (unsigned int i=0;i<rparam.numberper;i++)
+            if (Features.RCS_fromOne==OFF || (x==0 && y==0))
             {
-                const randomconnection rc =
+                for (unsigned int i=0;i<rparam.numberper;i++)
                 {
-                    .strength = interestingconns[random()%nonzcount] * (One - couple.normalization_parameters.glob_mult.GM),
-                    .stdp_strength = Zero,
-                    .destination =
+                    const randomconnection rc =
                     {
-                        .x = (Neuron_coord)(((Compute_float)(random()) / (Compute_float)RAND_MAX) * (Compute_float)grid_size),
-                        .y = (Neuron_coord)(((Compute_float)(random()) / (Compute_float)RAND_MAX) * (Compute_float)grid_size),
+                        .strength = interestingconns[random()%nonzcount] * Strmod,
+                        .stdp_strength = Zero,
+                        .destination =
+                        {
+                            .x = (Neuron_coord)(((Compute_float)(random()) / (Compute_float)RAND_MAX) * (Compute_float)grid_size),
+                            .y = (Neuron_coord)(((Compute_float)(random()) / (Compute_float)RAND_MAX) * (Compute_float)grid_size),
+                        }
+                    };
+                    rcinfo.randconns[(x*grid_size+y)*rparam.numberper + i] = rc;
+                    //the normal matrix stores by where they come from.  Also need to store where they got to.
+                    bigmat[(rc.destination.x*grid_size+rc.destination.y)*(int)rparam.numberper*(int)overkill_factor + (int)bigmatcounts[rc.destination.x*grid_size+rc.destination.y]]=&rcinfo.randconns[(x*grid_size+y)*rparam.numberper + i];
+                    bigmatcounts[rc.destination.x*grid_size+rc.destination.y]++;
+                    if(bigmatcounts[rc.destination.x*grid_size+rc.destination.y] > overkill_factor*rparam.numberper)
+                    {
+                        printf("Overkill factor is not large enough - please make it bigger at dx = %i dy = %i\n",rc.destination.x,rc.destination.y);
+                        exit(EXIT_FAILURE);
                     }
-                };
-                rcinfo.randconns[(x*grid_size+y)*rparam.numberper + i] = rc;
-                //the normal matrix stores by where they come from.  Also need to store where they got to.
-                bigmat[(rc.destination.x*grid_size+rc.destination.y)*(int)rparam.numberper*(int)overkill_factor + (int)bigmatcounts[rc.destination.x*grid_size+rc.destination.y]]=&rcinfo.randconns[(x*grid_size+y)*rparam.numberper + i];
-                bigmatcounts[rc.destination.x*grid_size+rc.destination.y]++;
-                if(bigmatcounts[rc.destination.x*grid_size+rc.destination.y] > overkill_factor*rparam.numberper)
-                {
-                    printf("Overkill factor is not large enough - please make it bigger at dx = %i dy = %i\n",rc.destination.x,rc.destination.y);
-                    exit(EXIT_FAILURE);
                 }
             }
         }

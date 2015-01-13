@@ -14,7 +14,6 @@
 #include "out/out.h"
 #include "utils.h"
 #include "animal.h"
-#include "randconns.h"
 #define max(a,b) \
     ({ __typeof__ (a) _a = (a);\
        __typeof__ (b) _b = (b); \

@@ -4,7 +4,6 @@
 #include "randconns.h"
 #include "paramheader.h"
 #include "coupling.h"
-#include "STDP.h"
 randconns_info init_randconns(const randconn_parameters rparam,const couple_parameters couple)
 {
     randconns_info rcinfo;

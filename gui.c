@@ -1,4 +1,5 @@
 /// \file
+#include <stdlib.h>
 #include "output.h"
 #include "tagged_array.h"
 #include "opencv/cv.h"

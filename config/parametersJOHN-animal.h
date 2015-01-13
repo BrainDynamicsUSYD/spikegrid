@@ -42,9 +42,10 @@ static const parameters OneLayerModel = {.couple={0}}; //since unused - shortes 
 
 #define STDPparams .STDP=   \
     {                       \
-        .stdp_limit=0.5,    \
+        .stdp_limit=0.5,   \
         .stdp_tau=20,       \
-        .stdp_strength=0.0000  \
+        .stdp_strength=0.005, \
+        .STDP_on=ON         \
     }
 ///parameters for the inhibitory layer of the double layer model
 static const parameters DualLayerModelIn =

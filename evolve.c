@@ -10,6 +10,7 @@
 #include "model.h"
 #include "localstim.h"
 #include "animal.h"
+#include "randconns.h"
 #ifdef ANDROID
     #define APPNAME "myapp"
     #include <android/log.h>

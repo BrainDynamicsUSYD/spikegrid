@@ -7,7 +7,6 @@
 #include "STDP.h"
 #include "layer.h"
 #include "sizes.h"
-#include "randconns.h"
 typedef struct
 {
     Compute_float Strength_increase;

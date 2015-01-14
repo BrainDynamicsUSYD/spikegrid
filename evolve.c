@@ -50,13 +50,13 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
             }
             if (Features.Random_connections == ON )
             {
-                const int randbase = (x*grid_size+y)*(int)L.P->random.numberper;
-                for (int i=0;i<(int)L.P->random.numberper;i++)
+                unsigned int norand;
+                const randomconnection* rcs = GetRandomConnsLeaving(x,y,L.rcinfo,&L.P->random,&norand);
+                for (unsigned int i=0;i<norand;i++)
                 {
-                    const randomconnection rc = L.rcinfo.randconns[randbase+i];
-                    const int condindex = Conductance_index(rc.destination.x,rc.destination.y);
-                    if (L.Layer_is_inhibitory) {gI[condindex] += str * rc.strength;}
-                    else                       {gE[condindex] += str * rc.strength;}
+                    const int condindex = Conductance_index(rcs[i].destination.x,rcs[i].destination.y);
+                    if (L.Layer_is_inhibitory) {gI[condindex] += str * rcs[i].strength;}
+                    else                       {gE[condindex] += str * rcs[i].strength;}
                 }
             }
         }

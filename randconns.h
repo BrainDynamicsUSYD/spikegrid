@@ -2,6 +2,7 @@
 #define RANDCONNS
 #include "typedefs.h"
 typedef struct coords {Neuron_coord x; /**<x coord*/Neuron_coord y;/**<y coord*/} coords;
+typedef struct randconn_parameters randconn_parameters;
 typedef struct randomconnection
 {
     Compute_float   strength;
@@ -18,4 +19,6 @@ typedef struct randconns_info
 } randconns_info;
 
 randconns_info init_randconns();
+
+randomconnection* GetRandomConnsLeaving(const int x,const int y,const randconns_info rcinfo,const randconn_parameters* const rparam, unsigned int* numberconns);
 #endif

@@ -72,3 +72,9 @@ randconns_info init_randconns(const randconn_parameters rparam,const couple_para
     free(bigmatcounts);
     return rcinfo;
 }
+randomconnection* GetRandomConnsLeaving(const int x,const int y,const randconns_info rcinfo,const randconn_parameters* const rparam, unsigned int* numberconns)
+{
+    const int randbase=(x*grid_size+y)+(int)rparam->numberper;
+    *numberconns = rparam->numberper;
+    return &(rcinfo.randconns[randbase]);
+}

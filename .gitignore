@@ -46,3 +46,4 @@ libcv
 *.o
 local_output/*
 .nfs*
+*.swo

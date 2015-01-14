@@ -206,8 +206,8 @@ void processopts (int argc,char** argv,parameters** newparam,parameters** newpar
                     }
                     else
                     {
-                        *newparamEx =Sweep.SweepEx==ON?GetNthParam(DualLayerModelEx,Sweep,(unsigned int)jobnumber):NULL;
-                        *newparamIn =Sweep.SweepIn==ON?GetNthParam(DualLayerModelIn,Sweep,(unsigned int)jobnumber):NULL;
+                        *newparamEx =Sweep.SweepEx==ON?GetNthParam(DualLayerModelEx,Sweep,(unsigned int)yossarianjobnumber):NULL;
+                        *newparamIn =Sweep.SweepIn==ON?GetNthParam(DualLayerModelIn,Sweep,(unsigned int)yossarianjobnumber):NULL;
                     }
                 }
                 break;

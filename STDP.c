@@ -147,7 +147,7 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
                        const int destidx2 = ((rc.destination.x * grid_size) + y)*data2->lags.lagsperpoint;
                        STDP_change rcchange   = STDP_change_calc(destidx,destidx2,S,S2,data->lags.lags,data2->lags.lags);
                        rc.stdp_strength       = clamp(rc.stdp_strength+rcchange.Strength_increase,rc.strength,S.stdp_limit);
-                       //                                             ^ note plus sign (not minus)
+                       //                                             ^ note plus sign (not minus) why?? - I assume the strengths are reversed
                    }
                 }
             }

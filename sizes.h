@@ -12,3 +12,5 @@
 #define STDP_RANGE couplerange
 #define STDP_RANGE_SQUARED (STDP_RANGE*STDP_RANGE)
 #define STDP_array_size (2*STDP_RANGE  + 1)
+
+static inline int Conductance_index(const int x,const int y) {return (x+couplerange)*conductance_array_size+y+couplerange;}

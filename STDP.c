@@ -7,7 +7,6 @@
 #include "STDP.h"
 #include "layer.h"
 #include "sizes.h"
-#include "randconns.h"
 typedef struct
 {
     Compute_float Strength_increase;
@@ -15,7 +14,7 @@ typedef struct
     on_off        valid;
 } STDP_change;
 
-//gcc thinks that this can be const - but I think the read of timestep prevents this - not sure what is going on
+//gcc thinks that this can be const - but I think the read of timestep prevents this - not sure what is going on - maybe timestep gets inlined?
 Compute_float __attribute__((pure)) STDP_strength(const STDP_parameters S,const Compute_float lag) //implicitrly assumed that the function is odd
 {
     return  S.stdp_strength * exp(-lag*Features.Timestep/S.stdp_tau);
@@ -129,15 +128,15 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
                 }
                 if (Features.Random_connections == ON)
                 {
-                    const unsigned int basercidx = (unsigned int)(x*grid_size+y) * rparams->numberper ;
+                    unsigned int norand;
+                    randomconnection* randconns = GetRandomConnsLeaving(x,y,*rcs,rparams,&norand);
                     //random connections away from (x,y) - these will be getting decreased
-                    for (unsigned int i = 0;i<rparams->numberper;i++)
+                    for (unsigned int i = 0;i<norand;i++)
                     {
-                        randomconnection rc    = rcs->randconns[basercidx + i];
-                        const int destidx  = ((rc.destination.x * grid_size) + y)*data->lags.lagsperpoint;
-                        const int destidx2 = ((rc.destination.x * grid_size) + y)*data2->lags.lagsperpoint;
+                        const int destidx  = ((randconns[i].destination.x * grid_size) + y)*data->lags.lagsperpoint;
+                        const int destidx2 = ((randconns[i].destination.x * grid_size) + y)*data2->lags.lagsperpoint;
                         STDP_change rcchange   = STDP_change_calc(destidx,destidx2,S,S2,data->lags.lags,data2->lags.lags);
-                        rc.stdp_strength       = clamp(rc.stdp_strength-rcchange.Strength_decrease,rc.strength,S.stdp_limit);
+                        randconns[i].stdp_strength       = clamp(randconns[i].stdp_strength-rcchange.Strength_decrease,randconns[i].strength,S.stdp_limit);
                     }
                     //random connections to (x,y) - these will be getting increased - code is almost identical - except sign of change is reversed
                    randomconnection** rcbase = rcs->randconns_reverse_lookup[x*grid_size+y];
@@ -148,7 +147,7 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
                        const int destidx2 = ((rc.destination.x * grid_size) + y)*data2->lags.lagsperpoint;
                        STDP_change rcchange   = STDP_change_calc(destidx,destidx2,S,S2,data->lags.lags,data2->lags.lags);
                        rc.stdp_strength       = clamp(rc.stdp_strength+rcchange.Strength_increase,rc.strength,S.stdp_limit);
-                       //                                             ^ note plus sign (not minus)
+                       //                                             ^ note plus sign (not minus) why?? - I assume the strengths are reversed
                    }
                 }
             }

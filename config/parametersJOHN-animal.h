@@ -89,6 +89,7 @@ static const parameters DualLayerModelEx =
     },
     STDPparams,
     potparams,
+    .random= {.numberper=100,.str=1.0},
     .skip=1,
 };
 ///Some global features that can be turned on and off
@@ -99,12 +100,13 @@ static const model_features Features =
     .Timestep   = 0.1,
     .Simlength  = 10000,
     .UseAnimal     = ON,
+    .Random_connections=ON,
 };
 ///Constant external input to conductances
 static const extinput Extinput =
 {
     .gE0 = 0.0,
-    .gI0 = 0.0,
+    .gI0 = 0.05,
 };
 ///Parameters for conducting a parameter sweep.
 static const sweepable Sweep =

@@ -4,10 +4,10 @@
 #include "randconns.h"
 #include "paramheader.h"
 #include "coupling.h"
-#include "STDP.h"
 randconns_info init_randconns(const randconn_parameters rparam,const couple_parameters couple)
 {
     randconns_info rcinfo;
+    rcinfo.randconns= calloc(sizeof(randomconnection),(size_t)(grid_size*grid_size*rparam.numberper));
     //creat a rather ridiculously sized matrix
     //allows for 10x the avg number of connections per point.  Incredibly wasteful.  It would be really nice to have some c++ vectors here
     const unsigned int overkill_factor = 10;
@@ -17,6 +17,7 @@ randconns_info init_randconns(const randconn_parameters rparam,const couple_para
     Compute_float* interestingconns;
     Non_zerocouplings(couple,&interestingconns,&nonzcount);
     srandom((unsigned)0);
+    const Compute_float Strmod = One - couple.normalization_parameters.glob_mult.GM;
     for (unsigned int x=0;x<grid_size;x++)
     {
         for (unsigned int y=0;y<grid_size;y++)
@@ -25,7 +26,7 @@ randconns_info init_randconns(const randconn_parameters rparam,const couple_para
             {
                 const randomconnection rc =
                 {
-                    .strength = interestingconns[random()%nonzcount] * (One - couple.normalization_parameters.glob_mult.GM),
+                    .strength = interestingconns[random()%nonzcount] * Strmod,
                     .stdp_strength = Zero,
                     .destination =
                     {
@@ -70,4 +71,10 @@ randconns_info init_randconns(const randconn_parameters rparam,const couple_para
     free(bigmat);
     free(bigmatcounts);
     return rcinfo;
+}
+randomconnection* GetRandomConnsLeaving(const int x,const int y,const randconns_info rcinfo,const randconn_parameters* const rparam, unsigned int* numberconns)
+{
+    const int randbase=(x*grid_size+y)+(int)rparam->numberper;
+    *numberconns = rparam->numberper;
+    return &(rcinfo.randconns[randbase]);
 }

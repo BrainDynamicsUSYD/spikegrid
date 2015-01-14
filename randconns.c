@@ -17,31 +17,36 @@ randconns_info init_randconns(const randconn_parameters rparam,const couple_para
     Compute_float* interestingconns;
     Non_zerocouplings(couple,&interestingconns,&nonzcount);
     srandom((unsigned)0);
-    const Compute_float Strmod = One - couple.normalization_parameters.glob_mult.GM;
+    const Compute_float Strmod = Features.FixedRCStart==ON?100.0: One - couple.normalization_parameters.glob_mult.GM;
+    printf("STrmod is %f\n",Strmod);
     for (unsigned int x=0;x<grid_size;x++)
     {
         for (unsigned int y=0;y<grid_size;y++)
         {
-            for (unsigned int i=0;i<rparam.numberper;i++)
+            if (Features.FixedRCStart == OFF || (x==0 && y==0))
             {
-                const randomconnection rc =
+                for (unsigned int i=0;i<rparam.numberper;i++)
                 {
-                    .strength = interestingconns[random()%nonzcount] * Strmod,
-                    .stdp_strength = Zero,
-                    .destination =
+                    const randomconnection rc =
                     {
-                        .x = (Neuron_coord)(((Compute_float)(random()) / (Compute_float)RAND_MAX) * (Compute_float)grid_size),
-                        .y = (Neuron_coord)(((Compute_float)(random()) / (Compute_float)RAND_MAX) * (Compute_float)grid_size),
+                        .strength = interestingconns[random()%nonzcount] * Strmod,
+                        .stdp_strength = Zero,
+                        .destination =
+                        {
+                            .x = (Neuron_coord)(((Compute_float)(random()) / (Compute_float)RAND_MAX) * (Compute_float)grid_size),
+                            .y = (Neuron_coord)(((Compute_float)(random()) / (Compute_float)RAND_MAX) * (Compute_float)grid_size),
+                        }
+                    };
+                    printf("on init rc str = %f\n",rc.strength);
+                    rcinfo.randconns[(x*grid_size+y)*rparam.numberper + i] = rc;
+                    //the normal matrix stores by where they come from.  Also need to store where they got to.
+                    bigmat[(rc.destination.x*grid_size+rc.destination.y)*(int)rparam.numberper*(int)overkill_factor + (int)bigmatcounts[rc.destination.x*grid_size+rc.destination.y]]=&rcinfo.randconns[(x*grid_size+y)*rparam.numberper + i];
+                    bigmatcounts[rc.destination.x*grid_size+rc.destination.y]++;
+                    if(bigmatcounts[rc.destination.x*grid_size+rc.destination.y] > overkill_factor*rparam.numberper)
+                    {
+                        printf("Overkill factor is not large enough - please make it bigger at dx = %i dy = %i\n",rc.destination.x,rc.destination.y);
+                        exit(EXIT_FAILURE);
                     }
-                };
-                rcinfo.randconns[(x*grid_size+y)*rparam.numberper + i] = rc;
-                //the normal matrix stores by where they come from.  Also need to store where they got to.
-                bigmat[(rc.destination.x*grid_size+rc.destination.y)*(int)rparam.numberper*(int)overkill_factor + (int)bigmatcounts[rc.destination.x*grid_size+rc.destination.y]]=&rcinfo.randconns[(x*grid_size+y)*rparam.numberper + i];
-                bigmatcounts[rc.destination.x*grid_size+rc.destination.y]++;
-                if(bigmatcounts[rc.destination.x*grid_size+rc.destination.y] > overkill_factor*rparam.numberper)
-                {
-                    printf("Overkill factor is not large enough - please make it bigger at dx = %i dy = %i\n",rc.destination.x,rc.destination.y);
-                    exit(EXIT_FAILURE);
                 }
             }
         }
@@ -74,7 +79,15 @@ randconns_info init_randconns(const randconn_parameters rparam,const couple_para
 }
 randomconnection* GetRandomConnsLeaving(const int x,const int y,const randconns_info rcinfo,const randconn_parameters* const rparam, unsigned int* numberconns)
 {
-    const int randbase=(x*grid_size+y)+(int)rparam->numberper;
-    *numberconns = rparam->numberper;
-    return &(rcinfo.randconns[randbase]);
+    const int randbase=(x*grid_size+y)*(int)rparam->numberper;
+    if ((x==0 && y==0) || Features.FixedRCStart==OFF)
+    {
+        *numberconns = rparam->numberper;
+        return &(rcinfo.randconns[randbase]);
+    }
+    else
+    {
+        *numberconns=0;
+        return NULL;
+    }
 }

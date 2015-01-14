@@ -1,6 +1,7 @@
 /// \file
 #include <string.h> //memset
 #include <stdlib.h> //random
+#include <stdio.h>
 #include "theta.h"
 #include "STDP.h"
 #include "evolvegen.h"
@@ -48,7 +49,7 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
                     evolvept_duallayer_STDP(x,y,L.connections,L.STDP_data->connections,str,(L.Layer_is_inhibitory?gI:gE));
                 }
             }
-            if (Features.Random_connections == ON )
+            if (Features.Random_connections == ON && !L.Layer_is_inhibitory )
             {
                 unsigned int norand;
                 const randomconnection* rcs = GetRandomConnsLeaving(x,y,L.rcinfo,&L.P->random,&norand);

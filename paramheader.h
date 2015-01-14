@@ -156,6 +156,7 @@ typedef struct model_features
     const on_off LocalStim;         ///< Is the local stimulus on
     const output_parameters output[10];         ///<What things do you want to output 10 outputs should be enough (but limit is arbitrary)
     const on_off UseAnimal;
+    const on_off FixedRCStart;
 } model_features;
 
 ///Structure that holds all the parameters for a layer

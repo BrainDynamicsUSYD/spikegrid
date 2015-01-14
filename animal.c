@@ -5,7 +5,7 @@
 void AnimalEffects(const animal a,Compute_float* gE)
 {
     ApplyLocalBoost(gE,(int)a.X,(int)a.Y);
-    if (fabs(a.X - (Compute_float)(grid_size/2)) < 0.1) {gE[couplerange*conductance_array_size + couplerange] += 10;}
+    if (fabs(a.X - (Compute_float)(grid_size/2)) < 0.1) {gE[couplerange*conductance_array_size + couplerange] += 30;}
 }
 void MoveAnimal(animal* a, const Compute_float timemillis)
 {

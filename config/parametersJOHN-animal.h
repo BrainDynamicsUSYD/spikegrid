@@ -89,7 +89,7 @@ static const parameters DualLayerModelEx =
     },
     STDPparams,
     potparams,
-    .random= {.numberper=100,.str=1.0},
+    .random= {.numberper=10,.str=1000.0},
     .skip=1,
 };
 ///Some global features that can be turned on and off
@@ -101,6 +101,7 @@ static const model_features Features =
     .Simlength  = 10000,
     .UseAnimal     = ON,
     .Random_connections=ON,
+    .FixedRCStart   = ON,
 };
 ///Constant external input to conductances
 static const extinput Extinput =

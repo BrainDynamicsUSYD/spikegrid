@@ -48,15 +48,15 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
                     evolvept_duallayer_STDP(x,y,L.connections,L.STDP_data->connections,str,(L.Layer_is_inhibitory?gI:gE));
                 }
             }
-            if (Features.Random_connections == ON && Features.RCS_fromOne == OFF || (x==0 && y==0))
+            if (Features.Random_connections == ON )
             {
                 const int randbase = (x*grid_size+y)*(int)L.P->random.numberper;
                 for (int i=0;i<(int)L.P->random.numberper;i++)
                 {
                     const randomconnection rc = L.rcinfo.randconns[randbase+i];
-                    const int condindex = (rc.destination.x + couplerange) * conductance_array_size + rc.destination.y + couplerange;
+                    const int condindex = Conductance_index(rc.destination.x,rc.destination.y);
                     if (L.Layer_is_inhibitory) {gI[condindex] += str * rc.strength;}
-                    else  {gE[condindex] += str * rc.strength;}
+                    else                       {gE[condindex] += str * rc.strength;}
                 }
             }
         }
@@ -127,7 +127,7 @@ void CalcVoltages(const Compute_float* const __restrict__ Vinput,
     {
         for (int y=0;y<grid_size;y++)
         {
-            const int idx = (x+couplerange)*conductance_array_size + y + couplerange; //index for gE/gI
+            const int idx =Conductance_index(x,y);
             const int idx2=  x*grid_size+y;
             const Compute_float rhs = rhs_func(Vinput[idx2],gE[idx],gI[idx],C);
             Vout[idx2]=Vinput[idx2]+Features.Timestep*rhs;
@@ -149,7 +149,7 @@ void CalcRecoverys(const Compute_float* const __restrict__ Vinput,
     {
         for (int y=0;y<grid_size;y++)
         {   //step all neurons through time - use Euler method
-            const int idx = (x+couplerange)*conductance_array_size + y + couplerange; //index for gE/gI
+            const int idx = Conductance_index(x,y);
             const int idx2 = x*grid_size+y;       //index for voltage/recovery
             const Compute_float rhsV=rhs_func(Vinput[idx2],gE[idx],gI[idx],C)-Winput[idx2];
             const Compute_float rhsW=R.Wcv*(R.Wir*(Vinput[idx2]-C.Vlk) - Winput[idx2]);

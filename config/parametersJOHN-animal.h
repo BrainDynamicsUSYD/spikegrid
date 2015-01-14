@@ -100,14 +100,13 @@ static const model_features Features =
     .Timestep   = 0.1,
     .Simlength  = 10000,
     .UseAnimal     = ON,
-    .RCS_fromOne    = ON,
     .Random_connections=ON,
 };
 ///Constant external input to conductances
 static const extinput Extinput =
 {
     .gE0 = 0.0,
-    .gI0 = 0.0,
+    .gI0 = 0.05,
 };
 ///Parameters for conducting a parameter sweep.
 static const sweepable Sweep =

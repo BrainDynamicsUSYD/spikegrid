@@ -62,7 +62,7 @@ STDP_change STDP_change_calc (const int destneuronidx,const int destinotherlayer
         ret.Strength_increase += STDP_strength(S2,revlags[destneuronidx+idx]);
         //the connection from the other layer to the current layer uses the other layer parameters
         //slightly arbitrary but feels correct and maintains the sum of STDP=0 when window function is odd.
-        ret.Strength_decrease += STDP_strength(S, revlags[destneuronidx+idx]); 
+        ret.Strength_decrease += STDP_strength(S, revlags[destneuronidx+idx]);
         idx++;
     }
     return ret;
@@ -76,8 +76,8 @@ void STDP_At_point(const int x, const int y,STDP_data* const data,STDP_data* con
     const int wx = wrap(x+xoffset);
     const int wy = wrap(y+yoffset);
     //calculate the indexes for the neuron we are connected to and compute the offsets
-    const int baseidx = (wx*grid_size + wy) * data->lags.lagsperpoint;
-    const int baseidx2 = (wx*grid_size + wy) * revdata->lags.lagsperpoint;
+    const int baseidx = LagIdx(wx,wy,data->lags);
+    const int baseidx2 = LagIdx(wx,wy,revdata->lags);
     STDP_change change = STDP_change_calc(baseidx,baseidx2,S,S2,data->lags.lags,revdata->lags.lags);
     if (change.valid==ON)
     {
@@ -108,7 +108,7 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
     {
         for (int y=0;y<grid_size;y++)
         {
-            const int baseidx = (x*grid_size + y)*data->lags.lagsperpoint;
+            const int baseidx = LagIdx(x,y,data->lags);
             //first - check if the neuron has fired this timestep
             int idx = 0;
             while (data->lags.lags[baseidx + idx] != -1)
@@ -133,8 +133,8 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
                     //random connections away from (x,y) - these will be getting decreased
                     for (unsigned int i = 0;i<norand;i++)
                     {
-                        const int destidx  = ((randconns[i].destination.x * grid_size) + randconns[i].destination.y)*data->lags.lagsperpoint;
-                        const int destidx2 = ((randconns[i].destination.x * grid_size) + randconns[i].destination.y)*data2->lags.lagsperpoint;
+                        const int destidx  = LagIdx(randconns[i].destination.x,randconns[i].destination.y,data->lags);
+                        const int destidx2 = LagIdx(randconns[i].destination.x,randconns[i].destination.y,data2->lags);
                         STDP_change rcchange   = STDP_change_calc(destidx,destidx2,S,S2,data->lags.lags,data2->lags.lags);
                         randconns[i].stdp_strength       = clamp(randconns[i].stdp_strength-rcchange.Strength_decrease*50.0,randconns[i].strength,S.stdp_limit*1000.0);
                     }
@@ -143,8 +143,8 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
                    for (unsigned int i=0;i<rcs->rev_pp[x*grid_size+y];i++)
                    {
                        randomconnection rc = *rcbase[i];
-                       const int destidx  = ((rc.destination.x * grid_size) + rc.destination.y)*data->lags.lagsperpoint;
-                       const int destidx2 = ((rc.destination.x * grid_size) + rc.destination.y)*data2->lags.lagsperpoint;
+                       const int destidx  = LagIdx(rc.destination.x,rc.destination.y,data->lags);
+                       const int destidx2 = LagIdx(rc.destination.x,rc.destination.y,data2->lags);
                        STDP_change rcchange   = STDP_change_calc(destidx,destidx2,S,S2,data->lags.lags,data2->lags.lags);
                        rc.stdp_strength       = clamp(rc.stdp_strength+rcchange.Strength_increase*50.0,rc.strength,S.stdp_limit*1000.0);
                        //                                             ^ note plus sign (not minus) why?? - I assume the strengths are reversed
@@ -161,23 +161,9 @@ STDP_data* STDP_init(const STDP_parameters S,const int trefrac_in_ts)
     const int stdplagcount = (int)((STDP_cap/trefrac_in_ts)+2);
     STDP_data D =
     {
-        .lags =
-        {
-            .lags         = calloc(sizeof(int16_t),grid_size*grid_size*(size_t)stdplagcount),
-            .cap          = STDP_cap,
-            .lagsperpoint = stdplagcount
-        },
+        .lags = lagstorage_init(stdplagcount,STDP_cap),
         .connections =  calloc(sizeof(Compute_float),grid_size*grid_size*STDP_array_size*STDP_array_size)
-
     };
-    for (int x = 0;x<grid_size;x++)
-    {
-        for (int y = 0;y<grid_size;y++)
-        {
-            D.lags.lags[(x*grid_size+y)*D.lags.lagsperpoint]=-1;
-        }
-    }
-
     memcpy(ret,&D,sizeof(*ret));
     return ret;
 }

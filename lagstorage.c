@@ -14,7 +14,7 @@ lagstorage lagstorage_init(const int flagcount,const int cap)
     { //initialize firing lags - essentially sets up an initial condition with no spikes in the past.  If you wanted spikes before the start of the simulation - change this
         for (int y = 0;y<grid_size;y++)
         {
-            firinglags.lags[(x*grid_size+y)*firinglags.lagsperpoint]= -1;
+            firinglags.lags[LagIdx(x,y,firinglags)]= -1;
         }
     }
     return firinglags;

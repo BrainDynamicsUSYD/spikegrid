@@ -1,4 +1,6 @@
 /// \file
+#ifndef SIZES
+#define SIZES
 #define PARAMETERS
 #include "whichparam.h"
 #undef  PARAMETERS
@@ -14,3 +16,4 @@
 #define STDP_array_size (2*STDP_RANGE  + 1)
 
 static inline int Conductance_index(const int x,const int y) {return (x+couplerange)*conductance_array_size+y+couplerange;}
+#endif

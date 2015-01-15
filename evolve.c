@@ -171,9 +171,9 @@ void StoreFiring(layer* L)
             const int test = x % step ==0 && y % step ==0;
             if ((test && step > 0) || ((!test) && step<0)) //check if this is an active neuron
             {
-                const int baseidx=(x*grid_size+y)*L->firinglags.lagsperpoint;
+                const int baseidx=LagIdx(x,y,L->firinglags); 
                 modifyLags(&L->firinglags,baseidx);
-                if (Features.STDP==ON) {modifyLags(&L->STDP_data->lags,(x*grid_size+y)*L->STDP_data->lags.lagsperpoint);}
+                if (Features.STDP==ON) {modifyLags(&L->STDP_data->lags,LagIdx(x,y,L->STDP_data->lags));}
                 //now - add in new spikes
                 if (L->voltages_out[x*grid_size + y]  >= L->P->potential.Vpk)
                 {
@@ -183,7 +183,7 @@ void StoreFiring(layer* L)
                         L->recoverys_out[x*grid_size+y]+=L->P->recovery.Wrt;
                     }
                     AddnewSpike(&L->firinglags,baseidx);
-                    if (Features.STDP==ON) {AddnewSpike(&L->STDP_data->lags,(x*grid_size+y)*L->STDP_data->lags.lagsperpoint);}
+                    if (Features.STDP==ON) {AddnewSpike(&L->STDP_data->lags,LagIdx(x,y,L->STDP_data->lags));}
                 }//add random spikes
                 else if (((Compute_float)(random()))/((Compute_float)RAND_MAX) <
                         (L->P->potential.rate*((Compute_float)0.001)*Features.Timestep))

@@ -112,7 +112,7 @@ model* setup(const parameters p,const parameters p2,const LayerNumbers lcount,co
         }
         else
         {
-         sprintf(nostring,"%i-%i",yossarianjobnumber,jobnumber);   
+         sprintf(nostring,"%i-%i",yossarianjobnumber,jobnumber);
         }
         // Here it is... add the extra file.
         if (strlen(Features.Outprefix)==0)

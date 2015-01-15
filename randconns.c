@@ -17,8 +17,7 @@ randconns_info init_randconns(const randconn_parameters rparam,const couple_para
     Compute_float* interestingconns;
     Non_zerocouplings(couple,&interestingconns,&nonzcount);
     srandom((unsigned)0);
-    const Compute_float Strmod = Features.FixedRCStart==ON?100.0: One - couple.normalization_parameters.glob_mult.GM;
-    printf("STrmod is %f\n",Strmod);
+    const Compute_float Strmod = Features.FixedRCStart==ON?2.0: One - couple.normalization_parameters.glob_mult.GM;
     for (unsigned int x=0;x<grid_size;x++)
     {
         for (unsigned int y=0;y<grid_size;y++)
@@ -37,7 +36,6 @@ randconns_info init_randconns(const randconn_parameters rparam,const couple_para
                             .y = (Neuron_coord)(((Compute_float)(random()) / (Compute_float)RAND_MAX) * (Compute_float)grid_size),
                         }
                     };
-                    printf("on init rc str = %f\n",rc.strength);
                     rcinfo.randconns[(x*grid_size+y)*rparam.numberper + i] = rc;
                     //the normal matrix stores by where they come from.  Also need to store where they got to.
                     bigmat[(rc.destination.x*grid_size+rc.destination.y)*(int)rparam.numberper*(int)overkill_factor + (int)bigmatcounts[rc.destination.x*grid_size+rc.destination.y]]=&rcinfo.randconns[(x*grid_size+y)*rparam.numberper + i];

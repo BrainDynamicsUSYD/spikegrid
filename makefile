@@ -33,8 +33,8 @@ export matlabopencvldflags=$(shell for x in $$(pkg-config --libs opencv); do  fi
 #have to set rpath in the linker to get the right libs to link.  Also add in the extra flags
 export matlabopencvldflags:= -Wl,-rpath -Wl,${matlabdir} ${matlabopencvldflags} $(shell pkg-config --libs-only-l opencv)
 #set up some non-matlab variables
-export DEBUGFLAGS= -g -std=gnu11
-export CXXDEBUGFLAGS= -g --std=c++11
+export DEBUGFLAGS= -g -std=gnu11 ${DEFINES}
+export CXXDEBUGFLAGS= -g --std=c++11 ${DEFINES}
 export CLIBFLAGS= -fPIC -shared
 export LDFLAGS= -lm -g
 export opencvcflags=$(shell  pkg-config --cflags opencv)

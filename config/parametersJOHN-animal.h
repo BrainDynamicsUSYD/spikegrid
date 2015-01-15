@@ -42,7 +42,7 @@ static const parameters OneLayerModel = {.couple={0}}; //since unused - shortes 
 
 #define STDPparams .STDP=   \
     {                       \
-        .stdp_limit=0.5,   \
+        .stdp_limit=0.2,   \
         .stdp_tau=20,       \
         .stdp_strength=0.005, \
         .STDP_on=ON         \
@@ -89,7 +89,7 @@ static const parameters DualLayerModelEx =
     },
     STDPparams,
     potparams,
-    .random= {.numberper=10,.str=1000.0},
+    .random= {.numberper=5000,.str=1000.0},
     .skip=1,
 };
 ///Some global features that can be turned on and off
@@ -98,7 +98,7 @@ static const model_features Features =
     .STDP		= ON, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep -
     .STD        = OFF, //               if we need any of these features we can make the changes then.
     .Timestep   = 0.1,
-    .Simlength  = 10000,
+    .Simlength  = 1000000,
     .UseAnimal     = ON,
     .Random_connections=ON,
     .FixedRCStart   = ON,

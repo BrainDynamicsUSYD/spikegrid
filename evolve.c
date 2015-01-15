@@ -56,8 +56,8 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
                 for (unsigned int i=0;i<norand;i++)
                 {
                     const int condindex = Conductance_index(rcs[i].destination.x,rcs[i].destination.y);
-                    if (L.Layer_is_inhibitory) {gI[condindex] += str * rcs[i].strength;}
-                    else                       {gE[condindex] += str * rcs[i].strength;}
+                    if (L.Layer_is_inhibitory) {gI[condindex] += str * (rcs[i].strength + rcs[i].stdp_strength);}
+                    else                       {gE[condindex] += str * (rcs[i].strength + rcs[i].stdp_strength);}
                 }
             }
         }
@@ -250,7 +250,7 @@ void step1(model* m,const unsigned int time)
     if(Features.UseAnimal==ON)
     {
         MoveAnimal(m->animal,timemillis);
-        AnimalEffects(*m->animal,m->gE);
+        AnimalEffects(*m->animal,m->gE,time);
     }
     // Add spiking input to the conductances
     AddSpikes(m->layer1,m->gE,m->gI,time);

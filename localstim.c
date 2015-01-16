@@ -9,10 +9,9 @@ void ApplyLocalBoost(Compute_float* geIn,const int xcenter,const int ycenter)
     {
         for (int y=0;y<grid_size;y++)
         {
-            const int idx = (x+couplerange)*conductance_array_size + y + couplerange; //index for gE/gI
             const Compute_float rsq =(Compute_float) ((x-xcenter)*(x-xcenter) + (y-ycenter)*(y-ycenter));
             const Compute_float str = exp(-rsq/25.0) * 0.1;
-            geIn[idx]+=str;
+            geIn[Conductance_index(x,y)]+=str;
         }
     }
 }
@@ -28,8 +27,7 @@ void RandomBlocking(Compute_float* geIn,const unsigned int time)
         for (int y=0;y<grid_size;y++)
         {
 
-            const int idx = (x+couplerange)*conductance_array_size + y + couplerange; //index for gE/gI
-            if ((curblock ==0 && x<y) || (curblock == 1 && x>y)) {geIn[idx]= 0.0;}
+            if ((curblock ==0 && x<y) || (curblock == 1 && x>y)) {geIn[Conductance_index(x,y)]= 0.0;}
         }
     }
 

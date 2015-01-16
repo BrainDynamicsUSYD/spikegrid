@@ -117,7 +117,7 @@ Compute_float* unnormedCouplingMat(const couple_parameters c)
                             val = c.Layer_parameters.dual.W;
                         }
                     }
-                    matrix[(x+couplerange)*couple_array_size + y + couplerange] = val;//and set the array
+                    matrix[Conductance_index(x,y)] = val;//and set the array
                 }
                 else {count++;}
             }

@@ -2,6 +2,7 @@
 #ifdef __cplusplus
 #include "opencv2/core/core.hpp" //core opencv
 #include "opencv2/highgui/highgui.hpp" //for video writer
+typedef struct randconns_info randconns_info;
 ///generic class for outputting an object.
 ///you probably want to inhereit from this for a new output method
 class Output
@@ -60,6 +61,14 @@ class SpikeOutput: public SingleFileOutput
         SpikeOutput(int,int,const lagstorage*);
         void DoOutput();
 };
+class RandConnOutput: public PNGoutput
+{
+    const randconns_info* rcinfo;
+        public:
+            RandConnOutput(int,int,const randconns_info* const );
+            void DoOutput();
+};
+
 extern "C" {
 #endif
 typedef struct output_parameters output_parameters;

@@ -130,6 +130,19 @@ void SpikeOutput::DoOutput()
     fflush(f);
 
 }
+RandConnOutput::RandConnOutput(int idxin,const int intervalin,const randconns_info* const rcinfo_in): PNGoutput(idxin,intervalin,NULL) /*we set the data once we have created it.*/
+{
+   /* tagged_array* t = (tagged_array*)calloc(sizeof(tagged_array),1);
+ //   t->data = calloc(sizeof(Compute_float),grid_size*grid_size);
+    t->size=grid_size;
+    Compute_float min = 1000.0;
+    Compute_float max = -1000.0;
+*/
+}
+void RandConnOutput::DoOutput()
+{
+
+}
 void MakeOutputs(const output_parameters* const m)
 {
     int i = 0;

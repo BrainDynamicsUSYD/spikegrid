@@ -133,20 +133,21 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
                     //random connections away from (x,y) - these will be getting decreased
                     for (unsigned int i = 0;i<norand;i++)
                     {
-                        const int destidx  = LagIdx(randconns[i].destination.x,randconns[i].destination.y,data->lags);
-                        const int destidx2 = LagIdx(randconns[i].destination.x,randconns[i].destination.y,data2->lags);
-                        STDP_change rcchange   = STDP_change_calc(destidx,destidx2,S,S2,data->lags.lags,data2->lags.lags);
-                        randconns[i].stdp_strength       = clamp(randconns[i].stdp_strength-rcchange.Strength_decrease*50.0,randconns[i].strength,S.stdp_limit*1000.0);
+                        const int destidx           = LagIdx(randconns[i].destination.x,randconns[i].destination.y,data->lags);
+                        const int destidx2          = LagIdx(randconns[i].destination.x,randconns[i].destination.y,data2->lags);
+                        STDP_change rcchange        = STDP_change_calc(destidx,destidx2,S,S2,data->lags.lags,data2->lags.lags);
+                        randconns[i].stdp_strength  = clamp(randconns[i].stdp_strength-rcchange.Strength_decrease*50.0,randconns[i].strength,S.stdp_limit*1000.0);
                     }
                     //random connections to (x,y) - these will be getting increased - code is almost identical - except sign of change is reversed
-                   randomconnection** rcbase = rcs->randconns_reverse_lookup[x*grid_size+y];
-                   for (unsigned int i=0;i<rcs->rev_pp[x*grid_size+y];i++)
+                   unsigned int noconsArriving;
+                   randomconnection* rcbase = GetRandomConnsArriving(x,y,*rcs,rparams,&noconsArriving);
+                   for (unsigned int i=0;i<noconsArriving;i++)
                    {
-                       randomconnection rc = *rcbase[i];
-                       const int destidx  = LagIdx(rc.destination.x,rc.destination.y,data->lags);
-                       const int destidx2 = LagIdx(rc.destination.x,rc.destination.y,data2->lags);
-                       STDP_change rcchange   = STDP_change_calc(destidx,destidx2,S,S2,data->lags.lags,data2->lags.lags);
-                       rc.stdp_strength       = clamp(rc.stdp_strength+rcchange.Strength_increase*50.0,rc.strength,S.stdp_limit*1000.0);
+                       randomconnection rc      = rcbase[i];
+                       const int destidx        = LagIdx(rc.destination.x,rc.destination.y,data->lags);
+                       const int destidx2       = LagIdx(rc.destination.x,rc.destination.y,data2->lags);
+                       STDP_change rcchange     = STDP_change_calc(destidx,destidx2,S,S2,data->lags.lags,data2->lags.lags);
+                       rc.stdp_strength         = clamp(rc.stdp_strength+rcchange.Strength_increase*50.0,rc.strength,S.stdp_limit*1000.0);
                        //                                             ^ note plus sign (not minus) why?? - I assume the strengths are reversed
                    }
                 }

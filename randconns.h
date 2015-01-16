@@ -14,11 +14,10 @@ typedef struct randconns_info
     randomconnection* randconns;                ///<stores random connections
     randomconnection** randconns_reverse;   //reverse connections (might not be required?)
     unsigned int* rev_pp;                   //no of to conns / point
-    randomconnection*** randconns_reverse_lookup; //lookup to randconns_reverse - triple pointers are fun
-
 } randconns_info;
 
 randconns_info init_randconns();
 
-randomconnection* GetRandomConnsLeaving(const int x,const int y,const randconns_info rcinfo,const randconn_parameters* const rparam, unsigned int* numberconns);
+randomconnection* GetRandomConnsArriving(const int x,const int y,const randconns_info rcinfo,const randconn_parameters* const rparam, unsigned int* numberconns);
+randomconnection* GetRandomConnsLeaving (const int x,const int y,const randconns_info rcinfo,const randconn_parameters* const rparam, unsigned int* numberconns);
 #endif

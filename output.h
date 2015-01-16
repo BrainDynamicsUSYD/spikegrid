@@ -1,7 +1,6 @@
 /// \file
 #ifndef OUTPUT
 #define OUTPUT
-#include "enums.h"
 typedef struct model model;
 typedef struct lagstorage lagstorage;
 typedef struct tagged_array tagged_array;

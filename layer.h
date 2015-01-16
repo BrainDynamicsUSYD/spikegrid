@@ -2,7 +2,6 @@
 #ifndef LAYER
 #define LAYER
 #include "lagstorage.h"
-#include "typedefs.h"
 #include "enums.h" //needed at least for the is-inhibitory flag
 #include "randconns.h" //TODO:need to remove this dependency by making rcinfo in struct layer a pointer
 typedef struct STD_data STD_data; //forward declare STD_data to make things cleaner - makes this file a little messier, but it makes it more obvious where things come from

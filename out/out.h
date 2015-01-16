@@ -61,14 +61,6 @@ class SpikeOutput: public SingleFileOutput
         SpikeOutput(int,int,const lagstorage*);
         void DoOutput();
 };
-class RandConnOutput: public PNGoutput
-{
-    const randconns_info* rcinfo;
-        public:
-            RandConnOutput(int,int,const randconns_info* const );
-            void DoOutput();
-};
-
 extern "C" {
 #endif
 typedef struct output_parameters output_parameters;

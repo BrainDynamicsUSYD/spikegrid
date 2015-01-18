@@ -9,7 +9,7 @@
 const unsigned int overkill_factor = 10;
 randconns_info init_randconns(const randconn_parameters rparam,const couple_parameters couple)
 {
-    randconns_info rcinfo;
+    randconns_info rcinfo = {.numberper = rparam.numberper};
     rcinfo.randconns= calloc(sizeof(randomconnection),(size_t)(grid_size*grid_size*rparam.numberper));
     //bigmat will store the points coming towards somewhere (but we don't know precisely how many there will be, so use overkill factor)
     randomconnection** bigmat = calloc(sizeof(randomconnection*),grid_size*grid_size*rparam.numberper*overkill_factor);
@@ -57,12 +57,12 @@ randconns_info init_randconns(const randconn_parameters rparam,const couple_para
     rcinfo.randconns_reverse=bigmat;
     return rcinfo;
 }
-randomconnection* GetRandomConnsLeaving(const int x,const int y,const randconns_info rcinfo,const randconn_parameters* const rparam, unsigned int* numberconns)
+randomconnection* GetRandomConnsLeaving(const int x,const int y,const randconns_info rcinfo, unsigned int* numberconns)
 {
-    const int randbase=(x*grid_size+y)*(int)rparam->numberper;
+    const int randbase=(x*grid_size+y)*(int)rcinfo.numberper;
     if ((x==0 && y==0) || Features.FixedRCStart==OFF)
     {
-        *numberconns = rparam->numberper;
+        *numberconns = rcinfo.numberper;
         return &(rcinfo.randconns[randbase]);
     }
     else
@@ -71,8 +71,8 @@ randomconnection* GetRandomConnsLeaving(const int x,const int y,const randconns_
         return NULL;
     }
 }
-randomconnection* GetRandomConnsArriving(const int x,const int y,const randconns_info rcinfo,const randconn_parameters* const rparam, unsigned int* numberconns)
+randomconnection* GetRandomConnsArriving(const int x,const int y,const randconns_info rcinfo, unsigned int* numberconns)
 {
     *numberconns              = rcinfo.rev_pp[x*grid_size+y];
-    return (rcinfo.randconns_reverse[(x*grid_size+y)*(int)rparam->numberper*(int)overkill_factor]);
+    return (rcinfo.randconns_reverse[(x*grid_size+y)*(int)rcinfo.numberper*(int)overkill_factor]);
 }

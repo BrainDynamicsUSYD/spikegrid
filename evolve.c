@@ -52,7 +52,7 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
             if (Features.Random_connections == ON && !L.Layer_is_inhibitory )
             {
                 unsigned int norand;
-                const randomconnection* rcs = GetRandomConnsLeaving(x,y,L.rcinfo,&L.P->random,&norand);
+                const randomconnection* rcs = GetRandomConnsLeaving(x,y,L.rcinfo,&norand);
                 for (unsigned int i=0;i<norand;i++)
                 {
                     const int condindex = Conductance_index(rcs[i].destination.x,rcs[i].destination.y);
@@ -271,7 +271,7 @@ void step1(model* m,const unsigned int time)
     if (m->NoLayers==DUALLAYER){tidylayer(&m->layer2,timemillis,m->gE,m->gI);}
     if (Features.STDP==ON)
     {
-        DoSTDP(m->layer1.connections,m->layer2.connections,m->layer1.STDP_data,m->layer1.P->STDP, m->layer2.STDP_data,m->layer2.P->STDP,&m->layer1.rcinfo,&m->layer1.P->random);
-        DoSTDP(m->layer2.connections,m->layer1.connections,m->layer2.STDP_data,m->layer2.P->STDP, m->layer1.STDP_data,m->layer1.P->STDP,&m->layer2.rcinfo,&m->layer2.P->random);
+        DoSTDP(m->layer1.connections,m->layer2.connections,m->layer1.STDP_data,m->layer1.P->STDP, m->layer2.STDP_data,m->layer2.P->STDP,&m->layer1.rcinfo);
+        DoSTDP(m->layer2.connections,m->layer1.connections,m->layer2.STDP_data,m->layer2.P->STDP, m->layer1.STDP_data,m->layer1.P->STDP,&m->layer2.rcinfo);
     }
 }

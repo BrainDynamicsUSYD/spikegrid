@@ -84,14 +84,8 @@ layer setuplayer(const parameters p)
         .recoverys          = Features.Recovery==ON?calloc(sizeof(Compute_float),grid_size*grid_size):NULL,
         .recoverys_out      = Features.Recovery==ON?calloc(sizeof(Compute_float),grid_size*grid_size):NULL,
         .Layer_is_inhibitory = p.couple.Layertype==DUALLAYER && p.couple.Layer_parameters.dual.W<0,
+        .rcinfo             = Features.Random_connections==ON?init_randconns(p.random,p.couple): (randconns_info){0},
     };
-    //the next section deals with setup for random connsections.  It is quite messy and long.
-    //much of this complexity is involved with allowing access to the random connections in efficient ways
-    //(particularly when STDP is included in the model)
-    if (Features.Random_connections == ON)
-    {
-       L.rcinfo= init_randconns(p.random,p.couple);
-    }
     return L;
 }
 

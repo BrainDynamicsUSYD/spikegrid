@@ -101,7 +101,7 @@ void STDP_At_point(const int x, const int y,STDP_data* const data,STDP_data* con
 }
 void  DoSTDP(const Compute_float* const const_couples, const Compute_float* const const_couples2,
         STDP_data* data,const STDP_parameters S, STDP_data* const data2,const STDP_parameters S2,
-        randconns_info* rcs,const randconn_parameters* const rparams )
+        randconns_info* rcs)
 {
     if (S.STDP_on ==OFF) {return;}
     for (int x=0;x<grid_size;x++)
@@ -129,7 +129,7 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
                 if (Features.Random_connections == ON)
                 {
                     unsigned int norand;
-                    randomconnection* randconns = GetRandomConnsLeaving(x,y,*rcs,rparams,&norand);
+                    randomconnection* randconns = GetRandomConnsLeaving(x,y,*rcs,&norand);
                     //random connections away from (x,y) - these will be getting decreased
                     for (unsigned int i = 0;i<norand;i++)
                     {
@@ -140,7 +140,7 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
                     }
                     //random connections to (x,y) - these will be getting increased - code is almost identical - except sign of change is reversed
                    unsigned int noconsArriving;
-                   randomconnection* rcbase = GetRandomConnsArriving(x,y,*rcs,rparams,&noconsArriving);
+                   randomconnection* rcbase = GetRandomConnsArriving(x,y,*rcs,&noconsArriving);
                    for (unsigned int i=0;i<noconsArriving;i++)
                    {
                        randomconnection rc      = rcbase[i];

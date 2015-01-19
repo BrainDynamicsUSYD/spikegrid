@@ -79,10 +79,7 @@ randomconnection** GetRandomConnsArriving(const int x,const int y,const randconn
 }
 Compute_float* RandConnsToMat(const randconns_info* const rcinfo)
 {
-    unsigned int spare;
     Compute_float* strmat = calloc(sizeof(Compute_float),grid_size*grid_size);
-    spare++;
-    printf("%i\n",spare);
     for (int x=0;x<grid_size;x++)
     {
         for(int y=0;y<grid_size;y++)

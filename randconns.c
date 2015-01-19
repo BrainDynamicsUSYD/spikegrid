@@ -37,7 +37,8 @@ randconns_info init_randconns(const randconn_parameters rparam,const couple_para
                         {   //pick a random destination
                             .x = (Neuron_coord)(((Compute_float)(random()) / (Compute_float)RAND_MAX) * (Compute_float)grid_size),
                             .y = (Neuron_coord)(((Compute_float)(random()) / (Compute_float)RAND_MAX) * (Compute_float)grid_size),
-                        }
+                        },
+                        .source = {.x=x,.y=y},
                     };
                     rcinfo.randconns[(x*grid_size+y)*rparam.numberper + i] = rc; //and store it (forward direction)
                     //the normal matrix stores by where they come from.  Also need to store where they got to.

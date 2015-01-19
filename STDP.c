@@ -134,11 +134,11 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
                    randomconnection** rcbase = GetRandomConnsArriving(x,y,*rcs,&noconsArriving);
                    for (unsigned int i=0;i<noconsArriving;i++)
                    {
-                       randomconnection* rc      = rcbase[i];
-                       const int destidx        = LagIdx(rc->destination.x,rc->destination.y,data->lags);
-                       const int destidx2       = LagIdx(rc->destination.x,rc->destination.y,data2->lags);
-                       STDP_change rcchange     = STDP_change_calc(destidx,destidx2,S,S2,data->lags.lags,data2->lags.lags);
-                       rc->stdp_strength         = clamp(rc->stdp_strength+rcchange.Strength_increase*50.0,rc->strength,S.stdp_limit*1000.0);
+                       randomconnection* rc = rcbase[i];
+                       const int destidx    = LagIdx(rc->source.x,rc->source.y,data->lags);
+                       const int destidx2   = LagIdx(rc->source.x,rc->source.y,data2->lags);
+                       STDP_change rcchange = STDP_change_calc(destidx,destidx2,S,S2,data->lags.lags,data2->lags.lags);
+                       rc->stdp_strength    = clamp(rc->stdp_strength+rcchange.Strength_decrease*50.0,rc->strength,S.stdp_limit*1000.0);
                        //                                             ^ note plus sign (not minus) why?? - I assume the strengths are reversed
                    }
                 }

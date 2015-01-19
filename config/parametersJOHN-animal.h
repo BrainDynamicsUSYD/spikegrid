@@ -43,7 +43,7 @@ static const parameters OneLayerModel = {.couple={0}}; //since unused - shortes 
 #define STDPparams .STDP=   \
     {                       \
         .stdp_limit=0.2,   \
-        .stdp_tau=20,       \
+        .stdp_tau=10,       \
         .stdp_strength=0.005, \
         .STDP_on=ON         \
     }

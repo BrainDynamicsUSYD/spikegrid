@@ -71,8 +71,36 @@ randomconnection* GetRandomConnsLeaving(const int x,const int y,const randconns_
         return NULL;
     }
 }
-randomconnection* GetRandomConnsArriving(const int x,const int y,const randconns_info rcinfo, unsigned int* numberconns)
+randomconnection** GetRandomConnsArriving(const int x,const int y,const randconns_info rcinfo, unsigned int* numberconns)
 {
     *numberconns              = rcinfo.rev_pp[x*grid_size+y];
-    return (rcinfo.randconns_reverse[(x*grid_size+y)*(int)rcinfo.numberper*(int)overkill_factor]);
+    return &(rcinfo.randconns_reverse[(x*grid_size+y)*(int)rcinfo.numberper*(int)overkill_factor]);
+}
+Compute_float* RandConnsToMat(const randconns_info* const rcinfo)
+{
+    unsigned int spare;
+    Compute_float* strmat = calloc(sizeof(Compute_float),grid_size*grid_size);
+    spare++;
+    printf("%i\n",spare);
+    for (int x=0;x<grid_size;x++)
+    {
+        for(int y=0;y<grid_size;y++)
+        {
+            unsigned int nconns;
+            randomconnection* rc = GetRandomConnsLeaving(x,y,*rcinfo,&nconns);
+            for (unsigned int i=0;i<nconns;i++)
+            {
+                strmat[rc[i].destination.x*grid_size+rc[i].destination.y] += rc[i].stdp_strength;
+            }
+            randomconnection** rcs = GetRandomConnsArriving(x,y,*rcinfo,&nconns);
+            for (unsigned int i=0;i<nconns;i++)
+            {
+                randomconnection rrc = *rcs[i];
+                if (rrc.destination.x != x || rrc.destination.y != y) {printf("error in RCarrive expected dest of %i %i got %i %i\n",x,y,rrc.destination.x,rrc.destination.y);}
+            //    strmat[rrc.destination.x*grid_size+rrc.destination.y] -= rrc.stdp_strength;
+            }
+        }
+    }
+    return strmat;
+
 }

@@ -19,6 +19,7 @@ typedef struct randconns_info
 
 randconns_info init_randconns();
 
-randomconnection* GetRandomConnsArriving(const int x,const int y,const randconns_info rcinfo, unsigned int* numberconns);
+randomconnection** GetRandomConnsArriving(const int x,const int y,const randconns_info rcinfo, unsigned int* numberconns);
 randomconnection* GetRandomConnsLeaving (const int x,const int y,const randconns_info rcinfo, unsigned int* numberconns);
+Compute_float* RandConnsToMat(const randconns_info* const rcinfo);
 #endif

@@ -26,15 +26,6 @@ int __attribute__((pure,const)) wrap (int n)
     else {return n;}
 }
 
-///helper function for STDP.  Calculates distance between two neurons, taking into account wrapping in the network
-///interesting idea - in some cases I don't care about this wrapping and could cheat
-inline static int dist(int cur,int prev)
-{
-    int dx = cur-prev;
-    if     (dx >       (grid_size/2)){return(dx - grid_size);}
-    else if(dx < -     (grid_size/2)){return(dx + grid_size);}
-    else   {return dx;}
-}
 inline static Compute_float clamp(Compute_float V,Compute_float target,Compute_float frac)
 {
     target = fabs(target);
@@ -59,10 +50,10 @@ STDP_change STDP_change_calc (const int destneuronidx,const int destinotherlayer
     idx = 0;
     while (revlags[destinotherlayeridx+idx] != -1) //connections to the other layer.  This is way too complicated - but I tghink it should work
     {
-        ret.Strength_increase += STDP_strength(S2,revlags[destneuronidx+idx]);
+        ret.Strength_increase += STDP_strength(S2,revlags[destinotherlayeridx+idx]);
         //the connection from the other layer to the current layer uses the other layer parameters
         //slightly arbitrary but feels correct and maintains the sum of STDP=0 when window function is odd.
-        ret.Strength_decrease += STDP_strength(S, revlags[destneuronidx+idx]);
+        ret.Strength_decrease += STDP_strength(S, revlags[destinotherlayeridx+idx]);
         idx++;
     }
     return ret;
@@ -140,14 +131,14 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
                     }
                     //random connections to (x,y) - these will be getting increased - code is almost identical - except sign of change is reversed
                    unsigned int noconsArriving;
-                   randomconnection* rcbase = GetRandomConnsArriving(x,y,*rcs,&noconsArriving);
+                   randomconnection** rcbase = GetRandomConnsArriving(x,y,*rcs,&noconsArriving);
                    for (unsigned int i=0;i<noconsArriving;i++)
                    {
-                       randomconnection rc      = rcbase[i];
-                       const int destidx        = LagIdx(rc.destination.x,rc.destination.y,data->lags);
-                       const int destidx2       = LagIdx(rc.destination.x,rc.destination.y,data2->lags);
+                       randomconnection* rc      = rcbase[i];
+                       const int destidx        = LagIdx(rc->destination.x,rc->destination.y,data->lags);
+                       const int destidx2       = LagIdx(rc->destination.x,rc->destination.y,data2->lags);
                        STDP_change rcchange     = STDP_change_calc(destidx,destidx2,S,S2,data->lags.lags,data2->lags.lags);
-                       rc.stdp_strength         = clamp(rc.stdp_strength+rcchange.Strength_increase*50.0,rc.strength,S.stdp_limit*1000.0);
+                       rc->stdp_strength         = clamp(rc->stdp_strength+rcchange.Strength_increase*50.0,rc->strength,S.stdp_limit*1000.0);
                        //                                             ^ note plus sign (not minus) why?? - I assume the strengths are reversed
                    }
                 }

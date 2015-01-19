@@ -224,8 +224,8 @@ void processopts (int argc,char** argv,parameters** newparam,parameters** newpar
 /// @param argv what the parameters actually are
 int main(int argc,char** argv) //useful for testing w/out matlab
 {
-    const char* CVDisplay[] = {"gE","V2","STDP1","STDP2"}; //list of possible variables to show
-    const int CVNumWindows=2;                              //and how many to show
+    const char* CVDisplay[] = {"gE","V2","RC","STDP1","STDP2"}; //list of possible variables to show
+    const int CVNumWindows=3;                              //and how many to show
 #ifndef ANDROID //android doesn't support this function - note the error is that this will fail at linking so it needs to hide in the #if
  //   feenableexcept(FE_INVALID | FE_OVERFLOW); //segfault on NaN and overflow.  Note - this cannot be used in matlab
 #endif
@@ -272,7 +272,7 @@ int main(int argc,char** argv) //useful for testing w/out matlab
 #ifdef OPENCV
                 if(mytime % 40 ==0 && OpenCv == ON)
                 {
-                    cvdisp(CVDisplay,CVNumWindows);
+                    cvdisp(CVDisplay,CVNumWindows,&m->layer2.rcinfo);
                 }
 #endif
             }

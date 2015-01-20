@@ -39,7 +39,7 @@ randconns_info* init_randconns(const randconn_parameters rparam,const couple_par
                             .x = (Neuron_coord)(((Compute_float)(random()) / (Compute_float)RAND_MAX) * (Compute_float)grid_size),
                             .y = (Neuron_coord)(((Compute_float)(random()) / (Compute_float)RAND_MAX) * (Compute_float)grid_size),
                         },
-                        .source = {.x=x,.y=y},
+                        .source = {.x=(Neuron_coord)x,.y=(Neuron_coord)y},
                     };
                     rcinfo.randconns[(x*grid_size+y)*rparam.numberper + i] = rc; //and store it (forward direction)
                     //the normal matrix stores by where they come from.  Also need to store where they got to.
@@ -92,13 +92,6 @@ Compute_float* RandConnsToMat(const randconns_info* const rcinfo)
             for (unsigned int i=0;i<nconns;i++)
             {
                 strmat[rc[i].destination.x*grid_size+rc[i].destination.y] += rc[i].stdp_strength;
-            }
-            randomconnection** rcs = GetRandomConnsArriving(x,y,*rcinfo,&nconns);
-            for (unsigned int i=0;i<nconns;i++)
-            {
-                randomconnection rrc = *rcs[i];
-                if (rrc.destination.x != x || rrc.destination.y != y) {printf("error in RCarrive expected dest of %i %i got %i %i\n",x,y,rrc.destination.x,rrc.destination.y);}
-            //    strmat[rrc.destination.x*grid_size+rrc.destination.y] -= rrc.stdp_strength;
             }
         }
     }

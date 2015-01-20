@@ -2,9 +2,9 @@
 #include <string.h> //memset
 #include <stdlib.h> //random
 #include <stdio.h>
+#include "STDP.h"
 #include "model.h"
 #include "theta.h"
-#include "STDP.h"
 #include "evolvegen.h"
 #include "STD.h"
 #include "mymath.h"

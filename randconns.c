@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "sizes.h"
 #include "randconns.h"
 #include "paramheader.h"
@@ -7,7 +8,7 @@
 //creat a rather ridiculously sized matrix
 //allows for 10x the avg number of connections per point.  Incredibly wasteful.  It would be really nice to have some c++ vectors here
 const unsigned int overkill_factor = 10;
-randconns_info init_randconns(const randconn_parameters rparam,const couple_parameters couple)
+randconns_info* init_randconns(const randconn_parameters rparam,const couple_parameters couple)
 {
     randconns_info rcinfo = {.numberper = rparam.numberper};
     rcinfo.randconns= calloc(sizeof(randomconnection),(size_t)(grid_size*grid_size*rparam.numberper));
@@ -56,7 +57,9 @@ randconns_info init_randconns(const randconn_parameters rparam,const couple_para
     }
     rcinfo.rev_pp=bigmatcounts;
     rcinfo.randconns_reverse=bigmat;
-    return rcinfo;
+    randconns_info* rcpoint = malloc(sizeof(*rcpoint));
+    memcpy(rcpoint,&rcinfo,sizeof(*rcpoint));
+    return rcpoint;
 }
 randomconnection* GetRandomConnsLeaving(const int x,const int y,const randconns_info rcinfo, unsigned int* numberconns)
 {

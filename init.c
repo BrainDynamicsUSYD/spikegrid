@@ -14,6 +14,7 @@
 #include "out/out.h"
 #include "utils.h"
 #include "animal.h"
+#include "randconns.h"
 #define max(a,b) \
     ({ __typeof__ (a) _a = (a);\
        __typeof__ (b) _b = (b); \
@@ -84,7 +85,7 @@ layer setuplayer(const parameters p)
         .recoverys          = Features.Recovery==ON?calloc(sizeof(Compute_float),grid_size*grid_size):NULL,
         .recoverys_out      = Features.Recovery==ON?calloc(sizeof(Compute_float),grid_size*grid_size):NULL,
         .Layer_is_inhibitory = p.couple.Layertype==DUALLAYER && p.couple.Layer_parameters.dual.W<0,
-        .rcinfo             = Features.Random_connections==ON?init_randconns(p.random,p.couple): (randconns_info){0},
+        .rcinfo             = Features.Random_connections==ON?init_randconns(p.random,p.couple): NULL,
     };
     return L;
 }

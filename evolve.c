@@ -2,15 +2,16 @@
 #include <string.h> //memset
 #include <stdlib.h> //random
 #include <stdio.h>
+#include "model.h"
 #include "theta.h"
 #include "STDP.h"
 #include "evolvegen.h"
 #include "STD.h"
 #include "mymath.h"
 #include "paramheader.h"
-#include "model.h"
 #include "localstim.h"
 #include "animal.h"
+#include "randconns.h"
 #ifdef ANDROID
     #define APPNAME "myapp"
     #include <android/log.h>
@@ -52,7 +53,7 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
             if (Features.Random_connections == ON && !L.Layer_is_inhibitory )
             {
                 unsigned int norand;
-                const randomconnection* rcs = GetRandomConnsLeaving(x,y,L.rcinfo,&norand);
+                const randomconnection* rcs = GetRandomConnsLeaving(x,y,*L.rcinfo,&norand);
                 for (unsigned int i=0;i<norand;i++)
                 {
                     const int condindex = Conductance_index(rcs[i].destination.x,rcs[i].destination.y);
@@ -271,7 +272,7 @@ void step1(model* m,const unsigned int time)
     if (m->NoLayers==DUALLAYER){tidylayer(&m->layer2,timemillis,m->gE,m->gI);}
     if (Features.STDP==ON)
     {
-        DoSTDP(m->layer1.connections,m->layer2.connections,m->layer1.STDP_data,m->layer1.P->STDP, m->layer2.STDP_data,m->layer2.P->STDP,&m->layer1.rcinfo);
-        DoSTDP(m->layer2.connections,m->layer1.connections,m->layer2.STDP_data,m->layer2.P->STDP, m->layer1.STDP_data,m->layer1.P->STDP,&m->layer2.rcinfo);
+        DoSTDP(m->layer1.connections,m->layer2.connections,m->layer1.STDP_data,m->layer1.P->STDP, m->layer2.STDP_data,m->layer2.P->STDP,m->layer1.rcinfo);
+        DoSTDP(m->layer2.connections,m->layer1.connections,m->layer2.STDP_data,m->layer2.P->STDP, m->layer1.STDP_data,m->layer1.P->STDP,m->layer2.rcinfo);
     }
 }

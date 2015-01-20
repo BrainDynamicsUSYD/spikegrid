@@ -272,7 +272,7 @@ int main(int argc,char** argv) //useful for testing w/out matlab
 #ifdef OPENCV
                 if(mytime % 40 ==0 && OpenCv == ON)
                 {
-                    cvdisp(CVDisplay,CVNumWindows,&m->layer2.rcinfo);
+                    cvdisp(CVDisplay,CVNumWindows,m->layer2.rcinfo);
                 }
 #endif
             }

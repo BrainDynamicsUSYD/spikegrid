@@ -12,6 +12,7 @@
 #include "localstim.h"
 #include "animal.h"
 #include "randconns.h"
+#include "lagstorage.h"
 #ifdef ANDROID
     #define APPNAME "myapp"
     #include <android/log.h>
@@ -28,12 +29,12 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
             Compute_float str = Zero;
             const int idx = x*grid_size + y;
             int numfirings = 0;
-            while (L.firinglags.lags[idx*L.firinglags.lagsperpoint+numfirings] != -1)
+            while (L.firinglags->lags[idx*L.firinglags->lagsperpoint+numfirings] != -1)
             {
-                Compute_float this_str =L.Mytimecourse[L.firinglags.lags[idx*L.firinglags.lagsperpoint + numfirings]];
+                Compute_float this_str =L.Mytimecourse[L.firinglags->lags[idx*L.firinglags->lagsperpoint + numfirings]];
                 if (Features.STD == ON)
                 {
-                    this_str = this_str * STD_str(L.P->STD,x,y,time,L.firinglags.lags[idx*L.firinglags.lagsperpoint + numfirings],L.std);
+                    this_str = this_str * STD_str(L.P->STD,x,y,time,L.firinglags->lags[idx*L.firinglags->lagsperpoint + numfirings],L.std);
                 }
                 str += this_str;
                 numfirings++;
@@ -173,8 +174,8 @@ void StoreFiring(layer* L)
             if ((test && step > 0) || ((!test) && step<0)) //check if this is an active neuron
             {
                 const int baseidx=LagIdx(x,y,L->firinglags); 
-                modifyLags(&L->firinglags,baseidx);
-                if (Features.STDP==ON) {modifyLags(&L->STDP_data->lags,LagIdx(x,y,L->STDP_data->lags));}
+                modifyLags(L->firinglags,baseidx);
+                if (Features.STDP==ON) {modifyLags(L->STDP_data->lags,LagIdx(x,y,L->STDP_data->lags));}
                 //now - add in new spikes
                 if (L->voltages_out[x*grid_size + y]  >= L->P->potential.Vpk)
                 {
@@ -183,8 +184,8 @@ void StoreFiring(layer* L)
                         L->voltages_out[x*grid_size+y]=L->P->potential.Vrt;                    //does voltage also need to be reset like this?
                         L->recoverys_out[x*grid_size+y]+=L->P->recovery.Wrt;
                     }
-                    AddnewSpike(&L->firinglags,baseidx);
-                    if (Features.STDP==ON) {AddnewSpike(&L->STDP_data->lags,LagIdx(x,y,L->STDP_data->lags));}
+                    AddnewSpike(L->firinglags,baseidx);
+                    if (Features.STDP==ON) {AddnewSpike(L->STDP_data->lags,LagIdx(x,y,L->STDP_data->lags));}
                 }//add random spikes
                 else if (((Compute_float)(random()))/((Compute_float)RAND_MAX) <
                         (L->P->potential.rate*((Compute_float)0.001)*Features.Timestep))
@@ -218,7 +219,7 @@ void tidylayer (layer* l,const Compute_float timemillis,const Compute_float* con
     if (Features.Recovery==OFF)
     {
         CalcVoltages(l->voltages,gE ,gI,l->P->potential,l->voltages_out);
-        ResetVoltages(l->voltages_out,l->P->couple,&l->firinglags,l->P->potential);
+        ResetVoltages(l->voltages_out,l->P->couple,l->firinglags,l->P->potential);
     }
     else
     {

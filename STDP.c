@@ -8,6 +8,7 @@
 #include "layer.h"
 #include "sizes.h"
 #include "randconns.h"
+#include "lagstorage.h"
 typedef struct
 {
     Compute_float Strength_increase;
@@ -70,7 +71,7 @@ void STDP_At_point(const int x, const int y,STDP_data* const data,STDP_data* con
     //calculate the indexes for the neuron we are connected to and compute the offsets
     const int baseidx = LagIdx(wx,wy,data->lags);
     const int baseidx2 = LagIdx(wx,wy,revdata->lags);
-    STDP_change change = STDP_change_calc(baseidx,baseidx2,S,S2,data->lags.lags,revdata->lags.lags);
+    STDP_change change = STDP_change_calc(baseidx,baseidx2,S,S2,data->lags->lags,revdata->lags->lags);
     if (change.valid==ON)
     {
         // the other neuron actually fired - so we can apply STDP - need to apply in two directions
@@ -103,11 +104,11 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
             const int baseidx = LagIdx(x,y,data->lags);
             //first - check if the neuron has fired this timestep
             int idx = 0;
-            while (data->lags.lags[baseidx + idx] != -1)
+            while (data->lags->lags[baseidx + idx] != -1)
             {
                 idx++; //we need to get to the last entry to ensure the neuron fired
             }
-            if (idx >0 && data->lags.lags[baseidx+idx-1]==1) //so the neuron did actually fire at the last timestep
+            if (idx >0 && data->lags->lags[baseidx+idx-1]==1) //so the neuron did actually fire at the last timestep
             {
                 //now check if other neurons recently fired - first for nearby connections
                 for (int i = -STDP_RANGE;i<=STDP_RANGE;i++)
@@ -127,7 +128,7 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
                     {
                         const int destidx           = LagIdx(randconns[i].destination.x,randconns[i].destination.y,data->lags);
                         const int destidx2          = LagIdx(randconns[i].destination.x,randconns[i].destination.y,data2->lags);
-                        STDP_change rcchange        = STDP_change_calc(destidx,destidx2,S,S2,data->lags.lags,data2->lags.lags);
+                        STDP_change rcchange        = STDP_change_calc(destidx,destidx2,S,S2,data->lags->lags,data2->lags->lags);
                         randconns[i].stdp_strength  = clamp(randconns[i].stdp_strength-rcchange.Strength_decrease*50.0,randconns[i].strength,S.stdp_limit*1000.0);
                     }
                     //random connections to (x,y) - these will be getting increased - code is almost identical - except sign of change is reversed
@@ -138,7 +139,7 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
                        randomconnection* rc = rcbase[i];
                        const int destidx    = LagIdx(rc->source.x,rc->source.y,data->lags);
                        const int destidx2   = LagIdx(rc->source.x,rc->source.y,data2->lags);
-                       STDP_change rcchange = STDP_change_calc(destidx,destidx2,S,S2,data->lags.lags,data2->lags.lags);
+                       STDP_change rcchange = STDP_change_calc(destidx,destidx2,S,S2,data->lags->lags,data2->lags->lags);
                        rc->stdp_strength    = clamp(rc->stdp_strength+rcchange.Strength_decrease*50.0,rc->strength,S.stdp_limit*1000.0);
                        //                                             ^ note plus sign (not minus) why?? - I assume the strengths are reversed
                    }

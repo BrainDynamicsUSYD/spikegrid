@@ -1,7 +1,6 @@
 /// \file
 #ifndef LAYER
 #define LAYER
-#include "lagstorage.h"
 #include "enums.h" //needed at least for the is-inhibitory flag
 #include "typedefs.h"
 typedef struct STD_data STD_data; //forward declare STD_data to make things cleaner - makes this file a little messier, but it makes it more obvious where things come from
@@ -9,6 +8,7 @@ typedef struct STD_data STD_data; //forward declare STD_data to make things clea
 typedef struct parameters parameters;
 typedef struct STDP_data STDP_data;
 typedef struct randconns_info randconns_info;
+typedef struct lagstorage lagstorage;
 //making some of these arrays fixed rather than pointers would be nice
 //it would probably improve cache access.
 //However, there would be issues - some functions pass layer rather than layer* which
@@ -24,7 +24,7 @@ typedef struct layer
     Compute_float* const Intimecourse;    ///<store time course of In synapses
     Compute_float* const Mytimecourse;    ///<store time course of synapses in dual layer case
     randconns_info* rcinfo;
-    lagstorage      firinglags;
+    lagstorage*      firinglags;
     STDP_data*      STDP_data;
     parameters*     P;                              ///<The parameters that we used to make the layer
     STD_data*       std;                               ///<Some info that is needed for STD

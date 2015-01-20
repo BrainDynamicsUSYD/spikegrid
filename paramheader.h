@@ -2,7 +2,6 @@
 #ifndef PARAMHEADER
 #define PARAMHEADER
 #include "typedefs.h"
-#include "enums.h"
 #include "cppparamheader.h" //I am not a huge fan of this particular include - but unfortuneately it is the simplest solutionit is the simplest solutiontypedef struct
 typedef struct
 {

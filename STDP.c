@@ -6,7 +6,6 @@
 #include "mymath.h" //fabsf
 #include "STDP.h"
 #include "layer.h"
-#include "sizes.h"
 #include "randconns.h"
 #include "lagstorage.h"
 typedef struct

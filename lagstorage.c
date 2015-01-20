@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "lagstorage.h"
-#include "sizes.h"
 lagstorage* lagstorage_init(const int flagcount,const int cap)
 {
     lagstorage firinglags =

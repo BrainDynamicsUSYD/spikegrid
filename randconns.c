@@ -77,8 +77,8 @@ randomconnection* GetRandomConnsLeaving(const int x,const int y,const randconns_
 }
 randomconnection** GetRandomConnsArriving(const int x,const int y,const randconns_info rcinfo, unsigned int* numberconns)
 {
-    *numberconns              = rcinfo.rev_pp[x*grid_size+y];
-    return &(rcinfo.randconns_reverse[(x*grid_size+y)*(int)rcinfo.numberper*(int)overkill_factor]);
+    *numberconns = rcinfo.rev_pp[x*grid_size+y];
+    return &(rcinfo.randconns_reverse[(x*grid_size+y)*(int)rcinfo.numberper*(int)overkill_factor]); //Ensure you return the address of this object - it is definitely required
 }
 Compute_float* RandConnsToMat(const randconns_info* const rcinfo)
 {

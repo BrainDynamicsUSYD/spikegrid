@@ -8,15 +8,7 @@
 #ifndef PARAMETERS  //DO NOT REMOVE
 ///include guard
 #define PARAMETERS  //DO NOT REMOVE
-//disable warnings about float conversion in this file only
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wconversion"
-#else
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wfloat-conversion"
-#pragma GCC diagnostic ignored "-Wconversion"
-#endif
+
 //the following typedef must be before the include to get the right compute types
 ///Whether we are using the single or double layer model
 static const LayerNumbers ModelType = DUALLAYER;
@@ -117,9 +109,4 @@ static const sweepable Sweep =
     .count = 100
 };
 
-#ifdef __clang__
-#pragma clang diagnostic pop
-#else
-#pragma GCC diagnostic pop
-#endif
 #endif //DO NOT REMOVE

@@ -35,7 +35,7 @@ static const parameters OneLayerModel = {.couple={0}}; //since unused - shortes 
 #define STDPparams .STDP=   \
     {                       \
         .stdp_limit=0.2,   \
-        .stdp_tau=10,       \
+        .stdp_tau=40,       \
         .stdp_strength=0.005, \
         .STDP_on=ON         \
     }
@@ -103,7 +103,7 @@ static const extinput Extinput =
 ///Parameters for conducting a parameter sweep.
 static const sweepable Sweep =
 {
-    .offset=offsetof(parameters,couple)+offsetof(couple_parameters,Layer_parameters) +0+ /*offset in the union is always 0*/  + offsetof(duallayer_parameters,W),
+    .offset=offsetof(parameters,couple.Layer_parameters.dual.sigma),//+offsetof(couple_parameters,Layer_parameters) +0+ /*offset in the union is always 0*/  + offsetof(duallayer_parameters,W),
     .minval = 0.0,
     .maxval = 1.0,
     .count = 100

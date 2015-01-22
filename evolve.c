@@ -252,7 +252,7 @@ void step1(model* m,const unsigned int time)
     if(Features.UseAnimal==ON)
     {
         MoveAnimal(m->animal,timemillis);
-        AnimalEffects(*m->animal,m->gE,time);
+        AnimalEffects(*m->animal,m->gE,timemillis);
     }
     // Add spiking input to the conductances
     AddSpikes(m->layer1,m->gE,m->gI,time);

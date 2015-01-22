@@ -16,6 +16,7 @@ typedef struct randconns_info
     randomconnection** randconns_reverse;   //reverse connections (might not be required?)
     unsigned int* rev_pp;                   //no of to conns / point - can vary due to randomness
     const unsigned int numberper;           //no of conns leaving point - essentially fixed except in special cases
+    const unsigned int nospecials;
 } randconns_info;
 
 randconns_info* init_randconns();

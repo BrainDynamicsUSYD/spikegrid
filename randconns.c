@@ -10,7 +10,7 @@
 const unsigned int overkill_factor = 10;
 randconns_info* init_randconns(const randconn_parameters rparam,const couple_parameters couple)
 {
-    randconns_info rcinfo = {.numberper = rparam.numberper};
+    randconns_info rcinfo = {.numberper = rparam.numberper,.nospecials=rparam.Specials};
     rcinfo.randconns= calloc(sizeof(randomconnection),(size_t)(grid_size*grid_size*rparam.numberper));
     //bigmat will store the points coming towards somewhere (but we don't know precisely how many there will be, so use overkill factor)
     randomconnection** bigmat = calloc(sizeof(randomconnection*),grid_size*grid_size*rparam.numberper*overkill_factor);
@@ -21,12 +21,13 @@ randconns_info* init_randconns(const randconn_parameters rparam,const couple_par
     Non_zerocouplings(couple,&interestingconns,&nonzcount);//get non-zero couplings - note these are unnormalized
     srandom((unsigned)0); //seed RNG - WHY???? should probably remove this!!!
     //RCS need some connection strength scaling.  We abuse the globalmultiplier normalization most of the time, when coming from a single point boost them unfairly
-    const Compute_float Strmod = Features.FixedRCStart==ON?2.0: One - couple.normalization_parameters.glob_mult.GM;
+    const Compute_float Strmod = rparam.Specials>0?2.0: One - couple.normalization_parameters.glob_mult.GM;
     for (unsigned int x=0;x<grid_size;x++)
     {
         for (unsigned int y=0;y<grid_size;y++)
         {
-            if (Features.FixedRCStart == OFF || (x==0 && y==0))
+
+            if (x*grid_size+y < rcinfo.nospecials || rcinfo.nospecials==0)
             {
                 for (unsigned int i=0;i<rparam.numberper;i++)
                 {
@@ -63,9 +64,9 @@ randconns_info* init_randconns(const randconn_parameters rparam,const couple_par
 }
 randomconnection* GetRandomConnsLeaving(const int x,const int y,const randconns_info rcinfo, unsigned int* numberconns)
 {
-    const int randbase=(x*grid_size+y)*(int)rcinfo.numberper;
-    if ((x==0 && y==0) || Features.FixedRCStart==OFF)
+    if (x*grid_size+y < rcinfo.nospecials || rcinfo.nospecials==0)
     {
+        const int randbase=(x*grid_size+y)*(int)rcinfo.numberper;
         *numberconns = rcinfo.numberper;
         return &(rcinfo.randconns[randbase]);
     }

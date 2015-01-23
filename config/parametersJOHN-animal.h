@@ -36,7 +36,7 @@ static const parameters OneLayerModel = {.couple={0}}; //since unused - shortes 
     {                       \
         .stdp_limit=0.2,   \
         .stdp_tau=40,       \
-        .stdp_strength=0.005, \
+        .stdp_strength=0.0005, \
         .STDP_on=ON         \
     }
 ///parameters for the inhibitory layer of the double layer model

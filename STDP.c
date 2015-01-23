@@ -128,7 +128,7 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
                         const int destidx           = LagIdx(randconns[i].destination.x,randconns[i].destination.y,data->lags);
                         const int destidx2          = LagIdx(randconns[i].destination.x,randconns[i].destination.y,data2->lags);
                         STDP_change rcchange        = STDP_change_calc(destidx,destidx2,S,S2,data->lags->lags,data2->lags->lags);
-                        randconns[i].stdp_strength  = clamp(randconns[i].stdp_strength-rcchange.Strength_decrease*50.0,randconns[i].strength,S.stdp_limit*1000.0);
+                        randconns[i].stdp_strength  = clamp(randconns[i].stdp_strength-rcchange.Strength_decrease*500.0,randconns[i].strength,S.stdp_limit*1000.0);
                     }
                     //random connections to (x,y) - these will be getting increased - code is almost identical - except sign of change is reversed
                    unsigned int noconsArriving;
@@ -139,7 +139,7 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
                        const int destidx    = LagIdx(rc->source.x,rc->source.y,data->lags);
                        const int destidx2   = LagIdx(rc->source.x,rc->source.y,data2->lags);
                        STDP_change rcchange = STDP_change_calc(destidx,destidx2,S,S2,data->lags->lags,data2->lags->lags);
-                       rc->stdp_strength    = clamp(rc->stdp_strength+rcchange.Strength_decrease*50.0,rc->strength,S.stdp_limit*1000.0);
+                       rc->stdp_strength    = clamp(rc->stdp_strength+rcchange.Strength_decrease*500.0,rc->strength,S.stdp_limit*1000.0);
                        //                                             ^ note plus sign (not minus) why?? - I assume the strengths are reversed
                    }
                 }

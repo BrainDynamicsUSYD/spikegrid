@@ -7,9 +7,9 @@ export DEFINES=-DOPENCV
 #set up some variables for compiling
 ##########
 ifeq ($(CC),clang)
-	export CFLAGS= -g -Wno-padded -Wno-missing-p	rototypes -Wno-missing-variable-declarations -Weverything -pedantic  -Ofast -Wno-documentation-unknown-command -Wno-covered-switch-default
+	export CFLAGS= -g -Wno-padded -Wno-missing-prototypes -Wno-missing-variable-declarations -Weverything -pedantic  -Ofast -Wno-documentation-unknown-command -Wno-covered-switch-default
 else #gcc
-	optflags=  -Ofast -msse -msse2 -msse3 -fu	nsafe-loop-optimizations -mtune=native -march=native  -floop-interchange -ftree-loop-optimize -floop-strip-mine -floop-block -flto  -fassociative-math -fno-signed-zeros -freciprocal-math -ffinite-math-only -fno-trapping-math -ftree-vectorize
+	optflags=  -Ofast -msse -msse2 -msse3 -funsafe-loop-optimizations -mtune=native -march=native  -floop-interchange -ftree-loop-optimize -floop-strip-mine -floop-block -flto  -fassociative-math -fno-signed-zeros -freciprocal-math -ffinite-math-only -fno-trapping-math -ftree-vectorize
 	extrawarnings=-Wstrict-aliasing -fstrict-aliasing   -Wshadow  -Wconversion -Wdouble-promotion -Wformat=2 -Wunused -Wuninitialized -Wfloat-equal -Wunsafe-loop-optimizations -Wcast-qual -Wcast-align -Wwrite-strings  -Wlogical-op  -Wvector-operation-performance -Wno-pragmas
 	extraextrawarnings=-Wsuggest-attribute=pure -Wsuggest-attribute=const -Wsuggest-attribute=noreturn -Wstrict-overflow=4
 	export CFLAGS=-g -ggdb -Wall -Wextra  ${optflags} ${extrawarnings} ${extraextrawarnings}
@@ -33,8 +33,8 @@ export matlabopencvldflags=$(shell for x in $$(pkg-config --libs opencv); do  fi
 #have to set rpath in the linker to get the right libs to link.  Also add in the extra flags
 export matlabopencvldflags:= -Wl,-rpath -Wl,${matlabdir} ${matlabopencvldflags} $(shell pkg-config --libs-only-l opencv)
 #set up some non-matlab variables
-export DEBUGFLAGS= -g -std=gnu11
-export CXXDEBUGFLAGS= -g --std=c++11
+export DEBUGFLAGS= -g -ggdb3 -std=gnu11
+export CXXDEBUGFLAGS= -g -ggdb3 --std=c++11
 export CLIBFLAGS= -fPIC -shared
 export LDFLAGS= -lm -g
 export opencvcflags=$(shell  pkg-config --cflags opencv)

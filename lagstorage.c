@@ -1,8 +1,8 @@
 /// \file
 #include <stdlib.h>
+#include <string.h>
 #include "lagstorage.h"
-#include "sizes.h"
-lagstorage lagstorage_init(const int flagcount,const int cap)
+lagstorage* lagstorage_init(const int flagcount,const int cap)
 {
     lagstorage firinglags =
     {
@@ -14,10 +14,12 @@ lagstorage lagstorage_init(const int flagcount,const int cap)
     { //initialize firing lags - essentially sets up an initial condition with no spikes in the past.  If you wanted spikes before the start of the simulation - change this
         for (int y = 0;y<grid_size;y++)
         {
-            firinglags.lags[(x*grid_size+y)*firinglags.lagsperpoint]= -1;
+            firinglags.lags[LagIdx(x,y,&firinglags)]= -1;
         }
     }
-    return firinglags;
+    lagstorage* l = malloc(sizeof(*l));
+    memcpy(l,&firinglags,sizeof(*l));
+    return l;
 }
 
 int16_t __attribute__((const,pure)) CurrentShortestLag(const lagstorage* const L,const int baseidx)

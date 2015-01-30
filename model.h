@@ -1,7 +1,6 @@
 /// \file
-#include "layer.h" //would be nice if this wasn't needed
+#include "layer.h" //TODO would be nice if this wasn't needed
 #include "sizes.h"
-
 typedef struct animal animal;
 ///Allows for having multiple layers and simulating them
 typedef struct model

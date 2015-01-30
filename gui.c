@@ -1,22 +1,31 @@
 /// \file
+#include <stdlib.h>
 #include "output.h"
+#include "randconns.h"
 #include "tagged_array.h"
 #include "opencv/cv.h"
 #include "opencv/highgui.h"
 #include "openCVAPI/api.h"
+#include "sizes.h"
 #ifdef OPENCV
 void cvdispInit(const char** const names,const int count)
 {
     for (int i=0;i<count;i++)
     {
-        output_s out = getOutputByName(names[i]);
-        cvNamedWindow(out.name,CV_WINDOW_NORMAL);
+        cvNamedWindow(names[i],CV_WINDOW_NORMAL);
     }
 }
-void cvdisp (const char** const names, const int count)
+
+void cvdisp (const char** const names, const int count,const randconns_info* const rcinfo)
 {
     for (int i=0;i<count;i++)
     {
+        if (strcmp(names[i],"RC")==0)
+        {
+            Compute_float* data=RandConnsToMat(rcinfo);
+            PlotColored("RC",data,-1,1,grid_size);
+            continue;
+        }
         output_s out = getOutputByName(names[i]);
         const unsigned int size = tagged_array_size_(*out.data.TA_data)*out.data.TA_data->subgrid;
         if (out.data.TA_data->subgrid>1)

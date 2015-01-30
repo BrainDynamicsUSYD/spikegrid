@@ -2,6 +2,7 @@
 #ifdef __cplusplus
 #include "opencv2/core/core.hpp" //core opencv
 #include "opencv2/highgui/highgui.hpp" //for video writer
+typedef struct randconns_info randconns_info;
 ///generic class for outputting an object.
 ///you probably want to inhereit from this for a new output method
 class Output

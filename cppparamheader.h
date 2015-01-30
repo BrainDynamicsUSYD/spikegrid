@@ -1,6 +1,7 @@
 /// \file
 #ifndef CPPPARAM
 #define CPPPARAM
+#include "enums.h"
 //c++ can't read all of the paramheader file, so this file gets its own entry
 typedef struct output_parameters
 {

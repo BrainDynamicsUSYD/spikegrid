@@ -11,7 +11,7 @@ ifeq ($(CC),clang)
 else #gcc
 	optflags=  -Ofast -msse -msse2 -msse3 -funsafe-loop-optimizations -mtune=native -march=native  -floop-interchange -ftree-loop-optimize -floop-strip-mine -floop-block -flto  -fassociative-math -fno-signed-zeros -freciprocal-math -ffinite-math-only -fno-trapping-math -ftree-vectorize
 	extrawarnings=-Wstrict-aliasing -fstrict-aliasing   -Wshadow  -Wconversion -Wdouble-promotion -Wformat=2 -Wunused -Wuninitialized -Wfloat-equal -Wunsafe-loop-optimizations -Wcast-qual -Wcast-align -Wwrite-strings  -Wlogical-op  -Wvector-operation-performance -Wno-pragmas
-	extraextrawarnings=-Wsuggest-attribute=pure -Wsuggest-attribute=const -Wsuggest-attribute=noreturn -Wstrict-overflow=4
+	extraextrawarnings=-Wsuggest-attribute=pure  -Wsuggest-attribute=noreturn -Wstrict-overflow=4
 	export CFLAGS=-g -ggdb -Wall -Wextra  ${optflags} ${extrawarnings} ${extraextrawarnings}
 	cspecificwarnings= -Wjump-misses-init
 endif
@@ -33,8 +33,8 @@ export matlabopencvldflags=$(shell for x in $$(pkg-config --libs opencv); do  fi
 #have to set rpath in the linker to get the right libs to link.  Also add in the extra flags
 export matlabopencvldflags:= -Wl,-rpath -Wl,${matlabdir} ${matlabopencvldflags} $(shell pkg-config --libs-only-l opencv)
 #set up some non-matlab variables
-export DEBUGFLAGS= -g -ggdb3 -std=gnu11
-export CXXDEBUGFLAGS= -g -ggdb3 --std=c++11
+export DEBUGFLAGS= -g -std=gnu11 ${DEFINES}
+export CXXDEBUGFLAGS= -g --std=c++11 ${DEFINES}
 export CLIBFLAGS= -fPIC -shared
 export LDFLAGS= -lm -g
 export opencvcflags=$(shell  pkg-config --cflags opencv)
@@ -44,7 +44,7 @@ export CXXFLAGS:=${CFLAGS} #use := to create an actual copy
 CFLAGS += --std=gnu11 ${cspecificwarnings}
 CXXFLAGS += --std=c++11
 #conductance.c always needs to be first - this ensures that the mexfile gets the right name
-SOURCES= conductance.c coupling.c  STDP.c STD.c output.c evolve.c newparam.c yossarian.c init.c theta.c printstruct.c cleanup.c evolvegen.c lagstorage.c gui.c tagged_array.c localstim.c utils.c animal.c
+SOURCES= conductance.c coupling.c  STDP.c STD.c output.c evolve.c newparam.c yossarian.c init.c theta.c printstruct.c cleanup.c evolvegen.c lagstorage.c gui.c tagged_array.c localstim.c utils.c animal.c randconns.c
 BINARY=./a.out
 VERSION_HASH = $(shell git rev-parse HEAD)
 export CONFIG=whichparam.h config/*

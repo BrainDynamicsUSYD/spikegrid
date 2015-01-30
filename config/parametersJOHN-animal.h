@@ -8,15 +8,7 @@
 #ifndef PARAMETERS  //DO NOT REMOVE
 ///include guard
 #define PARAMETERS  //DO NOT REMOVE
-//disable warnings about float conversion in this file only
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wconversion"
-#else
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wfloat-conversion"
-#pragma GCC diagnostic ignored "-Wconversion"
-#endif
+
 //the following typedef must be before the include to get the right compute types
 ///Whether we are using the single or double layer model
 static const LayerNumbers ModelType = DUALLAYER;
@@ -42,9 +34,10 @@ static const parameters OneLayerModel = {.couple={0}}; //since unused - shortes 
 
 #define STDPparams .STDP=   \
     {                       \
-        .stdp_limit=0.5,    \
-        .stdp_tau=20,       \
-        .stdp_strength=0.0000  \
+        .stdp_limit=0.2,   \
+        .stdp_tau=40,       \
+        .stdp_strength=0.0005, \
+        .STDP_on=ON         \
     }
 ///parameters for the inhibitory layer of the double layer model
 static const parameters DualLayerModelIn =
@@ -88,6 +81,7 @@ static const parameters DualLayerModelEx =
     },
     STDPparams,
     potparams,
+    .random= {.numberper=5000,.str=1000.0, .Specials=2},
     .skip=1,
 };
 ///Some global features that can be turned on and off
@@ -96,27 +90,23 @@ static const model_features Features =
     .STDP		= ON, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep -
     .STD        = OFF, //               if we need any of these features we can make the changes then.
     .Timestep   = 0.1,
-    .Simlength  = 10000,
+    .Simlength  = 1000000,
     .UseAnimal     = ON,
+    .Random_connections=ON,
 };
 ///Constant external input to conductances
 static const extinput Extinput =
 {
     .gE0 = 0.0,
-    .gI0 = 0.0,
+    .gI0 = 0.05,
 };
 ///Parameters for conducting a parameter sweep.
 static const sweepable Sweep =
 {
-    .offset=offsetof(parameters,couple)+offsetof(couple_parameters,Layer_parameters) +0+ /*offset in the union is always 0*/  + offsetof(duallayer_parameters,W),
+    .offset=offsetof(parameters,couple.Layer_parameters.dual.sigma),//+offsetof(couple_parameters,Layer_parameters) +0+ /*offset in the union is always 0*/  + offsetof(duallayer_parameters,W),
     .minval = 0.0,
     .maxval = 1.0,
     .count = 100
 };
 
-#ifdef __clang__
-#pragma clang diagnostic pop
-#else
-#pragma GCC diagnostic pop
-#endif
 #endif //DO NOT REMOVE

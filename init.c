@@ -14,6 +14,8 @@
 #include "out/out.h"
 #include "utils.h"
 #include "animal.h"
+#include "randconns.h"
+#include "lagstorage.h"
 #define max(a,b) \
     ({ __typeof__ (a) _a = (a);\
        __typeof__ (b) _b = (b); \
@@ -54,9 +56,6 @@ void* newdata(const void* const input,const unsigned int size)
 }
 
 ///given a parameters object, set up a layer object.
-///This function is what theoretically will allow for sweeping through parameter space.
-///The only problem is that a parameters object is immutable, so we need some way to do essentially a copy+update in C.
-///Essentially, we need to be able to do something like P = {p with A=B} (F# record syntax)
 ///currently this function is only called from the setup function (but it could be called directly)
 layer setuplayer(const parameters p)
 {
@@ -81,85 +80,14 @@ layer setuplayer(const parameters p)
             Synapse_timecourse_cache((unsigned int)cap,p.couple.Layer_parameters.single.In,Features.Timestep):NULL,
         .Mytimecourse       = p.couple.Layertype==DUALLAYER?
            Synapse_timecourse_cache((unsigned int)cap,p.couple.Layer_parameters.dual.synapse,Features.Timestep):NULL,
-        .rcinfo =
-            {
-                .randconns          = Features.Random_connections==ON?
-                    calloc(sizeof(randomconnection),(size_t)(grid_size*grid_size*p.random.numberper)):NULL
-            },
         .P                  = (parameters*)newdata(&p,sizeof(p)),
         .voltages           = calloc(sizeof(Compute_float),grid_size*grid_size),
         .voltages_out       = calloc(sizeof(Compute_float),grid_size*grid_size),
         .recoverys          = Features.Recovery==ON?calloc(sizeof(Compute_float),grid_size*grid_size):NULL,
         .recoverys_out      = Features.Recovery==ON?calloc(sizeof(Compute_float),grid_size*grid_size):NULL,
         .Layer_is_inhibitory = p.couple.Layertype==DUALLAYER && p.couple.Layer_parameters.dual.W<0,
+        .rcinfo             = Features.Random_connections==ON?init_randconns(p.random,p.couple): NULL,
     };
-    //the next section deals with setup for random connsections.  It is quite messy and long.
-    //much of this complexity is involved with allowing access to the random connections in efficient ways
-    //(particularly when STDP is included in the model)
-    if (Features.Random_connections == ON)
-    {
-        //creat a rather ridiculously sized matrix
-        //allows for 10x the avg number of connections per point.  Incredibly wasteful.  It would be really nice to have some c++ vectors here
-        const unsigned int overkill_factor = 10;
-        randomconnection** bigmat = calloc(sizeof(randomconnection*),grid_size*grid_size*p.random.numberper*overkill_factor);
-        unsigned int* bigmatcounts = calloc(sizeof(unsigned int),grid_size*grid_size);
-        int nonzcount;
-        Compute_float* interestingconns;
-        Non_zerocouplings(p.couple,&interestingconns,&nonzcount);
-        srandom((unsigned)0);
-        for (unsigned int x=0;x<grid_size;x++)
-        {
-            for (unsigned int y=0;y<grid_size;y++)
-            {
-                for (unsigned int i=0;i<p.random.numberper;i++)
-                {
-                    const randomconnection rc =
-                    {
-                        .strength = interestingconns[random()%nonzcount] * (One - p.couple.normalization_parameters.glob_mult.GM),
-                        .stdp_strength = Zero,
-                        .destination =
-                        {
-                            .x = (Neuron_coord)(((Compute_float)(random()) / (Compute_float)RAND_MAX) * (Compute_float)grid_size),
-                            .y = (Neuron_coord)(((Compute_float)(random()) / (Compute_float)RAND_MAX) * (Compute_float)grid_size),
-                        }
-                    };
-                    L.rcinfo.randconns[(x*grid_size+y)*p.random.numberper + i] = rc;
-                    //the normal matrix stores by where they come from.  Also need to store where they got to.
-                    bigmat[(rc.destination.x*grid_size+rc.destination.y)*(int)p.random.numberper*(int)overkill_factor + (int)bigmatcounts[rc.destination.x*grid_size+rc.destination.y]]=&L.rcinfo.randconns[(x*grid_size+y)*p.random.numberper + i];
-                    bigmatcounts[rc.destination.x*grid_size+rc.destination.y]++;
-                    if(bigmatcounts[rc.destination.x*grid_size+rc.destination.y] > overkill_factor*p.random.numberper)
-                    {
-                        printf("Overkill factor is not large enough - please make it bigger at dx = %i dy = %i\n",rc.destination.x,rc.destination.y);
-                        exit(EXIT_FAILURE);
-                    }
-                }
-            }
-        }
-        randomconnection** rev_conns = malloc(sizeof(randomconnection*)*grid_size*grid_size*p.random.numberper);
-        randomconnection*** rev_conns_lookup = malloc(sizeof(randomconnection**)*grid_size*grid_size);
-        unsigned int* rev_pp = malloc(sizeof(unsigned int)*grid_size*grid_size);
-        int count = 0;
-
-        for (unsigned int x=0;x<grid_size;x++)
-        {
-            for (unsigned int y=0;y<grid_size;y++)
-            {
-                rev_conns_lookup[x*grid_size+y] = &rev_conns[count];
-                unsigned int mycount = 0;
-                while(bigmat[(x*grid_size+y)*p.random.numberper*overkill_factor + mycount] != NULL && mycount < overkill_factor)
-                {
-                    rev_conns[count]=bigmat[(x*grid_size+y)*p.random.numberper*overkill_factor + mycount];
-                    count++;mycount++;
-                }
-                rev_pp[x*grid_size+y]=mycount;
-            }
-        }
-        L.rcinfo.rev_pp=rev_pp;
-        L.rcinfo.randconns_reverse=rev_conns;
-        L.rcinfo.randconns_reverse_lookup = rev_conns_lookup;
-        free(bigmat);
-        free(bigmatcounts);
-    }
     return L;
 }
 
@@ -180,7 +108,7 @@ model* setup(const parameters p,const parameters p2,const LayerNumbers lcount,co
         }
         else
         {
-         sprintf(nostring,"%i-%i",yossarianjobnumber,jobnumber);   
+         sprintf(nostring,"%i-%i",yossarianjobnumber,jobnumber);
         }
         // Here it is... add the extra file.
         if (strlen(Features.Outprefix)==0)

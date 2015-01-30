@@ -6,7 +6,8 @@
 #include "mymath.h" //fabsf
 #include "STDP.h"
 #include "layer.h"
-#include "sizes.h"
+#include "randconns.h"
+#include "lagstorage.h"
 typedef struct
 {
     Compute_float Strength_increase;
@@ -14,7 +15,7 @@ typedef struct
     on_off        valid;
 } STDP_change;
 
-//gcc thinks that this can be const - but I think the read of timestep prevents this - not sure what is going on
+//gcc thinks that this can be const - but I think the read of timestep prevents this - not sure what is going on - maybe timestep gets inlined?
 Compute_float __attribute__((pure)) STDP_strength(const STDP_parameters S,const Compute_float lag) //implicitrly assumed that the function is odd
 {
     return  S.stdp_strength * exp(-lag*Features.Timestep/S.stdp_tau);
@@ -26,15 +27,6 @@ int __attribute__((pure,const)) wrap (int n)
     else {return n;}
 }
 
-///helper function for STDP.  Calculates distance between two neurons, taking into account wrapping in the network
-///interesting idea - in some cases I don't care about this wrapping and could cheat
-inline static int dist(int cur,int prev)
-{
-    int dx = cur-prev;
-    if     (dx >       (grid_size/2)){return(dx - grid_size);}
-    else if(dx < -     (grid_size/2)){return(dx + grid_size);}
-    else   {return dx;}
-}
 inline static Compute_float clamp(Compute_float V,Compute_float target,Compute_float frac)
 {
     target = fabs(target);
@@ -59,10 +51,10 @@ STDP_change STDP_change_calc (const int destneuronidx,const int destinotherlayer
     idx = 0;
     while (revlags[destinotherlayeridx+idx] != -1) //connections to the other layer.  This is way too complicated - but I tghink it should work
     {
-        ret.Strength_increase += STDP_strength(S2,revlags[destneuronidx+idx]);
+        ret.Strength_increase += STDP_strength(S2,revlags[destinotherlayeridx+idx]);
         //the connection from the other layer to the current layer uses the other layer parameters
         //slightly arbitrary but feels correct and maintains the sum of STDP=0 when window function is odd.
-        ret.Strength_decrease += STDP_strength(S, revlags[destneuronidx+idx]); 
+        ret.Strength_decrease += STDP_strength(S, revlags[destinotherlayeridx+idx]);
         idx++;
     }
     return ret;
@@ -76,9 +68,9 @@ void STDP_At_point(const int x, const int y,STDP_data* const data,STDP_data* con
     const int wx = wrap(x+xoffset);
     const int wy = wrap(y+yoffset);
     //calculate the indexes for the neuron we are connected to and compute the offsets
-    const int baseidx = (wx*grid_size + wy) * data->lags.lagsperpoint;
-    const int baseidx2 = (wx*grid_size + wy) * revdata->lags.lagsperpoint;
-    STDP_change change = STDP_change_calc(baseidx,baseidx2,S,S2,data->lags.lags,revdata->lags.lags);
+    const int baseidx = LagIdx(wx,wy,data->lags);
+    const int baseidx2 = LagIdx(wx,wy,revdata->lags);
+    STDP_change change = STDP_change_calc(baseidx,baseidx2,S,S2,data->lags->lags,revdata->lags->lags);
     if (change.valid==ON)
     {
         // the other neuron actually fired - so we can apply STDP - need to apply in two directions
@@ -101,21 +93,21 @@ void STDP_At_point(const int x, const int y,STDP_data* const data,STDP_data* con
 }
 void  DoSTDP(const Compute_float* const const_couples, const Compute_float* const const_couples2,
         STDP_data* data,const STDP_parameters S, STDP_data* const data2,const STDP_parameters S2,
-        randconns_info* rcs,const randconn_parameters* const rparams )
+        randconns_info* rcs)
 {
     if (S.STDP_on ==OFF) {return;}
     for (int x=0;x<grid_size;x++)
     {
         for (int y=0;y<grid_size;y++)
         {
-            const int baseidx = (x*grid_size + y)*data->lags.lagsperpoint;
+            const int baseidx = LagIdx(x,y,data->lags);
             //first - check if the neuron has fired this timestep
             int idx = 0;
-            while (data->lags.lags[baseidx + idx] != -1)
+            while (data->lags->lags[baseidx + idx] != -1)
             {
                 idx++; //we need to get to the last entry to ensure the neuron fired
             }
-            if (idx >0 && data->lags.lags[baseidx+idx-1]==1) //so the neuron did actually fire at the last timestep
+            if (idx >0 && data->lags->lags[baseidx+idx-1]==1) //so the neuron did actually fire at the last timestep
             {
                 //now check if other neurons recently fired - first for nearby connections
                 for (int i = -STDP_RANGE;i<=STDP_RANGE;i++)
@@ -128,26 +120,27 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
                 }
                 if (Features.Random_connections == ON)
                 {
-                    const unsigned int basercidx = (unsigned int)(x*grid_size+y) * rparams->numberper ;
+                    unsigned int norand;
+                    randomconnection* randconns = GetRandomConnsLeaving(x,y,*rcs,&norand);
                     //random connections away from (x,y) - these will be getting decreased
-                    for (unsigned int i = 0;i<rparams->numberper;i++)
+                    for (unsigned int i = 0;i<norand;i++)
                     {
-                        randomconnection rc    = rcs->randconns[basercidx + i];
-                        const int destidx  = ((rc.destination.x * grid_size) + y)*data->lags.lagsperpoint;
-                        const int destidx2 = ((rc.destination.x * grid_size) + y)*data2->lags.lagsperpoint;
-                        STDP_change rcchange   = STDP_change_calc(destidx,destidx2,S,S2,data->lags.lags,data2->lags.lags);
-                        rc.stdp_strength       = clamp(rc.stdp_strength-rcchange.Strength_decrease,rc.strength,S.stdp_limit);
+                        const int destidx           = LagIdx(randconns[i].destination.x,randconns[i].destination.y,data->lags);
+                        const int destidx2          = LagIdx(randconns[i].destination.x,randconns[i].destination.y,data2->lags);
+                        STDP_change rcchange        = STDP_change_calc(destidx,destidx2,S,S2,data->lags->lags,data2->lags->lags);
+                        randconns[i].stdp_strength  = clamp(randconns[i].stdp_strength-rcchange.Strength_decrease*500.0,randconns[i].strength,S.stdp_limit*1000.0);
                     }
                     //random connections to (x,y) - these will be getting increased - code is almost identical - except sign of change is reversed
-                   randomconnection** rcbase = rcs->randconns_reverse_lookup[x*grid_size+y];
-                   for (unsigned int i=0;i<rcs->rev_pp[x*grid_size+y];i++)
+                   unsigned int noconsArriving;
+                   randomconnection** rcbase = GetRandomConnsArriving(x,y,*rcs,&noconsArriving);
+                   for (unsigned int i=0;i<noconsArriving;i++)
                    {
-                       randomconnection rc = *rcbase[i];
-                       const int destidx  = ((rc.destination.x * grid_size) + y)*data->lags.lagsperpoint;
-                       const int destidx2 = ((rc.destination.x * grid_size) + y)*data2->lags.lagsperpoint;
-                       STDP_change rcchange   = STDP_change_calc(destidx,destidx2,S,S2,data->lags.lags,data2->lags.lags);
-                       rc.stdp_strength       = clamp(rc.stdp_strength+rcchange.Strength_increase,rc.strength,S.stdp_limit);
-                       //                                             ^ note plus sign (not minus)
+                       randomconnection* rc = rcbase[i];
+                       const int destidx    = LagIdx(rc->source.x,rc->source.y,data->lags);
+                       const int destidx2   = LagIdx(rc->source.x,rc->source.y,data2->lags);
+                       STDP_change rcchange = STDP_change_calc(destidx,destidx2,S,S2,data->lags->lags,data2->lags->lags);
+                       rc->stdp_strength    = clamp(rc->stdp_strength+rcchange.Strength_decrease*500.0,rc->strength,S.stdp_limit*1000.0);
+                       //                                             ^ note plus sign (not minus) why?? - I assume the strengths are reversed
                    }
                 }
             }
@@ -161,23 +154,9 @@ STDP_data* STDP_init(const STDP_parameters S,const int trefrac_in_ts)
     const int stdplagcount = (int)((STDP_cap/trefrac_in_ts)+2);
     STDP_data D =
     {
-        .lags =
-        {
-            .lags         = calloc(sizeof(int16_t),grid_size*grid_size*(size_t)stdplagcount),
-            .cap          = STDP_cap,
-            .lagsperpoint = stdplagcount
-        },
+        .lags = lagstorage_init(stdplagcount,STDP_cap),
         .connections =  calloc(sizeof(Compute_float),grid_size*grid_size*STDP_array_size*STDP_array_size)
-
     };
-    for (int x = 0;x<grid_size;x++)
-    {
-        for (int y = 0;y<grid_size;y++)
-        {
-            D.lags.lags[(x*grid_size+y)*D.lags.lagsperpoint]=-1;
-        }
-    }
-
     memcpy(ret,&D,sizeof(*ret));
     return ret;
 }

@@ -12,7 +12,6 @@ extern "C"
 #include "../tagged_array.h"
 #include "../output.h" //but this is C
 #include "../cppparamheader.h"
-#include "../sizes.h"
 #include "../lagstorage.h"
 }
 #include "out.h" //and this is c++ again.
@@ -130,6 +129,7 @@ void SpikeOutput::DoOutput()
     fflush(f);
 
 }
+
 void MakeOutputs(const output_parameters* const m)
 {
     int i = 0;

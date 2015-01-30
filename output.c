@@ -52,8 +52,8 @@ void output_init(const model* const m)
         {"STDR2",       FLOAT_DATA, .data.TA_data=tagged_array_new(Features.STD==ON?m->layer2.std->R:NULL, grid_size, 0,             1,0,1)},
         {"STDP1",       FLOAT_DATA, .data.TA_data=tagged_array_new(Features.STDP==ON?m->layer1.STDP_data->connections:NULL,grid_size,0,couple_array_size,-0.01,0.01)},
         {"STDP2",       FLOAT_DATA, .data.TA_data=tagged_array_new(Features.STDP==ON?m->layer2.STDP_data->connections:NULL,grid_size,0,couple_array_size,-0.01,0.01)},
-        {"Spike1",      SPIKE_DATA, .data.Lag_data=&m->layer1.firinglags},
-        {"Spike2",      SPIKE_DATA, .data.Lag_data=&m->layer2.firinglags},
+        {"Spike1",      SPIKE_DATA, .data.Lag_data=m->layer1.firinglags},
+        {"Spike2",      SPIKE_DATA, .data.Lag_data=m->layer2.firinglags},
         {.name={0}}};         //a marker that we are at the end of the outputabbles list
     output_s* malloced = malloc(sizeof(output_s)*output_count);
     memcpy(malloced,outdata,sizeof(output_s)*output_count);

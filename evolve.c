@@ -1,15 +1,18 @@
 /// \file
 #include <string.h> //memset
 #include <stdlib.h> //random
-#include "theta.h"
+#include <stdio.h>
 #include "STDP.h"
+#include "model.h"
+#include "theta.h"
 #include "evolvegen.h"
 #include "STD.h"
 #include "mymath.h"
 #include "paramheader.h"
-#include "model.h"
 #include "localstim.h"
 #include "animal.h"
+#include "randconns.h"
+#include "lagstorage.h"
 #ifdef ANDROID
     #define APPNAME "myapp"
     #include <android/log.h>
@@ -26,12 +29,12 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
             Compute_float str = Zero;
             const int idx = x*grid_size + y;
             int numfirings = 0;
-            while (L.firinglags.lags[idx*L.firinglags.lagsperpoint+numfirings] != -1)
+            while (L.firinglags->lags[idx*L.firinglags->lagsperpoint+numfirings] != -1)
             {
-                Compute_float this_str =L.Mytimecourse[L.firinglags.lags[idx*L.firinglags.lagsperpoint + numfirings]];
+                Compute_float this_str =L.Mytimecourse[L.firinglags->lags[idx*L.firinglags->lagsperpoint + numfirings]];
                 if (Features.STD == ON)
                 {
-                    this_str = this_str * STD_str(L.P->STD,x,y,time,L.firinglags.lags[idx*L.firinglags.lagsperpoint + numfirings],L.std);
+                    this_str = this_str * STD_str(L.P->STD,x,y,time,L.firinglags->lags[idx*L.firinglags->lagsperpoint + numfirings],L.std);
                 }
                 str += this_str;
                 numfirings++;
@@ -48,15 +51,15 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
                     evolvept_duallayer_STDP(x,y,L.connections,L.STDP_data->connections,str,(L.Layer_is_inhibitory?gI:gE));
                 }
             }
-            if (Features.Random_connections == ON)
+            if (Features.Random_connections == ON && !L.Layer_is_inhibitory )
             {
-                const int randbase = (x*grid_size+y)*(int)L.P->random.numberper;
-                for (int i=0;i<(int)L.P->random.numberper;i++)
+                unsigned int norand;
+                const randomconnection* rcs = GetRandomConnsLeaving(x,y,*L.rcinfo,&norand);
+                for (unsigned int i=0;i<norand;i++)
                 {
-                    const randomconnection rc = L.rcinfo.randconns[randbase+i];
-                    const int condindex = (rc.destination.x + couplerange) * conductance_array_size + rc.destination.y + couplerange;
-                    if (L.Layer_is_inhibitory) {gI[condindex] += str * rc.strength;}
-                    else  {gE[condindex] += str * rc.strength;}
+                    const int condindex = Conductance_index(rcs[i].destination.x,rcs[i].destination.y);
+                    if (L.Layer_is_inhibitory) {gI[condindex] += str * (rcs[i].strength + rcs[i].stdp_strength);}
+                    else                       {gE[condindex] += str * (rcs[i].strength + rcs[i].stdp_strength);}
                 }
             }
         }
@@ -127,7 +130,7 @@ void CalcVoltages(const Compute_float* const __restrict__ Vinput,
     {
         for (int y=0;y<grid_size;y++)
         {
-            const int idx = (x+couplerange)*conductance_array_size + y + couplerange; //index for gE/gI
+            const int idx =Conductance_index(x,y);
             const int idx2=  x*grid_size+y;
             const Compute_float rhs = rhs_func(Vinput[idx2],gE[idx],gI[idx],C);
             Vout[idx2]=Vinput[idx2]+Features.Timestep*rhs;
@@ -149,7 +152,7 @@ void CalcRecoverys(const Compute_float* const __restrict__ Vinput,
     {
         for (int y=0;y<grid_size;y++)
         {   //step all neurons through time - use Euler method
-            const int idx = (x+couplerange)*conductance_array_size + y + couplerange; //index for gE/gI
+            const int idx = Conductance_index(x,y);
             const int idx2 = x*grid_size+y;       //index for voltage/recovery
             const Compute_float rhsV=rhs_func(Vinput[idx2],gE[idx],gI[idx],C)-Winput[idx2];
             const Compute_float rhsW=R.Wcv*(R.Wir*(Vinput[idx2]-C.Vlk) - Winput[idx2]);
@@ -170,9 +173,9 @@ void StoreFiring(layer* L)
             const int test = x % step ==0 && y % step ==0;
             if ((test && step > 0) || ((!test) && step<0)) //check if this is an active neuron
             {
-                const int baseidx=(x*grid_size+y)*L->firinglags.lagsperpoint;
-                modifyLags(&L->firinglags,baseidx);
-                if (Features.STDP==ON) {modifyLags(&L->STDP_data->lags,(x*grid_size+y)*L->STDP_data->lags.lagsperpoint);}
+                const int baseidx=LagIdx(x,y,L->firinglags); 
+                modifyLags(L->firinglags,baseidx);
+                if (Features.STDP==ON) {modifyLags(L->STDP_data->lags,LagIdx(x,y,L->STDP_data->lags));}
                 //now - add in new spikes
                 if (L->voltages_out[x*grid_size + y]  >= L->P->potential.Vpk)
                 {
@@ -181,11 +184,11 @@ void StoreFiring(layer* L)
                         L->voltages_out[x*grid_size+y]=L->P->potential.Vrt;                    //does voltage also need to be reset like this?
                         L->recoverys_out[x*grid_size+y]+=L->P->recovery.Wrt;
                     }
-                    AddnewSpike(&L->firinglags,baseidx);
-                    if (Features.STDP==ON) {AddnewSpike(&L->STDP_data->lags,(x*grid_size+y)*L->STDP_data->lags.lagsperpoint);}
+                    AddnewSpike(L->firinglags,baseidx);
+                    if (Features.STDP==ON) {AddnewSpike(L->STDP_data->lags,LagIdx(x,y,L->STDP_data->lags));}
                 }//add random spikes
-                else if (((Compute_float)(random()))/((Compute_float)RAND_MAX) <
-                        (L->P->potential.rate*((Compute_float)0.001)*Features.Timestep))
+                else if (L->P->potential.rate > 0 && (((Compute_float)(random()))/((Compute_float)RAND_MAX) <
+                        (L->P->potential.rate*((Compute_float)0.001)*Features.Timestep)))
                 {
                     L->voltages_out[x*grid_size+y]=L->P->potential.Vpk+(Compute_float)0.1;//make sure it fires - the neuron will actually fire next timestep
                 }
@@ -216,7 +219,7 @@ void tidylayer (layer* l,const Compute_float timemillis,const Compute_float* con
     if (Features.Recovery==OFF)
     {
         CalcVoltages(l->voltages,gE ,gI,l->P->potential,l->voltages_out);
-        ResetVoltages(l->voltages_out,l->P->couple,&l->firinglags,l->P->potential);
+        ResetVoltages(l->voltages_out,l->P->couple,l->firinglags,l->P->potential);
     }
     else
     {
@@ -249,7 +252,7 @@ void step1(model* m,const unsigned int time)
     if(Features.UseAnimal==ON)
     {
         MoveAnimal(m->animal,timemillis);
-        AnimalEffects(*m->animal,m->gE);
+        AnimalEffects(*m->animal,m->gE,timemillis);
     }
     // Add spiking input to the conductances
     AddSpikes(m->layer1,m->gE,m->gI,time);
@@ -270,7 +273,7 @@ void step1(model* m,const unsigned int time)
     if (m->NoLayers==DUALLAYER){tidylayer(&m->layer2,timemillis,m->gE,m->gI);}
     if (Features.STDP==ON)
     {
-        DoSTDP(m->layer1.connections,m->layer2.connections,m->layer1.STDP_data,m->layer1.P->STDP, m->layer2.STDP_data,m->layer2.P->STDP,&m->layer1.rcinfo,&m->layer1.P->random);
-        DoSTDP(m->layer2.connections,m->layer1.connections,m->layer2.STDP_data,m->layer2.P->STDP, m->layer1.STDP_data,m->layer1.P->STDP,&m->layer2.rcinfo,&m->layer2.P->random);
+        DoSTDP(m->layer1.connections,m->layer2.connections,m->layer1.STDP_data,m->layer1.P->STDP, m->layer2.STDP_data,m->layer2.P->STDP,m->layer1.rcinfo);
+        DoSTDP(m->layer2.connections,m->layer1.connections,m->layer2.STDP_data,m->layer2.P->STDP, m->layer1.STDP_data,m->layer1.P->STDP,m->layer2.rcinfo);
     }
 }

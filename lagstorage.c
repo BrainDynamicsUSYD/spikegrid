@@ -61,6 +61,7 @@ void RemoveDeadSpike(lagstorage* L,const int baseidx)
         }
     }
 }
+//be careful - this function uses a pretty significantly 
 void modifyLags(lagstorage* L,int baseidx)
 {
     //increment the firing lags.

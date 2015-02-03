@@ -27,20 +27,20 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
         for (int x=0;x<grid_size;x++)
         {
             Compute_float str = Zero;
-            const int idx = x*grid_size + y;
-            int numfirings = 0;
-            while (L.firinglags->lags[idx*L.firinglags->lagsperpoint+numfirings] != -1)
+            const int lagidx = LagIdx(x,y,L.firinglags);
+            int newlagidx = lagidx;
+            while (L.firinglags->lags[newlagidx] != -1)  //Note: I think perf might be overstating the amount of time on this line - although, if it isn't massive potential for perf improvement
             {
-                Compute_float this_str =L.Mytimecourse[L.firinglags->lags[idx*L.firinglags->lagsperpoint + numfirings]];
+                Compute_float this_str =L.Mytimecourse[L.firinglags->lags[newlagidx]];
                 if (Features.STD == ON)
                 {
-                    this_str = this_str * STD_str(L.P->STD,x,y,time,L.firinglags->lags[idx*L.firinglags->lagsperpoint + numfirings],L.std);
+                    this_str = this_str * STD_str(L.P->STD,x,y,time,L.firinglags->lags[newlagidx],L.std);
                 }
+                newlagidx++;
                 str += this_str;
-                numfirings++;
             }
             if (L.Layer_is_inhibitory) {str = (-str);} //invert strength for inhib conns.
-            if (numfirings > 0) //only fire if we had a spike.
+            if (newlagidx != lagidx) //only fire if we had a spike.
             {
                 if (Features.STDP==OFF)
                 {

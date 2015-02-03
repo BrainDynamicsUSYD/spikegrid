@@ -39,7 +39,7 @@ export CLIBFLAGS= -fPIC -shared
 export LDFLAGS= -lm -g
 export opencvcflags=$(shell  pkg-config --cflags opencv)
 export opencvldflags=$(shell  pkg-config --libs opencv)
-CFLAGS += ${SPEEDFLAG} ${DEFINES}
+CFLAGS += ${SPEEDFLAG} ${DEFINES} -fno-omit-frame-pointer
 export CXXFLAGS:=${CFLAGS} #use := to create an actual copy
 CFLAGS += --std=gnu11 ${cspecificwarnings}
 CXXFLAGS += --std=c++11

@@ -3,6 +3,7 @@
 #include "sizes.h"
 typedef struct animal animal;
 ///Allows for having multiple layers and simulating them
+///This holds both layes and things that we need to keep track of over time that aren't in the layers (main example gE,gI)
 typedef struct model
 {
     const LayerNumbers NoLayers;                                        ///<Whether this is a single or double layer model

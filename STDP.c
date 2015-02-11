@@ -160,3 +160,24 @@ STDP_data* STDP_init(const STDP_parameters S,const int trefrac_in_ts)
     memcpy(ret,&D,sizeof(*ret));
     return ret;
 }
+
+Compute_float* COMangle(const  STDP_data* const S)
+{
+    Compute_float* ret = malloc(sizeof(*ret)*grid_size*grid_size);
+    for (int i=0;i<grid_size*grid_size;i++)
+    {
+        Compute_float xsum = Zero;
+        Compute_float ysum = Zero;
+        for (int a=-STDP_RANGE;a<STDP_RANGE;a++)
+        {
+            for (int b=-STDP_RANGE;b<STDP_RANGE;b++)
+            {
+                Compute_float str = S->connections[i*STDP_array_size*STDP_array_size+(a+STDP_RANGE)*STDP_array_size + (b+STDP_RANGE)];
+                xsum += str*(Compute_float)a;
+                ysum += str*(Compute_float)b;
+            }
+        }
+        ret[i]=atan2(ysum,xsum);
+    }
+    return ret;
+}

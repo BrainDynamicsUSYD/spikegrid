@@ -2,11 +2,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include "lagstorage.h"
+///The lagstorage functions have some issues - mainly while loops to find the end etc.  However, it looks like it is 
+///slower to keep track of the count
 lagstorage* lagstorage_init(const int flagcount,const int cap)
 {
     lagstorage firinglags =
     {
-        .lags         = calloc(sizeof(int16_t),grid_size*grid_size*(size_t)flagcount),
+        .lags         = calloc(sizeof(int16_t),grid_size*grid_size*(size_t)flagcount), //TODO: switching to store a timestep number here might be faster
         .cap          = cap,
         .lagsperpoint = flagcount
     };
@@ -49,6 +51,7 @@ void AddnewSpike(lagstorage* L,const int baseidx)
     //and set the next one to -1 to mark the end of the array
     L->lags[baseidx + idx+1]= -1;
 }
+//called for every neuron on every timestep
 void RemoveDeadSpike(lagstorage* L,const int baseidx)
 {
     if (L->lags[baseidx] == L->cap )//if first entry is at cap - remove and shuffle everything down
@@ -61,7 +64,8 @@ void RemoveDeadSpike(lagstorage* L,const int baseidx)
         }
     }
 }
-//be careful - this function uses a pretty significantly 
+//be careful - this function uses a pretty significant amount of time - called for every neuron at every timestep (twice with STDP)
+//
 void modifyLags(lagstorage* L,int baseidx)
 {
     //increment the firing lags.
@@ -69,8 +73,10 @@ void modifyLags(lagstorage* L,int baseidx)
     while (L->lags[baseidx+idx] != -1)
     {
         L->lags[baseidx+idx]++;
-        idx++;
+        idx++; //I wonder if there is a trick here in the increment?
+        //maybe we could use some trick SSE instruction.
+        //otherwise - maybe store a timestep number
     }
-    RemoveDeadSpike(L,baseidx);
+    RemoveDeadSpike(L,baseidx); //the structure here could be nicer - however I wouldn't be surprised if gcc does some magic and auto inlines and reorders removedeadspike and modifylags
 }
 

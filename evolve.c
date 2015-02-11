@@ -69,13 +69,13 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
 ///This function adds in the overlapping bits back into the original matrix.  It is slightly opaque but using pictures you can convince yourself that it works
 ///To keep the evolvept code simple we use an array like this:
 ///~~~~
-///    +–––––––––––––––––+          
-///    |Extra for overlap|          
-///    |  +––––––––––+   |          
-///    |  |Actual    |   |          
-///    |  |matrix    |   |          
-///    |  +––––––––––+   |          
-///    +–––––––––––––––––+ 
+///     +-––––––––––––––––+
+///     |Extra for Overlap|
+///     |  +––––––––––+   |
+///     |  |Actual    |   |
+///     |  |matrix    |   |
+///     |  +––––––––––+   |
+///     +–––––––––––––––––+
 ///~~~~
 void fixboundary(Compute_float* __restrict gE, Compute_float* __restrict gI)
 {   //theoretically the two sets of loops could be combined but that would be incredibly confusing
@@ -163,6 +163,7 @@ void CalcRecoverys(const Compute_float* const __restrict__ Vinput,
 }
 
 ///Store current firing spikes also apply random spikes
+///TODO: make faster
 void StoreFiring(layer* L)
 {
     const int step = (int)L->P->skip;
@@ -173,9 +174,9 @@ void StoreFiring(layer* L)
             const int test = x % step ==0 && y % step ==0;
             if ((test && step > 0) || ((!test) && step<0)) //check if this is an active neuron
             {
-                const int baseidx=LagIdx(x,y,L->firinglags); 
+                const int baseidx=LagIdx(x,y,L->firinglags);
                 modifyLags(L->firinglags,baseidx);
-                if (Features.STDP==ON) {modifyLags(L->STDP_data->lags,LagIdx(x,y,L->STDP_data->lags));}
+                if (Features.STDP==ON) {modifyLags(L->STDP_data->lags,LagIdx(x,y,L->STDP_data->lags));} //question - would it be better to use a single lagstorage here with limits in appropriate places?
                 //now - add in new spikes
                 if (L->voltages_out[x*grid_size + y]  >= L->P->potential.Vpk)
                 {
@@ -187,15 +188,16 @@ void StoreFiring(layer* L)
                     AddnewSpike(L->firinglags,baseidx);
                     if (Features.STDP==ON) {AddnewSpike(L->STDP_data->lags,LagIdx(x,y,L->STDP_data->lags));}
                 }//add random spikes
-                else if (L->P->potential.rate > 0 && (((Compute_float)(random()))/((Compute_float)RAND_MAX) <
-                        (L->P->potential.rate*((Compute_float)0.001)*Features.Timestep)))
+                else if (L->P->potential.rate > 0 &&
+                            (((Compute_float)(random()))/((Compute_float)RAND_MAX) <
+                            (L->P->potential.rate*((Compute_float)0.001)*Features.Timestep)))
                 {
                     L->voltages_out[x*grid_size+y]=L->P->potential.Vpk+(Compute_float)0.1;//make sure it fires - the neuron will actually fire next timestep
                 }
             }
             else
             {
-                    L->voltages_out[x*grid_size+y]=Zero; //skipped neurons set to 0
+                    L->voltages_out[x*grid_size+y]=Zero; //skipped neurons set to 0 - probably not required but perf impact should be minimal
             }
         }
     }
@@ -214,6 +216,7 @@ void ResetVoltages(Compute_float* const __restrict Vout,const couple_parameters 
     }
 }
 #include "imread/imread.h"
+///This function takes up way too much time in the code - mostly in storefiring - slightly annoying as this is essentially all pure overhead.  It would be really nice to significantly reduce the amount of time this function takes.
 void tidylayer (layer* l,const Compute_float timemillis,const Compute_float* const gE,const Compute_float* const gI)
 {
     if (Features.Recovery==OFF)
@@ -232,7 +235,7 @@ void tidylayer (layer* l,const Compute_float timemillis,const Compute_float* con
     }
     if (Features.ImageStim==ON)
     {
-        ApplyStim(l->voltages_out,timemillis,l->P->Stim);
+        ApplyStim(l->voltages_out,timemillis,l->P->Stim,Features.ImagePath);
     }
 }
 ///Steps a model through 1 timestep - quite high-level function

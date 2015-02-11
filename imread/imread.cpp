@@ -12,20 +12,19 @@ extern "C"
 }
 bool cached=false;
 cv::Mat imcache; //elements have type Vec3b
-cv::Mat ReadImage()
+cv::Mat ReadImage(const char* const path)
 {
-    std::string path= "input_maps/test.png";
     cv::Mat m =cv::imread(path); //the pixels are stored with type cv::Vec3b - third element is red.  0 is black, 255 is white?
     return m;
 }
-void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimulus_parameters S)
+void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimulus_parameters S,const char* const path)
 {
-    if (cached==false) {imcache=ReadImage();cached=true;}
+    if (cached==false) {imcache=ReadImage(path);cached=true;}
     const Compute_float timemodper = fmod(timemillis,S.timeperiod);
     const bool stim1 = abs(timemodper-80.0)<.01;
     const bool stim2 =  abs(timemodper-80.0 + S.lag)<.01;
-    if (stim1) {std::cout<< "stim1" << std::endl;}
-    if (stim2) {std::cout<< "stim2" << std::endl;}
+//    if (stim1) {std::cout<< "stim1" << std::endl;}
+  //  if (stim2) {std::cout<< "stim2" << std::endl;}
    // std::cout << timemillis << std::endl;
     for (int x=0;x<grid_size;x++)
     {

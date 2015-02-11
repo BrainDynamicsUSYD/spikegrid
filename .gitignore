@@ -47,3 +47,4 @@ libcv
 local_output/*
 .nfs*
 *.swo
+latex/*

@@ -1,14 +1,14 @@
-/// \file
+// \file
 #include <stddef.h> //offsetof
 //these first few parameters actually escape into the paramheader file through magic
 #define grid_size 100
 ///Total size of the grid
 ///Coupling range
-#define couplerange 15
+#define couplerange 25
 #ifndef PARAMETERS  //DO NOT REMOVE
 ///include guard
 #define PARAMETERS  //DO NOT REMOVE
-
+//disable warnings about float conversion in this file only
 //the following typedef must be before the include to get the right compute types
 ///Whether we are using the single or double layer model
 static const LayerNumbers ModelType = DUALLAYER;
@@ -34,10 +34,10 @@ static const parameters OneLayerModel = {.couple={0}}; //since unused - shortes 
 
 #define STDPparams .STDP=   \
     {                       \
-        .stdp_limit=0.2,   \
-        .stdp_tau=40,       \
-        .stdp_strength=0.0005, \
-        .STDP_on=ON         \
+        .stdp_limit=5.8,    \
+        .stdp_tau=20,       \
+        .stdp_strength=0.0048,  \
+        .STDP_on=ON \
     }
 ///parameters for the inhibitory layer of the double layer model
 static const parameters DualLayerModelIn =
@@ -54,11 +54,12 @@ static const parameters DualLayerModelIn =
                 .synapse    = {.R=0.5,.D=2.0},
             }
         },
+
         .norm_type = None,
         .tref       = 5,
     },
-    potparams,
     STDPparams,
+    potparams,
     .skip=2,
 };
 ///parameters for the excitatory layer of the double layer model
@@ -71,7 +72,7 @@ static const parameters DualLayerModelEx =
         {
             .dual =
             {
-                .W          =  0.13,
+                .W          =  0.20,
                 .sigma      = 12,
                 .synapse    = {.R=0.5,.D=2.0},
             }
@@ -81,29 +82,29 @@ static const parameters DualLayerModelEx =
     },
     STDPparams,
     potparams,
-    .random= {.numberper=5000,.str=1000.0, .Specials=2},
-    .skip=1,
+    .skip=-2,
 };
 ///Some global features that can be turned on and off
 static const model_features Features =
 {
     .STDP		= ON, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep -
-    .STD        = OFF, //               if we need any of these features we can make the changes then.
+    .Random_connections = OFF,
     .Timestep   = 0.1,
-    .Simlength  = 10000,
-    .UseAnimal     = ON,
-    .Random_connections=ON,
+    .Simlength  = 100000,
+    .ImageStim  = ON,
+    .ImagePath  = "input_maps/1D.png"
+
 };
 ///Constant external input to conductances
 static const extinput Extinput =
 {
-    .gE0 = 0.0,
-    .gI0 = 0.05,
+    .gE0 = 0.024,
+    .gI0 = 0.0,
 };
 ///Parameters for conducting a parameter sweep.
 static const sweepable Sweep =
 {
-    .offset=offsetof(parameters,couple.Layer_parameters.dual.sigma),//+offsetof(couple_parameters,Layer_parameters) +0+ /*offset in the union is always 0*/  + offsetof(duallayer_parameters,W),
+    .offset=offsetof(parameters,couple)+offsetof(couple_parameters,Layer_parameters) +0+ /*offset in the union is always 0*/  + offsetof(duallayer_parameters,W),
     .minval = 0.0,
     .maxval = 1.0,
     .count = 100

@@ -7,6 +7,7 @@
 #include "opencv/highgui.h"
 #include "openCVAPI/api.h"
 #include "sizes.h"
+#include "STDP.h"
 #ifdef OPENCV
 void cvdispInit(const char** const names,const int count)
 {
@@ -16,7 +17,7 @@ void cvdispInit(const char** const names,const int count)
     }
 }
 
-void cvdisp (const char** const names, const int count,const randconns_info* const rcinfo)
+void cvdisp (const char** const names, const int count,const randconns_info* const rcinfo, const STDP_data* const S)
 {
     for (int i=0;i<count;i++)
     {
@@ -24,6 +25,12 @@ void cvdisp (const char** const names, const int count,const randconns_info* con
         {
             Compute_float* data=RandConnsToMat(rcinfo);
             PlotColored("RC",data,-1,1,grid_size);
+            continue;
+        }
+        if (strcmp(names[i],"SV")==0)
+        {
+            Compute_float* data=COMangle(S);
+            PlotColored("SV",data,-M_PI,M_PI,grid_size);
             continue;
         }
         output_s out = getOutputByName(names[i]);

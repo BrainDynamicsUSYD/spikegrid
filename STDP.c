@@ -177,7 +177,7 @@ Compute_float* COMangle(const  STDP_data* const S)
                 ysum += str*(Compute_float)b;
             }
         }
-        ret[i]=atan2(ysum,xsum);
+        if (ysum >0) {ret[i]=1;} else {ret[i]=-1;}
     }
     return ret;
 }

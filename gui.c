@@ -9,13 +9,8 @@
 #include "sizes.h"
 #include "STDP.h"
 #ifdef OPENCV
-void cvdispInit(const char** const names,const int count)
-{
-    for (int i=0;i<count;i++)
-    {
-        cvNamedWindow(names[i],CV_WINDOW_NORMAL);
-    }
-}
+
+
 
 void cvdisp (const char** const names, const int count,const randconns_info* const rcinfo, const STDP_data* const S)
 {
@@ -30,7 +25,7 @@ void cvdisp (const char** const names, const int count,const randconns_info* con
         if (strcmp(names[i],"SV")==0)
         {
             Compute_float* data=COMangle(S);
-            PlotColored("SV",data,-M_PI,M_PI,grid_size);
+            PlotColored("SV",data,-2,2,grid_size);
             continue;
         }
         output_s out = getOutputByName(names[i]);

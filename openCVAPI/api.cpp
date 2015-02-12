@@ -1,4 +1,6 @@
 /// \file
+#include <map>
+#include <iostream>
 #include "opencv2/contrib/contrib.hpp"
 #include "opencv2/highgui/highgui.hpp"
 #include "api.h"
@@ -25,10 +27,37 @@ Mat ProcessMatrix(const double* data,const double min,const double max,const uns
     free(dispmat);
     return outmat;
 }
+int savecount;
+std::map<std::string,Mat> matmap;
+void mousecb(int event,int x,int y,int dummy, void* dummy2)
+{
+    if (event==CV_EVENT_LBUTTONDOWN)
+    {
+        char buf[100];
+        sprintf(buf,"%i.png",savecount);
+        savecount++;
+        char* t = (char*)dummy2;
+        std::string s(t);
+        Mat m = matmap[s];
+        imwrite(buf,m);
+    }
+}
+void cvdispInit(const char** const names,const int count)
+{
+    for (int i=0;i<count;i++)
+    {
+        cvNamedWindow(names[i],CV_WINDOW_NORMAL);
+        cvSetMouseCallback(names[i],mousecb,(void*)names[i]);
+    }
+}
 void PlotColored(const char* winname,const double* data,const double min,const double max,const unsigned int size)
 {
     Mat outmat = ProcessMatrix(data,min,max,size);
-	imshow(winname,outmat);
+    imshow(winname,outmat);
+    std::string s(winname); 
+    Mat o ;
+    outmat.copyTo(o);
+    matmap[s]=o;
 }
 
 void SaveImage(const char* filename,const double* data,const double min,const double max,const unsigned int size)

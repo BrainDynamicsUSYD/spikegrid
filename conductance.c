@@ -16,6 +16,7 @@
 #include "paramheader.h"
 #include "model.h"
 #include "out/out.h"
+#include "openCVAPI/api.h"
 #ifdef ANDROID
     #define APPNAME "myapp"
     #include <android/log.h>

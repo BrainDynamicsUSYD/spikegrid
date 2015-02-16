@@ -54,7 +54,7 @@ void PlotColored(const char* winname,const double* data,const double min,const d
 {
     Mat outmat = ProcessMatrix(data,min,max,size);
     imshow(winname,outmat);
-    std::string s(winname); 
+    std::string s(winname);
     Mat o ;
     outmat.copyTo(o);
     matmap[s]=o;

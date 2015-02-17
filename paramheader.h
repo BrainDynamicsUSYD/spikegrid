@@ -118,14 +118,12 @@ typedef struct randconn_parameters
     const Compute_float str;
     const unsigned int Specials;
 } randconn_parameters;
-
 /// External input
 typedef struct
 {
     const Compute_float gE0;    ///< constant input to gE
     const Compute_float gI0;    ///< constant input to gI
 } extinput;
-
 
 
 struct Job;
@@ -156,7 +154,6 @@ typedef struct model_features
     const on_off LocalStim;         ///< Is the local stimulus on
     const output_parameters output[10];         ///<What things do you want to output 10 outputs should be enough (but limit is arbitrary)
     const on_off UseAnimal;
-    const char ImagePath[100];      ///< Path to use for image stimulus
 } model_features;
 
 ///Structure that holds all the parameters for a layer
@@ -171,6 +168,7 @@ typedef struct parameters
     const int skip;                             ///<Number of neurons to skip over in the layer setting skip=2 will produce 4-1 ratio of neurons to a layer with skip=1
     const randconn_parameters random;           ///<parameters controlling random connectivity
     const Stimulus_parameters Stim;             ///< Holds parameters for localized stimulus
+
 } parameters;
 
 /// On yossarian this is used for a parameter sweep

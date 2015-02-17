@@ -53,7 +53,7 @@ void cvdisp (const char** const names, const int count,const randconns_info* con
             PlotColored(out.name,data,out.data.TA_data->minval,out.data.TA_data->maxval,size);
             free(data);
         }
-        cvWaitKey(100);
+        cvWaitKey(10);
     }
 }
 #endif

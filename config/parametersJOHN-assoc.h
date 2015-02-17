@@ -55,8 +55,10 @@ static const parameters OneLayerModel = {.couple={0}}; //since unused - shortes 
     }
 #define Stimparams .Stim=\
 {\
+    .ImagePath  = "input_maps/test.png",\
     .timeperiod=220,\
     .lag=55,\
+    .PreconditioningTrials=0,\
 }
 ///parameters for the inhibitory layer of the double layer model
 static const parameters DualLayerModelIn =
@@ -78,11 +80,6 @@ static const parameters DualLayerModelIn =
         .normalization_parameters = {.glob_mult = {.GM=1.0}},
         .tref       = 5,
     },
-    .random =
-    {
-        .numberper=706,
-        .str = 0.8
-    },
     STDparams,
     STDPparams,
     potparams,
@@ -92,7 +89,7 @@ static const parameters DualLayerModelIn =
 ///parameters for the excitatory layer of the double layer model
 static const parameters DualLayerModelEx =
 {
-    .couple =   
+    .couple =
     {
         .Layertype = DUALLAYER,
         .Layer_parameters =
@@ -108,17 +105,11 @@ static const parameters DualLayerModelEx =
         .norm_type = GlobalMultiplier,
         .normalization_parameters = {.glob_mult = {.GM=1.0}},
     },
-    .random =
-    {
-        .numberper=706,
-        .str = 0.8
-    },
     STDparams,
     STDPparams,
     potparams,
     .skip=-2,
     Stimparams,
-    .output = {{ .method=PICTURE,.Output=5,.Delay=10} }
 };
 ///Some global features that can be turned on and off
 static const model_features Features =
@@ -131,6 +122,7 @@ static const model_features Features =
     .ImageStim  = ON,
     .job        = {.initcond = SINGLE_SPIKE, .Voltage_or_count = -70},
     .Disablewrapping = ON,
+    .output = {{.method = PICTURE,.Output=1,.Delay=5}}
 };
 ///Constant external input to conductances
 static const extinput Extinput =
@@ -141,10 +133,12 @@ static const extinput Extinput =
 ///Parameters for conducting a parameter sweep.
 static const sweepable Sweep =
 {
-    .offset=offsetof(parameters,Stim)+offsetof(Stimulus_parameters,lag) ,
+    .offset=offsetof(parameters,Stim.PreconditioningTrials) ,
     .minval = 0.000,
     .maxval = 100,
-    .count = 100
+    .count = 100,
+    .SweepEx = ON,
+    .SweepIn = ON,
 };
 
 #ifdef __clang__

@@ -29,7 +29,7 @@ Mat ProcessMatrix(const double* data,const double min,const double max,const uns
 }
 int savecount;
 std::map<std::string,Mat> matmap;
-void mousecb(int event,int x,int y,int dummy, void* dummy2)
+void mousecb(int event,int ,int ,int , void* dummy2)
 {
     if (event==CV_EVENT_LBUTTONDOWN)
     {

@@ -4,7 +4,7 @@
 #include "lagstorage.h"
 ///The lagstorage functions have some issues - mainly while loops to find the end etc.  However, it looks like it is 
 ///slower to keep track of the count
-lagstorage* lagstorage_init(const int flagcount,const int cap)
+lagstorage* lagstorage_init(const unsigned int flagcount,const int cap)
 {
     lagstorage firinglags =
     {
@@ -12,9 +12,9 @@ lagstorage* lagstorage_init(const int flagcount,const int cap)
         .cap          = cap,
         .lagsperpoint = flagcount
     };
-    for (int x = 0;x<grid_size;x++)
+    for (unsigned int x = 0;x<grid_size;x++)
     { //initialize firing lags - essentially sets up an initial condition with no spikes in the past.  If you wanted spikes before the start of the simulation - change this
-        for (int y = 0;y<grid_size;y++)
+        for (unsigned int y = 0;y<grid_size;y++)
         {
             firinglags.lags[LagIdx(x,y,&firinglags)]= -1;
         }
@@ -24,9 +24,9 @@ lagstorage* lagstorage_init(const int flagcount,const int cap)
     return l;
 }
 
-int16_t __attribute__((const,pure)) CurrentShortestLag(const lagstorage* const L,const int baseidx)
+int16_t __attribute__((const,pure)) CurrentShortestLag(const lagstorage* const L,const unsigned int baseidx)
 {
-    int idx=0;
+    unsigned int idx=0;
     while (L->lags[baseidx + idx] != -1)
     {
         idx++;
@@ -38,10 +38,10 @@ int16_t __attribute__((const,pure)) CurrentShortestLag(const lagstorage* const L
     else {return INT16_MAX;}
 
 }
-void AddnewSpike(lagstorage* L,const int baseidx)
+void AddnewSpike(lagstorage* L,const unsigned int baseidx)
 {
     //find the empty idx
-    int idx = 0;
+    unsigned int idx = 0;
     while (L->lags[baseidx + idx] != -1)
     {
         idx++;
@@ -52,11 +52,11 @@ void AddnewSpike(lagstorage* L,const int baseidx)
     L->lags[baseidx + idx+1]= -1;
 }
 //called for every neuron on every timestep
-void RemoveDeadSpike(lagstorage* L,const int baseidx)
+void RemoveDeadSpike(lagstorage* L,const unsigned int baseidx)
 {
     if (L->lags[baseidx] == L->cap )//if first entry is at cap - remove and shuffle everything down
     {
-        int idx2 = 0;
+        unsigned int idx2 = 0;
         while (L->lags[baseidx+idx2] != -1) //move everthing down
         {
             L->lags[baseidx+idx2] = L->lags[baseidx+idx2+1]; //since this is the next one, we will always move the -1 as well
@@ -66,10 +66,10 @@ void RemoveDeadSpike(lagstorage* L,const int baseidx)
 }
 //be careful - this function uses a pretty significant amount of time - called for every neuron at every timestep (twice with STDP)
 //
-void modifyLags(lagstorage* L,int baseidx)
+void modifyLags(lagstorage* L,unsigned int baseidx)
 {
     //increment the firing lags.
-    int idx = 0;
+    unsigned int idx = 0;
     while (L->lags[baseidx+idx] != -1)
     {
         L->lags[baseidx+idx]++;

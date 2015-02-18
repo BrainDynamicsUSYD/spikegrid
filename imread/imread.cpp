@@ -22,8 +22,8 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
     if (cached==false) {imcache=ReadImage(S.ImagePath);cached=true;}
     const Compute_float timemodper = fmod(timemillis,S.timeperiod);
     const Compute_float itercount = timemillis/S.timeperiod;
-    const bool stim1 = abs(timemodper-80.0)<.01 && itercount > S.PreconditioningTrials;
-    const bool stim2 =  abs(timemodper-80.0 + S.lag)<.01;
+    const bool stim1 = fabs(timemodper-80.0)<.01 && itercount > S.PreconditioningTrials;
+    const bool stim2 =  fabs(timemodper-80.0 + S.lag)<.01;
 //    if (stim1) {std::cout<< "stim1" << std::endl;}
   //  if (stim2) {std::cout<< "stim2" << std::endl;}
    // std::cout << timemillis << std::endl;

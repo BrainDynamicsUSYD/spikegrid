@@ -64,10 +64,9 @@ layer setuplayer(const parameters p)
     if (p.couple.Layertype==SINGLELAYER) {cap=(int)max(setcap(p.couple.Layer_parameters.single.Ex,min_effect,Features.Timestep),setcap(p.couple.Layer_parameters.single.In,min_effect,Features.Timestep));}
     else                                 {cap=(int)setcap(p.couple.Layer_parameters.dual.synapse,min_effect,Features.Timestep);}
     const int trefrac_in_ts =(int) ((Compute_float)p.couple.tref / Features.Timestep);
-    //const int flagcount = cap;
-    int flagcount;
-    if (Features.Recovery == ON) {flagcount = cap;} //this needs a comment
-    else {flagcount = (int)(cap/trefrac_in_ts) + 2;} //this needs a comment
+    unsigned int flagcount;
+    if (Features.Recovery == ON) {flagcount = (unsigned)cap;} //this needs a comment
+    else {flagcount = (unsigned)(cap/trefrac_in_ts) + 2;} //this needs a comment
     layer L =
     {
         .firinglags         = lagstorage_init(flagcount,cap),
@@ -108,7 +107,14 @@ model* setup(const parameters p,const parameters p2,const LayerNumbers lcount,co
         }
         else
         {
-         sprintf(nostring,"%i-%i",yossarianjobnumber,jobnumber);
+            if (yossarianjobnumber < 0)
+            {
+                sprintf(nostring,"%i",jobnumber);
+            }
+            else
+            {
+                sprintf(nostring,"%i-%i",yossarianjobnumber,jobnumber);
+            }
         }
         // Here it is... add the extra file.
         if (strlen(Features.Outprefix)==0)

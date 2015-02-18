@@ -22,13 +22,13 @@
 /// currently, single layer doesn't work (correctly)
 void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restrict__ gI,const unsigned int time)
 {
-    for (int y=0;y<grid_size;y++)
+    for (unsigned int y=0;y<grid_size;y++)
     {
-        for (int x=0;x<grid_size;x++)
+        for (unsigned int x=0;x<grid_size;x++)
         {
             Compute_float str = Zero;
-            const int lagidx = LagIdx(x,y,L.firinglags);
-            int newlagidx = lagidx;
+            const unsigned int lagidx = LagIdx(x,y,L.firinglags);
+            unsigned int newlagidx = lagidx;
             while (L.firinglags->lags[newlagidx] != -1)  //Note: I think perf might be overstating the amount of time on this line - although, if it isn't massive potential for perf improvement
             {
                 Compute_float this_str =L.Mytimecourse[L.firinglags->lags[newlagidx]];
@@ -44,11 +44,11 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
             {
                 if (Features.STDP==OFF)
                 {
-                    evolvept_duallayer(x,y,L.connections,str,(L.Layer_is_inhibitory?gI:gE)); //side note evolvegen doesn't currently work with singlelayer - should probably fix
+                    evolvept_duallayer((int)x,(int)y,L.connections,str,(L.Layer_is_inhibitory?gI:gE)); //side note evolvegen doesn't currently work with singlelayer - should probably fix
                 }
                 else
                 {
-                    evolvept_duallayer_STDP(x,y,L.connections,L.STDP_data->connections,str,(L.Layer_is_inhibitory?gI:gE));
+                    evolvept_duallayer_STDP((int)x,(int)y,L.connections,L.STDP_data->connections,str,(L.Layer_is_inhibitory?gI:gE));
                 }
             }
             if (Features.Random_connections == ON && !L.Layer_is_inhibitory )
@@ -166,15 +166,15 @@ void CalcRecoverys(const Compute_float* const __restrict__ Vinput,
 ///TODO: make faster
 void StoreFiring(layer* L)
 {
-    const int step = (int)L->P->skip;
-    for (int x=0;x<grid_size;x++)
+    const int step = L->P->skip;
+    for (unsigned int x=0;x<grid_size;x++)
     {
-        for (int y=0;y<grid_size;y++)
+        for (unsigned int y=0;y<grid_size;y++)
         {
-            const int test = x % step ==0 && y % step ==0;
+            const int test = (int)x % step ==0 && (int)y % step ==0;
             if ((test && step > 0) || ((!test) && step<0)) //check if this is an active neuron
             {
-                const int baseidx=LagIdx(x,y,L->firinglags);
+                const unsigned int baseidx=LagIdx(x,y,L->firinglags);
                 modifyLags(L->firinglags,baseidx);
                 if (Features.STDP==ON) {modifyLags(L->STDP_data->lags,LagIdx(x,y,L->STDP_data->lags));} //question - would it be better to use a single lagstorage here with limits in appropriate places?
                 //now - add in new spikes
@@ -206,9 +206,9 @@ void StoreFiring(layer* L)
 void ResetVoltages(Compute_float* const __restrict Vout,const couple_parameters C,const lagstorage* const  l,const conductance_parameters CP)
 {
     const int trefrac_in_ts =(int) ((Compute_float)C.tref / Features.Timestep);
-    for (int i=0;i<grid_size*grid_size;i++)
+    for (unsigned int i=0;i<grid_size*grid_size;i++)
     {
-        int baseidx = i*l->lagsperpoint;
+        unsigned int baseidx = i*l->lagsperpoint;
         if (CurrentShortestLag(l,baseidx) <= trefrac_in_ts)
         {
             Vout[i] = CP.Vrt;

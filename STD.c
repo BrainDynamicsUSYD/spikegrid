@@ -21,9 +21,9 @@ STD_data* __attribute__((const)) STD_init(const STD_parameters s)
     }
     return ret;
 }
-Compute_float STD_str (const STD_parameters s, const int x, const int y,const unsigned int time,const int16_t lag, STD_data* const d)
+Compute_float STD_str (const STD_parameters s, const unsigned int x, const unsigned int y,const unsigned int time,const int16_t lag, STD_data* const d)
 {
-    const int stdidx=x*grid_size+y;
+    const unsigned int stdidx=x*grid_size+y;
     if (lag==1) //recalculate after spiking
     {
         const Compute_float spike_interval = ((Compute_float)(time-(d->ftimes[stdidx])))/((Compute_float)1000.0)*Features.Timestep;//calculate inter spike interval in seconds

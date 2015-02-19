@@ -1,4 +1,4 @@
-/// \file
+///\file
 #include <string.h> //memset
 #include <stdlib.h> //random
 #include <stdio.h>
@@ -188,7 +188,7 @@ void StoreFiring(layer* L)
                     AddnewSpike(L->firinglags,baseidx);
                     if (Features.STDP==ON) {AddnewSpike(L->STDP_data->lags,LagIdx(x,y,L->STDP_data->lags));}
                 }//add random spikes
-                else if (L->P->potential.rate > 0 &&
+                else if (L->P->potential.rate > 0 && //this check is because the compiler doesn't optimize the call to random() otherwise
                             (((Compute_float)(random()))/((Compute_float)RAND_MAX) <
                             (L->P->potential.rate*((Compute_float)0.001)*Features.Timestep)))
                 {
@@ -240,16 +240,16 @@ void tidylayer (layer* l,const Compute_float timemillis,const Compute_float* con
 }
 ///Steps a model through 1 timestep - quite high-level function
 ///This is the only function in the file that needs model.h
-void step1(model* m,const unsigned int time)
+void step1(model* m)
 {
-    const Compute_float timemillis = ((Compute_float)time) * Features.Timestep ;
+    const Compute_float timemillis = ((Compute_float)m->timesteps) * Features.Timestep ;
     memset(m->gE,0,sizeof(Compute_float)*conductance_array_size*conductance_array_size); //zero the gE/gI matrices so they can be reused for this timestep
     memset(m->gI,0,sizeof(Compute_float)*conductance_array_size*conductance_array_size);
     if (Features.LocalStim==ON)
     {
-        if (time %1000 < 250) {ApplyLocalBoost(m->gE,20,20);}
-        else if (time % 1000 < 500) {ApplyLocalBoost(m->gE,20,60);}
-        else if (time % 1000 < 750) {ApplyLocalBoost(m->gE,60,20);}
+        if (m->timesteps %1000 < 250) {ApplyLocalBoost(m->gE,20,20);}
+        else if (m->timesteps % 1000 < 500) {ApplyLocalBoost(m->gE,20,60);}
+        else if (m->timesteps % 1000 < 750) {ApplyLocalBoost(m->gE,60,20);}
         else  {ApplyLocalBoost(m->gE,60,60);}
     }
     if(Features.UseAnimal==ON)
@@ -258,8 +258,8 @@ void step1(model* m,const unsigned int time)
         AnimalEffects(*m->animal,m->gE,timemillis);
     }
     // Add spiking input to the conductances
-    AddSpikes(m->layer1,m->gE,m->gI,time);
-    if (m->NoLayers==DUALLAYER) {AddSpikes(m->layer2,m->gE,m->gI,time);}
+    AddSpikes(m->layer1,m->gE,m->gI,m->timesteps);
+    if (m->NoLayers==DUALLAYER) {AddSpikes(m->layer2,m->gE,m->gI,m->timesteps);}
     if (Features.Disablewrapping==OFF)
     {
         fixboundary(m->gE,m->gI);

@@ -13,11 +13,10 @@ typedef struct lagstorage //TODO question - could this be moved out of .h?
     const int   cap;
     const unsigned int   lagsperpoint;
 } lagstorage;
-
 lagstorage* lagstorage_init(const unsigned int flagcount,const int cap);
 void AddnewSpike(lagstorage* L,const unsigned int baseidx);
 void modifyLags(lagstorage* L,unsigned int baseidx);
 int16_t __attribute__((const,pure)) CurrentShortestLag(const lagstorage* const L,const unsigned int baseidx);
 ///A small helper function to calculate the base idx for the lags at a given x and y coordinate.  Mostly just for convenience
-inline static unsigned int __attribute__((const,pure)) LagIdx(const unsigned int x,const unsigned int y,const lagstorage* L) {return (x*grid_size+y)*L->lagsperpoint;}
+static inline unsigned int __attribute__((const,pure)) LagIdx(const unsigned int x,const unsigned int y,const lagstorage* L) {return (x*grid_size+y)*L->lagsperpoint;}
 #endif

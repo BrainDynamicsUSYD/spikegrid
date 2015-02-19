@@ -22,7 +22,6 @@
     #include <android/log.h>
 #endif
 
-unsigned int mytime=0;  ///<< The current time step
 model* m;               ///< The model we are evolving through time
 int jobnumber=-1;        ///< The current job number - used for pics directory etc
 int yossarianjobnumber=-1;
@@ -40,7 +39,7 @@ void step_(const Compute_float* const inpV,const Compute_float* const inpV2, con
         if(inpV2==NULL)                         {printf("missing second input voltage in dual-layer model"); exit(EXIT_FAILURE);}
         if(Features.Recovery==ON && inpW2==NULL){printf("missing second recovery input in dual-layer model");exit(EXIT_FAILURE);}
     }
-    mytime++;
+    m->timesteps++;
     memcpy(m->layer1.voltages,inpV,sizeof(Compute_float)*grid_size*grid_size);
     if (Features.Recovery==ON) {memcpy(m->layer1.recoverys,inpW,sizeof(Compute_float)*grid_size*grid_size);}
     if (ModelType==DUALLAYER)
@@ -48,8 +47,8 @@ void step_(const Compute_float* const inpV,const Compute_float* const inpV2, con
         memcpy(m->layer2.voltages,inpV2,sizeof(Compute_float)*grid_size*grid_size);
         if (Features.Recovery==ON) {memcpy(m->layer2.recoverys,inpW2,sizeof(Compute_float)*grid_size*grid_size);}
     }
-    step1(m,mytime);
-    DoOutputs(mytime);
+    step1(m);
+    DoOutputs(m->timesteps);
 }
 
 //I am not a huge fan of this function.  A nicer version would be good.
@@ -244,7 +243,7 @@ int main(int argc,char** argv) //useful for testing w/out matlab
         int count = job->initcond==RAND_JOB?(int)job->Voltage_or_count:1; //default to 1 job
         for (int c = 0;c<count;c++)
         {
-            mytime=0;
+            m->timesteps=0;
             //seed RNG as appropriate - with either time or job number
             if     (job->initcond == RAND_TIME){srandom((unsigned)time(0));}
             else if(job->initcond==RAND_JOB)   {srandom((unsigned)c);}
@@ -255,14 +254,14 @@ int main(int argc,char** argv) //useful for testing w/out matlab
 
 #ifdef OPENCV
             if (OpenCv==ON){ cvdispInit(CVDisplay,CVNumWindows);}
-#endif
+#endif //opencv
             Compute_float *FirstV,*SecondV,*FirstW,*SecondW;
             setuppointers(&FirstV,&SecondV,&FirstW,&SecondW,job);
             //actually runs the model
-            while (mytime<Features.Simlength)
+            while (m->timesteps<Features.Simlength)
             {
 
-                if (mytime%10==0){printf("%i\n",mytime);}
+                if (m->timesteps%10==0){printf("%i\n",m->timesteps);}
                 step_(FirstV,SecondV,FirstW,SecondW);//always fine to pass an extra argument here
                 //copy the output to be new input
                 memcpy ( FirstV, m->layer1.voltages_out, sizeof ( Compute_float)*grid_size*grid_size);
@@ -271,11 +270,11 @@ int main(int argc,char** argv) //useful for testing w/out matlab
                 if(SecondW != NULL){memcpy(SecondW,m->layer2.recoverys_out,sizeof(Compute_float)*grid_size*grid_size);}
                 //do some opencv stuff
 #ifdef OPENCV
-                if(mytime % 40 ==0 && OpenCv == ON)
+                if(m->timesteps % 40 ==0 && OpenCv == ON)
                 {
                     cvdisp(CVDisplay,CVNumWindows,m->layer2.rcinfo,m->layer2.STDP_data);
                 }
-#endif
+#endif //opencv
             }
             FreeIfNotNull(FirstV);
             FreeIfNotNull(SecondV);

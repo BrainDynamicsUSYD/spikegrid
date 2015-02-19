@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "lagstorage.h"
+
 ///The lagstorage functions have some issues - mainly while loops to find the end etc.  However, it looks like it is 
 ///slower to keep track of the count
 lagstorage* lagstorage_init(const unsigned int flagcount,const int cap)

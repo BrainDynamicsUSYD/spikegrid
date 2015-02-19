@@ -140,7 +140,7 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
                        const unsigned int destidx2   = LagIdx(rc->source.x,rc->source.y,data2->lags);
                        STDP_change rcchange = STDP_change_calc(destidx,destidx2,S,S2,data->lags->lags,data2->lags->lags);
                        rc->stdp_strength    = clamp(rc->stdp_strength+rcchange.Strength_decrease*500.0,rc->strength,S.stdp_limit*1000.0);
-                       //                                             ^ note plus sign (not minus) why?? - I assume the strengths are reversed
+                       //                                             ^ note plus sign (not minus) why?? - I assume the strengths are reversed - maybe this should be stremgth_increase?
                    }
                 }
             }

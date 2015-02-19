@@ -1,0 +1,51 @@
+cgi-test.o: Makefile config.make common.make
+cgi-test.o: cgi-test.c include/wh/cson/cson_cgi.h include/wh/cson/cson.h \
+ include/wh/cson/cson_session.h
+cson_session_whio_epfs.o: Makefile config.make common.make
+cson_session_whio_epfs.o: cson_session_whio_epfs.c \
+ include/wh/cson/cson_session.h include/wh/cson/cson.h \
+ include/wh/whio/whio_amalgamation.h
+test-cpdo.o: Makefile config.make common.make
+test-cpdo.o: test-cpdo.c include/wh/cson/cson_cpdo.h \
+ include/wh/cson/cson.h
+cson.o: Makefile config.make common.make
+cson.o: cson.c include/wh/cson/cson.h parser/JSON_parser.h cson_lists.h
+cson_session_cpdo.o: Makefile config.make common.make
+cson_session_cpdo.o: cson_session_cpdo.c
+test.o: Makefile config.make common.make
+test.o: test.c include/wh/cson/cson.h parser/JSON_parser.c \
+ parser/JSON_parser.h cson.c parser/JSON_parser.h cson_lists.h
+cson_session.o: Makefile config.make common.make
+cson_session.o: cson_session.c include/wh/cson/cson_session.h \
+ include/wh/cson/cson.h
+cson_cpdo.o: Makefile config.make common.make
+cson_cpdo.o: cson_cpdo.c include/wh/cson/cson_cpdo.h \
+ include/wh/cson/cson.h
+test-sq3.o: Makefile config.make common.make
+test-sq3.o: test-sq3.c include/wh/cson/cson_sqlite3.h \
+ include/wh/cson/cson.h
+json-parser.o: Makefile config.make common.make
+json-parser.o: json-parser.c include/wh/cson/cson.h
+select-to-json.o: Makefile config.make common.make
+select-to-json.o: select-to-json.c include/wh/cson/cson.h \
+ include/wh/cson/cson_cpdo.h include/wh/cson/cson.h
+whio_amalgamation.o: Makefile config.make common.make
+whio_amalgamation.o: whio_amalgamation.c \
+ include/wh/whio/whio_amalgamation.h
+cson_session_file.o: Makefile config.make common.make
+cson_session_file.o: cson_session_file.c include/wh/cson/cson_session.h \
+ include/wh/cson/cson.h
+cpdo_amalgamation.o: Makefile config.make common.make
+cpdo_amalgamation.o: cpdo_amalgamation.c \
+ include/wh/cpdo/cpdo_amalgamation.h
+cson_session_whio_ht.o: Makefile config.make common.make
+cson_session_whio_ht.o: cson_session_whio_ht.c \
+ include/wh/cson/cson_session.h include/wh/cson/cson.h \
+ include/wh/whio/whio_amalgamation.h
+cson_sqlite3.o: Makefile config.make common.make
+cson_sqlite3.o: cson_sqlite3.c include/wh/cson/cson_sqlite3.h \
+ include/wh/cson/cson.h
+parser/JSON_parser.o: Makefile config.make common.make
+parser/JSON_parser.o: parser/JSON_parser.c parser/JSON_parser.h
+parser/main.o: Makefile config.make common.make
+parser/main.o: parser/main.c parser/JSON_parser.h

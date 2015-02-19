@@ -243,7 +243,6 @@ int main(int argc,char** argv) //useful for testing w/out matlab
         int count = job->initcond==RAND_JOB?(int)job->Voltage_or_count:1; //default to 1 job
         for (int c = 0;c<count;c++)
         {
-            m->timesteps=0;
             //seed RNG as appropriate - with either time or job number
             if     (job->initcond == RAND_TIME){srandom((unsigned)time(0));}
             else if(job->initcond==RAND_JOB)   {srandom((unsigned)c);}
@@ -251,7 +250,7 @@ int main(int argc,char** argv) //useful for testing w/out matlab
             //sets up the model code
             if (ModelType==SINGLELAYER) {m=setup(newparam!=NULL? (*newparam):OneLayerModel,newparam!=NULL? (*newparam):OneLayerModel,ModelType,jobnumber,yossarianjobnumber);} //pass the same layer as a double parameter
             else {m=setup(newparamIn!=NULL?*newparamIn:DualLayerModelIn,newparamEx!=NULL?*newparamEx:DualLayerModelEx,ModelType,jobnumber,yossarianjobnumber);}
-
+            SaveModel(m);
 #ifdef OPENCV
             if (OpenCv==ON){ cvdispInit(CVDisplay,CVNumWindows);}
 #endif //opencv

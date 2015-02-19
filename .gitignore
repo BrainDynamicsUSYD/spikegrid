@@ -48,3 +48,4 @@ local_output/*
 .nfs*
 *.swo
 latex/*
+*/doc/*

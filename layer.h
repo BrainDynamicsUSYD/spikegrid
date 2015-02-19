@@ -29,5 +29,6 @@ typedef struct layer
     parameters*     P;                              ///<The parameters that we used to make the layer
     STD_data*       std;                               ///<Some info that is needed for STD
     const on_off Layer_is_inhibitory;
+    const int cap; //used for saving timecourses - technically could just regenerate
 } layer;
 #endif

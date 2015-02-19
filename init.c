@@ -86,6 +86,7 @@ layer setuplayer(const parameters p)
         .recoverys_out      = Features.Recovery==ON?calloc(sizeof(Compute_float),grid_size*grid_size):NULL,
         .Layer_is_inhibitory = p.couple.Layertype==DUALLAYER && p.couple.Layer_parameters.dual.W<0,
         .rcinfo             = Features.Random_connections==ON?init_randconns(p.random,p.couple): NULL,
+        .cap                = cap, 
     };
     return L;
 }
@@ -136,7 +137,7 @@ model* setup(const parameters p,const parameters p2,const LayerNumbers lcount,co
    // printout_struct(&p2,"parameters",outdir,1);    //save the second parameters object and display everything
     const layer l1  = setuplayer(p);
     const layer l2  = lcount==DUALLAYER?setuplayer(p2):l1;
-    const model m   = {.layer1=l1,.layer2=l2,.NoLayers=lcount,.animal=calloc(sizeof(animal),1)};
+    const model m   = {.layer1=l1,.layer2=l2,.NoLayers=lcount,.animal=calloc(sizeof(animal),1),.timesteps=0};
     model* m2       = malloc(sizeof(m));
     memcpy(m2,&m,sizeof(m));
     char* buffer = malloc(1024);

@@ -44,7 +44,7 @@ static const parameters OneLayerModel = {.couple={0}}; //since unused - shortes 
     {                       \
         .stdp_limit=1.5,    \
         .stdp_tau=20,       \
-        .stdp_strength=0.00055,  \
+        .stdp_strength=0.00015,  \
         .STDP_on=ON\
     }
 #define STDparams .STD= \
@@ -122,7 +122,7 @@ static const model_features Features =
     .ImageStim  = ON,
     .job        = {.initcond = SINGLE_SPIKE, .Voltage_or_count = -70},
     .Disablewrapping = ON,
-    .output = {{.method = MOVIE,.Output=1,.Delay=5}}
+    .output = {{.method = VIDEO,.Output=1,.Delay=5}}
 };
 ///Constant external input to conductances
 static const extinput Extinput =

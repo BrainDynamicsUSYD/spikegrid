@@ -49,3 +49,4 @@ local_output/*
 *.swo
 latex/*
 */doc/*
+perf.data.old

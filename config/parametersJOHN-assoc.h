@@ -118,11 +118,11 @@ static const model_features Features =
     .STDP		= ON, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep -
     .Random_connections = OFF,
     .Timestep   = 0.1,
-    .Simlength  = 1000000,
+    .Simlength  = 10000,
     .ImageStim  = ON,
     .job        = {.initcond = SINGLE_SPIKE, .Voltage_or_count = -70},
     .Disablewrapping = ON,
-    .output = {{.method = PICTURE,.Output=1,.Delay=5}}
+    .output = {{.method = MOVIE,.Output=1,.Delay=5}}
 };
 ///Constant external input to conductances
 static const extinput Extinput =
@@ -135,8 +135,8 @@ static const sweepable Sweep =
 {
     .offset=offsetof(parameters,Stim.PreconditioningTrials) ,
     .minval = 0.000,
-    .maxval = 100,
-    .count = 100,
+    .maxval = 10,
+    .count = 10,
     .SweepEx = ON,
     .SweepIn = ON,
 };

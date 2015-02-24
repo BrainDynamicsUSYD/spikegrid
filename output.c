@@ -80,8 +80,8 @@ void output_init(const model* const m)
     memcpy(malloced,outdata,sizeof(output_s)*output_count);
     Outputtable = malloced;
     overlaytext* overdata = (overlaytext[]){
-        {"Trialno",({int Timestep() { return (int) (m->timesteps/m->layer1.P->Stim.timeperiod);} Timestep; })}, //not correct - need to use millis conversion
-        {"Timestep",({int Trialno() {return (int)m->timesteps;} Trialno;})}, //C has anonymous functions - WTF!!
+        {"Trialno",({int Trialno() { return (int) (m->timesteps * Features.Timestep /m->layer1.P->Stim.timeperiod - P->Stim.PreconditioningTrials)  ;} Trialno; })}, //not correct - need to use millis conversion
+        {"Timestep",({int Timestep() {return (int)m->timesteps;} Timestep;})}, //C has anonymous functions - WTF!!
         {.name={0}}
     };
     overlaytext* overmalloc = malloc(sizeof(overlaytext)*overlay_count);

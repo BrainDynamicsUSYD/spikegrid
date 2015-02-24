@@ -122,7 +122,7 @@ static const model_features Features =
     .ImageStim  = ON,
     .job        = {.initcond = SINGLE_SPIKE, .Voltage_or_count = -70},
     .Disablewrapping = ON,
-    .output = {{.method = VIDEO,.Output=1,.Delay=5}}
+    .output = {{.method = VIDEO,.Output=1,.Delay=5, .Overlay="Timestep"}}
 };
 ///Constant external input to conductances
 static const extinput Extinput =

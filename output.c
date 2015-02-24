@@ -8,8 +8,10 @@
 #include "model.h"
 #include "output.h"
 #include "tagged_array.h"
+#include "imread/imread.h"
 ///Total number of things to be output - occasionally needs to be incremented
-#define output_count  19
+#define output_count   19
+#define overlay_count  3
 
 ///Finds an output which matches the given name - case sensitive
 ///@param name the name of the outputtable
@@ -26,6 +28,25 @@ output_s __attribute__((pure)) getOutputByName(const char* const name)
     }
     printf("tried to get unknown thing to output called -%s-\n",name);
     exit(EXIT_FAILURE);
+}
+///Finds an overlay which matches the given name - case sensitive
+///@param name the name of the overlayt
+overlaytext* __attribute__((pure)) getOverlayByName(const char* const name)
+{
+    int outidx=0;
+    while (strlen(overlays[outidx].name) != 0)
+    {
+        if (!strcmp(overlays[outidx].name,name))
+        {
+            return &overlays[outidx];
+        }
+        outidx++;
+    }
+    return NULL;
+}
+int getTimeStep()
+{
+    return 1;
 }
 
 ///Set up the outputtables for a given model
@@ -58,6 +79,14 @@ void output_init(const model* const m)
     output_s* malloced = malloc(sizeof(output_s)*output_count);
     memcpy(malloced,outdata,sizeof(output_s)*output_count);
     Outputtable = malloced;
+    overlaytext* overdata = (overlaytext[]){
+        {"Trialno",({int Timestep() { return (int) (m->timesteps/m->layer1.P->Stim.timeperiod);} Timestep; })}, //not correct - need to use millis conversion
+        {"Timestep",({int Trialno() {return (int)m->timesteps;} Trialno;})}, //C has anonymous functions - WTF!!
+        {.name={0}}
+    };
+    overlaytext* overmalloc = malloc(sizeof(overlaytext)*overlay_count);
+    memcpy(overmalloc,overdata,sizeof(overlaytext)*overlay_count);
+    overlays = overmalloc;
 }
 ///Cleans up memory and file handles that are used by the outputtables object
 void CleanupOutput()

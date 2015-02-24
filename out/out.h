@@ -14,14 +14,16 @@ class Output
         virtual void DoOutput() {};
         int GetInterval() const {return interval;};
         int GetIdx() const {return idx;};
+        virtual ~Output() {};
 };
 /// outputs to series of pictures
 class PNGoutput : public Output
 {
     int count=0;
     const tagged_array* data;
+    const overlaytext* overlay;
     public:
-        PNGoutput(int,int,const tagged_array* );
+        PNGoutput(int,int,const tagged_array*,const char* const );
         void DoOutput() ;
 };
 class SingleFileOutput : public Output
@@ -35,9 +37,10 @@ class SingleFileOutput : public Output
 class VidOutput: public Output //This class probably needs a destructor to end the video.  Vlc will probably handle the file just fine though.
 {
     const tagged_array* data;
+    const overlaytext* overlay;
     cv::VideoWriter* writer;
     public:
-        VidOutput(int,int,const tagged_array*);
+        VidOutput(int,int,const tagged_array*,const char* const);
         void DoOutput();
 };
 class TextOutput : public SingleFileOutput

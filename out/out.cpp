@@ -17,26 +17,37 @@ extern "C"
 #include "out.h" //and this is c++ again.
 std::vector<Output*> outvec;
 
-PNGoutput::PNGoutput(int idxin ,const int intervalin,const tagged_array* datain) : Output(intervalin,idxin)
+PNGoutput::PNGoutput(int idxin ,const int intervalin,const tagged_array* datain,const char* const overlayin) : Output(intervalin,idxin)
 {
    data=datain;
+    overlay = getOverlayByName(overlayin);
+}
+cv::Mat TA_toMat(const tagged_array* const data,const overlaytext* const o)
+{
+    const unsigned int size = tagged_array_size_(*data)*data->subgrid;
+    Compute_float* actualdata=taggedarrayTocomputearray(*data);
+    cv::Mat m =ProcessMatrix(actualdata,data->minval,data->maxval,size);
+    free(actualdata);
+    if (o != NULL)
+    {
+        putText(m,std::to_string(o->func()),cv::Point(0,size), cv::FONT_HERSHEY_PLAIN,1.0,cv::Scalar(255,255,255));
+    }
+    return m;
 }
 void PNGoutput::DoOutput()
 {
 #ifdef OPENCV
     count++;
     char fnamebuffer[30];
-    const unsigned int size = tagged_array_size_(*data)*data->subgrid;
-    Compute_float* actualdata=taggedarrayTocomputearray(*data);
     sprintf(fnamebuffer,"%s/%i-%i.png",outdir,this->GetIdx(),count);
-    SaveImage(fnamebuffer,actualdata,data->minval,data->maxval,size);
-    free(actualdata);
+    imwrite(fnamebuffer,TA_toMat(data,overlay));
 #else
     printf("Using PNG outout without opencv is not possible\n");
 #endif
 }
-VidOutput::VidOutput(int idxin ,const int intervalin,const tagged_array* datain) : Output(intervalin,idxin)
+VidOutput::VidOutput(int idxin ,const int intervalin,const tagged_array* datain,const char* const overlayin) : Output(intervalin,idxin)
 {
+    overlay = getOverlayByName(overlayin);
     char buf[100];
     sprintf(buf,"%s/%i.avi",outdir,idxin);
     int fourcc = CV_FOURCC('H','F','Y','U');
@@ -46,11 +57,7 @@ VidOutput::VidOutput(int idxin ,const int intervalin,const tagged_array* datain)
 void VidOutput::DoOutput()
 {
 #ifdef OPENCV
-    const unsigned int size = tagged_array_size_(*data)*data->subgrid;
-    Compute_float* actualdata=taggedarrayTocomputearray(*data);
-    cv::Mat m =ProcessMatrix(actualdata,data->minval,data->maxval,size);
-    writer->write(m);
-    free(actualdata);
+    writer->write(TA_toMat(data,overlay));
 #else
     printf("Using PNG outout without opencv is not possible\n");
 #endif
@@ -139,7 +146,7 @@ void MakeOutputs(const output_parameters* const m)
         switch (m[i].method)
         {
             case PICTURE:
-                out = new PNGoutput(i,m[i].Delay,Outputtable[m[i].Output].data.TA_data);
+                out = new PNGoutput(i,m[i].Delay,Outputtable[m[i].Output].data.TA_data,m[i].Overlay);
                 outvec.push_back(out);
                 break;
             case TEXT:
@@ -155,7 +162,7 @@ void MakeOutputs(const output_parameters* const m)
                 outvec.push_back(out);
                 break;
             case VIDEO:
-                out = new VidOutput(i,m[i].Delay,Outputtable[m[i].Output].data.TA_data);
+                out = new VidOutput(i,m[i].Delay,Outputtable[m[i].Output].data.TA_data,m[i].Overlay);
                 outvec.push_back(out);
                 break;
             default:
@@ -180,6 +187,9 @@ void CleanupOutputs()
     }
     outvec.clear(); //this is the more important bit - the memory occupied by the various output objects is comparitively tiny.
 }
+//###################
+//-------------------------------------MATLAB stuff below here
+//###################
 //So here is a problem - All the outputs are set up to essentially return `void`.
 //However, we really need to return something for matlab.
 //Also, it is possible that the matlab outputs change over time

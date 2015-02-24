@@ -118,11 +118,11 @@ static const model_features Features =
     .STDP		= ON, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep -
     .Random_connections = OFF,
     .Timestep   = 0.1,
-    .Simlength  = 10000,
+    .Simlength  = 100000,
     .ImageStim  = ON,
     .job        = {.initcond = SINGLE_SPIKE, .Voltage_or_count = -70},
     .Disablewrapping = ON,
-    .output = {{.method = VIDEO,.Output=1,.Delay=5, .Overlay="Trialno"}}
+    .output = {{.method = VIDEO,.Output=1,.Delay=20, .Overlay="Trialno"}}
 };
 ///Constant external input to conductances
 static const extinput Extinput =

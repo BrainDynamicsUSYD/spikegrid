@@ -15,23 +15,26 @@ else #gcc
 	export CFLAGS=-g -ggdb -Wall -Wextra  ${optflags} ${extrawarnings} ${extraextrawarnings}
 	cspecificwarnings= -Wjump-misses-init
 endif
-#now when we are using matlab, everything is way too hard
-#this is mainly because matlab ships its own opencv libraries.
-#There are several problems with this:
-# 1. The matlab version is old and doesn't have all libraries
-# 2. Using any of my installed opencv libs will make the code not run.
-#So there is a rather ridiculous amount of hackery here
 
-#First find where matlab is - we need to use readlink and then dirname as matlab is almost always symlinked
-export matlabdir=$(shell dirname $$(readlink -f $$(which matlab)))
-#these C and ld flags are stolen from mex-v
-export MATLABCFLAGS= -DMX_COMPAT_32 -D_GNU_SOURCE -DMATLAB_MEX_FILE -DMATLAB -I"${matlabdir}/../extern/include" -I"${matlabdir}/../simulink/include"
-export ADAMMATLABCFLAGS= -DMX_COMPAT_32 -D_GNU_SOURCE -DMATLAB_MEX_FILE -I"${matlabdir}/../extern/include" -I"${matlabdir}/../simulink/include"
-export MATLABLDFLAGS=  -L"${matlabdir}/glnxa64" -lmx -lmex -lmat -lm -lstdc++
-#here some hackery - use pkg-config to learn the names of the libs but then find to only get the ones matlab has a copy of
-export matlabopencvldflags=$(shell for x in $$(pkg-config --libs opencv); do  find ${matlabdir}/glnxa64/ -name $$(basename -- $$x)\*  ; done)
-#have to set rpath in the linker to get the right libs to link.  Also add in the extra flags
-export matlabopencvldflags:= -Wl,-rpath -Wl,${matlabdir} ${matlabopencvldflags} $(shell pkg-config --libs-only-l opencv)
+ifeq ($(MATLAB),yes)
+	#now when we are using matlab, everything is way too hard
+	#this is mainly because matlab ships its own opencv libraries.
+	#There are several problems with this:
+	# 1. The matlab version is old and doesn't have all libraries
+	# 2. Using any of my installed opencv libs will make the code not run.
+	#So there is a rather ridiculous amount of hackery here
+
+	#First find where matlab is - we need to use readlink and then dirname as matlab is almost always symlinked
+	export matlabdir=$(shell dirname $$(readlink -f $$(which matlab)))
+	#these C and ld flags are stolen from mex-v
+	export MATLABCFLAGS= -DMX_COMPAT_32 -D_GNU_SOURCE -DMATLAB_MEX_FILE -DMATLAB -I"${matlabdir}/../extern/include" -I"${matlabdir}/../simulink/include"
+	export ADAMMATLABCFLAGS= -DMX_COMPAT_32 -D_GNU_SOURCE -DMATLAB_MEX_FILE -I"${matlabdir}/../extern/include" -I"${matlabdir}/../simulink/include"
+	export MATLABLDFLAGS=  -L"${matlabdir}/glnxa64" -lmx -lmex -lmat -lm -lstdc++
+	#here some hackery - use pkg-config to learn the names of the libs but then find to only get the ones matlab has a copy of
+	export matlabopencvldflags=$(shell for x in $$(pkg-config --libs opencv); do  find ${matlabdir}/glnxa64/ -name $$(basename -- $$x)\*  ; done)
+	#have to set rpath in the linker to get the right libs to link.  Also add in the extra flags
+	export matlabopencvldflags:= -Wl,-rpath -Wl,${matlabdir} ${matlabopencvldflags} $(shell pkg-config --libs-only-l opencv)
+endif
 #set up some non-matlab variables
 export DEBUGFLAGS= -g -std=gnu11 ${DEFINES}
 export CXXDEBUGFLAGS= -g --std=c++11 ${DEFINES}
@@ -62,6 +65,7 @@ OFILES=${imreadlib} ${outlib} ${CVClib}
 ###########
 ${BINARY}: ${SOURCES} *.h ${OFILES} ${CONFIG}
 	${CC} ${CFLAGS} ${opencvcflags}     ${SOURCES} ${OFILES} -o ${BINARY} -L. ${LDFLAGS}   ${opencvldflags}
+conductance.mexa64: MATLAB = YES
 conductance.mexa64: CFLAGS +=   ${MATLABCFLAGS}
 conductance.mexa64: CXXFLAGS += ${MATLABCFLAGS}
 conductance.mexa64: LDFLAGS +=  ${MATLABLDFLAGS}
@@ -131,3 +135,5 @@ ${outlib}: force_look ${CONFIG}
 	$(MAKE) -C out ${outlib}
 ${imreadlib}: force_look ${CONFIG}
 	$(MAKE) -C imread ${imreadlib}
+cson/libcson.a: force_look
+	$(MAKE) -C cson

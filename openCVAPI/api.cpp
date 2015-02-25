@@ -6,6 +6,7 @@
 #include "api.h"
 extern "C"
 {
+#include "../sizes.h"
 #include "../typedefs.h"
 }
 using namespace cv;

@@ -15,4 +15,4 @@ typedef struct model
     Compute_float gI [conductance_array_size*conductance_array_size];   ///<gI matrix (large)
     animal*         animal;
 } model;
-void SaveModel(const model* const m);
+//void SaveModel(const model* const m);

@@ -250,7 +250,7 @@ int main(int argc,char** argv) //useful for testing w/out matlab
             //sets up the model code
             if (ModelType==SINGLELAYER) {m=setup(newparam!=NULL? (*newparam):OneLayerModel,newparam!=NULL? (*newparam):OneLayerModel,ModelType,jobnumber,yossarianjobnumber);} //pass the same layer as a double parameter
             else {m=setup(newparamIn!=NULL?*newparamIn:DualLayerModelIn,newparamEx!=NULL?*newparamEx:DualLayerModelEx,ModelType,jobnumber,yossarianjobnumber);}
-            SaveModel(m);
+//            SaveModel(m);
 #ifdef OPENCV
             if (OpenCv==ON){ cvdispInit(CVDisplay,CVNumWindows);}
 #endif //opencv

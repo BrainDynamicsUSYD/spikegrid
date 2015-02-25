@@ -135,5 +135,8 @@ ${outlib}: force_look ${CONFIG}
 	$(MAKE) -C out ${outlib}
 ${imreadlib}: force_look ${CONFIG}
 	$(MAKE) -C imread ${imreadlib}
+cson/libcson.a: CFLAGS=
+cson/libcson.a: CXXFLAGS =
+cson/libcson.a: LDFLAGS =
 cson/libcson.a: force_look
-	$(MAKE) -C cson
+	cd cson && make && cd ..

@@ -7,12 +7,12 @@ export DEFINES=-DOPENCV
 #set up some variables for compiling
 ##########
 ifeq ($(CC),clang)
-	export CFLAGS= -g -Wno-padded -Wno-missing-prototypes -Wno-missing-variable-declarations -Weverything -pedantic  -Ofast -Wno-documentation-unknown-command -Wno-covered-switch-default
+	export CFLAGS= -g -Wno-padded -Wno-missing-prototypes -Wno-missing-variable-declarations -Weverything -pedantic  -Ofast -Wno-documentation-unknown-command -Wno-covered-switch-default 
 else #gcc
 	optflags=  -Ofast -msse -msse2 -msse3 -funsafe-loop-optimizations -mtune=native -march=native  -floop-interchange -ftree-loop-optimize -floop-strip-mine -floop-block -flto  -fassociative-math -fno-signed-zeros -freciprocal-math -ffinite-math-only -fno-trapping-math -ftree-vectorize
 	extrawarnings=-Wstrict-aliasing -fstrict-aliasing   -Wshadow  -Wconversion -Wdouble-promotion -Wformat=2 -Wunused -Wuninitialized -Wfloat-equal -Wunsafe-loop-optimizations -Wcast-qual -Wcast-align -Wwrite-strings  -Wlogical-op  -Wvector-operation-performance -Wno-pragmas
 	extraextrawarnings=-Wsuggest-attribute=pure  -Wsuggest-attribute=noreturn -Wstrict-overflow=4
-	export CFLAGS=-g -ggdb -Wall -Wextra  ${optflags} ${extrawarnings} ${extraextrawarnings}
+	export CFLAGS=-g -ggdb -Wall -Wextra  ${optflags} ${extrawarnings} ${extraextrawarnings} -Werror-implicit-function-declaration
 	cspecificwarnings= -Wjump-misses-init
 endif
 #now when we are using matlab, everything is way too hard

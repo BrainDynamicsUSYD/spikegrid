@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include "cson/include/wh/cson/cson.h"
 #include "model.h"
-#include "layer.h"
 void SaveArray(const Compute_float* arr,const unsigned int count,const char* const name,cson_object* json)
 {
     cson_value* av = cson_value_new_array();

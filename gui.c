@@ -3,14 +3,11 @@
 #include "output.h"
 #include "randconns.h"
 #include "tagged_array.h"
-#include "opencv/cv.h"
 #include "opencv/highgui.h"
 #include "openCVAPI/api.h"
 #include "sizes.h"
 #include "STDP.h"
 #ifdef OPENCV
-
-
 
 void cvdisp (const char** const names, const int count,const randconns_info* const rcinfo, const STDP_data* const S)
 {
@@ -53,7 +50,7 @@ void cvdisp (const char** const names, const int count,const randconns_info* con
             PlotColored(out.name,data,out.data.TA_data->minval,out.data.TA_data->maxval,size);
             free(data);
         }
-        cvWaitKey(10);
     }
+    cvWaitKey(10);
 }
 #endif

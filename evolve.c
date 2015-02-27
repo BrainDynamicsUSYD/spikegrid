@@ -1,7 +1,7 @@
 ///\file
 #include <string.h> //memset
 #include <stdlib.h> //random
-#include <stdio.h>
+#include <stdio.h>  //useful when we need to print things
 #include "STDP.h"
 #include "model.h"
 #include "theta.h"

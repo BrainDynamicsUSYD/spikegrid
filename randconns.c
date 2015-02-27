@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "sizes.h"
 #include "randconns.h"
 #include "paramheader.h"
 #include "coupling.h"

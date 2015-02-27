@@ -50,3 +50,12 @@ local_output/*
 latex/*
 */doc/*
 perf.data.old
+cson/.make*
+cson/cgi-test*
+cson/*.a
+cson/*.so
+cson/test
+cson/json-parser
+cson/select-to-json
+cson/test-cpdo
+cson/test-sq3

@@ -4,6 +4,7 @@
 #include <string.h>
 #include <errno.h>
 #include <vector>
+#include <iostream>
 #include <unistd.h>
 #include "opencv2/core/core.hpp" //core opencv
 #include "opencv2/highgui/highgui.hpp" //for video writer
@@ -32,7 +33,8 @@ cv::Mat TA_toMat(const tagged_array* const data,const overlaytext* const o)
     free(actualdata);
     if (o != NULL)
     {
-        putText(m,std::to_string(o->func()),cv::Point(0,size), cv::FONT_HERSHEY_PLAIN,1.0,cv::Scalar(255,255,255));
+        std::string s = std::to_string(o->func());
+        putText(m,s,cv::Point(0,size), cv::FONT_HERSHEY_PLAIN,1.0,cv::Scalar(255,255,255));
     }
     return m;
 }

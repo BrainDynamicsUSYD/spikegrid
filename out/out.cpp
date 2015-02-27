@@ -18,6 +18,7 @@ extern "C"
 #include "../lagstorage.h"
 }
 #include "out.h" //and this is c++ again.
+on_off showimages=ON;
 std::vector<Output*> outvec;
 
 PNGoutput::PNGoutput(int idxin ,const int intervalin,const tagged_array* datain,const char* const overlayin) : Output(intervalin,idxin)
@@ -48,6 +49,40 @@ void PNGoutput::DoOutput()
 #else
     printf("Using PNG outout without opencv is not possible\n");
 #endif
+}
+int savecount;
+std::map<std::string,cv::Mat> matmap;
+void mousecb(int event,int ,int ,int , void* dummy2)
+{
+    if (event==CV_EVENT_LBUTTONDOWN)
+    {
+        char buf[100];
+        sprintf(buf,"%i.png",savecount);
+        savecount++;
+        char* t = (char*)dummy2;
+        std::string s(t);
+        cv::Mat m = matmap[s];
+        cv::imwrite(buf,m);
+    }
+}
+GUIoutput::GUIoutput(int a,int b, const tagged_array* c, const char* const d, const char* const wname) : PNGoutput(a,b,c,d)
+{
+    winname = wname;
+    cvNamedWindow(wname,CV_WINDOW_NORMAL);
+    cvSetMouseCallback(wname,mousecb,(void*)wname);
+}
+void GUIoutput::DoOutput()
+{
+    if (showimages == ON)
+    {
+        cv::Mat m = TA_toMat(data,overlay);
+        imshow(winname,m);
+        std::string s(winname);
+        cv::Mat o;//this bit probably not required
+        m.copyTo(o);
+        matmap[s]=o;
+        cv::waitKey(10); //TODO: move this somewhere else
+    }
 }
 VidOutput::VidOutput(int idxin ,const int intervalin,const tagged_array* datain,const char* const overlayin) : Output(intervalin,idxin)
 {
@@ -167,6 +202,10 @@ void MakeOutputs(const output_parameters* const m)
                 break;
             case VIDEO:
                 out = new VidOutput(i,m[i].Delay,Outputtable[m[i].Output].data.TA_data,m[i].Overlay);
+                outvec.push_back(out);
+                break;
+            case GUI:
+                out = new GUIoutput(i,m[i].Delay,Outputtable[m[i].Output].data.TA_data,m[i].Overlay,Outputtable[m[i].Output].name);
                 outvec.push_back(out);
                 break;
             default:

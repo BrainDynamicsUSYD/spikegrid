@@ -24,11 +24,19 @@ class Output
 class PNGoutput : public Output
 {
     int count=0;
-    const tagged_array* data;
-    const overlaytext* overlay;
+    protected:
+        const tagged_array* data;
+        const overlaytext* overlay;
     public:
         PNGoutput(int,int,const tagged_array*,const char* const );
         void DoOutput() ;
+};
+class GUIoutput : public PNGoutput
+{
+    const char* winname;
+    public:
+        GUIoutput(int,int,const tagged_array*, const char* const,const char* const);
+        void DoOutput();
 };
 class SingleFileOutput : public Output
 {
@@ -74,6 +82,7 @@ typedef struct output_parameters output_parameters;
 void DoOutputs(const unsigned int time);
 void MakeOutputs(const output_parameters* const m);
 void CleanupOutputs();
+extern on_off showimages;
 #ifdef MATLAB
 #include "../matlab_includes.h"
 #include "../output.h"

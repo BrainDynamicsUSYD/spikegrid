@@ -7,7 +7,6 @@
 #include <fenv.h>   //for some debugging
 #include <stdio.h>
 #include <time.h>
-#include "gui.h"
 #include "cleanup.h"
 #include "evolve.h"
 #include "newparam.h"
@@ -16,7 +15,6 @@
 #include "paramheader.h"
 #include "model.h"
 #include "out/out.h"
-#include "openCVAPI/api.h"
 #ifdef ANDROID
     #define APPNAME "myapp"
     #include <android/log.h>
@@ -224,8 +222,6 @@ void processopts (int argc,char** argv,parameters** newparam,parameters** newpar
 /// @param argv what the parameters actually are
 int main(int argc,char** argv) //useful for testing w/out matlab
 {
-    const char* CVDisplay[] = {"gE","V2","SV","STDP1","STDP2"}; //list of possible variables to show
-    const int CVNumWindows=2;                              //and how many to show
 #ifndef ANDROID //android doesn't support this function - note the error is that this will fail at linking so it needs to hide in the #if
  //   feenableexcept(FE_INVALID | FE_OVERFLOW); //segfault on NaN and overflow.  Note - this cannot be used in matlab
 #endif
@@ -233,8 +229,7 @@ int main(int argc,char** argv) //useful for testing w/out matlab
     parameters* newparamEx = NULL;
     parameters* newparamIn = NULL;
     setvbuf(stdout,NULL,_IONBF,0);
-    on_off OpenCv=ON;
-    processopts(argc,argv,&newparam,&newparamEx,&newparamIn,&OpenCv);
+    processopts(argc,argv,&newparam,&newparamEx,&newparamIn,&showimages);
 
     const Job* job = &Features.job;
     if (job->next != NULL || (job->initcond==RAND_JOB && job->Voltage_or_count>1)) {jobnumber=0;} //if more than one job - then start at 0 - so that stuff goes in folders
@@ -251,9 +246,6 @@ int main(int argc,char** argv) //useful for testing w/out matlab
             if (ModelType==SINGLELAYER) {m=setup(newparam!=NULL? (*newparam):OneLayerModel,newparam!=NULL? (*newparam):OneLayerModel,ModelType,jobnumber,yossarianjobnumber);} //pass the same layer as a double parameter
             else {m=setup(newparamIn!=NULL?*newparamIn:DualLayerModelIn,newparamEx!=NULL?*newparamEx:DualLayerModelEx,ModelType,jobnumber,yossarianjobnumber);}
 //            SaveModel(m);
-#ifdef OPENCV
-            if (OpenCv==ON){ cvdispInit(CVDisplay,CVNumWindows);}
-#endif //opencv
             Compute_float *FirstV,*SecondV,*FirstW,*SecondW;
             setuppointers(&FirstV,&SecondV,&FirstW,&SecondW,job);
             //actually runs the model
@@ -267,13 +259,6 @@ int main(int argc,char** argv) //useful for testing w/out matlab
                 if(SecondV != NULL){memcpy(SecondV,m->layer2.voltages_out, sizeof(Compute_float)*grid_size*grid_size);}
                 if(FirstW != NULL) {memcpy(FirstW, m->layer1.recoverys_out,sizeof(Compute_float)*grid_size*grid_size);}
                 if(SecondW != NULL){memcpy(SecondW,m->layer2.recoverys_out,sizeof(Compute_float)*grid_size*grid_size);}
-                //do some opencv stuff
-#ifdef OPENCV
-                if(m->timesteps % 40 ==0 && OpenCv == ON)
-                {
-                    cvdisp(CVDisplay,CVNumWindows,m->layer2.rcinfo,m->layer2.STDP_data);
-                }
-#endif //opencv
             }
             FreeIfNotNull(FirstV);
             FreeIfNotNull(SecondV);

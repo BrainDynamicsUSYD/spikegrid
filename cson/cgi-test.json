@@ -1,0 +1,54 @@
+{
+    "wtf": "This is a config file for cgi-test.c",
+    "formatting": {
+        "indentation": 1,
+        "addNewline": true,
+        "addSpaceAfterColon": true,
+        "indentSingleMemberValues": true,
+        "escapeForwardSlashes": false
+    },
+    "session": {
+        "manager": "sqlite3",
+        "cookieLifetimeMinutes": 10080,
+        "cookieName": "cson_session_id",
+        "managers": {
+            "file": {
+                "sessionDriver": "file",
+                "dir": "./session",
+                "prefix": "cson-session-",
+                "suffix": ".json"
+            },
+            "mysql5": {
+                "sessionDriver": "cpdo",
+                "dsn": "mysql5:dbname=cpdo;host=localhost",
+                "user": "cpdo",
+                "password": "cpdo",
+                "table": "cson_session",
+                "fieldId": "id",
+                "fieldTimestamp": "last_saved",
+                "fieldSession": "json"
+            },
+            "sqlite3": {
+                "sessionDriver": "cpdo",
+                "dsn": "sqlite3:session/sessions.sqlite3",
+                "user": null,
+                "password": null,
+                "table": "cson_session",
+                "fieldId": "id",
+                "fieldTimestamp": "last_saved",
+                "fieldSession": "json"
+            },
+            "hashtable": {
+                "sessionDriver": "whio_ht",
+                "whio_ht_home_page":"http://fossil.wanderinghorse.net/repos/whio/index.cgi/wiki/whio_ht",
+                "file": "session/sessions.whio_ht"
+            },
+            "epfs": {
+                "sessionDriver": "whio_epfs",
+                "whio_epfs_home_page":"http://fossil.wanderinghorse.net/repos/whio/index.cgi/wiki/whio_epfs",
+                "file": "session/sessions.whio_epfs"
+            }
+        }
+    }
+}
+

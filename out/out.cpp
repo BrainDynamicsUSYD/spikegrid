@@ -4,7 +4,10 @@
 #include <string.h>
 #include <errno.h>
 #include <vector>
+#include <iostream>
 #include <unistd.h>
+#include "opencv2/core/core.hpp" //core opencv
+#include "opencv2/highgui/highgui.hpp" //for video writer
 #include "stdio.h"
 #include "../openCVAPI/api.h" //this is c++
 extern "C"
@@ -15,28 +18,75 @@ extern "C"
 #include "../lagstorage.h"
 }
 #include "out.h" //and this is c++ again.
+on_off showimages=ON;
 std::vector<Output*> outvec;
 
-PNGoutput::PNGoutput(int idxin ,const int intervalin,const tagged_array* datain) : Output(intervalin,idxin)
+PNGoutput::PNGoutput(int idxin ,const int intervalin,const tagged_array* datain,const char* const overlayin) : Output(intervalin,idxin)
 {
    data=datain;
+    overlay = getOverlayByName(overlayin);
+}
+cv::Mat TA_toMat(const tagged_array* const data,const overlaytext* const o)
+{
+    const unsigned int size = tagged_array_size_(*data)*data->subgrid;
+    Compute_float* actualdata=taggedarrayTocomputearray(*data);
+    cv::Mat m =ProcessMatrix(actualdata,data->minval,data->maxval,size);
+    free(actualdata);
+    if (o != NULL)
+    {
+        std::string s = std::to_string(o->func());
+        putText(m,s,cv::Point(0,size), cv::FONT_HERSHEY_PLAIN,1.0,cv::Scalar(255,255,255));
+    }
+    return m;
 }
 void PNGoutput::DoOutput()
 {
 #ifdef OPENCV
     count++;
     char fnamebuffer[30];
-    const unsigned int size = tagged_array_size_(*data)*data->subgrid;
-    Compute_float* actualdata=taggedarrayTocomputearray(*data);
     sprintf(fnamebuffer,"%s/%i-%i.png",outdir,this->GetIdx(),count);
-    SaveImage(fnamebuffer,actualdata,data->minval,data->maxval,size);
-    free(actualdata);
+    imwrite(fnamebuffer,TA_toMat(data,overlay));
 #else
     printf("Using PNG outout without opencv is not possible\n");
 #endif
 }
-VidOutput::VidOutput(int idxin ,const int intervalin,const tagged_array* datain) : Output(intervalin,idxin)
+int savecount;
+std::map<std::string,cv::Mat> matmap;
+void mousecb(int event,int ,int ,int , void* dummy2)
 {
+    if (event==CV_EVENT_LBUTTONDOWN)
+    {
+        char buf[100];
+        sprintf(buf,"%i.png",savecount);
+        savecount++;
+        char* t = (char*)dummy2;
+        std::string s(t);
+        cv::Mat m = matmap[s];
+        cv::imwrite(buf,m);
+    }
+}
+GUIoutput::GUIoutput(int a,int b, const tagged_array* c, const char* const d, const char* const wname) : PNGoutput(a,b,c,d)
+{
+    winname = wname;
+    cvNamedWindow(wname,CV_WINDOW_NORMAL);
+    cvSetMouseCallback(wname,mousecb,(void*)wname);
+}
+void GUIoutput::DoOutput()
+{
+    if (showimages == ON)
+    {
+        cv::Mat m = TA_toMat(data,overlay);
+        imshow(winname,m);
+        std::string s(winname);
+        cv::Mat o;//this bit probably not required
+        m.copyTo(o);
+        matmap[s]=o;
+        cv::waitKey(10); //TODO: move this somewhere else
+    }
+}
+VidOutput::VidOutput(int idxin ,const int intervalin,const tagged_array* datain,const char* const overlayin) : Output(intervalin,idxin)
+{
+    overlay = getOverlayByName(overlayin);
     char buf[100];
     sprintf(buf,"%s/%i.avi",outdir,idxin);
     int fourcc = CV_FOURCC('H','F','Y','U');
@@ -46,11 +96,7 @@ VidOutput::VidOutput(int idxin ,const int intervalin,const tagged_array* datain)
 void VidOutput::DoOutput()
 {
 #ifdef OPENCV
-    const unsigned int size = tagged_array_size_(*data)*data->subgrid;
-    Compute_float* actualdata=taggedarrayTocomputearray(*data);
-    cv::Mat m =ProcessMatrix(actualdata,data->minval,data->maxval,size);
-    writer->write(m);
-    free(actualdata);
+    writer->write(TA_toMat(data,overlay));
 #else
     printf("Using PNG outout without opencv is not possible\n");
 #endif
@@ -139,7 +185,7 @@ void MakeOutputs(const output_parameters* const m)
         switch (m[i].method)
         {
             case PICTURE:
-                out = new PNGoutput(i,m[i].Delay,Outputtable[m[i].Output].data.TA_data);
+                out = new PNGoutput(i,m[i].Delay,Outputtable[m[i].Output].data.TA_data,m[i].Overlay);
                 outvec.push_back(out);
                 break;
             case TEXT:
@@ -155,7 +201,11 @@ void MakeOutputs(const output_parameters* const m)
                 outvec.push_back(out);
                 break;
             case VIDEO:
-                out = new VidOutput(i,m[i].Delay,Outputtable[m[i].Output].data.TA_data);
+                out = new VidOutput(i,m[i].Delay,Outputtable[m[i].Output].data.TA_data,m[i].Overlay);
+                outvec.push_back(out);
+                break;
+            case GUI:
+                out = new GUIoutput(i,m[i].Delay,Outputtable[m[i].Output].data.TA_data,m[i].Overlay,Outputtable[m[i].Output].name);
                 outvec.push_back(out);
                 break;
             default:
@@ -180,6 +230,9 @@ void CleanupOutputs()
     }
     outvec.clear(); //this is the more important bit - the memory occupied by the various output objects is comparitively tiny.
 }
+//###################
+//-------------------------------------MATLAB stuff below here
+//###################
 //So here is a problem - All the outputs are set up to essentially return `void`.
 //However, we really need to return something for matlab.
 //Also, it is possible that the matlab outputs change over time

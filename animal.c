@@ -1,4 +1,3 @@
-#include <stdlib.h>
 #include "mymath.h"
 #include "animal.h"
 #include "sizes.h"

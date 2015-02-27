@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "sizes.h"
 #include "randconns.h"
 #include "paramheader.h"
 #include "coupling.h"
@@ -62,11 +61,11 @@ randconns_info* init_randconns(const randconn_parameters rparam,const couple_par
     memcpy(rcpoint,&rcinfo,sizeof(*rcpoint));
     return rcpoint;
 }
-randomconnection* GetRandomConnsLeaving(const int x,const int y,const randconns_info rcinfo, unsigned int* numberconns)
+randomconnection* GetRandomConnsLeaving(const unsigned int x,const unsigned int y,const randconns_info rcinfo, unsigned int* numberconns)
 {
     if (x*grid_size+y < rcinfo.nospecials || rcinfo.nospecials==0)
     {
-        const int randbase=(x*grid_size+y)*(int)rcinfo.numberper;
+        const unsigned int randbase=(x*grid_size+y)*rcinfo.numberper;
         *numberconns = rcinfo.numberper;
         return &(rcinfo.randconns[randbase]);
     }
@@ -84,9 +83,9 @@ randomconnection** GetRandomConnsArriving(const int x,const int y,const randconn
 Compute_float* RandConnsToMat(const randconns_info* const rcinfo)
 {
     Compute_float* strmat = calloc(sizeof(Compute_float),grid_size*grid_size);
-    for (int x=0;x<grid_size;x++)
+    for (unsigned int x=0;x<grid_size;x++)
     {
-        for(int y=0;y<grid_size;y++)
+        for(unsigned int y=0;y<grid_size;y++)
         {
             unsigned int nconns;
             randomconnection* rc = GetRandomConnsLeaving(x,y,*rcinfo,&nconns);

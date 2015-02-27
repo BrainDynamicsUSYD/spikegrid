@@ -18,10 +18,16 @@ typedef struct output_s {
         const tagged_array* TA_data;
         const lagstorage*  Lag_data;
     } data;                         ///< the data to return
-
 } output_s; //used so that matlab has string identifiers that correspond to a specific tagged_array
+typedef struct overlaytext
+{
+    const char name[20];
+    int (*func)();
+} overlaytext;
 output_s __attribute__((pure)) getOutputByName(const char* const name);
+overlaytext* __attribute__((pure)) getOverlayByName(const char* const name);
 void output_init(const model* const m);
 void CleanupOutput();
 output_s* Outputtable;
+overlaytext* overlays;
 #endif //OUTPUT

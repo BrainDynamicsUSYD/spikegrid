@@ -9,8 +9,10 @@
 #include "output.h"
 #include "tagged_array.h"
 ///Total number of things to be output - occasionally needs to be incremented
-#define output_count  19
-
+#define output_count   19
+#define overlay_count  3
+//outptu holds an open reference to the model - this enables the mini functions to work
+const model* modelref; //MASSIVE HACK
 ///Finds an output which matches the given name - case sensitive
 ///@param name the name of the outputtable
 output_s __attribute__((pure)) getOutputByName(const char* const name)
@@ -27,12 +29,29 @@ output_s __attribute__((pure)) getOutputByName(const char* const name)
     printf("tried to get unknown thing to output called -%s-\n",name);
     exit(EXIT_FAILURE);
 }
-
+///Finds an overlay which matches the given name - case sensitive
+///@param name the name of the overlayt
+overlaytext* __attribute__((pure)) getOverlayByName(const char* const name)
+{
+    int outidx=0;
+    while (strlen(overlays[outidx].name) != 0)
+    {
+        if (!strcmp(overlays[outidx].name,name))
+        {
+            return &overlays[outidx];
+        }
+        outidx++;
+    }
+    return NULL;
+}
+int Trialno()  {return (int) (modelref->timesteps * Features.Timestep /modelref->layer1.P->Stim.timeperiod - modelref->layer1.P->Stim.PreconditioningTrials)  ;}
+int Timestep() {return (int) modelref->timesteps;}
 ///Set up the outputtables for a given model
 ///This function should probably move to the C++ code
 ///@param m the model we are going to output stuff from
 void output_init(const model* const m)
 {
+    modelref = m; //store ref to model.
     //WHEN YOU ADD SOMETHING - INCREASE OUTPUT_COUNT AT TOP OF FILE;
     //ALSO - only add things to the end of the array
     output_s* outdata=(output_s[]){ //note - neat feature - missing elements initailized to 0
@@ -58,6 +77,14 @@ void output_init(const model* const m)
     output_s* malloced = malloc(sizeof(output_s)*output_count);
     memcpy(malloced,outdata,sizeof(output_s)*output_count);
     Outputtable = malloced;
+    overlaytext* overdata = (overlaytext[]){
+        {"Trialno", Trialno}, //not correct - need to use millis conversion
+        {"Timestep", Timestep}, //C has anonymous functions - WTF!!
+        {.name={0}}
+    };
+    overlaytext* overmalloc = malloc(sizeof(overlaytext)*overlay_count);
+    memcpy(overmalloc,overdata,sizeof(overlaytext)*overlay_count);
+    overlays = overmalloc;
 }
 ///Cleans up memory and file handles that are used by the outputtables object
 void CleanupOutput()

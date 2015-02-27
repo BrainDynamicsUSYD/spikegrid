@@ -7,7 +7,6 @@
 #include <fenv.h>   //for some debugging
 #include <stdio.h>
 #include <time.h>
-#include "gui.h"
 #include "cleanup.h"
 #include "evolve.h"
 #include "newparam.h"
@@ -21,7 +20,6 @@
     #include <android/log.h>
 #endif
 
-unsigned int mytime=0;  ///<< The current time step
 model* m;               ///< The model we are evolving through time
 int jobnumber=-1;        ///< The current job number - used for pics directory etc
 int yossarianjobnumber=-1;
@@ -39,7 +37,7 @@ void step_(const Compute_float* const inpV,const Compute_float* const inpV2, con
         if(inpV2==NULL)                         {printf("missing second input voltage in dual-layer model"); exit(EXIT_FAILURE);}
         if(Features.Recovery==ON && inpW2==NULL){printf("missing second recovery input in dual-layer model");exit(EXIT_FAILURE);}
     }
-    mytime++;
+    m->timesteps++;
     memcpy(m->layer1.voltages,inpV,sizeof(Compute_float)*grid_size*grid_size);
     if (Features.Recovery==ON) {memcpy(m->layer1.recoverys,inpW,sizeof(Compute_float)*grid_size*grid_size);}
     if (ModelType==DUALLAYER)
@@ -47,8 +45,8 @@ void step_(const Compute_float* const inpV,const Compute_float* const inpV2, con
         memcpy(m->layer2.voltages,inpV2,sizeof(Compute_float)*grid_size*grid_size);
         if (Features.Recovery==ON) {memcpy(m->layer2.recoverys,inpW2,sizeof(Compute_float)*grid_size*grid_size);}
     }
-    step1(m,mytime);
-    DoOutputs(mytime);
+    step1(m);
+    DoOutputs(m->timesteps);
 }
 
 //I am not a huge fan of this function.  A nicer version would be good.
@@ -224,8 +222,6 @@ void processopts (int argc,char** argv,parameters** newparam,parameters** newpar
 /// @param argv what the parameters actually are
 int main(int argc,char** argv) //useful for testing w/out matlab
 {
-    const char* CVDisplay[] = {"gE","V2","RC","STDP1","STDP2"}; //list of possible variables to show
-    const int CVNumWindows=3;                              //and how many to show
 #ifndef ANDROID //android doesn't support this function - note the error is that this will fail at linking so it needs to hide in the #if
  //   feenableexcept(FE_INVALID | FE_OVERFLOW); //segfault on NaN and overflow.  Note - this cannot be used in matlab
 #endif
@@ -233,8 +229,7 @@ int main(int argc,char** argv) //useful for testing w/out matlab
     parameters* newparamEx = NULL;
     parameters* newparamIn = NULL;
     setvbuf(stdout,NULL,_IONBF,0);
-    on_off OpenCv=ON;
-    processopts(argc,argv,&newparam,&newparamEx,&newparamIn,&OpenCv);
+    processopts(argc,argv,&newparam,&newparamEx,&newparamIn,&showimages);
 
     const Job* job = &Features.job;
     if (job->next != NULL || (job->initcond==RAND_JOB && job->Voltage_or_count>1)) {jobnumber=0;} //if more than one job - then start at 0 - so that stuff goes in folders
@@ -243,7 +238,6 @@ int main(int argc,char** argv) //useful for testing w/out matlab
         int count = job->initcond==RAND_JOB?(int)job->Voltage_or_count:1; //default to 1 job
         for (int c = 0;c<count;c++)
         {
-            mytime=0;
             //seed RNG as appropriate - with either time or job number
             if     (job->initcond == RAND_TIME){srandom((unsigned)time(0));}
             else if(job->initcond==RAND_JOB)   {srandom((unsigned)c);}
@@ -251,30 +245,20 @@ int main(int argc,char** argv) //useful for testing w/out matlab
             //sets up the model code
             if (ModelType==SINGLELAYER) {m=setup(newparam!=NULL? (*newparam):OneLayerModel,newparam!=NULL? (*newparam):OneLayerModel,ModelType,jobnumber,yossarianjobnumber);} //pass the same layer as a double parameter
             else {m=setup(newparamIn!=NULL?*newparamIn:DualLayerModelIn,newparamEx!=NULL?*newparamEx:DualLayerModelEx,ModelType,jobnumber,yossarianjobnumber);}
-
-#ifdef OPENCV
-            if (OpenCv==ON){ cvdispInit(CVDisplay,CVNumWindows);}
-#endif
+//            SaveModel(m);
             Compute_float *FirstV,*SecondV,*FirstW,*SecondW;
             setuppointers(&FirstV,&SecondV,&FirstW,&SecondW,job);
             //actually runs the model
-            while (mytime<Features.Simlength)
+            while (m->timesteps<Features.Simlength)
             {
 
-                if (mytime%10==0){printf("%i\n",mytime);}
+                if (m->timesteps%10==0){printf("%i\n",m->timesteps);}
                 step_(FirstV,SecondV,FirstW,SecondW);//always fine to pass an extra argument here
                 //copy the output to be new input
                 memcpy ( FirstV, m->layer1.voltages_out, sizeof ( Compute_float)*grid_size*grid_size);
                 if(SecondV != NULL){memcpy(SecondV,m->layer2.voltages_out, sizeof(Compute_float)*grid_size*grid_size);}
                 if(FirstW != NULL) {memcpy(FirstW, m->layer1.recoverys_out,sizeof(Compute_float)*grid_size*grid_size);}
                 if(SecondW != NULL){memcpy(SecondW,m->layer2.recoverys_out,sizeof(Compute_float)*grid_size*grid_size);}
-                //do some opencv stuff
-#ifdef OPENCV
-                if(mytime % 40 ==0 && OpenCv == ON)
-                {
-                    cvdisp(CVDisplay,CVNumWindows,m->layer2.rcinfo);
-                }
-#endif
             }
             FreeIfNotNull(FirstV);
             FreeIfNotNull(SecondV);

@@ -20,7 +20,7 @@ void createyossarianfile (const char* const outfile,const sweepable sweep)
 "#PBS -N job\n"
 "#PBS -q batch\n"
 "#PBS -l nodes=1:ppn=1\n"
-"#PBS -l walltime=2:00:00 -l mem=400MB\n"
+"#PBS -l walltime=200:00:00 -l mem=400MB\n"
 "#PBS -w %s\n"
 "#PBS -V\n"
 "#PBS -t 0-%i\n"

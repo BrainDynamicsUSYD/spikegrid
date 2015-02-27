@@ -64,10 +64,9 @@ layer setuplayer(const parameters p)
     if (p.couple.Layertype==SINGLELAYER) {cap=(int)max(setcap(p.couple.Layer_parameters.single.Ex,min_effect,Features.Timestep),setcap(p.couple.Layer_parameters.single.In,min_effect,Features.Timestep));}
     else                                 {cap=(int)setcap(p.couple.Layer_parameters.dual.synapse,min_effect,Features.Timestep);}
     const int trefrac_in_ts =(int) ((Compute_float)p.couple.tref / Features.Timestep);
-    //const int flagcount = cap;
-    int flagcount;
-    if (Features.Recovery == ON) {flagcount = cap;} //this needs a comment
-    else {flagcount = (int)(cap/trefrac_in_ts) + 2;} //this needs a comment
+    unsigned int flagcount;
+    if (Features.Recovery == ON) {flagcount = (unsigned)cap;} //this needs a comment
+    else {flagcount = (unsigned)(cap/trefrac_in_ts) + 2;} //this needs a comment
     layer L =
     {
         .firinglags         = lagstorage_init(flagcount,cap),
@@ -87,6 +86,7 @@ layer setuplayer(const parameters p)
         .recoverys_out      = Features.Recovery==ON?calloc(sizeof(Compute_float),grid_size*grid_size):NULL,
         .Layer_is_inhibitory = p.couple.Layertype==DUALLAYER && p.couple.Layer_parameters.dual.W<0,
         .rcinfo             = Features.Random_connections==ON?init_randconns(p.random,p.couple): NULL,
+        .cap                = cap, 
     };
     return L;
 }
@@ -108,7 +108,14 @@ model* setup(const parameters p,const parameters p2,const LayerNumbers lcount,co
         }
         else
         {
-         sprintf(nostring,"%i-%i",yossarianjobnumber,jobnumber);
+            if (yossarianjobnumber < 0)
+            {
+                sprintf(nostring,"%i",jobnumber);
+            }
+            else
+            {
+                sprintf(nostring,"%i-%i",yossarianjobnumber,jobnumber);
+            }
         }
         // Here it is... add the extra file.
         if (strlen(Features.Outprefix)==0)
@@ -130,7 +137,7 @@ model* setup(const parameters p,const parameters p2,const LayerNumbers lcount,co
    // printout_struct(&p2,"parameters",outdir,1);    //save the second parameters object and display everything
     const layer l1  = setuplayer(p);
     const layer l2  = lcount==DUALLAYER?setuplayer(p2):l1;
-    const model m   = {.layer1=l1,.layer2=l2,.NoLayers=lcount,.animal=calloc(sizeof(animal),1)};
+    const model m   = {.layer1=l1,.layer2=l2,.NoLayers=lcount,.animal=calloc(sizeof(animal),1),.timesteps=0};
     model* m2       = malloc(sizeof(m));
     memcpy(m2,&m,sizeof(m));
     char* buffer = malloc(1024);

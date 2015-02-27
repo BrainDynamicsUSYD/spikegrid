@@ -90,7 +90,7 @@ static const model_features Features =
     .STDP		= ON, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep -
     .STD        = OFF, //               if we need any of these features we can make the changes then.
     .Timestep   = 0.1,
-    .Simlength  = 1000000,
+    .Simlength  = 10000,
     .UseAnimal     = ON,
     .Random_connections=ON,
 };

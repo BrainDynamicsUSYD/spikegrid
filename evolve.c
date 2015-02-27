@@ -1,7 +1,7 @@
-/// \file
+///\file
 #include <string.h> //memset
 #include <stdlib.h> //random
-#include <stdio.h>
+#include <stdio.h>  //useful when we need to print things
 #include "STDP.h"
 #include "model.h"
 #include "theta.h"
@@ -22,33 +22,33 @@
 /// currently, single layer doesn't work (correctly)
 void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restrict__ gI,const unsigned int time)
 {
-    for (int y=0;y<grid_size;y++)
+    for (unsigned int y=0;y<grid_size;y++)
     {
-        for (int x=0;x<grid_size;x++)
+        for (unsigned int x=0;x<grid_size;x++)
         {
             Compute_float str = Zero;
-            const int idx = x*grid_size + y;
-            int numfirings = 0;
-            while (L.firinglags->lags[idx*L.firinglags->lagsperpoint+numfirings] != -1)
+            const unsigned int lagidx = LagIdx(x,y,L.firinglags);
+            unsigned int newlagidx = lagidx;
+            while (L.firinglags->lags[newlagidx] != -1)  //Note: I think perf might be overstating the amount of time on this line - although, if it isn't massive potential for perf improvement
             {
-                Compute_float this_str =L.Mytimecourse[L.firinglags->lags[idx*L.firinglags->lagsperpoint + numfirings]];
+                Compute_float this_str =L.Mytimecourse[L.firinglags->lags[newlagidx]];
                 if (Features.STD == ON)
                 {
-                    this_str = this_str * STD_str(L.P->STD,x,y,time,L.firinglags->lags[idx*L.firinglags->lagsperpoint + numfirings],L.std);
+                    this_str = this_str * STD_str(L.P->STD,x,y,time,L.firinglags->lags[newlagidx],L.std);
                 }
+                newlagidx++;
                 str += this_str;
-                numfirings++;
             }
             if (L.Layer_is_inhibitory) {str = (-str);} //invert strength for inhib conns.
-            if (numfirings > 0) //only fire if we had a spike.
+            if (newlagidx != lagidx) //only fire if we had a spike.
             {
                 if (Features.STDP==OFF)
                 {
-                    evolvept_duallayer(x,y,L.connections,str,(L.Layer_is_inhibitory?gI:gE)); //side note evolvegen doesn't currently work with singlelayer - should probably fix
+                    evolvept_duallayer((int)x,(int)y,L.connections,str,(L.Layer_is_inhibitory?gI:gE)); //side note evolvegen doesn't currently work with singlelayer - should probably fix
                 }
                 else
                 {
-                    evolvept_duallayer_STDP(x,y,L.connections,L.STDP_data->connections,str,(L.Layer_is_inhibitory?gI:gE));
+                    evolvept_duallayer_STDP((int)x,(int)y,L.connections,L.STDP_data->connections,str,(L.Layer_is_inhibitory?gI:gE));
                 }
             }
             if (Features.Random_connections == ON && !L.Layer_is_inhibitory )
@@ -69,13 +69,13 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
 ///This function adds in the overlapping bits back into the original matrix.  It is slightly opaque but using pictures you can convince yourself that it works
 ///To keep the evolvept code simple we use an array like this:
 ///~~~~
-///    +–––––––––––––––––+          
-///    |Extra for overlap|          
-///    |  +––––––––––+   |          
-///    |  |Actual    |   |          
-///    |  |matrix    |   |          
-///    |  +––––––––––+   |          
-///    +–––––––––––––––––+ 
+///     +-––––––––––––––––+
+///     |Extra for Overlap|
+///     |  +––––––––––+   |
+///     |  |Actual    |   |
+///     |  |matrix    |   |
+///     |  +––––––––––+   |
+///     +–––––––––––––––––+
 ///~~~~
 void fixboundary(Compute_float* __restrict gE, Compute_float* __restrict gI)
 {   //theoretically the two sets of loops could be combined but that would be incredibly confusing
@@ -163,19 +163,20 @@ void CalcRecoverys(const Compute_float* const __restrict__ Vinput,
 }
 
 ///Store current firing spikes also apply random spikes
+///TODO: make faster
 void StoreFiring(layer* L)
 {
-    const int step = (int)L->P->skip;
-    for (int x=0;x<grid_size;x++)
+    const int step = L->P->skip;
+    for (unsigned int x=0;x<grid_size;x++)
     {
-        for (int y=0;y<grid_size;y++)
+        for (unsigned int y=0;y<grid_size;y++)
         {
-            const int test = x % step ==0 && y % step ==0;
+            const int test = (int)x % step ==0 && (int)y % step ==0;
             if ((test && step > 0) || ((!test) && step<0)) //check if this is an active neuron
             {
-                const int baseidx=LagIdx(x,y,L->firinglags); 
+                const unsigned int baseidx=LagIdx(x,y,L->firinglags);
                 modifyLags(L->firinglags,baseidx);
-                if (Features.STDP==ON) {modifyLags(L->STDP_data->lags,LagIdx(x,y,L->STDP_data->lags));}
+                if (Features.STDP==ON) {modifyLags(L->STDP_data->lags,LagIdx(x,y,L->STDP_data->lags));} //question - would it be better to use a single lagstorage here with limits in appropriate places?
                 //now - add in new spikes
                 if (L->voltages_out[x*grid_size + y]  >= L->P->potential.Vpk)
                 {
@@ -187,15 +188,16 @@ void StoreFiring(layer* L)
                     AddnewSpike(L->firinglags,baseidx);
                     if (Features.STDP==ON) {AddnewSpike(L->STDP_data->lags,LagIdx(x,y,L->STDP_data->lags));}
                 }//add random spikes
-                else if (L->P->potential.rate > 0 && (((Compute_float)(random()))/((Compute_float)RAND_MAX) <
-                        (L->P->potential.rate*((Compute_float)0.001)*Features.Timestep)))
+                else if (L->P->potential.rate > 0 && //this check is because the compiler doesn't optimize the call to random() otherwise
+                            (((Compute_float)(random()))/((Compute_float)RAND_MAX) <
+                            (L->P->potential.rate*((Compute_float)0.001)*Features.Timestep)))
                 {
                     L->voltages_out[x*grid_size+y]=L->P->potential.Vpk+(Compute_float)0.1;//make sure it fires - the neuron will actually fire next timestep
                 }
             }
             else
             {
-                    L->voltages_out[x*grid_size+y]=Zero; //skipped neurons set to 0
+                    L->voltages_out[x*grid_size+y]=Zero; //skipped neurons set to 0 - probably not required but perf impact should be minimal
             }
         }
     }
@@ -204,9 +206,9 @@ void StoreFiring(layer* L)
 void ResetVoltages(Compute_float* const __restrict Vout,const couple_parameters C,const lagstorage* const  l,const conductance_parameters CP)
 {
     const int trefrac_in_ts =(int) ((Compute_float)C.tref / Features.Timestep);
-    for (int i=0;i<grid_size*grid_size;i++)
+    for (unsigned int i=0;i<grid_size*grid_size;i++)
     {
-        int baseidx = i*l->lagsperpoint;
+        unsigned int baseidx = i*l->lagsperpoint;
         if (CurrentShortestLag(l,baseidx) <= trefrac_in_ts)
         {
             Vout[i] = CP.Vrt;
@@ -214,6 +216,7 @@ void ResetVoltages(Compute_float* const __restrict Vout,const couple_parameters 
     }
 }
 #include "imread/imread.h"
+///This function takes up way too much time in the code - mostly in storefiring - slightly annoying as this is essentially all pure overhead.  It would be really nice to significantly reduce the amount of time this function takes.
 void tidylayer (layer* l,const Compute_float timemillis,const Compute_float* const gE,const Compute_float* const gI)
 {
     if (Features.Recovery==OFF)
@@ -237,16 +240,16 @@ void tidylayer (layer* l,const Compute_float timemillis,const Compute_float* con
 }
 ///Steps a model through 1 timestep - quite high-level function
 ///This is the only function in the file that needs model.h
-void step1(model* m,const unsigned int time)
+void step1(model* m)
 {
-    const Compute_float timemillis = ((Compute_float)time) * Features.Timestep ;
+    const Compute_float timemillis = ((Compute_float)m->timesteps) * Features.Timestep ;
     memset(m->gE,0,sizeof(Compute_float)*conductance_array_size*conductance_array_size); //zero the gE/gI matrices so they can be reused for this timestep
     memset(m->gI,0,sizeof(Compute_float)*conductance_array_size*conductance_array_size);
     if (Features.LocalStim==ON)
     {
-        if (time %1000 < 250) {ApplyLocalBoost(m->gE,20,20);}
-        else if (time % 1000 < 500) {ApplyLocalBoost(m->gE,20,60);}
-        else if (time % 1000 < 750) {ApplyLocalBoost(m->gE,60,20);}
+        if (m->timesteps %1000 < 250) {ApplyLocalBoost(m->gE,20,20);}
+        else if (m->timesteps % 1000 < 500) {ApplyLocalBoost(m->gE,20,60);}
+        else if (m->timesteps % 1000 < 750) {ApplyLocalBoost(m->gE,60,20);}
         else  {ApplyLocalBoost(m->gE,60,60);}
     }
     if(Features.UseAnimal==ON)
@@ -255,8 +258,8 @@ void step1(model* m,const unsigned int time)
         AnimalEffects(*m->animal,m->gE,timemillis);
     }
     // Add spiking input to the conductances
-    AddSpikes(m->layer1,m->gE,m->gI,time);
-    if (m->NoLayers==DUALLAYER) {AddSpikes(m->layer2,m->gE,m->gI,time);}
+    AddSpikes(m->layer1,m->gE,m->gI,m->timesteps);
+    if (m->NoLayers==DUALLAYER) {AddSpikes(m->layer2,m->gE,m->gI,m->timesteps);}
     if (Features.Disablewrapping==OFF)
     {
         fixboundary(m->gE,m->gI);

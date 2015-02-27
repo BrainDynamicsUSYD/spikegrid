@@ -1,0 +1,169 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title>cson_cgi demo</title>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script> 
+<!--
+    <script type="text/javascript" src="/js/FormToJSON.js"></script> 
+-->
+
+<script type='text/javascript'>
+var App = {
+      response:null,
+      sessionID:null,
+      sessionManager:null,
+      cgiUrl:'index.cgi/a/path'
+};
+function urldecode(str)
+{
+      return decodeURIComponent((str + '').replace(/\+/g, '%20'));
+}
+function fetchSessionID()
+{
+      var rx = /.*(cson_session_id)=([^;]+)+.*/;
+      var m;
+      if( ! m ) {
+          m = App.response;
+          m = m && m['$COOKIE'];
+          m = m && m['cson_session_id'];
+          if(m && ('object' === typeof m) ) m = m.value;
+      }
+      if( ! m ) {
+          m = rx.exec( ''+document.cookie );
+          m = m && urldecode(m[2]);
+      }
+      
+      return m || 'unknown';
+}
+
+function updateSessionID()
+{
+      App.sessionID = fetchSessionID();
+      var tgt = jQuery('#sessionID');
+      if( App.sessionID !== tgt.text() ) tgt.fadeOut().fadeIn();
+      tgt.text( App.sessionID );
+      var sm = App.response;
+      sm = sm && sm["$SESSION"];
+      sm = sm && sm["sessionManager"];
+      App.sessionManager = sm || 'unknown';
+      tgt = jQuery('#sessionBackend')
+      if( App.sessionManager !== tgt.text() ) tgt.fadeOut().fadeIn();
+      tgt.text( App.sessionManager );
+}
+
+function handleClickOne()
+{
+      var tgt = jQuery('#taResponse');
+      var src = jQuery('#taRequest');
+      var json = src.val();
+      var xargs = ''+window.location;
+      var ndx = xargs.indexOf('?');
+      if( ndx > 0 ) xargs = xargs.substring( ndx+1 );
+      else xargs = false;
+      jQuery.ajax({
+          url: App.cgiUrl+'?a[]=3&a[]=7'+(xargs ? ('&'+xargs) : ''),
+          type: 'POST',
+          dataType: 'json',
+          data:json,
+          processData: false,
+          contentType:'application/json',
+          success: function(data) {
+              tgt.val( JSON.stringify(data,0,4) );
+              App.response = data;
+              updateSessionID();
+          },
+          error: function(jqXHR, textStatus, errorThrown) {
+              tgt.val("ERROR:\n"+textStatus)
+          }
+      });
+    return false;
+}
+
+function handleClickUrlEncoded(form)
+{
+      var tgt = jQuery('#taResponse');
+      var src = form;
+      var xargs = ''+window.location;
+      var ndx = xargs.indexOf('?');
+      if( ndx > 0 ) xargs = xargs.substring( ndx+1 );
+      else xargs = false;
+      jQuery.ajax({
+          url: App.cgiUrl+'?a[]=3&a[]=7'+(xargs ? ('&'+xargs) : ''),
+          type: 'POST',
+          dataType: 'json',
+          data:src.serialize(),
+          contentType:'application/x-www-form-urlencoded',
+          processData: false,
+          dataType:'text',
+          success: function(data) {
+              var json;
+              try {
+                json = JSON.parse(data);
+              }
+              catch(e) {
+                alert("Error parsing response as JSON!");
+                tgt.val( data );
+                return;
+              }
+              tgt.val( JSON.stringify(json,0,4) );
+              App.response = json;
+              updateSessionID();
+          },
+          error: function(jqXHR, textStatus, errorThrown) {
+              tgt.val("ERROR:\n"+textStatus)
+          }
+      });
+      return false;
+}
+
+jQuery(document).ready(function(){
+      updateSessionID();
+      if( false && App.sessionID ) {
+          jQuery('#btnSubmit').click();
+      }
+});
+</script>
+</head>
+<body>
+<h1>The quick and dirty <a href='http://fossil.wanderinghorse.net/repos/cson/index.cgi/wiki/cson_cgi'>cson_cgi</a> demo...</h1>
+
+This page requires cookies and javascript.
+
+<hr/>
+
+<input id='btnSubmit' type='button' onclick='handleClickOne()' value='Submit'/><br/>
+
+Request JSON: <br/>
+    <textarea id='taRequest' rows='10' cols='100'>
+{ "hi": "world",
+  "demotime": "now"
+}
+</textarea>
+<hr/>
+Session ID: <span id='sessionID' style='font-family:monospace'>unknown</span>,
+<a target='_new' href='http://fossil.wanderinghorse.net/repos/cson/index.cgi/wiki/cson_session'>session manager</a>:
+<span id='sessionBackend' style='font-family:monospace'>unknown</span><br/>
+Response JSON:<br/>
+    <textarea id='taResponse' rows='30' cols='100'>
+Response text will go here.
+</textarea>
+
+<hr/>
+
+<form id='formForPost' method='POST' action=''>
+<select name='select1'>
+    <option value='1'>One</option>
+    <option value='2'>Two</option>
+    <option value='3'>Three</option>
+</select>
+<input type='text' name='aString' value='A string' cols='30'/>
+<!--
+(Destroy session? <input type='checkbox' value='1' name='destroySession' />)
+-->
+<br/>
+<input type='button' onclick='handleClickUrlEncoded(jQuery(this).parent())' value='Submit form-urlencoded request.' />
+</form>
+
+<hr/><hr/>
+</body>
+</html>

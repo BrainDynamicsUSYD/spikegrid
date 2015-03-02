@@ -154,7 +154,9 @@ STDP_data* STDP_init(const STDP_parameters S,const int trefrac_in_ts)
     STDP_data D =
     {
         .lags = lagstorage_init(stdplagcount,STDP_cap),
-        .connections =  calloc(sizeof(Compute_float),grid_size*grid_size*STDP_array_size*STDP_array_size)
+        .connections =  calloc(sizeof(Compute_float),grid_size*grid_size*STDP_array_size*STDP_array_size),
+        .RecordSpikes = ON,
+
     };
     memcpy(ret,&D,sizeof(*ret));
     return ret;

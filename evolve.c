@@ -163,7 +163,7 @@ void CalcRecoverys(const Compute_float* const __restrict__ Vinput,
 }
 
 ///Store current firing spikes also apply random spikes
-///TODO: make faster
+///TODO: make faster - definitely room for improvement here
 void StoreFiring(layer* L)
 {
     const int step = L->P->skip;
@@ -172,7 +172,7 @@ void StoreFiring(layer* L)
         for (unsigned int y=0;y<grid_size;y++)
         {
             const int test = (int)x % step ==0 && (int)y % step ==0;
-            if ((test && step > 0) || ((!test) && step<0)) //check if this is an active neuron
+            if ((test && step > 0) || ((!test) && step<0)) //check if this is an active neuron - here reversing the sign of "step" changes what becomes the active neurons
             {
                 const unsigned int baseidx=LagIdx(x,y,L->firinglags);
                 modifyLags(L->firinglags,baseidx);
@@ -186,7 +186,7 @@ void StoreFiring(layer* L)
                         L->recoverys_out[x*grid_size+y]+=L->P->recovery.Wrt;
                     }
                     AddnewSpike(L->firinglags,baseidx);
-                    if (Features.STDP==ON) {AddnewSpike(L->STDP_data->lags,LagIdx(x,y,L->STDP_data->lags));}
+                    if (Features.STDP==ON && L->STDP_data->RecordSpikes==ON /*We are sometimes not recording spikes */) {AddnewSpike(L->STDP_data->lags,LagIdx(x,y,L->STDP_data->lags));}
                 }//add random spikes
                 else if (L->P->potential.rate > 0 && //this check is because the compiler doesn't optimize the call to random() otherwise
                             (((Compute_float)(random()))/((Compute_float)RAND_MAX) <
@@ -195,7 +195,7 @@ void StoreFiring(layer* L)
                     L->voltages_out[x*grid_size+y]=L->P->potential.Vpk+(Compute_float)0.1;//make sure it fires - the neuron will actually fire next timestep
                 }
             }
-            else
+            else //non-active neurons never get to fire
             {
                     L->voltages_out[x*grid_size+y]=Zero; //skipped neurons set to 0 - probably not required but perf impact should be minimal
             }

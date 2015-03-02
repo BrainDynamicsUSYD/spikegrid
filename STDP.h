@@ -1,5 +1,6 @@
 /// \file
 #include "typedefs.h"
+#include "enums.h"
 typedef struct STDP_parameters STDP_parameters;
 typedef struct randconns_info randconns_info;
 typedef struct lagstorage lagstorage;
@@ -7,6 +8,7 @@ typedef struct STDP_data
 {
     lagstorage* lags;
     Compute_float* connections;
+    on_off RecordSpikes;
 } STDP_data;
 void  DoSTDP(const Compute_float* const const_couples, const Compute_float* const const_couples2,
         STDP_data* data,const STDP_parameters S, STDP_data* const data2,const STDP_parameters S2,

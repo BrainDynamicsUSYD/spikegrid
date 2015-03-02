@@ -29,11 +29,6 @@ Mat ProcessMatrix(const double* data,const double min,const double max,const uns
     return outmat;
 }
 
-void SaveImage(const char* filename,const double* data,const double min,const double max,const unsigned int size)
-{
-    Mat outmat = ProcessMatrix(data,min,max,size);
-    imwrite(filename,outmat);
-}
 void getcolors(const double* data, const double min, const double max, const unsigned int size, uchar* red,uchar* blue,uchar* green)
 {
     Mat outmat = ProcessMatrix(data,min,max,size);

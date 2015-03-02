@@ -4,7 +4,7 @@
 	extern "C" {
 #endif
 #include "../cppparamheader.h"
-void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimulus_parameters S);
+void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimulus_parameters S,const Compute_float threshold);
 int trialno ();
 #ifdef __cplusplus
 	}

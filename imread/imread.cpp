@@ -17,22 +17,20 @@ cv::Mat ReadImage(const char* const path)
     cv::Mat m =cv::imread(path); //the pixels are stored with type cv::Vec3b - third element is red.  0 is black, 255 is white?
     return m;
 }
-void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimulus_parameters S)
+void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimulus_parameters S,const Compute_float threshold)
 {
     if (cached==false) {imcache=ReadImage(S.ImagePath);cached=true;}
     const Compute_float timemodper = fmod(timemillis,S.timeperiod);
     const Compute_float itercount = timemillis/S.timeperiod;
     const bool stim1 = fabs(timemodper-80.0)<.01 && itercount > S.PreconditioningTrials;
     const bool stim2 =  fabs(timemodper-80.0 + S.lag)<.01;
-//    if (stim1) {std::cout<< "stim1" << std::endl;}
-  //  if (stim2) {std::cout<< "stim2" << std::endl;}
    // std::cout << timemillis << std::endl;
     for (int x=0;x<grid_size;x++)
     {
         for (int y=0;y<grid_size;y++)
         {
             cv::Vec3b pixel = imcache.at<cv::Vec3b>(x,y);
-     //       std::cout << pixel << std::endl;
+        //    std::cout << x << "," << y << " " <<  pixel << std::endl;
             if (pixel == cv::Vec3b(0,0,0))
             {
                 voltsin[x*grid_size+y]=-100;
@@ -45,9 +43,17 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
             {
                 voltsin[x*grid_size+y]=100;
             }
-            else if (timemodper < 5)
+            else if (timemodper < 5) //reset before next period.
             {
                 voltsin[x*grid_size+y]=-100;
+            }
+            //detection loop - keep in a separate statement for now
+            if (pixel == cv::Vec3b(100,100,100))
+            {
+                if (voltsin[x*grid_size+y] > threshold )
+                {
+                    std::cout << "spike" << std::endl;
+                }
             }
         }
     }

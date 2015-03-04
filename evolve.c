@@ -197,7 +197,7 @@ void StoreFiring(layer* L)
             }
             else //non-active neurons never get to fire
             {
-                    L->voltages_out[x*grid_size+y]=Zero; //skipped neurons set to 0 - probably not required but perf impact should be minimal
+                    L->voltages_out[x*grid_size+y]=-1000; //skipped neurons set to -1000 - probably not required but perf impact should be minimal - also ensures they will never be >Vpk
             }
         }
     }

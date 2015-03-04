@@ -10,21 +10,42 @@ extern "C"
 {
 #include "../sizes.h"
 }
+typedef enum {Normal=0,Testing=1} Net_state;
 bool cached=false;
+Net_state state = Normal;
 cv::Mat imcache; //elements have type Vec3b
 cv::Mat ReadImage(const char* const path)
 {
     cv::Mat m =cv::imread(path); //the pixels are stored with type cv::Vec3b - third element is red.  0 is black, 255 is white?
     return m;
 }
+bool fire1 = false;
+bool fire2 = false;
+void StartTesting()
+{
+    state = Testing;
+    fire1=false;
+    fire2=false;
+    //disable STDP recording - FIXME
+}
+void EndTesting()
+{
+    state = Normal;
+    if (fire1 && fire2)
+    {
+        std::cout << "Both spiked" << std::endl;
+    }
+    //reenable STDP recording - FIXME
+}
 void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimulus_parameters S,const Compute_float threshold)
 {
     if (cached==false) {imcache=ReadImage(S.ImagePath);cached=true;}
     const Compute_float timemodper = fmod(timemillis,S.timeperiod);
     const Compute_float itercount = timemillis/S.timeperiod;
-    const bool stim1 = fabs(timemodper-80.0)<.01 && itercount > S.PreconditioningTrials;
-    const bool stim2 =  fabs(timemodper-80.0 + S.lag)<.01;
-   // std::cout << timemillis << std::endl;
+    const bool stim1 = (fabs(timemodper-80.0)<.01 && itercount > S.PreconditioningTrials)  || fabs (timemodper-220)<.01;
+    const bool stim2 =  fabs(timemodper-80.0 + S.lag)<.01  || fabs (timemodper-220)<.01;
+    if (fabs(timemodper - 220) < 0.01) {StartTesting();  }
+    if (fabs(timemodper ) < 0.01) {EndTesting();  }
     for (int x=0;x<grid_size;x++)
     {
         for (int y=0;y<grid_size;y++)
@@ -53,6 +74,15 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
                 if (voltsin[x*grid_size+y] > threshold )
                 {
                     std::cout << "spike" << std::endl;
+                    fire1 = true;
+                }
+            }
+            else if (pixel == cv::Vec3b(150,150,150))
+            {
+                if (voltsin[x*grid_size+y] > threshold )
+                {
+                    std::cout << "spike2" << std::endl;
+                    fire2 = true;
                 }
             }
         }

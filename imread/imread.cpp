@@ -5,9 +5,11 @@
 #include <iostream>
 #include <string>
 #include <cstdbool>
+#include <stdlib.h>
 #include "imread.h"
 extern "C"
 {
+#include "../STDP.h"
 #include "../sizes.h"
 }
 typedef enum {Normal=0,Testing=1} Net_state;
@@ -21,31 +23,42 @@ cv::Mat ReadImage(const char* const path)
 }
 bool fire1 = false;
 bool fire2 = false;
-void StartTesting()
+void ResetVoltages(Compute_float* voltsin)
 {
+    for (int i=0;i<grid_size;i++)
+    {
+        voltsin[i]=-100; //TODO - make this a parameter;
+    }
+}
+void StartTesting(Compute_float* voltsin, STDP_data* S)
+{
+    ResetVoltages(voltsin);
     state = Testing;
     fire1=false;
     fire2=false;
-    //disable STDP recording - FIXME
+    S->RecordSpikes = OFF;
 }
-void EndTesting()
+void EndTesting(STDP_data* S)
 {
     state = Normal;
     if (fire1 && fire2)
     {
         std::cout << "Both spiked" << std::endl;
+        exit(0);
     }
-    //reenable STDP recording - FIXME
+    S->RecordSpikes = ON;
 }
-void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimulus_parameters S,const Compute_float threshold)
+
+void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimulus_parameters S,const Compute_float threshold, STDP_data* stdp)
 {
     if (cached==false) {imcache=ReadImage(S.ImagePath);cached=true;}
     const Compute_float timemodper = fmod(timemillis,S.timeperiod);
     const Compute_float itercount = timemillis/S.timeperiod;
     const bool stim1 = (fabs(timemodper-80.0)<.01 && itercount > S.PreconditioningTrials)  || fabs (timemodper-220)<.01;
     const bool stim2 =  fabs(timemodper-80.0 + S.lag)<.01  || fabs (timemodper-220)<.01;
-    if (fabs(timemodper - 220) < 0.01) {StartTesting();  }
-    if (fabs(timemodper ) < 0.01) {EndTesting();  }
+    if (fabs(timemodper - 220) < 0.01) {StartTesting(voltsin,stdp);  }
+    if (fabs(timemodper ) < 0.01) {EndTesting(stdp);  }
+    if (timemodper < 5) { ResetVoltages(voltsin);} //reset before next period.
     for (int x=0;x<grid_size;x++)
     {
         for (int y=0;y<grid_size;y++)
@@ -64,7 +77,7 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
             {
                 voltsin[x*grid_size+y]=100;
             }
-            else if (timemodper < 5) //reset before next period.
+            else 
             {
                 voltsin[x*grid_size+y]=-100;
             }

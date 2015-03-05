@@ -235,7 +235,7 @@ void tidylayer (layer* l,const Compute_float timemillis,const Compute_float* con
     }
     if (Features.ImageStim==ON)
     {
-        ApplyStim(l->voltages_out,timemillis,l->P->Stim,l->P->potential.Vpk);
+        ApplyStim(l->voltages_out,timemillis,l->P->Stim,l->P->potential.Vpk,l->STDP_data);
     }
 }
 ///Steps a model through 1 timestep - quite high-level function

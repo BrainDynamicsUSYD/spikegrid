@@ -54,7 +54,7 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
     if (cached==false) {imcache=ReadImage(S.ImagePath);cached=true;}
     const Compute_float timemodper = fmod(timemillis,S.timeperiod);
     const Compute_float itercount = timemillis/S.timeperiod;
-    const bool stim1 = (fabs(timemodper-80.0)<.01 && itercount > S.PreconditioningTrials)  || fabs (timemodper-220)<.01;
+    const bool stim1 = (fabs(timemodper-80.0)<.01 && itercount > S.PreconditioningTrials)  ;
     const bool stim2 =  fabs(timemodper-80.0 + S.lag)<.01  || fabs (timemodper-220)<.01;
     if (fabs(timemodper - 220) < 0.01) {StartTesting(voltsin,stdp);  }
     if (fabs(timemodper ) < 0.01) {EndTesting(stdp);  }
@@ -76,10 +76,6 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
             else if (stim2 && pixel == cv::Vec3b(255,0,0))
             {
                 voltsin[x*grid_size+y]=100;
-            }
-            else 
-            {
-                voltsin[x*grid_size+y]=-100;
             }
             //detection loop - keep in a separate statement for now
             if (pixel == cv::Vec3b(100,100,100))

@@ -67,9 +67,12 @@ void mousecb(int event,int ,int ,int , void* dummy2)
 }
 GUIoutput::GUIoutput(int a,int b, const tagged_array* c, const char* const d, const char* const wname) : PNGoutput(a,b,c,d)
 {
+    if (showimages==ON)
+    {
     winname = wname;
     cvNamedWindow(wname,CV_WINDOW_NORMAL);
     cvSetMouseCallback(wname,mousecb,(void*)wname);
+    }
 }
 void GUIoutput::DoOutput()
 {

@@ -56,7 +56,7 @@ static const parameters OneLayerModel = {.couple={0}}; //since unused - shortes 
 #define Stimparams .Stim=\
 {\
     .ImagePath  = "input_maps/test.png",\
-    .timeperiod=420,\
+    .timeperiod=370,\
     .lag=55,\
     .PreconditioningTrials=0,\
 }

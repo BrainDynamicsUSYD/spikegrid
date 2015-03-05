@@ -25,13 +25,15 @@ bool fire1 = false;
 bool fire2 = false;
 void ResetVoltages(Compute_float* voltsin)
 {
-    for (int i=0;i<grid_size;i++)
+    for (int i=0;i<grid_size*grid_size;i++)
     {
         voltsin[i]=-100; //TODO - make this a parameter;
     }
 }
 void StartTesting(Compute_float* voltsin, STDP_data* S)
 {
+
+    std::cout << "Started testing" << std::endl;
     ResetVoltages(voltsin);
     state = Testing;
     fire1=false;
@@ -55,8 +57,8 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
     const Compute_float timemodper = fmod(timemillis,S.timeperiod);
     const Compute_float itercount = timemillis/S.timeperiod;
     const bool stim1 = (fabs(timemodper-80.0)<.01 && itercount > S.PreconditioningTrials)  ;
-    const bool stim2 =  fabs(timemodper-80.0 + S.lag)<.01  || fabs (timemodper-220)<.01;
-    if (fabs(timemodper - 220) < 0.01) {StartTesting(voltsin,stdp);  }
+    const bool stim2 =  fabs(timemodper-80.0 + S.lag)<.01  || fabs (timemodper-220 - 5 )<.01;
+    if (fabs(timemodper - 220) < 5) {StartTesting(voltsin,stdp);  }
     if (fabs(timemodper ) < 0.01) {EndTesting(stdp);  }
     if (timemodper < 5) { ResetVoltages(voltsin);} //reset before next period.
     for (int x=0;x<grid_size;x++)

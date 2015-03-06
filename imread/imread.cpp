@@ -84,7 +84,6 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
             {
                 if (voltsin[x*grid_size+y] > threshold )
                 {
-                    std::cout << "spike" << std::endl;
                     fire1 = true;
                 }
             }
@@ -92,7 +91,6 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
             {
                 if (voltsin[x*grid_size+y] > threshold )
                 {
-                    std::cout << "spike2" << std::endl;
                     fire2 = true;
                 }
             }

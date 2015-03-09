@@ -40,12 +40,13 @@ void StartTesting(Compute_float* voltsin, STDP_data* S)
     fire2=false;
     S->RecordSpikes = OFF;
 }
-void EndTesting(STDP_data* S)
+void EndTesting(STDP_data* S, const int trialno)
 {
     state = Normal;
     if (fire1 && fire2)
     {
         std::cout << "Both spiked" << std::endl;
+        std::cout << trialno << std::endl;
         exit(0);
     }
     S->RecordSpikes = ON;
@@ -59,7 +60,7 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
     const bool stim1 = (fabs(timemodper-80.0)<.01 && itercount > S.PreconditioningTrials)  ;
     const bool stim2 =  fabs(timemodper-80.0 + S.lag)<.01  || fabs (timemodper-220 - 5 )<.01;
     if (fabs(timemodper - 220) < 5) {StartTesting(voltsin,stdp);  }
-    if (fabs(timemodper ) < 0.01) {EndTesting(stdp);  }
+    if (fabs(timemodper ) < 0.01) {EndTesting(stdp,itercount - S.PreconditioningTrials);  }
     if (timemodper < 5) { ResetVoltages(voltsin);} //reset before next period.
     for (int x=0;x<grid_size;x++)
     {

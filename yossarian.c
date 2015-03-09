@@ -18,7 +18,7 @@ void createyossarianfile (const char* const outfile,const sweepable sweep)
     fprintf(file,""
 "#!/bin/csh\n"
 "#PBS -N job\n"
-"#PBS -q batch\n"
+"#PBS -q yossarian\n"
 "#PBS -l nodes=1:ppn=1\n"
 "#PBS -l walltime=200:00:00 -l mem=400MB\n"
 "#PBS -w %s\n"

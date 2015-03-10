@@ -59,7 +59,7 @@ static const parameters OneLayerModel = {.couple={0}}; //since unused - shortes 
     .timeperiod=370,\
     .lag=55,\
     .PreconditioningTrials=0,\
-    .NoUSprob=0,
+    .NoUSprob=0, \
 }
 ///parameters for the inhibitory layer of the double layer model
 static const parameters DualLayerModelIn =

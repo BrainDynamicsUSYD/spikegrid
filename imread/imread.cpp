@@ -9,6 +9,7 @@
 #include "imread.h"
 extern "C"
 {
+#include "../mymath.h"
 #include "../STDP.h"
 #include "../sizes.h"
 }
@@ -45,8 +46,7 @@ void EndTesting(STDP_data* S, const int trialno)
     state = Normal;
     if (fire1 && fire2)
     {
-        std::cout << "Both spiked" << std::endl;
-        std::cout << trialno << std::endl;
+        std::cout << "Both spiked: " << trialno << std::endl;
         exit(0);
     }
     S->RecordSpikes = ON;
@@ -57,8 +57,8 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
     if (cached==false) {imcache=ReadImage(S.ImagePath);cached=true;}
     const Compute_float timemodper = fmod(timemillis,S.timeperiod);
     const Compute_float itercount = timemillis/S.timeperiod;
-    const bool stim1 = (fabs(timemodper-80.0)<.01 && itercount > S.PreconditioningTrials)  ;
-    const bool stim2 =  fabs(timemodper-80.0 + S.lag)<.01  || fabs (timemodper-220 - 5 )<.01;
+    const bool stim1 = ((fabs(timemodper-80.0)<.01 && RandFloat() > S.NoUSprob) && itercount > S.PreconditioningTrials)  ;  //late wave
+    const bool stim2 =  fabs(timemodper-80.0 + S.lag)<.01  || fabs (timemodper-220 - 5 )<.01; //early wave - issues twice - first is normal, second is test trial.
     if (fabs(timemodper - 220) < 5) {StartTesting(voltsin,stdp);  }
     if (fabs(timemodper ) < 0.01) {EndTesting(stdp,itercount - S.PreconditioningTrials);  }
     if (timemodper < 5) { ResetVoltages(voltsin);} //reset before next period.

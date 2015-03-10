@@ -17,5 +17,6 @@ typedef struct
     const Compute_float lag;
     const char ImagePath[100];          ///< Path to use for image stimulus
     const Compute_float  PreconditioningTrials;   ///< Number of preconditioning trials
+    const Compute_float NoUSprob;
 } Stimulus_parameters;
 #endif

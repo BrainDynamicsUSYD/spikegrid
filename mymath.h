@@ -4,6 +4,8 @@
 ///tgmath.h produces lots of fun warnings about float <-> double <-> complex conversion.
 ///So instead, we just do things manually.
 #include <math.h>
+#include <stdlib.h>
+#include "typedefs.h"
 #ifdef FAST
 #define exp(x)  expf(x)
 #define fabs(x) fabsf(x)
@@ -11,3 +13,7 @@
 #define ceil(x) ceilf(x)
 #define cos(x)  cosf(x)
 #endif
+static inline Compute_float RandFloat()
+{
+    return (Compute_float)random() / (Compute_float) RAND_MAX;
+}

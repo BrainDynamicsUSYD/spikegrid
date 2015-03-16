@@ -1,4 +1,4 @@
-/// \file
+;/// \file
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -154,7 +154,7 @@ STDP_data* STDP_init(const STDP_parameters S,const int trefrac_in_ts)
     STDP_data D =
     {
         .lags = lagstorage_init(stdplagcount,STDP_cap),
-        .connections =  calloc(sizeof(Compute_float),grid_size*grid_size*STDP_array_size*STDP_array_size),
+        .connections =  calloc(sizeof(Compute_float),grid_size*grid_size*STDP_array_size*STDP_array_size), //This is a truly epic sized matrix.  For example a 300x300 grid with a coupling range of 25 will take up 1.7GB/layer.  Unfortuneately, I suspect that reductions in this size may cause perf problems.  Regardless we have 6GB/core on yossarian, so this is still OK.  Although maybe this calculation should use `long` to avoid overflow.
         .RecordSpikes = ON,
 
     };

@@ -4,6 +4,7 @@
 #include <unistd.h> //gethostname
 #include <stdio.h>
 #include "coupling.h"
+#include <malloc.h>
 #include "output.h"
 #include "printstruct.h"
 #include "STD.h"
@@ -90,10 +91,31 @@ layer setuplayer(const parameters p)
     };
     return L;
 }
-
+//need to disable a warning for the rest of the file.  TODO: find a better solution than __malloc_hook
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+long long int total_malloced;
+void* old_malloc_hook;
+static void * my_malloc_hook (size_t size, __attribute__((unused)) const void * caller)
+{
+  void *result;
+  /* Restore all old hooks */
+  __malloc_hook = old_malloc_hook;
+  /* Call recursively - have to have the hook disabled*/
+  result = malloc (size);
+  total_malloced += (long long int)size;
+  /* Restore our own hooks */
+  __malloc_hook = my_malloc_hook;
+  return result;
+}
 ///The idea here is that "one-off" setup occurs here, whilst per-layer setup occurs in setuplayer
 model* setup(const parameters p,const parameters p2,const LayerNumbers lcount,const int jobnumber,const int yossarianjobnumber)
 {
+    //set up malloc hook.  With multiple jobs, this can be called multiple times, so only change the hook once.
+    if (__malloc_hook != my_malloc_hook)
+    {
+        old_malloc_hook = __malloc_hook;
+        __malloc_hook = my_malloc_hook;
+    }
     check(); //check evolvegen   is correct
     if (jobnumber <0 && yossarianjobnumber <0)
     {
@@ -146,5 +168,6 @@ model* setup(const parameters p,const parameters p2,const LayerNumbers lcount,co
     free(buffer);
     output_init(m2);
     MakeOutputs(Features.output);
+    printf("Total amount of ran used: %f GB\n",((double)total_malloced) / 1024.0/1024.0/1024.0);
     return m2;
 }

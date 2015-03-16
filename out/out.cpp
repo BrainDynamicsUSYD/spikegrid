@@ -51,7 +51,7 @@ void PNGoutput::DoOutput()
 #endif
 }
 int savecount;
-std::map<std::string,cv::Mat> matmap;
+std::map<std::string,cv::Mat*> matmap;
 void mousecb(int event,int ,int ,int , void* dummy2)
 {
     if (event==CV_EVENT_LBUTTONDOWN)
@@ -61,7 +61,7 @@ void mousecb(int event,int ,int ,int , void* dummy2)
         savecount++;
         char* t = (char*)dummy2;
         std::string s(t);
-        cv::Mat m = matmap[s];
+        cv::Mat m = *matmap[s];
         cv::imwrite(buf,m);
     }
 }
@@ -69,21 +69,20 @@ GUIoutput::GUIoutput(int a,int b, const tagged_array* c, const char* const d, co
 {
     if (showimages==ON)
     {
-    winname = wname;
-    cvNamedWindow(wname,CV_WINDOW_NORMAL);
-    cvSetMouseCallback(wname,mousecb,(void*)wname);
+        winname = wname;
+        cvNamedWindow(wname,CV_WINDOW_NORMAL);
+        cvSetMouseCallback(wname,mousecb,(void*)wname);
     }
 }
 void GUIoutput::DoOutput()
 {
     if (showimages == ON)
     {
-        cv::Mat m = TA_toMat(data,overlay);
-        imshow(winname,m);
+        cv::Mat* m = new cv::Mat(TA_toMat(data,overlay));
+        imshow(winname,*m);
         std::string s(winname);
-        cv::Mat o;//this bit probably not required
-        m.copyTo(o);
-        matmap[s]=o;
+        delete matmap[s]; //delete the old value
+        matmap[s]=m;
         cv::waitKey(10); //TODO: move this somewhere else
     }
 }
@@ -93,13 +92,14 @@ VidOutput::VidOutput(int idxin ,const int intervalin,const tagged_array* datain,
     char buf[100];
     sprintf(buf,"%s/%i.avi",outdir,idxin);
     int fourcc = CV_FOURCC('H','F','Y','U');
-    writer = new cv::VideoWriter(buf,fourcc,60,cvSize(grid_size,grid_size),true);
+    writer = new cv::VideoWriter();
+    writer->open(buf,fourcc,60,cvSize(grid_size,grid_size),1);
     data=datain;
 }
 void VidOutput::DoOutput()
 {
 #ifdef OPENCV
-    writer->write(TA_toMat(data,overlay));
+    writer->write(TA_toMat(data,overlay)); //valgrind gives an error here - only on the first frame.  I don't know what causes it but can't see an obvious problem.
 #else
     printf("Using PNG outout without opencv is not possible\n");
 #endif

@@ -228,7 +228,7 @@ int main(int argc,char** argv) //useful for testing w/out matlab
     parameters* newparam = NULL;
     parameters* newparamEx = NULL;
     parameters* newparamIn = NULL;
-    setvbuf(stdout,NULL,_IONBF,0);
+    setvbuf(stdout,NULL,_IONBF,0); //mainly useful for the console visualisation - maybe move to there?
     processopts(argc,argv,&newparam,&newparamEx,&newparamIn,&showimages);
 
     const Job* job = &Features.job;
@@ -254,7 +254,7 @@ int main(int argc,char** argv) //useful for testing w/out matlab
 
                 if (m->timesteps%10==0){printf("%i\n",m->timesteps);}
                 step_(FirstV,SecondV,FirstW,SecondW);//always fine to pass an extra argument here
-                //copy the output to be new input
+                //copy the output to be new input - this does seem slightly inelegant.  There is definitely room for improvement here
                 memcpy ( FirstV, m->layer1.voltages_out, sizeof ( Compute_float)*grid_size*grid_size);
                 if(SecondV != NULL){memcpy(SecondV,m->layer2.voltages_out, sizeof(Compute_float)*grid_size*grid_size);}
                 if(FirstW != NULL) {memcpy(FirstW, m->layer1.recoverys_out,sizeof(Compute_float)*grid_size*grid_size);}

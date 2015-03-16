@@ -4,7 +4,7 @@
 typedef struct STDP_parameters STDP_parameters;
 typedef struct randconns_info randconns_info;
 typedef struct lagstorage lagstorage;
-typedef struct STDP_data
+typedef struct STDP_data //this does actually need to go in a header as the image reading code switches STDP on and off
 {
     lagstorage* lags;
     Compute_float* connections;

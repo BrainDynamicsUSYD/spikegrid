@@ -19,6 +19,7 @@ Compute_float __attribute__((pure)) STDP_strength(const STDP_parameters S,const 
 {
     return  S.stdp_strength * exp(-lag*Features.Timestep/S.stdp_tau);
 }
+//this takes a coordinate and maps it to the grid allowing for overflow over the edges.
 int __attribute__((pure,const)) wrap (int n)
 {
     if (n<0) {return grid_size+n;}
@@ -59,7 +60,7 @@ STDP_change STDP_change_calc (const unsigned int destneuronidx,const unsigned in
     return ret;
 }
 
-//invert a vector joining 2 points (not really - applied after there has been some additions and also does some tidying up)
+//invert a vector joining 2 points (not really - applied after there has been some additions and also does some tidying up) - the inverse 
 inline static int invertdist(int v) {return ((2*couplerange) - v);}
 void STDP_At_point(const int x, const int y,STDP_data* const data,STDP_data* const revdata,const STDP_parameters S,const STDP_parameters S2,const int xoffset,const int yoffset,
         const Compute_float* const const_couples,const Compute_float* const revconst_couples)
@@ -84,7 +85,7 @@ void STDP_At_point(const int x, const int y,STDP_data* const data,STDP_data* con
         data->connections[ridx]    = clamp(data->   connections[ridx] - change.Strength_decrease  ,const_couples[   cdx*couple_array_size + cdy],S.stdp_limit);
         revdata->connections[ridx] = clamp(revdata->connections[ridx] - change.Strength_increase  ,revconst_couples[cdx*couple_array_size + cdy],S2.stdp_limit);
 
-        if (fabs(data->connections[fidx]) > 1.0 || fabs(data->connections[ridx]) > 1.0)
+        if (fabs(data->connections[fidx]) > 1.0 || fabs(data->connections[ridx]) > 1.0) //check is some connection has become massive - often indicative of a bug
         {
           //  printf("something bad has happened at idx %i or %i %i %i\n",fidx,ridx,x,y);
         }
@@ -94,6 +95,7 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
         STDP_data* data,const STDP_parameters S, STDP_data* const data2,const STDP_parameters S2,
         randconns_info* rcs)
 {
+    //whilst this looks like O(n^4) (n=gridsize), it is actually O(n^2) as STDP_RANGE is always fixed
     if (S.STDP_on ==OFF) {return;}
     for (int x=0;x<grid_size;x++)
     {
@@ -146,6 +148,7 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
         }
     }
 }
+//Look - we can write constructors for objects in C
 STDP_data* STDP_init(const STDP_parameters S,const int trefrac_in_ts)
 {
     STDP_data* ret = malloc(sizeof(*ret));
@@ -153,15 +156,16 @@ STDP_data* STDP_init(const STDP_parameters S,const int trefrac_in_ts)
     const unsigned int stdplagcount = (unsigned int)((STDP_cap/trefrac_in_ts)+2); //int division is fine here
     STDP_data D =
     {
-        .lags = lagstorage_init(stdplagcount,STDP_cap),
+        .lags = lagstorage_init(stdplagcount,STDP_cap), //in the normal model, the lagstorage uses all the ram.  However, in the STDP code, the couplings use it all, so while we could do some trickery to avoid the duplicate lagstorages, it is not a huge issue - except we are doing some unnecersarry work here.  So it might be possible to eliminate this to improve performance.
         .connections =  calloc(sizeof(Compute_float),grid_size*grid_size*STDP_array_size*STDP_array_size), //This is a truly epic sized matrix.  For example a 300x300 grid with a coupling range of 25 will take up 1.7GB/layer.  Unfortuneately, I suspect that reductions in this size may cause perf problems.  Regardless we have 6GB/core on yossarian, so this is still OK.  Although maybe this calculation should use `long` to avoid overflow.
+        //roughly 20% of the ram here can be saved if we don't store the zero entries.  Bigger saving would be in eliminating inactive neurons that would be 50%
         .RecordSpikes = ON,
 
     };
     memcpy(ret,&D,sizeof(*ret));
     return ret;
 }
-
+///this function would
 Compute_float* COMangle(const  STDP_data* const S)
 {
     Compute_float* ret = malloc(sizeof(*ret)*grid_size*grid_size);

@@ -12,7 +12,6 @@
 #include "newparam.h"
 #include "init.h"
 #include "yossarian.h"
-#include "paramheader.h"
 #include "model.h"
 #include "out/out.h"
 #ifdef ANDROID
@@ -25,6 +24,7 @@ int jobnumber=-1;        ///< The current job number - used for pics directory e
 int yossarianjobnumber=-1;
 //DO NOT CALL THIS FUNCTION "step" - this causes a weird collision in matlab that results in segfaults.  Incredibly fun to debug
 ///Function that steps the model through time (high level).
+/// I think maybe we should get rid of this function
 /// @param inpV the input voltages
 /// @param inpV2 input voltages for layer 2.  In the single layer model a dummy argument needs to be passed.
 /// @param inpW the input recoveries

@@ -4,7 +4,6 @@
 #include <unistd.h> //gethostname
 #include <stdio.h>
 #include "coupling.h"
-#include <malloc.h>
 #include "output.h"
 #include "printstruct.h"
 #include "STD.h"
@@ -46,15 +45,6 @@ void Fixedinit(Compute_float* input, const Compute_float def_value,const Compute
     }
     input[grid_size*(grid_size/2) + (grid_size/2)] = mod_value;
 }
-///Copies a struct using malloc - occasionally required
-/// @param input  the initial input
-/// @param size   the amount of data to copy
-void* newdata(const void* const input,const unsigned int size)
-{
-    void* ret = malloc(size);
-    memcpy(ret,input,size);
-    return ret;
-}
 
 ///given a parameters object, set up a layer object.
 ///currently this function is only called from the setup function (but it could be called directly)
@@ -87,35 +77,15 @@ layer setuplayer(const parameters p)
         .recoverys_out      = Features.Recovery==ON?calloc(sizeof(Compute_float),grid_size*grid_size):NULL,
         .Layer_is_inhibitory = p.couple.Layertype==DUALLAYER && p.couple.Layer_parameters.dual.W<0,
         .rcinfo             = Features.Random_connections==ON?init_randconns(p.random,p.couple): NULL,
-        .cap                = cap, 
+        .cap                = cap,
     };
     return L;
 }
-//need to disable a warning for the rest of the file.  TODO: find a better solution than __malloc_hook
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-long long int total_malloced;
-void* old_malloc_hook;
-static void * my_malloc_hook (size_t size, __attribute__((unused)) const void * caller)
-{
-  void *result;
-  /* Restore all old hooks */
-  __malloc_hook = old_malloc_hook;
-  /* Call recursively - have to have the hook disabled*/
-  result = malloc (size);
-  total_malloced += (long long int)size;
-  /* Restore our own hooks */
-  __malloc_hook = my_malloc_hook;
-  return result;
-}
+
 ///The idea here is that "one-off" setup occurs here, whilst per-layer setup occurs in setuplayer
 model* setup(const parameters p,const parameters p2,const LayerNumbers lcount,const int jobnumber,const int yossarianjobnumber)
 {
-    //set up malloc hook.  With multiple jobs, this can be called multiple times, so only change the hook once.
-    if (__malloc_hook != my_malloc_hook)
-    {
-        old_malloc_hook = __malloc_hook;
-        __malloc_hook = my_malloc_hook;
-    }
+    Hook_malloc();
     check(); //check evolvegen   is correct
     if (jobnumber <0 && yossarianjobnumber <0)
     {
@@ -124,7 +94,7 @@ model* setup(const parameters p,const parameters p2,const LayerNumbers lcount,co
     else
     {
         char nostring[100];
-        if (jobnumber <0)
+        if (jobnumber < 0)
         {
             sprintf(nostring,"%i",yossarianjobnumber);
         }
@@ -168,6 +138,6 @@ model* setup(const parameters p,const parameters p2,const LayerNumbers lcount,co
     free(buffer);
     output_init(m2);
     MakeOutputs(Features.output);
-    printf("Total amount of ran used: %f GB\n",((double)total_malloced) / 1024.0/1024.0/1024.0);
+    printf("Total amount of ram used: %f GB\n",((double)total_malloced) / 1024.0/1024.0/1024.0);
     return m2;
 }

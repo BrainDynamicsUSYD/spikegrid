@@ -26,7 +26,7 @@ int __attribute__((pure,const)) wrap (int n)
     else {return n;}
 }
 
-inline static Compute_float clamp(Compute_float V,Compute_float target,Compute_float frac)
+Compute_float clamp(Compute_float V,Compute_float target,Compute_float frac)
 {
     target = fabs(target);
     if     (target > 1)        {printf("large target created\n");}

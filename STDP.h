@@ -15,3 +15,7 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
         randconns_info* rcs);
 STDP_data* STDP_init(const STDP_parameters S,const int trefrac_in_ts);
 Compute_float* COMangle(const  STDP_data* const S);
+#ifdef TESTING //for unit testing the code
+int __attribute__((pure,const)) wrap (int n);
+Compute_float clamp(Compute_float V,Compute_float target,Compute_float frac);
+#endif

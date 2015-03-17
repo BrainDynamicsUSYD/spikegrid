@@ -120,7 +120,6 @@ model* setup(const parameters p,const parameters p2,const LayerNumbers lcount,co
         }
     }
     recursive_mkdir(outdir);
-
     printf("outdir is %s\n",outdir);
     char buf[100];
     sprintf(buf,"%s/struct.dump",outdir);

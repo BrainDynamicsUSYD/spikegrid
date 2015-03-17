@@ -17,6 +17,18 @@
     #include <android/log.h>
 #endif
 
+void RandSpikes(const unsigned int x,const unsigned int y,const layer L,Compute_float* __restrict__ gE, Compute_float* __restrict__ gI,const Compute_float str)
+{
+    unsigned int norand;
+    const randomconnection* rcs = GetRandomConnsLeaving(x,y,*L.rcinfo,&norand);
+    for (unsigned int i=0;i<norand;i++)
+    {
+        const int condindex = Conductance_index(rcs[i].destination.x,rcs[i].destination.y);
+        if (L.Layer_is_inhibitory) {gI[condindex] += str * (rcs[i].strength + rcs[i].stdp_strength);}
+        else                       {gE[condindex] += str * (rcs[i].strength + rcs[i].stdp_strength);}
+    }
+}
+
 ///Adds the effect of the spikes that have fired in the past to the gE and gI arrays as appropriate
 /// currently, single layer doesn't work (correctly)
 void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restrict__ gI,const unsigned int time)
@@ -50,16 +62,9 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
                     evolvept_duallayer_STDP((int)x,(int)y,L.connections,L.STDP_data->connections,str,(L.Layer_is_inhibitory?gI:gE));
                 }
             }
-            if (Features.Random_connections == ON && !L.Layer_is_inhibitory )
+            if (Features.Random_connections == ON )
             {
-                unsigned int norand;
-                const randomconnection* rcs = GetRandomConnsLeaving(x,y,*L.rcinfo,&norand);
-                for (unsigned int i=0;i<norand;i++)
-                {
-                    const int condindex = Conductance_index(rcs[i].destination.x,rcs[i].destination.y);
-                    if (L.Layer_is_inhibitory) {gI[condindex] += str * (rcs[i].strength + rcs[i].stdp_strength);}
-                    else                       {gE[condindex] += str * (rcs[i].strength + rcs[i].stdp_strength);}
-                }
+               RandSpikes(x,y,L,gE,gI,str);
             }
         }
     }

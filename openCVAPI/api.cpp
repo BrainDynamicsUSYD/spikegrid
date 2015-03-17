@@ -1,14 +1,6 @@
 /// \file
-#include <map>
-#include <iostream>
+#include <stdlib.h>
 #include "opencv2/contrib/contrib.hpp"
-#include "opencv2/highgui/highgui.hpp"
-#include "api.h"
-extern "C"
-{
-#include "../sizes.h"
-#include "../typedefs.h"
-}
 using namespace cv;
 Mat ProcessMatrix(const double* data,const double min,const double max,const unsigned int size)
 {

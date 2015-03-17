@@ -59,7 +59,7 @@ layer setuplayer(const parameters p)
     if (Features.Recovery == ON) {flagcount = (unsigned)cap;} //this needs a comment
     else {flagcount = (unsigned)(cap/trefrac_in_ts) + 2;} //this needs a comment
     layer L =
-    {
+    {   //I am not particularly happy with this block.  It is highly complicated.  One idea: have the init functions themselves decide to return null
         .firinglags         = lagstorage_init(flagcount,cap),
         .STDP_data          = Features.STDP==ON?STDP_init(p.STDP,trefrac_in_ts):NULL,
         .connections        = CreateCouplingMatrix(p.couple),
@@ -85,7 +85,7 @@ layer setuplayer(const parameters p)
 ///The idea here is that "one-off" setup occurs here, whilst per-layer setup occurs in setuplayer
 model* setup(const parameters p,const parameters p2,const LayerNumbers lcount,const int jobnumber,const int yossarianjobnumber)
 {
-    Hook_malloc();
+    Hook_malloc(); //this makes malloc record total number of bytes requested.
     check(); //check evolvegen   is correct
     if (jobnumber <0 && yossarianjobnumber <0)
     {

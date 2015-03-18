@@ -184,14 +184,14 @@ void StoreFiring(layer* L)
             if (IsActiveNeuron((int)x,(int)y,L->P->skip))
             {
                 const unsigned int baseidx=LagIdx(x,y,L->firinglags);
-                modifyLags(L->firinglags,baseidx);
+                modifyLags(L->firinglags,baseidx);//this might be better elsewhere - it is hiding a little
                 if (Features.STDP==ON) {modifyLags(L->STDP_data->lags,LagIdx(x,y,L->STDP_data->lags));} //question - would it be better to use a single lagstorage here with limits in appropriate places?
                 //now - add in new spikes
                 if (L->voltages_out[x*grid_size + y]  >= L->P->potential.Vpk)
                 {
-                    if (Features.Recovery==ON) //reset recovery if needed
+                    if (Features.Recovery==ON) //reset recovery if needed.  Note recovery has no refractory period so a reset is required
                     {
-                        L->voltages_out[x*grid_size+y]=L->P->potential.Vrt;  //does voltage also need to be reset like this?
+                        L->voltages_out[x*grid_size+y]=L->P->potential.Vrt;
                         L->recoverys_out[x*grid_size+y]+=L->P->recovery.Wrt;
                     }
                     AddnewSpike(L->firinglags,baseidx);
@@ -211,7 +211,7 @@ void StoreFiring(layer* L)
     }
 }
 ///Cleans up voltages for neurons that are in the refractory state
-void ResetVoltages(Compute_float* const __restrict Vout,const couple_parameters C,const lagstorage* const  l,const conductance_parameters CP)
+void RefractoryVoltages(Compute_float* const __restrict Vout,const couple_parameters C,const lagstorage* const  l,const conductance_parameters CP)
 {
     const int trefrac_in_ts =(int) ((Compute_float)C.tref / Features.Timestep);
     for (unsigned int i=0;i<grid_size*grid_size;i++)
@@ -230,7 +230,7 @@ void tidylayer (layer* l,const Compute_float timemillis,const Compute_float* con
     if (Features.Recovery==OFF)
     {
         CalcVoltages(l->voltages,gE ,gI,l->P->potential,l->voltages_out);
-        ResetVoltages(l->voltages_out,l->P->couple,l->firinglags,l->P->potential);
+        RefractoryVoltages(l->voltages_out,l->P->couple,l->firinglags,l->P->potential);
     }
     else
     {

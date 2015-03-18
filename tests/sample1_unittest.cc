@@ -49,9 +49,12 @@
 #define TESTING
 extern "C"
 {
+#include "../cppparamheader.h"
 #include "../sizes.h"
 #include "../STDP.h"
 #include "../evolve.h"
+#include "../coupling.h"
+#include "consts.h"
 }
 
 //first param is group - second is test name
@@ -83,4 +86,15 @@ TEST(evolve,ActiveNeuron)
     //and with -ve skip we get the inverse of +ve skip
     EXPECT_FALSE(IsActiveNeuron(10,10,-2));
     EXPECT_TRUE(IsActiveNeuron(10,9,-2));
+}
+TEST(coupling,NonzeroCouplings)
+{
+    double* d;
+    int c;
+    Non_zerocouplings(couple_example,&d,&c);
+    //the assertion here checks the count of non zero couplings.
+    //we use some bindings on PI to account for grid-induced rounding
+    EXPECT_LT(3*couplerange*couplerange,c);
+    EXPECT_GT(4*couplerange*couplerange,c);
+
 }

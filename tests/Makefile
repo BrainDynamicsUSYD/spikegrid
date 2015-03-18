@@ -24,7 +24,7 @@ USER_DIR = .
 CPPFLAGS += -isystem $(GTEST_DIR)/include
 
 # Flags passed to the C++ compiler.
-CXXFLAGS += -g -Wall -Wextra -pthread
+CXXFLAGS += -g -Wall -Wextra -pthread -std=c++11
 CFLAGS += -g -Wall -Wextra -std=gnu11
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
@@ -79,8 +79,10 @@ sample1_unittest.o : $(USER_DIR)/sample1_unittest.cc \
 imread.o:
 	$(MAKE) -C .. imread.o
 	mv ../imread.o .
+consts.o : consts.c
+	$(CC) -c -o $@ $< $(CFLAGS)
 %.o : ../%.c
 	$(CC) -c -o $@ $< $(CFLAGS)
 export opencvldflags=$(shell  pkg-config --libs opencv)
-test : sample1_unittest.o gtest_main.a STDP.o randconns.o coupling.o lagstorage.o evolve.o STD.o evolvegen.o theta.o animal.o localstim.o imread.o
+test : sample1_unittest.o gtest_main.a STDP.o randconns.o coupling.o lagstorage.o evolve.o STD.o evolvegen.o theta.o animal.o localstim.o imread.o consts.o
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $(opencvldflags) $^ -o $@

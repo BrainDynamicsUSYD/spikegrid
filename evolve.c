@@ -165,18 +165,21 @@ void CalcRecoverys(const Compute_float* const __restrict__ Vinput,
         }
     }
 }
-
+//detect if a neuron is active - may be useful elsewhere
+int IsActiveNeuron (const int x, const int y,const int step)
+{
+    const int test = (x % step) == 0 && (y % step) ==0;
+    return (test && step > 0) || (!test && step < 0);
+}
 ///Store current firing spikes also apply random spikes
 ///TODO: make faster - definitely room for improvement here
 void StoreFiring(layer* L)
 {
-    const int step = L->P->skip;
     for (unsigned int x=0;x<grid_size;x++)
     {
         for (unsigned int y=0;y<grid_size;y++)
         {
-            const int test = (int)x % step ==0 && (int)y % step ==0;
-            if ((test && step > 0) || ((!test) && step<0)) //check if this is an active neuron - here reversing the sign of "step" changes what becomes the active neurons
+            if (IsActiveNeuron(x,y,L->P->skip) ) //check if this is an active neuron - here reversing the sign of "step" changes what becomes the active neurons
             {
                 const unsigned int baseidx=LagIdx(x,y,L->firinglags);
                 modifyLags(L->firinglags,baseidx);

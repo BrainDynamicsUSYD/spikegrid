@@ -51,6 +51,7 @@ extern "C"
 {
 #include "../sizes.h"
 #include "../STDP.h"
+#include "../evolve.h"
 }
 
 //first param is group - second is test name
@@ -69,4 +70,17 @@ TEST(STDP,clamp)
     EXPECT_DOUBLE_EQ(1,clamp(1,1,1));
     EXPECT_DOUBLE_EQ(1,clamp(1.1,1,1));
     EXPECT_DOUBLE_EQ(0.05,clamp(1.1,1,0.05));
+}
+TEST(evolve,ActiveNeuron)
+{
+    //with skip of 1, all neurons are active
+    EXPECT_TRUE(IsActiveNeuron(0,0,1));
+    EXPECT_TRUE(IsActiveNeuron(50,12,1));
+    EXPECT_TRUE(IsActiveNeuron(50,10,1));
+    //with +ve skip, some things are skipped
+    EXPECT_TRUE(IsActiveNeuron(10,10,2));
+    EXPECT_FALSE(IsActiveNeuron(10,9,2));
+    //and with -ve skip we get the inverse of +ve skip
+    EXPECT_FALSE(IsActiveNeuron(10,10,-2));
+    EXPECT_TRUE(IsActiveNeuron(10,9,-2));
 }

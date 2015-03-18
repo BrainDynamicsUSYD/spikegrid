@@ -24,8 +24,8 @@ USER_DIR = .
 CPPFLAGS += -isystem $(GTEST_DIR)/include
 
 # Flags passed to the C++ compiler.
-CXXFLAGS += -g -Wall -Wextra -pthread 
-CFLAGS += -g -Wall -Wextra -std=gnu11 
+CXXFLAGS += -g -Wall -Wextra -pthread
+CFLAGS += -g -Wall -Wextra -std=gnu11
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
 TESTS = test
@@ -75,8 +75,12 @@ sample1_unittest.o : $(USER_DIR)/sample1_unittest.cc \
                      $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/sample1_unittest.cc
 #stuff from main directory
-mainobj=STDP.c randconns.c lagstorage.c coupling.c
+#mainobj=STDP.c randconns.c lagstorage.c coupling.c evolve.c
+imread.o:
+	$(MAKE) -C .. imread.o
+	mv ../imread.o .
 %.o : ../%.c
 	$(CC) -c -o $@ $< $(CFLAGS)
-test : sample1_unittest.o gtest_main.a STDP.o randconns.o coupling.o lagstorage.o
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $^ -o $@
+export opencvldflags=$(shell  pkg-config --libs opencv)
+test : sample1_unittest.o gtest_main.a STDP.o randconns.o coupling.o lagstorage.o evolve.o STD.o evolvegen.o theta.o animal.o localstim.o imread.o
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lpthread $(opencvldflags) $^ -o $@

@@ -165,7 +165,9 @@ void CalcRecoverys(const Compute_float* const __restrict__ Vinput,
         }
     }
 }
-//detect if a neuron is active - may be useful elsewhere
+//detect if a neuron is active - may be useful elsewhere - used to maintain an appropriate ratio of ex/in neurons
+//note when we have STDP, if you have one layer with skip +x and another with -x the code is massively simpler.
+//+ve skip is obvious.  -ve skip does the "inverse" of +ve skip
 int IsActiveNeuron (const int x, const int y,const int step)
 {
     const int test = (x % step) == 0 && (y % step) ==0;
@@ -179,7 +181,7 @@ void StoreFiring(layer* L)
     {
         for (unsigned int y=0;y<grid_size;y++)
         {
-            if (IsActiveNeuron(x,y,L->P->skip) ) //check if this is an active neuron - here reversing the sign of "step" changes what becomes the active neurons
+            if (IsActiveNeuron((int)x,(int)y,L->P->skip))
             {
                 const unsigned int baseidx=LagIdx(x,y,L->firinglags);
                 modifyLags(L->firinglags,baseidx);
@@ -189,15 +191,14 @@ void StoreFiring(layer* L)
                 {
                     if (Features.Recovery==ON) //reset recovery if needed
                     {
-                        L->voltages_out[x*grid_size+y]=L->P->potential.Vrt;                    //does voltage also need to be reset like this?
+                        L->voltages_out[x*grid_size+y]=L->P->potential.Vrt;  //does voltage also need to be reset like this?
                         L->recoverys_out[x*grid_size+y]+=L->P->recovery.Wrt;
                     }
                     AddnewSpike(L->firinglags,baseidx);
-                    if (Features.STDP==ON && L->STDP_data->RecordSpikes==ON /*We are sometimes not recording spikes */) {AddnewSpike(L->STDP_data->lags,LagIdx(x,y,L->STDP_data->lags));}
+                    if (Features.STDP==ON && L->STDP_data->RecordSpikes==ON /*We are sometimes not recording spikes (STDP only)*/) {AddnewSpike(L->STDP_data->lags,LagIdx(x,y,L->STDP_data->lags));}
                 }//add random spikes
                 else if (L->P->potential.rate > 0 && //this check is because the compiler doesn't optimize the call to random() otherwise
-                            (((Compute_float)(random()))/((Compute_float)RAND_MAX) <
-                            (L->P->potential.rate*((Compute_float)0.001)*Features.Timestep)))
+                            (RandFloat() < (L->P->potential.rate*((Compute_float)0.001)*Features.Timestep)))
                 {
                     L->voltages_out[x*grid_size+y]=L->P->potential.Vpk+(Compute_float)0.1;//make sure it fires - the neuron will actually fire next timestep
                 }
@@ -271,7 +272,7 @@ void step1(model* m)
     {
         fixboundary(m->gE,m->gI);
     }
-    // Add constant input to the conductances
+    // Add constant input to the conductances - note easiest to do this after wrapping - slight inefficiency with border but who cares
     for (int i = 0;i < conductance_array_size*conductance_array_size;i++)
     {
         m->gE[i] += Extinput.gE0;

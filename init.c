@@ -137,6 +137,13 @@ model* setup(const parameters p,const parameters p2,const LayerNumbers lcount,co
     free(buffer);
     output_init(m2);
     MakeOutputs(Features.output);
-    printf("Total amount of ram used: %f GB\n",((double)total_malloced) / 1024.0/1024.0/1024.0);
+    if (total_malloced > 1024L*1024L*1024L)
+    {
+        printf("Total amount of ram used: %f GB\n",((double)total_malloced) / 1024.0/1024.0/1024.0);
+    }
+    else
+    {
+        printf("Total amount of ram used: %f MB\n",((double)total_malloced) /1024.0/1024.0);
+    }
     return m2;
 }

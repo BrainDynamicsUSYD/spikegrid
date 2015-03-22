@@ -44,8 +44,8 @@ overlaytext* __attribute__((pure)) getOverlayByName(const char* const name)
     }
     return NULL;
 }
-int Trialno()  {return (int) (modelref->timesteps * Features.Timestep /modelref->layer1.P->Stim.timeperiod - modelref->layer1.P->Stim.PreconditioningTrials)  ;}
-int Timestep() {return (int) modelref->timesteps;}
+int __attribute__((pure)) Trialno()  {return (int) (modelref->timesteps * Features.Timestep /modelref->layer1.P->Stim.timeperiod - modelref->layer1.P->Stim.PreconditioningTrials)  ;}
+int __attribute__((pure)) Timestep() {return (int) modelref->timesteps;}
 ///Set up the outputtables for a given model
 ///This function should probably move to the C++ code
 ///@param m the model we are going to output stuff from

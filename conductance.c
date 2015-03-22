@@ -12,7 +12,6 @@
 #include "newparam.h"
 #include "init.h"
 #include "yossarian.h"
-#include "paramheader.h"
 #include "model.h"
 #include "out/out.h"
 #ifdef ANDROID
@@ -25,6 +24,7 @@ int jobnumber=-1;        ///< The current job number - used for pics directory e
 int yossarianjobnumber=-1;
 //DO NOT CALL THIS FUNCTION "step" - this causes a weird collision in matlab that results in segfaults.  Incredibly fun to debug
 ///Function that steps the model through time (high level).
+/// I think maybe we should get rid of this function
 /// @param inpV the input voltages
 /// @param inpV2 input voltages for layer 2.  In the single layer model a dummy argument needs to be passed.
 /// @param inpW the input recoveries
@@ -228,7 +228,7 @@ int main(int argc,char** argv) //useful for testing w/out matlab
     parameters* newparam = NULL;
     parameters* newparamEx = NULL;
     parameters* newparamIn = NULL;
-    setvbuf(stdout,NULL,_IONBF,0);
+    setvbuf(stdout,NULL,_IONBF,0); //mainly useful for the console visualisation - maybe move to there?
     processopts(argc,argv,&newparam,&newparamEx,&newparamIn,&showimages);
 
     const Job* job = &Features.job;
@@ -254,7 +254,7 @@ int main(int argc,char** argv) //useful for testing w/out matlab
 
                 if (m->timesteps%10==0){printf("%i\n",m->timesteps);}
                 step_(FirstV,SecondV,FirstW,SecondW);//always fine to pass an extra argument here
-                //copy the output to be new input
+                //copy the output to be new input - this does seem slightly inelegant.  There is definitely room for improvement here
                 memcpy ( FirstV, m->layer1.voltages_out, sizeof ( Compute_float)*grid_size*grid_size);
                 if(SecondV != NULL){memcpy(SecondV,m->layer2.voltages_out, sizeof(Compute_float)*grid_size*grid_size);}
                 if(FirstW != NULL) {memcpy(FirstW, m->layer1.recoverys_out,sizeof(Compute_float)*grid_size*grid_size);}

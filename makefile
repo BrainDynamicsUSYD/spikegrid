@@ -133,6 +133,7 @@ ${maskgen} : force_look ${CONFIG}
 	$(MAKE) -C maskgen ${maskgen}
 ${outlib}: force_look ${CONFIG}
 	$(MAKE) -C out ${outlib}
+imread.o : ${imreadlib}
 ${imreadlib}: force_look ${CONFIG}
 	$(MAKE) -C imread ${imreadlib}
 cson/libcson.a: CFLAGS=

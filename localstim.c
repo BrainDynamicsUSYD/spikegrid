@@ -1,6 +1,4 @@
 /// \file
-#include <stdlib.h>
-#include "typedefs.h"
 #include "sizes.h"
 #include "mymath.h"
 void ApplyLocalBoost(Compute_float* geIn,const int xcenter,const int ycenter)

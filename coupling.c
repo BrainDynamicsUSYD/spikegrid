@@ -1,5 +1,4 @@
 /// \file
-#include <stdlib.h> //calloc
 #include <stdio.h>  //printf
 #include "paramheader.h"
 #include "sizes.h"

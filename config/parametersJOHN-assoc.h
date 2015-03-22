@@ -56,9 +56,10 @@ static const parameters OneLayerModel = {.couple={0}}; //since unused - shortes 
 #define Stimparams .Stim=\
 {\
     .ImagePath  = "input_maps/test.png",\
-    .timeperiod=220,\
+    .timeperiod=370,\
     .lag=55,\
     .PreconditioningTrials=0,\
+    .NoUSprob=0,\
 }
 ///parameters for the inhibitory layer of the double layer model
 static const parameters DualLayerModelIn =
@@ -133,10 +134,10 @@ static const extinput Extinput =
 ///Parameters for conducting a parameter sweep.
 static const sweepable Sweep =
 {
-    .offset=offsetof(parameters,Stim.PreconditioningTrials) ,
+    .offset=offsetof(parameters,Stim.NoUSprob) ,
     .minval = 0.000,
-    .maxval = 10,
-    .count = 10,
+    .maxval = 1,
+    .count = 100,
     .SweepEx = ON,
     .SweepIn = ON,
 };

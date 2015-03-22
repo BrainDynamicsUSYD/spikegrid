@@ -45,15 +45,6 @@ void Fixedinit(Compute_float* input, const Compute_float def_value,const Compute
     }
     input[grid_size*(grid_size/2) + (grid_size/2)] = mod_value;
 }
-///Copies a struct using malloc - occasionally required
-/// @param input  the initial input
-/// @param size   the amount of data to copy
-void* newdata(const void* const input,const unsigned int size)
-{
-    void* ret = malloc(size);
-    memcpy(ret,input,size);
-    return ret;
-}
 
 ///given a parameters object, set up a layer object.
 ///currently this function is only called from the setup function (but it could be called directly)
@@ -68,7 +59,7 @@ layer setuplayer(const parameters p)
     if (Features.Recovery == ON) {flagcount = (unsigned)cap;} //this needs a comment
     else {flagcount = (unsigned)(cap/trefrac_in_ts) + 2;} //this needs a comment
     layer L =
-    {
+    {   //I am not particularly happy with this block.  It is highly complicated.  One idea: have the init functions themselves decide to return null
         .firinglags         = lagstorage_init(flagcount,cap),
         .STDP_data          = Features.STDP==ON?STDP_init(p.STDP,trefrac_in_ts):NULL,
         .connections        = CreateCouplingMatrix(p.couple),
@@ -86,7 +77,7 @@ layer setuplayer(const parameters p)
         .recoverys_out      = Features.Recovery==ON?calloc(sizeof(Compute_float),grid_size*grid_size):NULL,
         .Layer_is_inhibitory = p.couple.Layertype==DUALLAYER && p.couple.Layer_parameters.dual.W<0,
         .rcinfo             = Features.Random_connections==ON?init_randconns(p.random,p.couple): NULL,
-        .cap                = cap, 
+        .cap                = cap,
     };
     return L;
 }
@@ -94,6 +85,7 @@ layer setuplayer(const parameters p)
 ///The idea here is that "one-off" setup occurs here, whilst per-layer setup occurs in setuplayer
 model* setup(const parameters p,const parameters p2,const LayerNumbers lcount,const int jobnumber,const int yossarianjobnumber)
 {
+    Hook_malloc(); //this makes malloc record total number of bytes requested.
     check(); //check evolvegen   is correct
     if (jobnumber <0 && yossarianjobnumber <0)
     {
@@ -102,7 +94,7 @@ model* setup(const parameters p,const parameters p2,const LayerNumbers lcount,co
     else
     {
         char nostring[100];
-        if (jobnumber <0)
+        if (jobnumber < 0)
         {
             sprintf(nostring,"%i",yossarianjobnumber);
         }
@@ -128,7 +120,6 @@ model* setup(const parameters p,const parameters p2,const LayerNumbers lcount,co
         }
     }
     recursive_mkdir(outdir);
-
     printf("outdir is %s\n",outdir);
     char buf[100];
     sprintf(buf,"%s/struct.dump",outdir);
@@ -146,5 +137,13 @@ model* setup(const parameters p,const parameters p2,const LayerNumbers lcount,co
     free(buffer);
     output_init(m2);
     MakeOutputs(Features.output);
+    if (total_malloced > 1024L*1024L*1024L)
+    {
+        printf("Total amount of ram used: %f GB\n",((double)total_malloced) / 1024.0/1024.0/1024.0);
+    }
+    else
+    {
+        printf("Total amount of ram used: %f MB\n",((double)total_malloced) /1024.0/1024.0);
+    }
     return m2;
 }

@@ -1,14 +1,7 @@
 /// \file
-#include <map>
-#include <iostream>
+#include <stdlib.h>
 #include "opencv2/contrib/contrib.hpp"
-#include "opencv2/highgui/highgui.hpp"
 #include "api.h"
-extern "C"
-{
-#include "../sizes.h"
-#include "../typedefs.h"
-}
 using namespace cv;
 Mat ProcessMatrix(const double* data,const double min,const double max,const unsigned int size)
 {
@@ -29,11 +22,6 @@ Mat ProcessMatrix(const double* data,const double min,const double max,const uns
     return outmat;
 }
 
-void SaveImage(const char* filename,const double* data,const double min,const double max,const unsigned int size)
-{
-    Mat outmat = ProcessMatrix(data,min,max,size);
-    imwrite(filename,outmat);
-}
 void getcolors(const double* data, const double min, const double max, const unsigned int size, uchar* red,uchar* blue,uchar* green)
 {
     Mat outmat = ProcessMatrix(data,min,max,size);

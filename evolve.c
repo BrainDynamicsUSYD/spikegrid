@@ -1,6 +1,5 @@
 ///\file
 #include <string.h> //memset
-#include <stdlib.h> //random
 #include <stdio.h>  //useful when we need to print things
 #include "STDP.h"
 #include "model.h"
@@ -17,6 +16,18 @@
     #define APPNAME "myapp"
     #include <android/log.h>
 #endif
+
+void RandSpikes(const unsigned int x,const unsigned int y,const layer L,Compute_float* __restrict__ gE, Compute_float* __restrict__ gI,const Compute_float str)
+{
+    unsigned int norand;
+    const randomconnection* rcs = GetRandomConnsLeaving(x,y,*L.rcinfo,&norand);
+    for (unsigned int i=0;i<norand;i++)
+    {
+        const int condindex = Conductance_index(rcs[i].destination.x,rcs[i].destination.y);
+        if (L.Layer_is_inhibitory) {gI[condindex] += str * (rcs[i].strength + rcs[i].stdp_strength);}
+        else                       {gE[condindex] += str * (rcs[i].strength + rcs[i].stdp_strength);}
+    }
+}
 
 ///Adds the effect of the spikes that have fired in the past to the gE and gI arrays as appropriate
 /// currently, single layer doesn't work (correctly)
@@ -51,16 +62,9 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
                     evolvept_duallayer_STDP((int)x,(int)y,L.connections,L.STDP_data->connections,str,(L.Layer_is_inhibitory?gI:gE));
                 }
             }
-            if (Features.Random_connections == ON && !L.Layer_is_inhibitory )
+            if (Features.Random_connections == ON )
             {
-                unsigned int norand;
-                const randomconnection* rcs = GetRandomConnsLeaving(x,y,*L.rcinfo,&norand);
-                for (unsigned int i=0;i<norand;i++)
-                {
-                    const int condindex = Conductance_index(rcs[i].destination.x,rcs[i].destination.y);
-                    if (L.Layer_is_inhibitory) {gI[condindex] += str * (rcs[i].strength + rcs[i].stdp_strength);}
-                    else                       {gE[condindex] += str * (rcs[i].strength + rcs[i].stdp_strength);}
-                }
+               RandSpikes(x,y,L,gE,gI,str);
             }
         }
     }
@@ -161,49 +165,53 @@ void CalcRecoverys(const Compute_float* const __restrict__ Vinput,
         }
     }
 }
-
+//detect if a neuron is active - may be useful elsewhere - used to maintain an appropriate ratio of ex/in neurons
+//note when we have STDP, if you have one layer with skip +x and another with -x the code is massively simpler.
+//+ve skip is obvious.  -ve skip does the "inverse" of +ve skip
+int IsActiveNeuron (const int x, const int y,const int step)
+{
+    const int test = (x % step) == 0 && (y % step) ==0;
+    return (test && step > 0) || (!test && step < 0);
+}
 ///Store current firing spikes also apply random spikes
-///TODO: make faster
+///TODO: make faster - definitely room for improvement here
 void StoreFiring(layer* L)
 {
-    const int step = L->P->skip;
     for (unsigned int x=0;x<grid_size;x++)
     {
         for (unsigned int y=0;y<grid_size;y++)
         {
-            const int test = (int)x % step ==0 && (int)y % step ==0;
-            if ((test && step > 0) || ((!test) && step<0)) //check if this is an active neuron
+            if (IsActiveNeuron((int)x,(int)y,L->P->skip))
             {
                 const unsigned int baseidx=LagIdx(x,y,L->firinglags);
-                modifyLags(L->firinglags,baseidx);
+                modifyLags(L->firinglags,baseidx);//this might be better elsewhere - it is hiding a little
                 if (Features.STDP==ON) {modifyLags(L->STDP_data->lags,LagIdx(x,y,L->STDP_data->lags));} //question - would it be better to use a single lagstorage here with limits in appropriate places?
                 //now - add in new spikes
                 if (L->voltages_out[x*grid_size + y]  >= L->P->potential.Vpk)
                 {
-                    if (Features.Recovery==ON) //reset recovery if needed
+                    if (Features.Recovery==ON) //reset recovery if needed.  Note recovery has no refractory period so a reset is required
                     {
-                        L->voltages_out[x*grid_size+y]=L->P->potential.Vrt;                    //does voltage also need to be reset like this?
+                        L->voltages_out[x*grid_size+y]=L->P->potential.Vrt;
                         L->recoverys_out[x*grid_size+y]+=L->P->recovery.Wrt;
                     }
                     AddnewSpike(L->firinglags,baseidx);
-                    if (Features.STDP==ON) {AddnewSpike(L->STDP_data->lags,LagIdx(x,y,L->STDP_data->lags));}
+                    if (Features.STDP==ON && L->STDP_data->RecordSpikes==ON /*We are sometimes not recording spikes (STDP only)*/) {AddnewSpike(L->STDP_data->lags,LagIdx(x,y,L->STDP_data->lags));}
                 }//add random spikes
                 else if (L->P->potential.rate > 0 && //this check is because the compiler doesn't optimize the call to random() otherwise
-                            (((Compute_float)(random()))/((Compute_float)RAND_MAX) <
-                            (L->P->potential.rate*((Compute_float)0.001)*Features.Timestep)))
+                            (RandFloat() < (L->P->potential.rate*((Compute_float)0.001)*Features.Timestep)))
                 {
                     L->voltages_out[x*grid_size+y]=L->P->potential.Vpk+(Compute_float)0.1;//make sure it fires - the neuron will actually fire next timestep
                 }
             }
-            else
+            else //non-active neurons never get to fire
             {
-                    L->voltages_out[x*grid_size+y]=Zero; //skipped neurons set to 0 - probably not required but perf impact should be minimal
+                    L->voltages_out[x*grid_size+y]=-1000; //skipped neurons set to -1000 - probably not required but perf impact should be minimal - also ensures they will never be >Vpk
             }
         }
     }
 }
 ///Cleans up voltages for neurons that are in the refractory state
-void ResetVoltages(Compute_float* const __restrict Vout,const couple_parameters C,const lagstorage* const  l,const conductance_parameters CP)
+void RefractoryVoltages(Compute_float* const __restrict Vout,const couple_parameters C,const lagstorage* const  l,const conductance_parameters CP)
 {
     const int trefrac_in_ts =(int) ((Compute_float)C.tref / Features.Timestep);
     for (unsigned int i=0;i<grid_size*grid_size;i++)
@@ -222,7 +230,7 @@ void tidylayer (layer* l,const Compute_float timemillis,const Compute_float* con
     if (Features.Recovery==OFF)
     {
         CalcVoltages(l->voltages,gE ,gI,l->P->potential,l->voltages_out);
-        ResetVoltages(l->voltages_out,l->P->couple,l->firinglags,l->P->potential);
+        RefractoryVoltages(l->voltages_out,l->P->couple,l->firinglags,l->P->potential);
     }
     else
     {
@@ -235,7 +243,7 @@ void tidylayer (layer* l,const Compute_float timemillis,const Compute_float* con
     }
     if (Features.ImageStim==ON)
     {
-        ApplyStim(l->voltages_out,timemillis,l->P->Stim);
+        ApplyStim(l->voltages_out,timemillis,l->P->Stim,l->P->potential.Vpk,l->STDP_data);
     }
 }
 ///Steps a model through 1 timestep - quite high-level function
@@ -264,7 +272,7 @@ void step1(model* m)
     {
         fixboundary(m->gE,m->gI);
     }
-    // Add constant input to the conductances
+    // Add constant input to the conductances - note easiest to do this after wrapping - slight inefficiency with border but who cares
     for (int i = 0;i < conductance_array_size*conductance_array_size;i++)
     {
         m->gE[i] += Extinput.gE0;

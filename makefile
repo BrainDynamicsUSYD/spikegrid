@@ -12,8 +12,8 @@ else #gcc
 	optflags=  -Ofast -msse -msse2 -msse3 -funsafe-loop-optimizations -mtune=native -march=native  -floop-interchange -ftree-loop-optimize -floop-strip-mine -floop-block -flto  -fassociative-math -fno-signed-zeros -freciprocal-math -ffinite-math-only -fno-trapping-math -ftree-vectorize
 	extrawarnings=-Wstrict-aliasing -fstrict-aliasing   -Wshadow  -Wconversion -Wdouble-promotion -Wformat=2 -Wunused -Wuninitialized -Wfloat-equal -Wunsafe-loop-optimizations -Wcast-qual -Wcast-align -Wwrite-strings  -Wlogical-op  -Wvector-operation-performance -Wno-pragmas
 	extraextrawarnings=-Wsuggest-attribute=pure  -Wsuggest-attribute=noreturn -Wstrict-overflow=4
-	export CFLAGS=-g -ggdb -Wall -Wextra  ${optflags} ${extrawarnings} ${extraextrawarnings} -Werror-implicit-function-declaration
-	cspecificwarnings= -Wjump-misses-init
+	export CFLAGS=-g -ggdb -Wall -Wextra  ${optflags} ${extrawarnings} ${extraextrawarnings} -Werror-implicit-function-declaration -fno-builtin-malloc
+	cspecificwarnings= -Wjump-misses-init 
 endif
 
 ifeq ($(MATLAB),yes)
@@ -47,7 +47,7 @@ export CXXFLAGS:=${CFLAGS} #use := to create an actual copy
 CFLAGS += --std=gnu11 ${cspecificwarnings}
 CXXFLAGS += --std=c++11
 #conductance.c always needs to be first - this ensures that the mexfile gets the right name
-SOURCES= conductance.c coupling.c  STDP.c STD.c output.c evolve.c newparam.c yossarian.c init.c theta.c printstruct.c cleanup.c evolvegen.c lagstorage.c  tagged_array.c localstim.c utils.c animal.c randconns.c  cson/libcson.a
+SOURCES= conductance.c coupling.c  STDP.c STD.c output.c evolve.c newparam.c yossarian.c init.c theta.c printstruct.c cleanup.c evolvegen.c lagstorage.c  tagged_array.c localstim.c utils.c animal.c randconns.c  
 BINARY=./a.out
 VERSION_HASH = $(shell git rev-parse HEAD)
 export CONFIG=whichparam.h config/*

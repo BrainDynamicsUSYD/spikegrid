@@ -25,7 +25,7 @@ void* newdata(const void* const input,const unsigned int size)
 long long int total_malloced;
 //need to disable a warning for the rest of the file.  TODO: find a better solution than __malloc_hook
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-void* old_malloc_hook;
+static void *(*old_malloc_hook)(size_t,const void *);
 //this function is based on something in the GCC docs
 static void * my_malloc_hook (size_t size, __attribute__((unused)) const void * caller)
 {

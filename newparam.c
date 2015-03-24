@@ -30,8 +30,10 @@ Compute_float __attribute__((const)) nthvalue (const Compute_float min,const Com
 /// @param input The initial parameter to modify
 /// @param sweep The thing we are sweeping over
 /// @param n Which job we are (this is used to calculate the correct parameter value in the linear spacing)
+#include <stdio.h>
 parameters* __attribute__((const)) GetNthParam(const parameters input, const sweepable sweep,const unsigned int n)
 {
     const Compute_float value = nthvalue(sweep.minval,sweep.maxval,sweep.count,n);
+    
     return modparam(&input,sweep.offset,&value,sizeof(value));
 }

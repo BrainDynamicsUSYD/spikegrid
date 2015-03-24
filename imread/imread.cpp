@@ -39,7 +39,10 @@ void StartTesting(Compute_float* voltsin, STDP_data* S)
     state = Testing;
     fire1=false;
     fire2=false;
-    S->RecordSpikes = OFF;
+    if (S != NULL) //need to check if STDP points to NULL - which will occur if STDP is off
+    {
+        S->RecordSpikes = OFF;
+    }
 }
 void EndTesting(STDP_data* S, const int trialno)
 {
@@ -49,7 +52,10 @@ void EndTesting(STDP_data* S, const int trialno)
         std::cout << "Both spiked: " << trialno << std::endl;
         exit(0);
     }
-    S->RecordSpikes = ON;
+    if (S != NULL)
+    {
+        S->RecordSpikes = ON;
+    }
 }
 
 void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimulus_parameters S,const Compute_float threshold, STDP_data* stdp)

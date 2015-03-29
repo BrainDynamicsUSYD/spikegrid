@@ -16,7 +16,7 @@ else #gcc
 	cspecificwarnings= -Wjump-misses-init 
 endif
 
-ifeq ($(MATLAB),yes)
+ifeq ($(MATLAB),yes)a #this has to be an if due to errors
 	#now when we are using matlab, everything is way too hard
 	#this is mainly because matlab ships its own opencv libraries.
 	#There are several problems with this:
@@ -65,28 +65,24 @@ OFILES=${imreadlib} ${outlib} ${CVClib}
 ###########
 ${BINARY}: ${SOURCES} *.h ${OFILES} ${CONFIG}
 	${CC} ${CFLAGS} ${opencvcflags}     ${SOURCES} ${OFILES} -o ${BINARY} -L. ${LDFLAGS}   ${opencvldflags}
-conductance.mexa64: MATLAB = YES
+#manually compile the mex file.  This is actually similar to what matlab does but we get more control this way
+conductance.mexa64: MATLAB = YES #sets variable for future makefiles
 conductance.mexa64: CFLAGS +=   ${MATLABCFLAGS}
 conductance.mexa64: CXXFLAGS += ${MATLABCFLAGS}
 conductance.mexa64: LDFLAGS +=  ${MATLABLDFLAGS}
 conductance.mexa64: opencvldflags =  ${matlabopencvldflags}
 conductance.mexa64:  ${SOURCES} *.h whichparam.h ${OFILES}
 	${CC} -fpic ${CFLAGS} ${MATLABCFLAGS} ${opencvcflags}     ${SOURCES} ${OFILES} -o conductance.mexa64 -L. ${CLIBFLAGS} ${LDFLAGS} ${opencvldflags}
+#generated .c file - for speed
 evolvegen.c: ${maskgen} whichparam.h config/*
 	${maskgen} > evolvegen.c
-ADAM: CFLAGS +=   ${ADAMMATLABCFLAGS}
-ADAM: CXXFLAGS += ${MATLABCFLAGS}
-ADAM: LDFLAGS +=  ${MATLABLDFLAGS}
-ADAM: opencvldflags =  ${matlabopencvldflags}
-ADAM: ${SOURCES} *.h ${OFILES} ${CONFIG}
-	${CC} ${CFLAGS} ${opencvcflags} ${SOURCES} ${OFILES} -o ${BINARY} -L. ${LDFLAGS} ${opencvldflags}
+#select a parameters file
 whichparam.h:
 	./setupparam.sh
+#debug build
 debug: CFLAGS = ${DEBUGFLAGS}
 debug: CXXFLAGS = ${CXXDEBUGFLAGS}
 debug: ${BINARY}
-mediumopt:
-	${CC} -g -std=gnu99 ${SOURCES} -o ${BINARY} ${LDFLAGS}
 TEST: 
 	rm -rf jobtest/*
 	mv whichparam.h whichparambackup.h #backup config choice
@@ -106,8 +102,6 @@ docs: html/index.html
 html/index.html: ${SOURCES} *.h Doxyfile
 		echo "Suphys computers don't have dot installed, so graphs will be missing if this was run on silliac"
 	doxygen Doxyfile
-profile:
-	${CC} ${CFLAGS} -pg ${SOURCES} -o ${BINARY} ${LDFLAGS}
 #yossarian
 yossarian.csh: ${BINARY}
 	${BINARY} -g
@@ -117,11 +111,6 @@ submit: yossarian.csh
 clean:
 	-rm -f ${BINARY}  ${maskgen}  evolvegen.c ${OFILES}
 	-rm -rf html
-#.m files
-compile.m: makefile
-	echo "mex CFLAGS=\"-fPIC -shared ${CFLAGS} -DMATLAB \" LDFLAGS=\"${LDFLAGS} ${opencvldflags} -shared\" ${SOURCES} ${OFILES}"  > compile.m
-compileslow.m: makefile
-	echo "mex CFLAGS=\"-fPIC -shared ${DEBUGFLAGS}  -DMATLAB \" LDFLAGS=\"${LDFLAGS} ${opencvldflags} -shared\" ${SOURCES} ${OFILES}" > compileslow.m
 #movie viewer
 viewer: ${VIEWERBIN}
 ${VIEWERBIN} :
@@ -136,6 +125,7 @@ ${outlib}: force_look ${CONFIG}
 imread.o : ${imreadlib}
 ${imreadlib}: force_look ${CONFIG}
 	$(MAKE) -C imread ${imreadlib}
+#cson is currently unused - but clear the variables so that CSON's makefile works
 cson/libcson.a: CFLAGS=
 cson/libcson.a: CXXFLAGS =
 cson/libcson.a: LDFLAGS =

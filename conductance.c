@@ -62,8 +62,7 @@ void setuppointers(Compute_float** FirstV,Compute_float** SecondV, Compute_float
     if (ModelType==SINGLELAYER)
     {
         *SecondV = NULL; *SecondW = NULL; //force all dual layer to be null
-        if (job->initcond == SINGLE_SPIKE) {Fixedinit(*FirstV,OneLayerModel.potential.Vrt,job->Voltage_or_count);}
-        else                               {randinit(*FirstV,OneLayerModel.potential.Vrt,OneLayerModel.potential.Vpk);}
+        InitVoltage(FirstV,OneLayerModel.potential.Vrt,OneLayerModel.potential.Vpk,job);
         if (Features.Recovery==ON)
         {
             *FirstW = calloc(sizeof(Compute_float),grid_size*grid_size);
@@ -72,16 +71,8 @@ void setuppointers(Compute_float** FirstV,Compute_float** SecondV, Compute_float
     else if (ModelType==DUALLAYER)
     {
         *SecondV = malloc(sizeof(Compute_float)*grid_size*grid_size);
-        if (job->initcond == SINGLE_SPIKE)
-        {
-            Fixedinit(*FirstV, DualLayerModelIn.potential.Vrt,job->Voltage_or_count);
-            Fixedinit(*SecondV,DualLayerModelEx.potential.Vrt,job->Voltage_or_count);
-        }
-        else
-        {
-            randinit(*FirstV, DualLayerModelIn.potential.Vrt,DualLayerModelIn.potential.Vpk);
-            randinit(*SecondV,DualLayerModelEx.potential.Vrt,DualLayerModelEx.potential.Vpk);
-        }
+        InitVoltage(FirstV, DualLayerModelIn.potential.Vrt,DualLayerModelIn.potential.Vpk,job);
+        InitVoltage(SecondV,DualLayerModelEx.potential.Vrt,DualLayerModelEx.potential.Vpk,job);
         if (Features.Recovery==ON)
         {
             *FirstW  = calloc(sizeof(Compute_float),grid_size*grid_size);

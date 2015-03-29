@@ -16,7 +16,7 @@ else #gcc
 	cspecificwarnings= -Wjump-misses-init 
 endif
 
-ifeq ($(MATLAB),yes)a #this has to be an if due to errors
+ifeq ($(MATLAB),yes) #this has to be an if due to errors
 	#now when we are using matlab, everything is way too hard
 	#this is mainly because matlab ships its own opencv libraries.
 	#There are several problems with this:

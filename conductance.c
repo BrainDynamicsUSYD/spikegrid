@@ -49,20 +49,25 @@ void step_(const Compute_float* const inpV,const Compute_float* const inpV2, con
     DoOutputs(m->timesteps);
 }
 
+void InitVoltage(Compute_float** Volts,const Compute_float Vrt,const Compute_float Vpk,const Job* const job)
+{
+    if (job -> initcond == SINGLE_SPIKE) {Fixedinit(*Volts,Vrt,job->Voltage_or_count);}
+    else                                 {randinit (*Volts,Vrt,Vpk);}
+}
+
 //I am not a huge fan of this function.  A nicer version would be good.
 void setuppointers(Compute_float** FirstV,Compute_float** SecondV, Compute_float** FirstW, Compute_float** SecondW,const Job* const job)
 {
     *FirstV = calloc(sizeof(Compute_float),grid_size*grid_size); //we always need the voltage in the first layer
     if (ModelType==SINGLELAYER)
     {
-        *SecondV = NULL;
+        *SecondV = NULL; *SecondW = NULL; //force all dual layer to be null
         if (job->initcond == SINGLE_SPIKE) {Fixedinit(*FirstV,OneLayerModel.potential.Vrt,job->Voltage_or_count);}
         else                               {randinit(*FirstV,OneLayerModel.potential.Vrt,OneLayerModel.potential.Vpk);}
         if (Features.Recovery==ON)
         {
             *FirstW = calloc(sizeof(Compute_float),grid_size*grid_size);
-            *SecondW = NULL;
-        } else {*FirstW=NULL;*SecondW=NULL;}
+        } else {*FirstW=NULL;}
     }
     else if (ModelType==DUALLAYER)
     {

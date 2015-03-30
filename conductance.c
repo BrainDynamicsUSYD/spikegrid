@@ -239,14 +239,15 @@ int main(int argc,char** argv) //useful for testing w/out matlab
             else if(job->initcond==RAND_JOB)   {srandom((unsigned)c);}
             else if(job->initcond==RAND_ZERO)  {srandom((unsigned)0);}
             //sets up the model code
-            if (ModelType==SINGLELAYER) {m=setup(newparam!=NULL? (*newparam):OneLayerModel,newparam!=NULL? (*newparam):OneLayerModel,ModelType,jobnumber,yossarianjobnumber);} //pass the same layer as a double parameter
-            else {m=setup(newparamIn!=NULL?*newparamIn:DualLayerModelIn,newparamEx!=NULL?*newparamEx:DualLayerModelEx,ModelType,jobnumber,yossarianjobnumber);}
+            //lets create the actual parameters we use
+            const parameters actualsingle = newparam!=NULL  ? *newparam  :OneLayerModel;
+            const parameters actualDualIn = newparamIn!=NULL? *newparamIn:DualLayerModelIn;
+            const parameters actualDualEx = newparamEx!=NULL? *newparamEx:DualLayerModelEx;
+            if (ModelType==SINGLELAYER) {m=setup(actualsingle,actualsingle,ModelType,jobnumber,yossarianjobnumber);} //pass the same layer as a double parameter
+            else {m=setup(actualDualIn,actualDualEx,ModelType,jobnumber,yossarianjobnumber);}
 //            SaveModel(m);
             Compute_float *FirstV,*SecondV,*FirstW,*SecondW;
-            setuppointers(&FirstV,&SecondV,&FirstW,&SecondW,job,newparam!=NULL?   newparam  :&OneLayerModel,
-                                                                newparamIn!=NULL? newparamIn:&DualLayerModelIn,
-                                                                newparamEx!=NULL? newparamEx:&DualLayerModelEx
-                    );
+            setuppointers(&FirstV,&SecondV,&FirstW,&SecondW,job,&actualsingle,&actualDualIn,&actualDualEx);
             //actually runs the model
             while (m->timesteps<Features.Simlength)
             {

@@ -48,7 +48,7 @@ void step_(const Compute_float* const inpV,const Compute_float* const inpV2, con
     step1(m);
     DoOutputs(m->timesteps);
 }
-
+//this could move files
 void InitVoltage(Compute_float** Volts,const Compute_float Vrt,const Compute_float Vpk,const Job* const job)
 {
     if (job -> initcond == SINGLE_SPIKE) {Fixedinit(*Volts,Vrt,job->Voltage_or_count);}
@@ -240,9 +240,9 @@ int main(int argc,char** argv) //useful for testing w/out matlab
             else if(job->initcond==RAND_ZERO)  {srandom((unsigned)0);}
             //sets up the model code
             //lets create the actual parameters we use
-            const parameters actualsingle = newparam!=NULL  ? *newparam  :OneLayerModel;
-            const parameters actualDualIn = newparamIn!=NULL? *newparamIn:DualLayerModelIn;
-            const parameters actualDualEx = newparamEx!=NULL? *newparamEx:DualLayerModelEx;
+            const parameters actualsingle = newparam  !=NULL ? *newparam  :OneLayerModel;
+            const parameters actualDualIn = newparamIn!=NULL ? *newparamIn:DualLayerModelIn;
+            const parameters actualDualEx = newparamEx!=NULL ? *newparamEx:DualLayerModelEx;
             if (ModelType==SINGLELAYER) {m=setup(actualsingle,actualsingle,ModelType,jobnumber,yossarianjobnumber);} //pass the same layer as a double parameter
             else {m=setup(actualDualIn,actualDualEx,ModelType,jobnumber,yossarianjobnumber);}
 //            SaveModel(m);

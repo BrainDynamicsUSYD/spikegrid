@@ -56,13 +56,13 @@ void InitVoltage(Compute_float** Volts,const Compute_float Vrt,const Compute_flo
 }
 
 //I am not a huge fan of this function.  A nicer version would be good.
-void setuppointers(Compute_float** FirstV,Compute_float** SecondV, Compute_float** FirstW, Compute_float** SecondW,const Job* const job)
+void setuppointers(Compute_float** FirstV,Compute_float** SecondV, Compute_float** FirstW, Compute_float** SecondW,const Job* const job,const parameters* const OneLayer, const parameters* const DualLayerIn, const parameters* const DualLayerEx)
 {
     *FirstV = calloc(sizeof(Compute_float),grid_size*grid_size); //we always need the voltage in the first layer
     if (ModelType==SINGLELAYER)
     {
         *SecondV = NULL; *SecondW = NULL; //force all dual layer to be null
-        InitVoltage(FirstV,OneLayerModel.potential.Vrt,OneLayerModel.potential.Vpk,job);
+        InitVoltage(FirstV,OneLayer->potential.Vrt,OneLayer->potential.Vpk,job);
         if (Features.Recovery==ON)
         {
             *FirstW = calloc(sizeof(Compute_float),grid_size*grid_size);
@@ -71,8 +71,8 @@ void setuppointers(Compute_float** FirstV,Compute_float** SecondV, Compute_float
     else if (ModelType==DUALLAYER)
     {
         *SecondV = malloc(sizeof(Compute_float)*grid_size*grid_size);
-        InitVoltage(FirstV, DualLayerModelIn.potential.Vrt,DualLayerModelIn.potential.Vpk,job);
-        InitVoltage(SecondV,DualLayerModelEx.potential.Vrt,DualLayerModelEx.potential.Vpk,job);
+        InitVoltage(FirstV, DualLayerIn->potential.Vrt,DualLayerIn->potential.Vpk,job);
+        InitVoltage(SecondV,DualLayerEx->potential.Vrt,DualLayerEx->potential.Vpk,job);
         if (Features.Recovery==ON)
         {
             *FirstW  = calloc(sizeof(Compute_float),grid_size*grid_size);
@@ -243,7 +243,10 @@ int main(int argc,char** argv) //useful for testing w/out matlab
             else {m=setup(newparamIn!=NULL?*newparamIn:DualLayerModelIn,newparamEx!=NULL?*newparamEx:DualLayerModelEx,ModelType,jobnumber,yossarianjobnumber);}
 //            SaveModel(m);
             Compute_float *FirstV,*SecondV,*FirstW,*SecondW;
-            setuppointers(&FirstV,&SecondV,&FirstW,&SecondW,job);
+            setuppointers(&FirstV,&SecondV,&FirstW,&SecondW,job,newparam!=NULL?   newparam  :&OneLayerModel,
+                                                                newparamIn!=NULL? newparamIn:&DualLayerModelIn,
+                                                                newparamEx!=NULL? newparamEx:&DualLayerModelEx
+                    );
             //actually runs the model
             while (m->timesteps<Features.Simlength)
             {

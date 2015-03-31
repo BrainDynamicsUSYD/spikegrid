@@ -108,7 +108,7 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
                 {
                     for (int j = -STDP_RANGE ;j<=STDP_RANGE;j++)
                     {
-                        if (x+i<0 || x+i>=grid_size || y+j<0 || y+j>=grid_size || i*i+j*j > STDP_RANGE_SQUARED) {continue;}
+                        if ( i*i+j*j > STDP_RANGE_SQUARED) {continue;}
                         STDP_At_point(x,y,data,data2,S,S2,i,j,const_couples,const_couples2);
                     }
                 }

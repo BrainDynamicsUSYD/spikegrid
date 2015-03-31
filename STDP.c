@@ -33,7 +33,6 @@ Compute_float clamp(Compute_float V,Compute_float target,Compute_float frac)
     if     (V > target * frac) {return(target * frac);}
     else if(V < target * -frac){return(target * -frac);}
     else   {return V;}
-
 }
 
 STDP_change STDP_change_calc (const unsigned int destneuronidx,const unsigned int destinotherlayeridx, const STDP_parameters S, const STDP_parameters S2,const int16_t* const lags,const int16_t* revlags)
@@ -84,7 +83,7 @@ void STDP_At_point(const int x, const int y,STDP_data* const data,STDP_data* con
         data->connections[ridx]    = clamp(data->   connections[ridx] - change.Strength_decrease  ,const_couples[   cdx*couple_array_size + cdy],S.stdp_limit);
         revdata->connections[ridx] = clamp(revdata->connections[ridx] - change.Strength_increase  ,revconst_couples[cdx*couple_array_size + cdy],S2.stdp_limit);
 
-        if (fabs(data->connections[fidx]) > 1.0 || fabs(data->connections[ridx]) > 1.0) //check is some connection has become massive - often indicative of a bug
+        if (fabs(data->connections[fidx]) > 1.0 || fabs(data->connections[ridx]) > 1.0) //check is some connection has become massive - often indicative of a bug - note with strong STDP it is not necersarrily a bug.
         {
           //  printf("something bad has happened at idx %i or %i %i %i\n",fidx,ridx,x,y);
         }
@@ -102,12 +101,7 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
         {
             const unsigned int baseidx = LagIdx((unsigned)x,(unsigned)y,data->lags);
             //first - check if the neuron has fired this timestep
-            unsigned int idx = 0;
-            while (data->lags->lags[baseidx + idx] != -1)
-            {
-                idx++; //we need to get to the last entry to ensure the neuron fired recently
-            }
-            if (idx >0 && data->lags->lags[baseidx+idx-1]==1) //so the neuron did actually fire at the last timestep
+            if ( CurrentShortestLag(data->lags,baseidx)==1) //so the neuron did actually fire at the last timestep
             {
                 //now check if other neurons recently fired - first for nearby connections
                 for (int i = -STDP_RANGE;i<=STDP_RANGE;i++)

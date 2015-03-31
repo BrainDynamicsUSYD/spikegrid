@@ -19,7 +19,7 @@
     #include <android/log.h>
 #endif
 
-model* m;               ///< The model we are evolving through time
+model* m;               ///< The model we are evolving through time - static data not great but it does only exist in this file
 int jobnumber=-1;        ///< The current job number - used for pics directory etc
 int yossarianjobnumber=-1;
 //DO NOT CALL THIS FUNCTION "step" - this causes a weird collision in matlab that results in segfaults.  Incredibly fun to debug
@@ -48,7 +48,7 @@ void step_(const Compute_float* const inpV,const Compute_float* const inpV2, con
     step1(m);
     DoOutputs(m->timesteps);
 }
-//this could move files
+//this could move files - not quite sure where though
 void InitVoltage(Compute_float** Volts,const Compute_float Vrt,const Compute_float Vpk,const Job* const job)
 {
     if (job -> initcond == SINGLE_SPIKE) {Fixedinit(*Volts,Vrt,job->Voltage_or_count);}
@@ -185,7 +185,7 @@ void processopts (int argc,char** argv,parameters** newparam,parameters** newpar
                         "   -g --generate generate a yossarian config file\n"
                         "   -n --nocv disable open cv viewer\n"
                         "   -s --sweep N do the nth element of a sweep\n"
-                        "   -f --nosegfault prevents almost all segfaults");
+                        "   -f --nosegfault prevents almost all segfaults - very reliable method");
                 exit(EXIT_SUCCESS);
             case 'g':
                 createyossarianfile("yossarian.csh",Sweep);

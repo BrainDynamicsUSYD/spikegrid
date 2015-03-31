@@ -24,6 +24,7 @@ typedef struct
     const char ImagePath[100];          ///< Path to use for image stimulus
     const Compute_float  PreconditioningTrials;   ///< Number of preconditioning trials
     const Compute_float NoUSprob;
+    const on_off Testing;
 } Stimulus_parameters;
 ///Parameters for a layer when it is the only one
 typedef struct

@@ -240,7 +240,7 @@ int main(int argc,char** argv) //useful for testing w/out matlab
             else if(job->initcond==RAND_ZERO)  {srandom((unsigned)0);}
             //sets up the model code
             //lets create the actual parameters we use
-            const parameters actualsingle = newparam  !=NULL ? *newparam  :OneLayerModel;
+            const parameters actualsingle = newparam  !=NULL ? *newparam  :OneLayerModel; //TODO: it is not going to be hard to remove these
             const parameters actualDualIn = newparamIn!=NULL ? *newparamIn:DualLayerModelIn;
             const parameters actualDualEx = newparamEx!=NULL ? *newparamEx:DualLayerModelEx;
             if (ModelType==SINGLELAYER) {m=setup(actualsingle,actualsingle,ModelType,jobnumber,yossarianjobnumber);} //pass the same layer as a double parameter

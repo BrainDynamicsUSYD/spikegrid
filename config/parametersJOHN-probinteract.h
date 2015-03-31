@@ -44,7 +44,7 @@ static const parameters OneLayerModel = {.couple={0}}; //since unused - shortes 
     {                       \
         .stdp_limit=1.5,    \
         .stdp_tau=20,       \
-        .stdp_strength=0.00015,  \
+        .stdp_strength=0.0001,  \
         .STDP_on=ON\
     }
 #define STDparams .STD= \
@@ -56,10 +56,11 @@ static const parameters OneLayerModel = {.couple={0}}; //since unused - shortes 
 #define Stimparams .Stim=\
 {\
     .ImagePath  = "input_maps/stoch_interact.png",\
-    .timeperiod=370,\
+    .timeperiod=150,\
     .lag=55,\
     .PreconditioningTrials=0,\
     .NoUSprob=0,\
+    .Testing = OFF,\
 }
 ///parameters for the inhibitory layer of the double layer model
 static const parameters DualLayerModelIn =

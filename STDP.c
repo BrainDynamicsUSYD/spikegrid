@@ -108,7 +108,7 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
                 {
                     for (int j = -STDP_RANGE ;j<=STDP_RANGE;j++)
                     {
-                        if ( i*i+j*j > STDP_RANGE_SQUARED) {continue;}
+                        if (i*i+j*j > STDP_RANGE_SQUARED) {continue;}
                         STDP_At_point(x,y,data,data2,S,S2,i,j,const_couples,const_couples2);
                     }
                 }
@@ -122,7 +122,7 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
                         const unsigned int destidx           = LagIdx(randconns[i].destination.x,randconns[i].destination.y,data->lags);
                         const unsigned int destidx2          = LagIdx(randconns[i].destination.x,randconns[i].destination.y,data2->lags);
                         STDP_change rcchange        = STDP_change_calc(destidx,destidx2,S,S2,data->lags->lags,data2->lags->lags);
-                        randconns[i].stdp_strength  = clamp(randconns[i].stdp_strength-rcchange.Strength_decrease*500.0,randconns[i].strength,S.stdp_limit*1000.0);
+                        randconns[i].stdp_strength  = clamp(randconns[i].stdp_strength-rcchange.Strength_decrease,randconns[i].strength,S.stdp_limit);
                     }
                     //random connections to (x,y) - these will be getting increased - code is almost identical - except sign of change is reversed
                    unsigned int noconsArriving;
@@ -133,7 +133,7 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
                        const unsigned int destidx    = LagIdx(rc->source.x,rc->source.y,data->lags);
                        const unsigned int destidx2   = LagIdx(rc->source.x,rc->source.y,data2->lags);
                        STDP_change rcchange = STDP_change_calc(destidx,destidx2,S,S2,data->lags->lags,data2->lags->lags);
-                       rc->stdp_strength    = clamp(rc->stdp_strength+rcchange.Strength_decrease*500.0,rc->strength,S.stdp_limit*1000.0);
+                       rc->stdp_strength    = clamp(rc->stdp_strength+rcchange.Strength_decrease,rc->strength,S.stdp_limit);
                        //                                             ^ note plus sign (not minus) why?? - I assume the strengths are reversed - maybe this should be stremgth_increase?
                    }
                 }

@@ -45,7 +45,7 @@ static const parameters OneLayerModel = {.couple={0}}; //since unused - shortes 
         .stdp_limit=1.5,    \
         .stdp_tau=20,       \
         .stdp_strength=0.00015,  \
-        .STDP_on=OFF\
+        .STDP_on=ON\
     }
 #define STDparams .STD= \
     {                   \
@@ -116,7 +116,7 @@ static const parameters DualLayerModelEx =
 static const model_features Features =
 {
     .STD        = OFF,
-    .STDP		= OFF, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep -
+    .STDP		= ON, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep -
     .Random_connections = OFF,
     .Timestep   = 0.1,
     .Simlength  = 100000,

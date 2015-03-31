@@ -65,8 +65,8 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
     const Compute_float itercount = timemillis/S.timeperiod;
     const bool stim1 = ((fabs(timemodper-80.0)<.01 && RandFloat() > S.NoUSprob) && itercount > S.PreconditioningTrials)  ;  //late wave
     const bool stim2 =  fabs(timemodper-80.0 + S.lag)<.01  || fabs (timemodper-220 - 5 )<.01; //early wave - issues twice - first is normal, second is test trial.
-    const bool path1 = (int)itercount %2 == 0 ?false:true;
-    const bool path2 = !path1;
+    const bool path1 = (int)itercount %2 == 0 ?false:true && itercount < 10;
+    const bool path2 = !path1 && itercount < 10;
     if (fabs(timemodper - 220) < 5) {StartTesting(voltsin,stdp);  }
     if (fabs(timemodper ) < 0.01) {EndTesting(stdp,(int)(itercount - S.PreconditioningTrials));  }
     if (timemodper < 5) { ResetVoltages(voltsin);} //reset before next period.

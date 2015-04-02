@@ -25,7 +25,7 @@ unsigned int __attribute__((pure)) setcap(const decay_parameters d,const Compute
     Compute_float prev = -1000;//initial values
     Compute_float time=0;
     unsigned int count = 2; //3. keeps compatibility with matlab
-    while(1)
+    while(1) //slightly poor loop structure - but at least the logic is consistent
     {
         time+=timestep;
         count++;
@@ -44,7 +44,7 @@ Compute_float* Norm_couplematrix(const couple_parameters c, Compute_float* const
         case None:
             return unnormed;
         case TotalArea:
-            {   //Apparently we need a separate scope to declare the variables in - C is weird
+            {
                 Compute_float plusval = 0;
                 Compute_float negval = 0;
                 for (int i=0;i<couple_array_size*couple_array_size;i++)
@@ -98,10 +98,10 @@ Compute_float* unnormedCouplingMat(const couple_parameters c)
         {
             if (x*x+y*y<=couplerange*couplerange)//if we are within coupling range
             {
-                if (x!= 0 || y!= 0) //remove self-coupling
+                if (x!= 0 || y!= 0) //remove self-coupling - quite important in the conductance case
                 {
                     Compute_float val;
-                    if (c.Layertype==SINGLELAYER)
+                    if (c.Layertype==SINGLELAYER) //In a single layer model we use mexican hat connectivity.
                     {
                         val = mexhat((Compute_float)(x*x+y*y),c.Layer_parameters.single);//compute the mexican hat function
                     }
@@ -132,6 +132,8 @@ Compute_float* CreateCouplingMatrix(const couple_parameters c)
     return Norm_couplematrix(c, unnormedCouplingMat(c));
 }
 ///Returns a list of nonzero couplings.  returns count - is based on unnormed couple matrix - useful trick
+///This is mainly used for random couplings when we want to draw strength of random couplings from the same distribution
+///as the non-random couplings
 void Non_zerocouplings(const couple_parameters c,Compute_float** validconns,int* counts)
 {
     Compute_float* couplemat = unnormedCouplingMat(c);
@@ -150,7 +152,7 @@ void Non_zerocouplings(const couple_parameters c,Compute_float** validconns,int*
     free(couplemat);
 }
 ///Cache the shape of the spike
-///In the conductance model, neurons emit spikes that decay gradually over time.  This function pre-calculates these strengths
+///In the conductance model, neurons emit spikes that decay gradually over time.  This function pre-calculates these strengths - need to perf test whether this should just be an inline function to return a value - probably not too much difference though
 /// @param cap The maximum time to still add a spike @see setcap
 /// @param Decay used to calculate spike magnitude over time @see Synapse_timecourse
 /// @param timestep Required for various parts of the calculation

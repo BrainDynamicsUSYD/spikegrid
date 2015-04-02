@@ -3,8 +3,9 @@
 #include <string.h>
 #include "lagstorage.h"
 
-///The lagstorage functions have some issues - mainly while loops to find the end etc.  However, it looks like it is 
+///The lagstorage functions have some issues - mainly while loops to find the end etc.  However, it looks like it is
 ///slower to keep track of the count
+///One thing to fix would be auto-calculating lengths - bit it is a little tricky as STDP uses a different mechanism
 lagstorage* lagstorage_init(const unsigned int flagcount,const int cap)
 {
     lagstorage firinglags =
@@ -20,7 +21,7 @@ lagstorage* lagstorage_init(const unsigned int flagcount,const int cap)
             firinglags.lags[LagIdx(x,y,&firinglags)]= -1;
         }
     }
-    lagstorage* l = malloc(sizeof(*l));
+    lagstorage* l = malloc(sizeof(*l)); //otherwise we are returning a stack variable
     memcpy(l,&firinglags,sizeof(*l));
     return l;
 }

@@ -145,7 +145,7 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
 STDP_data* STDP_init(const STDP_parameters S,const int trefrac_in_ts)
 {
     STDP_data* ret = malloc(sizeof(*ret));
-    const int STDP_cap = (int)(S.stdp_tau*5.0 / Features.Timestep);
+    const int STDP_cap = (int)(S.stdp_tau*5.0 / Features.Timestep); //massive hack - potential segfaults / errors when high firing rates and low tref
     const unsigned int stdplagcount = (unsigned int)((STDP_cap/trefrac_in_ts)+2); //int division is fine here
     STDP_data D =
     {

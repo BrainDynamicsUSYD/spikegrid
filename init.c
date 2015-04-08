@@ -83,7 +83,7 @@ layer setuplayer(const parameters p)
 }
 
 ///The idea here is that "one-off" setup occurs here, whilst per-layer setup occurs in setuplayer
-model* setup(const parameters p,const parameters p2,const LayerNumbers lcount,const int jobnumber,const int yossarianjobnumber)
+model* setup(const parameters p,const parameters p2,const LayerNumbers lcount,const int jobnumber,const int yossarianjobnumber,const int testing)
 {
     Hook_malloc(); //this makes malloc record total number of bytes requested.
     check(); //check evolvegen   is correct
@@ -133,7 +133,7 @@ model* setup(const parameters p,const parameters p2,const LayerNumbers lcount,co
     memcpy(m2,&m,sizeof(m));
     char* buffer = malloc(1024);
     gethostname(buffer,1023);
-    if (!strcmp(buffer,"headnode.physics.usyd.edu.au")) {printf("DON'T RUN THIS CODE ON HEADNODE\n");exit(EXIT_FAILURE);}
+    if (!strcmp(buffer,"headnode.physics.usyd.edu.au")&& !testing) {printf("DON'T RUN THIS CODE ON HEADNODE\n");exit(EXIT_FAILURE);}
     free(buffer);
     output_init(m2);
     MakeOutputs(Features.output);

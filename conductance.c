@@ -243,8 +243,8 @@ int main(int argc,char** argv) //useful for testing w/out matlab
             const parameters actualsingle = newparam  !=NULL ? *newparam  :OneLayerModel; //TODO: it is not going to be hard to remove these
             const parameters actualDualIn = newparamIn!=NULL ? *newparamIn:DualLayerModelIn;
             const parameters actualDualEx = newparamEx!=NULL ? *newparamEx:DualLayerModelEx;
-            if (ModelType==SINGLELAYER) {m=setup(actualsingle,actualsingle,ModelType,jobnumber,yossarianjobnumber);} //pass the same layer as a double parameter
-            else {m=setup(actualDualIn,actualDualEx,ModelType,jobnumber,yossarianjobnumber);}
+            if (ModelType==SINGLELAYER) {m=setup(actualsingle,actualsingle,ModelType,jobnumber,yossarianjobnumber,0);} //pass the same layer as a double parameter
+            else {m=setup(actualDualIn,actualDualEx,ModelType,jobnumber,yossarianjobnumber,0);}
 //            SaveModel(m);
             Compute_float *FirstV,*SecondV,*FirstW,*SecondW;
             setuppointers(&FirstV,&SecondV,&FirstW,&SecondW,job,&actualsingle,&actualDualIn,&actualDualEx);

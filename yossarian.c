@@ -16,7 +16,7 @@ void createyossarianfile (const char* const outfile,const sweepable sweep)
         printf("error getting current directory - exiting");
         exit(EXIT_FAILURE);
     }
-    model* dummy __attribute__((unused))= setup(DualLayerModelIn,DualLayerModelEx,ModelType,-1,-1);
+    model* dummy __attribute__((unused))= setup(DualLayerModelIn,DualLayerModelEx,ModelType,-1,-1,1);
     int MemInMB = (int)(((double)total_malloced) * 1.1 / 1024.0 / 1024.0);
     fprintf(file,""
 "#!/bin/csh\n"

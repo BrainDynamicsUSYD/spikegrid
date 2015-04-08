@@ -26,7 +26,7 @@ typedef struct layer
     randconns_info* rcinfo;
     lagstorage*      firinglags;
     STDP_data*      STDP_data;
-    parameters*     P;                              ///<The parameters that we used to make the layer
+    parameters* P;                              ///<The parameters that we used to make the layer -can't be const as we need to free it
     STD_data*       std;                               ///<Some info that is needed for STD
     const on_off Layer_is_inhibitory;
     const int cap; //used for saving timecourses - technically could just regenerate

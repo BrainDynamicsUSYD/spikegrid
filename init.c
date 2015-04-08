@@ -58,10 +58,11 @@ layer setuplayer(const parameters p)
     unsigned int flagcount;
     if (Features.Recovery == ON) {flagcount = (unsigned)cap;} //this needs a comment
     else {flagcount = (unsigned)(cap/trefrac_in_ts) + 2;} //this needs a comment
+    parameters* P = (parameters*)newdata(&p,sizeof(p));
     layer L =
     {   //I am not particularly happy with this block.  It is highly complicated.  One idea: have the init functions themselves decide to return null
         .firinglags         = lagstorage_init(flagcount,cap),
-        .STDP_data          = Features.STDP==ON?STDP_init(p.STDP,trefrac_in_ts):NULL,
+        .STDP_data          = Features.STDP==ON?STDP_init(&P->STDP,trefrac_in_ts):NULL, //problem - P defd later
         .connections        = CreateCouplingMatrix(p.couple),
         .std                = Features.STD==ON?STD_init(p.STD):NULL,
         .Extimecourse       = p.couple.Layertype==SINGLELAYER?
@@ -70,7 +71,7 @@ layer setuplayer(const parameters p)
             Synapse_timecourse_cache((unsigned int)cap,p.couple.Layer_parameters.single.In,Features.Timestep):NULL,
         .Mytimecourse       = p.couple.Layertype==DUALLAYER?
            Synapse_timecourse_cache((unsigned int)cap,p.couple.Layer_parameters.dual.synapse,Features.Timestep):NULL,
-        .P                  = (parameters*)newdata(&p,sizeof(p)),
+        .P                  = P,
         .voltages           = calloc(sizeof(Compute_float),grid_size*grid_size),
         .voltages_out       = calloc(sizeof(Compute_float),grid_size*grid_size),
         .recoverys          = Features.Recovery==ON?calloc(sizeof(Compute_float),grid_size*grid_size):NULL,

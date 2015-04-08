@@ -68,6 +68,8 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
     if (timemodper < 0.1)
     {
         path1 = (RandFloat() < S.Prob1) && itercount < 10;
+        if ((int)itercount==10) {fire1=false;fire2=false;}
+        if ((int)itercount==11) {printf("fire1=%i fire2=%i\n",fire1,fire2);exit(EXIT_SUCCESS);}
     }
     const bool path2 = !path1 && itercount < 10;
     if (S.Testing == ON)

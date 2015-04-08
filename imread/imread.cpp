@@ -57,7 +57,7 @@ void EndTesting(STDP_data* S, const int trialno)
         S->RecordSpikes = ON;
     }
 }
-
+bool path1;
 void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimulus_parameters S,const Compute_float threshold, STDP_data* stdp)
 {
     if (cached==false) {imcache=ReadImage(S.ImagePath);cached=true;}
@@ -65,7 +65,10 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
     const Compute_float itercount = timemillis/S.timeperiod;
     const bool stim1 = ((fabs(timemodper-80.0)<.01 && RandFloat() > S.NoUSprob) && itercount > S.PreconditioningTrials)  ;  //late wave
     const bool stim2 =  fabs(timemodper-80.0 + S.lag)<.01  || fabs (timemodper-220 - 5 )<.01; //early wave - issues twice - first is normal, second is test trial.
-    const bool path1 = (RandFloat() < S.Prob1) && itercount < 10;
+    if (timemodper < 0.1)
+    {
+        path1 = (RandFloat() < S.Prob1) && itercount < 10;
+    }
     const bool path2 = !path1 && itercount < 10;
     if (S.Testing == ON)
     {

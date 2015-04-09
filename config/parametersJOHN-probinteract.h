@@ -122,7 +122,7 @@ static const model_features Features =
     .Timestep   = 0.1,
     .Simlength  = 100000,
     .ImageStim  = ON,
-    .job        = {.initcond = SINGLE_SPIKE, .Voltage_or_count = -70},
+    .job        = {.initcond = RAND_JOB, .Voltage_or_count = 1},
     .Disablewrapping = ON,
     .output = {{.method = VIDEO,.Output=5,.Delay=20, .Overlay="Trialno"},{.method=GUI,.Output=5,.Delay=10,.Overlay="Timestep"}}
 };

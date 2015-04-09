@@ -58,6 +58,7 @@ void EndTesting(STDP_data* S, const int trialno)
     }
 }
 bool path1;
+int  counts1;
 void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimulus_parameters S,const Compute_float threshold, STDP_data* stdp)
 {
     if (cached==false) {imcache=ReadImage(S.ImagePath);cached=true;}
@@ -68,8 +69,9 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
     if (timemodper < 0.1)
     {
         path1 = (RandFloat() < S.Prob1) && itercount < 10;
+        counts1 += path1==true?1:0;
         if ((int)itercount==10) {fire1=false;fire2=false;}
-        if ((int)itercount==11) {printf("fire1=%i fire2=%i\n",fire1,fire2);exit(EXIT_SUCCESS);}
+        if ((int)itercount==11) {printf("%i %i %i\n",counts1,fire1,fire2);exit(EXIT_SUCCESS);}
     }
     const bool path2 = !path1 && itercount < 10;
     if (S.Testing == ON)

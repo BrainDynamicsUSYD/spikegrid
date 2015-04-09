@@ -10,3 +10,6 @@ Following the instructions for setting up GCC should also pull in a version of o
 Note: compiling openCV will also require CMake
 
 Other Note: doing `CC=Clang CXX=clang make` will compile the code with clang (if installed).  This can be useful as clang will warn on different things to GCC. I would like to reduce the very large number of warnings this generates
+
+#Documentation
+Some developer documentation can be auto-generated from the code using Doxygen with the following command: `make docs`

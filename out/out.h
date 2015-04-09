@@ -15,9 +15,9 @@ class Output
     int idx;      /// <- used to store a prefix for the output file
     public:
         Output(int intervalin,int idxin) {interval=intervalin;idx=idxin;};
-        virtual void DoOutput() {};
-        int GetInterval() const {return interval;};
-        int GetIdx() const {return idx;};
+        virtual void DoOutput() {}
+        int GetInterval() const {return interval;}
+        int GetIdx() const {return idx;}
         virtual ~Output() {};
 };
 /// outputs to series of pictures

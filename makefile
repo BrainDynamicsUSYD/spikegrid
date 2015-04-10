@@ -59,12 +59,14 @@ export imreadlib=$(shell pwd)/imread.o
 export maskgen=$(shell pwd)/mask
 
 OFILES=${imreadlib} ${outlib} ${CVClib}
-.PHONY: profile clean submit docs debug params matlabparams viewer ${VIEWERBIN}  force_look TEST
+.PHONY: profile clean submit docs debug params matlabparams viewer ${VIEWERBIN}  force_look TEST watch
 ###########
 #Actually compile
 ###########
 ${BINARY}: ${SOURCES} *.h ${OFILES} ${CONFIG}
 	${CC} ${CFLAGS} ${opencvcflags}     ${SOURCES} ${OFILES} -o ${BINARY} -L. ${LDFLAGS}   ${opencvldflags}
+watch:
+	while ! inotifywait -e modify *.c; do make;done
 #manually compile the mex file.  This is actually similar to what matlab does but we get more control this way
 conductance.mexa64: MATLAB = YES #sets variable for future makefiles
 conductance.mexa64: CFLAGS +=   ${MATLABCFLAGS}

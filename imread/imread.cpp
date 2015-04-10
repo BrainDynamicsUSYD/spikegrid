@@ -59,6 +59,7 @@ void EndTesting(STDP_data* S, const int trialno)
 }
 bool path1;
 int  counts1;
+Compute_float lastset;
 void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimulus_parameters S,const Compute_float threshold, STDP_data* stdp)
 {
     if (cached==false) {imcache=ReadImage(S.ImagePath);cached=true;}
@@ -66,8 +67,10 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
     const Compute_float itercount = timemillis/S.timeperiod;
     const bool stim1 = ((fabs(timemodper-80.0)<.01 && RandFloat() > S.NoUSprob) && itercount > S.PreconditioningTrials)  ;  //late wave
     const bool stim2 =  fabs(timemodper-80.0 + S.lag)<.01  || fabs (timemodper-220 - 5 )<.01; //early wave - issues twice - first is normal, second is test trial.
-    if (timemodper < 0.1)
+    if (timemodper < 0.001 && fabs(timemillis - lastset) > 0.01)
     {
+        lastset=timemillis;
+        printf("picking path\n");
         path1 = (RandFloat() < S.Prob1) && itercount < 10;
         counts1 += path1==true?1:0;
         if ((int)itercount==10) {fire1=false;fire2=false;}

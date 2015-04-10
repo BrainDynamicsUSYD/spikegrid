@@ -65,16 +65,17 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
     if (cached==false) {imcache=ReadImage(S.ImagePath);cached=true;}
     const Compute_float timemodper = fmod(timemillis,S.timeperiod);
     const Compute_float itercount = timemillis/S.timeperiod;
+    if (itercount < 1.0) {return;} //do nothing in first period
     const bool stim1 = ((fabs(timemodper-80.0)<.01 && RandFloat() > S.NoUSprob) && itercount > S.PreconditioningTrials)  ;  //late wave
     const bool stim2 =  fabs(timemodper-80.0 + S.lag)<.01  || fabs (timemodper-220 - 5 )<.01; //early wave - issues twice - first is normal, second is test trial.
     if (timemodper < 0.001 && fabs(timemillis - lastset) > 0.01)
     {
         lastset=timemillis;
         printf("picking path\n");
-        path1 = (RandFloat() < S.Prob1) && itercount < 10;
+        path1 = (RandFloat() < S.Prob1) && itercount < 11;
         counts1 += path1==true?1:0;
-        if ((int)itercount==10) {fire1=false;fire2=false;}
-        if ((int)itercount==11) {printf("%i %i %i\n",counts1,fire1,fire2);exit(EXIT_SUCCESS);}
+        if ((int)itercount==11) {fire1=false;fire2=false;}
+        if ((int)itercount==12) {printf("%i %i %i\n",counts1,fire1,fire2);exit(EXIT_SUCCESS);}
     }
     const bool path2 = !path1 && itercount < 10;
     if (S.Testing == ON)

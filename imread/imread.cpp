@@ -77,7 +77,7 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
         if ((int)itercount==11) {fire1=false;fire2=false;}
         if ((int)itercount==12) {printf("%i %i %i\n",counts1,fire1,fire2);exit(EXIT_SUCCESS);}
     }
-    const bool path2 = !path1 && itercount < 10;
+    const bool path2 = !path1 && itercount < 11;
     if (S.Testing == ON)
     {
         if (fabs(timemodper - 220) < 5) {StartTesting(voltsin,stdp);  }

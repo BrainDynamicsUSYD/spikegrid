@@ -72,12 +72,12 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
     {
         lastset=timemillis;
         printf("picking path\n");
-        path1 = (RandFloat() < S.Prob1) && itercount < 11;
+        path1 = (RandFloat() < S.Prob1) && itercount < 21;
         counts1 += path1==true?1:0;
-        if ((int)itercount==11) {fire1=false;fire2=false;}
-        if ((int)itercount==12) {printf("%i %i %i\n",counts1,fire1,fire2);exit(EXIT_SUCCESS);}
+        if ((int)itercount==21) {fire1=false;fire2=false;}
+        if ((int)itercount==22) {printf("%i %i %i\n",counts1,fire1,fire2);exit(EXIT_SUCCESS);}
     }
-    const bool path2 = !path1 && itercount < 11;
+    const bool path2 = !path1 && itercount < 21;
     if (S.Testing == ON)
     {
         if (fabs(timemodper - 220) < 5) {StartTesting(voltsin,stdp);  }

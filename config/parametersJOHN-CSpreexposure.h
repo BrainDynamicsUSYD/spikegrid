@@ -135,10 +135,10 @@ static const extinput Extinput =
 ///Parameters for conducting a parameter sweep.
 static const sweepable Sweep =
 {
-    .offset=offsetof(parameters,Stim.NoUSprob) ,
+    .offset=offsetof(parameters,Stim.PreconditioningTrials) ,
     .minval = 0.000,
-    .maxval = 1,
-    .count = 100,
+    .maxval = 10,
+    .count = 10,
     .SweepEx = ON,
     .SweepIn = ON,
 };

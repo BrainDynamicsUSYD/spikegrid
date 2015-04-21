@@ -7,6 +7,6 @@ do
     #echo  $jobno  $first $second
     tail -1 $x
 done | sort -n) 
-echo "$vars" | tr ' ' ','
-echo -e "plot '-' using 1:2  smooth unique , '-' using 1:3 smooth unique \n" "$vars" "\n" e "\n""$vars"| gnuplot -persist
+#echo -e "plot '-' using 1:2  smooth unique , '-' using 1:3 smooth unique \n" "$vars" "\n" e "\n""$vars"| gnuplot -persist
+echo -e "set terminal tikz \n set output 'test.tex'\n"  "plot '-' using 1:2  smooth unique , '-' using 1:3 smooth unique \n" "$vars" "\n" e "\n""$vars""\nexit"  | gnuplot 
 

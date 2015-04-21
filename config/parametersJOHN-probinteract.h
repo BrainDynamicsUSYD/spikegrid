@@ -61,6 +61,7 @@ static const parameters OneLayerModel = {.couple={0}}; //since unused - shortes 
     .PreconditioningTrials=0,\
     .NoUSprob=0,\
     .Testing = OFF,\
+    .TestPathChoice = ON\
 }
 ///parameters for the inhibitory layer of the double layer model
 static const parameters DualLayerModelIn =

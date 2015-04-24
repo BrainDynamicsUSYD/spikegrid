@@ -49,7 +49,7 @@ void EndTesting(STDP_data* S, const int trialno,const Stimulus_parameters Stim)
     state = Normal;
     if (fire1 && fire2)
     {
-        std::cout << "Both spiked: " << trialno << " " << Stim.PreconditioningTrials<< std::endl ;
+        std::cout << "Both spiked: " << trialno << " " << Stim.PreconditioningTrials<< std::endl ; //endtesting actually gets called just after the start of the next trial - but this is good as it corrects for an off by one error that would otherwise occur as trials start at 0.
         exit(0);
     }
     if (S != NULL)

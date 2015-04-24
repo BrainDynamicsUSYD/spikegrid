@@ -7,11 +7,12 @@
 #include <stdlib.h>
 #include "typedefs.h"
 #ifdef FAST
-#define exp(x)  expf(x)
-#define fabs(x) fabsf(x)
-#define sin(x)  sinf(x)
-#define ceil(x) ceilf(x)
-#define cos(x)  cosf(x)
+#define exp(x)   expf(x)
+#define fabs(x)  fabsf(x)
+#define sin(x)   sinf(x)
+#define ceil(x)  ceilf(x)
+#define cos(x)   cosf(x)
+#define round(x) roundf(x)
 #endif
 static inline Compute_float RandFloat()
 {

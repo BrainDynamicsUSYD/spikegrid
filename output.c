@@ -8,6 +8,7 @@
 #include "model.h"
 #include "output.h"
 #include "tagged_array.h"
+#include "mymath.h"
 ///Total number of things to be output - occasionally needs to be incremented
 #define output_count   19
 #define overlay_count  3
@@ -44,7 +45,10 @@ overlaytext* __attribute__((pure)) getOverlayByName(const char* const name)
     }
     return NULL;
 }
-int __attribute__((pure)) Trialno()  {return (int) (modelref->timesteps * Features.Timestep /modelref->layer1.P->Stim.timeperiod - modelref->layer1.P->Stim.PreconditioningTrials)  ;}
+int __attribute__((pure)) Trialno()  
+{
+    return (int) round(modelref->timesteps * Features.Timestep /modelref->layer1.P->Stim.timeperiod - modelref->layer1.P->Stim.PreconditioningTrials)  ;
+}
 int __attribute__((pure)) Timestep() {return (int) modelref->timesteps;}
 ///Set up the outputtables for a given model
 ///This function should probably move to the C++ code

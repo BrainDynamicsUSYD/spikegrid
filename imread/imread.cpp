@@ -66,7 +66,7 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
     const Compute_float timemodper = fmod(timemillis,S.timeperiod);
     const Compute_float itercount = timemillis/S.timeperiod;
     if (itercount < 1.0  && S.TestPathChoice) {return;} //do nothing in first period
-    const bool stim1 = ((fabs(timemodper-80.0)<.01 && RandFloat() > S.NoUSprob) && itercount > S.PreconditioningTrials)  ;  //late wave
+    const bool stim1 = ((fabs(timemodper-80.0)<.01 && RandFloat() > S.NoUSprob) && itercount >= S.PreconditioningTrials)  ;  //late wave
     const bool stim2 =  fabs(timemodper-80.0 + S.lag)<.01  || fabs (timemodper-220 - 5 )<.01; //early wave - issues twice - first is normal, second is test trial.
     bool path2=false; //make compiler happy - need to redo this whole function anyway
     if (S.TestPathChoice)

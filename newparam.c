@@ -33,7 +33,7 @@ Compute_float __attribute__((const)) nthvalue (const Compute_float min,const Com
 #include <stdio.h>
 parameters* __attribute__((const)) GetNthParam(const parameters input, const sweepable sweep,const unsigned int n)
 {
-    const Compute_float value = nthvalue(sweep.minval,sweep.maxval,sweep.count,n);
-    
+    Compute_float value = nthvalue(sweep.minval,sweep.maxval,sweep.count,n);
+    if (sweep.Intify==ON) {value = (Compute_float)(int)value;}
     return modparam(&input,sweep.offset,&value,sizeof(value));
 }

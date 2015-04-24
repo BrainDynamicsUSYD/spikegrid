@@ -125,6 +125,7 @@ typedef struct sweepable
     const unsigned int count;   ///< the number of jobs to create - spacing of parameter is linear between maxval and minval
     const on_off SweepEx;
     const on_off SweepIn;
+    const on_off Intify;        ///<round numbers to integer
 } sweepable;
 
 

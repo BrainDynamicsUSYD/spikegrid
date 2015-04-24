@@ -141,6 +141,7 @@ static const sweepable Sweep =
     .count = 10,
     .SweepEx = ON,
     .SweepIn = ON,
+    .Intify  = ON,
 };
 
 #ifdef __clang__

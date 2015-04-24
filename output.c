@@ -78,8 +78,8 @@ void output_init(const model* const m)
     memcpy(malloced,outdata,sizeof(output_s)*output_count);
     Outputtable = malloced;
     overlaytext* overdata = (overlaytext[]){
-        {"Trialno", Trialno}, //not correct - need to use millis conversion
-        {"Timestep", Timestep}, //C has anonymous functions - WTF!!
+        {"Trialno", Trialno},
+        {"Timestep", Timestep},
         {.name={0}}
     };
     overlaytext* overmalloc = malloc(sizeof(overlaytext)*overlay_count);

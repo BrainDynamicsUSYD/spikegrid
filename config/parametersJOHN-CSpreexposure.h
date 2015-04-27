@@ -42,7 +42,7 @@ static const parameters OneLayerModel = {.couple={0}}; //since unused - shortes 
 
 #define STDPparams .STDP=   \
     {                       \
-        .stdp_limit=1.5,    \
+        .stdp_limit=2,    \
         .stdp_tau=20,       \
         .stdp_strength=0.00015,  \
         .STDP_on=ON\
@@ -120,7 +120,7 @@ static const model_features Features =
     .STDP		= ON, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep -
     .Random_connections = OFF,
     .Timestep   = 0.1,
-    .Simlength  = 100000,
+    .Simlength  = 1000000,
     .ImageStim  = ON,
     .job        = {.initcond = SINGLE_SPIKE, .Voltage_or_count = -70},
     .Disablewrapping = ON,

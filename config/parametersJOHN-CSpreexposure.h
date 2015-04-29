@@ -31,7 +31,7 @@ static const parameters OneLayerModel = {.couple={0}}; //since unused - shortes 
 
 #define STDPparams .STDP=   \
     {                       \
-        .stdp_limit=2,    \
+        .stdp_limit=1.5,    \
         .stdp_tau=20,       \
         .stdp_strength=0.00015,  \
         .STDP_on=ON\
@@ -40,7 +40,7 @@ static const parameters OneLayerModel = {.couple={0}}; //since unused - shortes 
 {\
     .ImagePath  = "input_maps/test.png",\
     .timeperiod=370,\
-    .lag=55,\
+    .lag=20,\
     .PreconditioningTrials=0,\
     .NoUSprob=0,\
     .Testing=ON\

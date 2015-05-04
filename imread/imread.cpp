@@ -44,12 +44,14 @@ void StartTesting(Compute_float* voltsin, STDP_data* S)
         S->RecordSpikes = OFF;
     }
 }
+int onesfire=0;
+int lastonesfire=-1;
 void EndTesting(STDP_data* S, const int trialno,const Stimulus_parameters Stim)
 {
     state = Normal;
     if (fire1 && fire2)
     {
-        std::cout << "Both spiked: " << trialno << " " << Stim.PreconditioningTrials<< std::endl ; //endtesting actually gets called just after the start of the next trial - but this is good as it corrects for an off by one error that would otherwise occur as trials start at 0.
+        std::cout << "Both spiked: " << trialno << " " << onesfire << std::endl ; //endtesting actually gets called just after the start of the next trial - but this is good as it corrects for an off by one error that would otherwise occur as trials start at 0.
         exit(0);
     }
     if (S != NULL)
@@ -60,14 +62,20 @@ void EndTesting(STDP_data* S, const int trialno,const Stimulus_parameters Stim)
 bool path1;
 int  counts1;
 Compute_float lastset;
+bool stim1choice=true;
+void CreateStims(const Compute_float timemodper,const Stimulus_parameters S,const Compute_float itercount)
+{
+    printf("createstims\n");
+    stim1choice = RandFloat() > S.NoUSprob;
+    if (stim1choice && (int)itercount > lastonesfire) {onesfire++;lastonesfire=(int)itercount; printf("increase\n");}
+}
 void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimulus_parameters S,const Compute_float threshold, STDP_data* stdp)
 {
     if (cached==false) {imcache=ReadImage(S.ImagePath);cached=true;}
     const Compute_float timemodper = fmod(timemillis,S.timeperiod);
     const Compute_float itercount = timemillis/S.timeperiod;
-    if (itercount < 1.0  && S.TestPathChoice) {return;} //do nothing in first period
-    const bool stim1 = ((fabs(timemodper-80.0)<.01 && RandFloat() > S.NoUSprob) && itercount >= S.PreconditioningTrials)  ;  //late wave
-    const bool stim2 =  fabs(timemodper-80.0 + S.lag)<.01  || fabs (timemodper-220 - 5 )<.01; //early wave - issues twice - first is normal, second is test trial.
+    if (itercount < 1.0  && S.TestPathChoice) {return;} //do nothing in first period- in test path mode the first period fails so skip over it - is pretty short anyway as no testing
+
     bool path2=false; //make compiler happy - need to redo this whole function anyway
     if (S.TestPathChoice)
     {
@@ -82,6 +90,19 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
         }
         path2 = !path1 && itercount < 21;
     }
+    else
+    {
+        if (timemodper < 0.001 && fabs(timemillis - lastset) > 0.01)
+        {
+            lastset=timemillis;
+            printf("picking stimulus\n");
+            CreateStims(timemodper,S,itercount);
+        }
+
+    }
+    const bool stim1 = ((fabs(timemodper-80.0)<.01 && stim1choice) && itercount >= S.PreconditioningTrials)  ;  //late wave
+    const bool stim2 =  fabs(timemodper-80.0 + S.lag)<.01  || fabs (timemodper-220 - 5 )<.01; //early wave - issues twice - first is normal, second is test trial.
+
     if (S.Testing == ON)
     {
         if (fabs(timemodper - 220) < 5) {StartTesting(voltsin,stdp);  }

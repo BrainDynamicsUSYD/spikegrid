@@ -236,7 +236,7 @@ int main(int argc,char** argv) //useful for testing w/out matlab
         {
             //seed RNG as appropriate - with either time or job number
             if     (job->initcond == RAND_TIME){srandom((unsigned)time(0));}
-            else if(job->initcond==RAND_JOB)   {srandom((unsigned)c + (unsigned) yossarianjobnumber);}
+            else if(job->initcond==RAND_JOB)   {srandom((unsigned)c +(unsigned) (yossarianjobnumber!= -1 ?yossarianjobnumber:0 ));}
             else if(job->initcond==RAND_ZERO)  {srandom((unsigned)0);}
             //sets up the model code
             //lets create the actual parameters we use

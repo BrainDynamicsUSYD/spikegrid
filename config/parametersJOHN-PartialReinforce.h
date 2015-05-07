@@ -8,6 +8,7 @@
 #ifndef PARAMETERS  //DO NOT REMOVE
 ///include guard
 #define PARAMETERS  //DO NOT REMOVE
+///Whether we are using the single or double layer model
 static const LayerNumbers ModelType = DUALLAYER;
 
 //Fun note - with the right optimisations GCC actually will pull these constants inline (for example disassemble evolvept_STDP with STDP off)
@@ -116,13 +117,13 @@ static const extinput Extinput =
 ///Parameters for conducting a parameter sweep.
 static const sweepable Sweep =
 {
-    .offset=offsetof(parameters,Stim.PreconditioningTrials) ,
+    .offset=offsetof(parameters,Stim.NoUSprob) ,
     .minval = 0.000,
-    .maxval = 10,
-    .count = 10,
+    .maxval = 1,
+    .count = 100,
     .SweepEx = ON,
     .SweepIn = ON,
-    .Intify  = ON,
+    .Intify  = OFF,
 };
 
 #endif //DO NOT REMOVE

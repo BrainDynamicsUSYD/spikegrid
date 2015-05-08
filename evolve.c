@@ -83,6 +83,7 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
 ///~~~~
 void fixboundary(Compute_float* __restrict gE, Compute_float* __restrict gI)
 {   //theoretically the two sets of loops could be combined but that would be incredibly confusing
+    //in particular, the left and right sides can get a little confused
     //top + bottom
     for (int i=0;i<couplerange;i++)
 	{

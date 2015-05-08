@@ -1,7 +1,7 @@
 /// \file
 #include <stddef.h> //offsetof
 //these first few parameters actually escape into the paramheader file through magic
-#define grid_size 100
+#define grid_size 60
 ///Total size of the grid
 ///Coupling range
 #define couplerange 15
@@ -95,10 +95,9 @@ static const model_features Features =
 {
     .STDP		= OFF, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep -
     .STD        = OFF, //               if we need any of these features we can make the changes then.
-    .Timestep   = 0.1,
-    .Simlength  = 10000,
-
-    .output = {{.method = VIDEO,.Output=5,.Delay=20, .Overlay="Trialno"},{.method=GUI,.Output=5,.Delay=10,.Overlay="Timestep"}}
+    .Timestep   = 0.01,
+    .Simlength  = 1000,
+    .output = {{.method = TEXT,.Output=5,.Delay=1, .Overlay="Trialno"},{.method=GUI,.Output=5,.Delay=10,.Overlay="Timestep"}}
 };
 ///Constant external input to conductances
 static const extinput Extinput =

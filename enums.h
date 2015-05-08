@@ -1,4 +1,4 @@
-enums/// \file
+/// \file
 #ifndef ENUMS
 #define ENUMS
 ///Simple enum for things that are on or off to make their state more obvious

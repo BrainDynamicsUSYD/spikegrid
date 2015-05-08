@@ -14,7 +14,10 @@
 /// @param Decay the parameters of the spike
 Compute_float  __attribute__((pure)) Synapse_timecourse(const decay_parameters Decay,const Compute_float time)
 {
-    return (One/(Decay.D-Decay.R))*(exp(-time/Decay.D)-exp(-time/Decay.R));
+    if (Decay.synfun==DOUBLE_EXP)
+        {return (One/(Decay.D-Decay.R))*(exp(-time/Decay.D)-exp(-time/Decay.R));}
+    else if (Decay.synfun==SINGLE_EXP)
+        {return (One/Decay.D)*exp(-time/Decay.D);}
 }
 ///Calculate how long we need to track spike histories.  This is done by seeing how long it takes the spike magnitude to decrease below a critical value
 ///@param minval The minimum spike size that we care about.  This is not affected by the coupling matrix at all.  As a result, if your coupling strengths are very high, this might need to be reduced

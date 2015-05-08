@@ -16,6 +16,7 @@ typedef struct output_parameters
 typedef struct decay_parameters{
     const Compute_float R;  ///<rise time constant (units?)
     const Compute_float D;  ///<decay time constant (units?)
+    const Synaptic_evol synfun;
 } decay_parameters;
 typedef struct
 {

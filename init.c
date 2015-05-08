@@ -51,7 +51,7 @@ void Fixedinit(Compute_float* input, const Compute_float def_value,const Compute
 layer setuplayer(const parameters p)
 {
     const Compute_float min_effect = (Compute_float)1E-6;
-    int cap;
+    int cap; //this cap should really be calculated in lagstorage init - it doesn't feel quite appropriate here
     if (p.couple.Layertype==SINGLELAYER) {cap=(int)max(setcap(p.couple.Layer_parameters.single.Ex,min_effect,Features.Timestep),setcap(p.couple.Layer_parameters.single.In,min_effect,Features.Timestep));}
     else                                 {cap=(int)setcap(p.couple.Layer_parameters.dual.synapse,min_effect,Features.Timestep);}
     const int trefrac_in_ts =(int) ((Compute_float)p.couple.tref / Features.Timestep);
@@ -78,7 +78,6 @@ layer setuplayer(const parameters p)
         .recoverys_out      = Features.Recovery==ON?calloc(sizeof(Compute_float),grid_size*grid_size):NULL,
         .Layer_is_inhibitory = p.couple.Layertype==DUALLAYER && p.couple.Layer_parameters.dual.W<0,
         .rcinfo             = Features.Random_connections==ON?init_randconns(p.random,p.couple): NULL,
-        .cap                = cap,
     };
     return L;
 }

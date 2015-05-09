@@ -52,8 +52,8 @@ void RDAdd()
     printf("void AddRD (const int x,const int y,const Compute_float* const __restrict connections, Compute_float* __restrict Rmat,Compute_float* __restrict Dmat, const Compute_float R,const Compute_float D)\n");
     printf("{\n");
     printf("c++;");
-    printf("const Compute_float Rstr = R/(D-R);\n");
-    printf("const Compute_float Dstr = D/(D-R);\n");
+    printf("const Compute_float Rstr = 1/(D-R);\n");
+    printf("const Compute_float Dstr = 1/(D-R);\n");
     //start the loop
     for (int i = 0; i < couple_array_size;i++)
     {

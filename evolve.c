@@ -55,11 +55,11 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
             {
                 if (Features.STDP==OFF)
                 {
-                    evolvept_duallayer((int)x,(int)y,L.connections,str,(L.Layer_is_inhibitory?gI:gE)); //side note evolvegen doesn't currently work with singlelayer - should probably fix
+           //         evolvept_duallayer((int)x,(int)y,L.connections,str,(L.Layer_is_inhibitory?gI:gE)); //side note evolvegen doesn't currently work with singlelayer - should probably fix
                 }
                 else
                 {
-                    evolvept_duallayer_STDP((int)x,(int)y,L.connections,L.STDP_data->connections,str,(L.Layer_is_inhibitory?gI:gE));
+         //           evolvept_duallayer_STDP((int)x,(int)y,L.connections,L.STDP_data->connections,str,(L.Layer_is_inhibitory?gI:gE));
                 }
             }
             if (Features.Random_connections == ON )
@@ -120,7 +120,7 @@ void FixRD(Compute_float* __restrict R,const Compute_float Rm,Compute_float* __r
             const int idx = Conductance_index(i,j);
             if (inhib==ON)
             {
-                gI[idx] +=( R[idx]-D[idx]);
+                gI[idx] += -( R[idx]-D[idx]);
             }
             else
             {
@@ -208,10 +208,13 @@ void StoreFiring(layer* L)
         {
             if (IsActiveNeuron((int)x,(int)y,L->P->skip))
             {
+                const unsigned int baseidx = LagIdx(x,y,L->firinglags);
+                modifyLags(L->firinglags,baseidx);
                 //now - add in new spikes
                 //TODO: restore STDP spike storage
                 if (L->voltages_out[x*grid_size + y]  >= L->P->potential.Vpk)
                 {
+                    AddnewSpike(L->firinglags,baseidx);
                     if (Features.Recovery==ON) //reset recovery if needed.  Note recovery has no refractory period so a reset is required
                     {
                         L->voltages_out[x*grid_size+y]=L->P->potential.Vrt;
@@ -219,7 +222,7 @@ void StoreFiring(layer* L)
                     }
                     if (L->Layer_is_inhibitory == ON)
                     {
-                        AddRD((int)x,(int)y,L->connections, L->Rmat,L->Dmat,-L->R,-L->D);
+                        AddRD((int)x,(int)y,L->connections, L->Rmat,L->Dmat,L->R,L->D);
                     }
                     else
                     {
@@ -236,7 +239,7 @@ void StoreFiring(layer* L)
             }
             else //non-active neurons never get to fire
             {
-                    L->voltages_out[x*grid_size+y]=-1000; //skipped neurons set to -1000 - probably not required but perf impact should be minimal - also ensures they will never be >Vpk
+                L->voltages_out[x*grid_size+y]=-1000; //skipped neurons set to -1000 - probably not required but perf impact should be minimal - also ensures they will never be >Vpk
             }
         }
     }
@@ -297,8 +300,8 @@ void step1(model* m)
         AnimalEffects(*m->animal,m->gE,timemillis);
     }
     // Add spiking input to the conductances
- //   AddSpikes(m->layer1,m->gE,m->gI,m->timesteps);
- //   if (m->NoLayers==DUALLAYER) {AddSpikes(m->layer2,m->gE,m->gI,m->timesteps);}
+    AddSpikes(m->layer1,m->gE,m->gI,m->timesteps);
+    if (m->NoLayers==DUALLAYER) {AddSpikes(m->layer2,m->gE,m->gI,m->timesteps);}
     if (Features.Disablewrapping==OFF)
     {
         fixboundary(m->gE);

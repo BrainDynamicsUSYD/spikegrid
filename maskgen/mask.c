@@ -47,6 +47,29 @@ void checkfn()
     printf("}");
 
 }
+void RDAdd()
+{
+    printf("void AddRD (const int x,const int y,const Compute_float* const __restrict connections, Compute_float* __restrict Rmat,Compute_float* __restrict Dmat, const Compute_float R,const Compute_float D)\n");
+    printf("{\n");
+    printf("c++;");
+    printf("const Compute_float Rstr = R/(D-R);\n");
+    printf("const Compute_float Dstr = D/(D-R);\n");
+    //start the loop
+    for (int i = 0; i < couple_array_size;i++)
+    {
+        printf("    const int outoff%i = ((x+%i)*%i + y);\n",i,i,conductance_array_size);
+        printf("    const int conoff%i = %i*couple_array_size;\n",i,i);
+        char buf [1000];
+        sprintf(buf,"((x+%i)*%i + y)",i,conductance_array_size);
+        const int off = getoffset(couplerange,i);
+        printf("    for (int kk=(couplerange-%i);kk<=(couplerange+%i);kk++)\n",off,off); //this is the key part - offsets are now known at compile time
+        printf("    {\n");
+        printf("        Rmat[outoff%i + kk] += connections[conoff%i+kk]*Rstr;\n",i,i);
+        printf("        Dmat[outoff%i + kk] += connections[conoff%i+kk]*Dstr;\n",i,i);
+        printf("    }\n");
+    }
+    printf("}\n");
+}
 int main()
 {
     //some initial setup lines
@@ -75,5 +98,6 @@ int main()
     }
     printf("}\n");
     withSTDP();
+    RDAdd();
     checkfn();
 }

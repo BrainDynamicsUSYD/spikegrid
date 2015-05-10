@@ -118,16 +118,16 @@ void FixRD(Compute_float* __restrict R,const Compute_float Rm,Compute_float* __r
         for (int j=0;j<grid_size;j++)
         {
             const int idx = Conductance_index(i,j);
+            R[idx] *= exp(-Features.Timestep/Rm);
+            D[idx] *= exp(-Features.Timestep/Dm);
             if (inhib==ON)
             {
-                gI[idx] += -( R[idx]-D[idx]);
+                gI[idx] += - ( D[idx]-R[idx]);
             }
             else
             {
                 gE[idx] += D[idx]-R[idx]; //question - calculate this first or second?
             }
-            R[idx] *= exp(-Features.Timestep/Dm);
-            D[idx] *= exp(-Features.Timestep/Rm);
         }
     }
 }
@@ -198,6 +198,7 @@ int IsActiveNeuron (const int x, const int y,const int step)
     const int test = (x % step) == 0 && (y % step) ==0;
     return (test && step > 0) || (!test && step < 0);
 }
+
 ///Store current firing spikes also apply random spikes
 ///TODO: make faster - definitely room for improvement here
 void StoreFiring(layer* L)

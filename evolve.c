@@ -55,11 +55,11 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
             {
                 if (Features.STDP==OFF)
                 {
-                    evolvept_duallayer((int)x,(int)y,L.connections,str,(L.Layer_is_inhibitory?gI:gE)); //side note evolvegen doesn't currently work with singlelayer - should probably fix
+           //         evolvept_duallayer((int)x,(int)y,L.connections,str,(L.Layer_is_inhibitory?gI:gE)); //side note evolvegen doesn't currently work with singlelayer - should probably fix
                 }
                 else
                 {
-                    evolvept_duallayer_STDP((int)x,(int)y,L.connections,L.STDP_data->connections,str,(L.Layer_is_inhibitory?gI:gE));
+         //           evolvept_duallayer_STDP((int)x,(int)y,L.connections,L.STDP_data->connections,str,(L.Layer_is_inhibitory?gI:gE));
                 }
             }
             if (Features.Random_connections == ON )
@@ -81,18 +81,18 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
 ///     |  +––––––––––+   |
 ///     +–––––––––––––––––+
 ///~~~~
-void fixboundary(Compute_float* __restrict gE, Compute_float* __restrict gI)
+void fixboundary(Compute_float* __restrict input)
 {   //theoretically the two sets of loops could be combined but that would be incredibly confusing
-    //in particular, the left and right sides can get a little confused
+    //in particular, the left and right sides can get a     little confused
     //top + bottom
     for (int i=0;i<couplerange;i++)
 	{
         for (int j=0;j<conductance_array_size;j++)
 		{
-            gE[(grid_size+i)*conductance_array_size + j] += gE[i*conductance_array_size+j]; //add to bottom
-            gE[(i+couplerange)*conductance_array_size+j] += gE[(grid_size+couplerange+i)*conductance_array_size+j];//add to top
-            gI[(grid_size+i)*conductance_array_size + j] += gI[i*conductance_array_size+j]; //add to bottom
-            gI[(i+couplerange)*conductance_array_size+j] += gI[(grid_size+couplerange+i)*conductance_array_size+j];//add to top
+            input[(grid_size+i)*conductance_array_size + j] += input[i*conductance_array_size+j]; //add to bottom
+            input[i*conductance_array_size+j] = 0; 
+            input[(i+couplerange)*conductance_array_size+j] += input[(grid_size+couplerange+i)*conductance_array_size+j];//add to top
+            input[(grid_size+couplerange+i)*conductance_array_size+j] = 0;
 		}
 	}
     //left + right boundary condition fix
@@ -100,12 +100,36 @@ void fixboundary(Compute_float* __restrict gE, Compute_float* __restrict gI)
 	{
         for (int j=0;j<couplerange;j++)
 		{
-             gE[i*conductance_array_size +grid_size+j ]  += gE[i*conductance_array_size+j];//left
-             gE[i*conductance_array_size +couplerange+j] += gE [i*conductance_array_size + grid_size+couplerange+j];//right
-             gI[i*conductance_array_size +grid_size+j ]  += gI[i*conductance_array_size+j];//left
-             gI[i*conductance_array_size +couplerange+j] += gI [i*conductance_array_size + grid_size+couplerange+j];//right
+             input[i*conductance_array_size    +grid_size+j ]  += input[i*conductance_array_size+j];//left
+             input[i*conductance_array_size+j]=0;//left
+             input[i*conductance_array_size +couplerange+j] += input [i*conductance_array_size + grid_size+couplerange+j];//right
+             input [i*conductance_array_size + grid_size+couplerange+j]=0;//right
 		}
 	}
+}
+//Ideally we change things so that this isn't required - maybe an inline function to get gE/gI using Rvalues
+//note - we need to use the normalised D/R values when we add the initial numbner
+void FixRD(Compute_float* __restrict R,const Compute_float Rm,Compute_float* __restrict D, const Compute_float Dm,Compute_float* __restrict gE, Compute_float* __restrict gI,const on_off inhib)
+{
+    fixboundary(R);
+    fixboundary(D);
+    for (int i=0;i<grid_size;i++)
+    {
+        for (int j=0;j<grid_size;j++)
+        {
+            const int idx = Conductance_index(i,j);
+            R[idx] *= exp(-Features.Timestep/Rm);
+            D[idx] *= exp(-Features.Timestep/Dm);
+            if (inhib==ON)
+            {
+                gI[idx] += - ( D[idx]-R[idx]);
+            }
+            else
+            {
+                gE[idx] += D[idx]-R[idx]; //question - calculate this first or second?
+            }
+        }
+    }
 }
 
 ///rhs_func used when integrating the neurons forward through time.  The actual integration is done using the midpoint method
@@ -174,6 +198,7 @@ int IsActiveNeuron (const int x, const int y,const int step)
     const int test = (x % step) == 0 && (y % step) ==0;
     return (test && step > 0) || (!test && step < 0);
 }
+
 ///Store current firing spikes also apply random spikes
 ///TODO: make faster - definitely room for improvement here
 void StoreFiring(layer* L)
@@ -184,29 +209,38 @@ void StoreFiring(layer* L)
         {
             if (IsActiveNeuron((int)x,(int)y,L->P->skip))
             {
-                const unsigned int baseidx=LagIdx(x,y,L->firinglags);
-                modifyLags(L->firinglags,baseidx);//this might be better elsewhere - it is hiding a little
-                if (Features.STDP==ON) {modifyLags(L->STDP_data->lags,LagIdx(x,y,L->STDP_data->lags));} //question - would it be better to use a single lagstorage here with limits in appropriate places?
+                const unsigned int baseidx = LagIdx(x,y,L->firinglags);
+                modifyLags(L->firinglags,baseidx);
                 //now - add in new spikes
+                //TODO: restore STDP spike storage
                 if (L->voltages_out[x*grid_size + y]  >= L->P->potential.Vpk)
                 {
+                    AddnewSpike(L->firinglags,baseidx);
                     if (Features.Recovery==ON) //reset recovery if needed.  Note recovery has no refractory period so a reset is required
                     {
                         L->voltages_out[x*grid_size+y]=L->P->potential.Vrt;
                         L->recoverys_out[x*grid_size+y]+=L->P->recovery.Wrt;
                     }
-                    AddnewSpike(L->firinglags,baseidx);
-                    if (Features.STDP==ON && L->STDP_data->RecordSpikes==ON /*We are sometimes not recording spikes (STDP only)*/) {AddnewSpike(L->STDP_data->lags,LagIdx(x,y,L->STDP_data->lags));}
+                    if (L->Layer_is_inhibitory == ON)
+                    {
+                        AddRD((int)x,(int)y,L->connections, L->Rmat,L->Dmat,L->R,L->D);
+                    }
+                    else
+                    {
+
+                        AddRD((int)x,(int)y,L->connections, L->Rmat,L->Dmat,L->R,L->D);
+                    }
                 }//add random spikes
                 else if (L->P->potential.rate > 0 && //this check is because the compiler doesn't optimize the call to random() otherwise
                             (RandFloat() < (L->P->potential.rate*((Compute_float)0.001)*Features.Timestep)))
                 {
                     L->voltages_out[x*grid_size+y]=L->P->potential.Vpk+(Compute_float)0.1;//make sure it fires - the neuron will actually fire next timestep
+                    AddRD((int)x,(int)y,L->connections,L-> Rmat,L->Dmat,L->R,L->D);
                 }
             }
             else //non-active neurons never get to fire
             {
-                    L->voltages_out[x*grid_size+y]=-1000; //skipped neurons set to -1000 - probably not required but perf impact should be minimal - also ensures they will never be >Vpk
+                L->voltages_out[x*grid_size+y]=-1000; //skipped neurons set to -1000 - probably not required but perf impact should be minimal - also ensures they will never be >Vpk
             }
         }
     }
@@ -271,7 +305,8 @@ void step1(model* m)
     if (m->NoLayers==DUALLAYER) {AddSpikes(m->layer2,m->gE,m->gI,m->timesteps);}
     if (Features.Disablewrapping==OFF)
     {
-        fixboundary(m->gE,m->gI);
+        fixboundary(m->gE);
+        fixboundary(m->gI);
     }
     // Add constant input to the conductances - note easiest to do this after wrapping - slight inefficiency with border but who cares
     for (int i = 0;i < conductance_array_size*conductance_array_size;i++)
@@ -280,7 +315,8 @@ void step1(model* m)
         m->gI[i] += Extinput.gI0;
     }
     //from this point the GE and GI are actually fixed - as a result there is no more layer interaction - so do things sequentially to each layer
-
+    FixRD(m->layer1.Rmat,m->layer1.R,m->layer1.Dmat,m->layer1.D,m->gE,m->gI,m->layer1.Layer_is_inhibitory);
+    FixRD(m->layer2.Rmat,m->layer2.R,m->layer2.Dmat,m->layer2.D,m->gE,m->gI,m->layer2.Layer_is_inhibitory);
     tidylayer(&m->layer1,timemillis,m->gE,m->gI);
     if (m->NoLayers==DUALLAYER){tidylayer(&m->layer2,timemillis,m->gE,m->gI);}
     if (Features.STDP==ON)

@@ -193,9 +193,9 @@ void CalcRecoverys(const Compute_float* const __restrict__ Vinput,
 //detect if a neuron is active - may be useful elsewhere - used to maintain an appropriate ratio of ex/in neurons
 //note when we have STDP, if you have one layer with skip +x and another with -x the code is massively simpler.
 //+ve skip is obvious.  -ve skip does the "inverse" of +ve skip
-int __attribute__((pure,const)) IsActiveNeuron (const int x, const int y,const int step)
+int __attribute__((pure,const)) IsActiveNeuron (const int x, const int y,const signed char step)
 {
-    const int test = (x % step) == 0 && (y % step) ==0;
+    const signed char test = (x % step) == 0 && (y % step) ==0;
     return (test && step > 0) || (!test && step < 0);
 }
 
@@ -203,11 +203,12 @@ int __attribute__((pure,const)) IsActiveNeuron (const int x, const int y,const i
 ///TODO: make faster - definitely room for improvement here
 void StoreFiring(layer* L)
 {
+    const signed char skip = (signed char) (L->P->skip);
     for (unsigned int x=0;x<grid_size;x++)
     {
         for (unsigned int y=0;y<grid_size;y++)
         {
-            if (IsActiveNeuron((int)x,(int)y,L->P->skip))
+            if (IsActiveNeuron((int)x,(int)y,skip))
             {
                 const unsigned int baseidx = LagIdx(x,y,L->firinglags);
                 modifyLags(L->firinglags,baseidx);

@@ -193,7 +193,7 @@ void CalcRecoverys(const Compute_float* const __restrict__ Vinput,
 //detect if a neuron is active - may be useful elsewhere - used to maintain an appropriate ratio of ex/in neurons
 //note when we have STDP, if you have one layer with skip +x and another with -x the code is massively simpler.
 //+ve skip is obvious.  -ve skip does the "inverse" of +ve skip
-int IsActiveNeuron (const int x, const int y,const int step)
+int __attribute__((pure,const)) IsActiveNeuron (const int x, const int y,const int step)
 {
     const int test = (x % step) == 0 && (y % step) ==0;
     return (test && step > 0) || (!test && step < 0);

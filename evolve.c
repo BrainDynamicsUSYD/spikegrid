@@ -204,13 +204,13 @@ int __attribute__((pure,const)) IsActiveNeuron (const int x, const int y,const s
 void StoreFiring(layer* L)
 {
     const signed char skip = (signed char) (L->P->skip);
-    for (unsigned int x=0;x<grid_size;x++)
+    for (int x=0;x<grid_size;x++)
     {
-        for (unsigned int y=0;y<grid_size;y++)
+        for (int y=0;y<grid_size;y++)
         {
-            if (IsActiveNeuron((int)x,(int)y,skip))
+            if (IsActiveNeuron(x,y,skip))
             {
-                const unsigned int baseidx = LagIdx(x,y,L->firinglags);
+                const unsigned int baseidx = LagIdx((unsigned int)x,(unsigned int)y,L->firinglags);
                 modifyLags(L->firinglags,baseidx);
                 //now - add in new spikes
                 //TODO: restore STDP spike storage
@@ -224,19 +224,19 @@ void StoreFiring(layer* L)
                     }
                     if (L->Layer_is_inhibitory == ON)
                     {
-                        AddRD((int)x,(int)y,L->connections, L->Rmat,L->Dmat,L->R,L->D);
+                        AddRD(x,y,L->connections, L->Rmat,L->Dmat,L->R,L->D);
                     }
                     else
                     {
 
-                        AddRD((int)x,(int)y,L->connections, L->Rmat,L->Dmat,L->R,L->D);
+                        AddRD(x,y,L->connections, L->Rmat,L->Dmat,L->R,L->D);
                     }
                 }//add random spikes
                 else if (L->P->potential.rate > 0 && //this check is because the compiler doesn't optimize the call to random() otherwise
                             (RandFloat() < (L->P->potential.rate*((Compute_float)0.001)*Features.Timestep)))
                 {
                     L->voltages_out[x*grid_size+y]=L->P->potential.Vpk+(Compute_float)0.1;//make sure it fires - the neuron will actually fire next timestep
-                    AddRD((int)x,(int)y,L->connections,L-> Rmat,L->Dmat,L->R,L->D);
+                    AddRD(x,y,L->connections,L-> Rmat,L->Dmat,L->R,L->D);
                 }
             }
             else //non-active neurons never get to fire

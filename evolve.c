@@ -82,14 +82,7 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
                     }
                     if (newlagidx != lagidx) //only fire if we had a spike.
                     {
-                        if (Features.STDP==OFF)
-                        {
-                            evolvept((int)x,(int)y,L.connections,excstr,inhstr,gE,gI); //side note evolvegen doesn't currently work with singlelayer - should probably fix
-                        }
-                        else
-                        {
-                            // THIS DOESN'T WORK FOR STDP==ON!
-                        }
+                        evolvept((int)x,(int)y,L.connections,excstr,inhstr,gE,gI); // No support for STDP in single layer  
                     }
             }
             else // Dual layer
@@ -118,11 +111,12 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
                         evolvept_duallayer_STDP((int)x,(int)y,L.connections,L.STDP_data->connections,str,(L.Layer_is_inhibitory?gI:gE));
                     }
                 }
+                if (Features.Random_connections == ON )
+                {
+                    RandSpikes(x,y,L,gE,gI,str);
+                }
             } 
-            // if (Features.Random_connections == ON )
-            // {
-            //    RandSpikes(x,y,L,gE,gI,str);
-            // }
+
         }
     }
 }

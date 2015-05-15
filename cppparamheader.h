@@ -28,6 +28,9 @@ typedef struct
     const on_off Testing;
     const Compute_float Prob1;
     const on_off TestPathChoice;
+    const on_off Periodic;
+    const Compute_float I1;
+    const Compute_float I0;
 } Stimulus_parameters;
 ///Parameters for a layer when it is the only one
 typedef struct

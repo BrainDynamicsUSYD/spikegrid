@@ -188,7 +188,14 @@ void processopts (int argc,char** argv,parameters** newparam,parameters** newpar
                         "   -f --nosegfault prevents almost all segfaults - very reliable method");
                 exit(EXIT_SUCCESS);
             case 'g':
-                createyossarianfile("yossarian.csh",Sweep);
+                if (ModelType == SINGLELAYER)
+                {
+                    createyossarianfile("yossarian.csh",Sweep,OneLayerModel,OneLayerModel);
+                }
+                else 
+                {
+                    createyossarianfile("yossarian.csh",Sweep,DualLayerModelIn,DualLayerModelEx);   
+                } 
                 exit(EXIT_SUCCESS);
             case 's':
                 {

@@ -85,6 +85,7 @@ void fixboundary(Compute_float* __restrict input)
 {   //theoretically the two sets of loops could be combined but that would be incredibly confusing
     //in particular, the left and right sides can get a     little confused
     //The zeroing is required for the D/R step
+    if (Features.Disablewrapping==ON) {return;} //as this function does wrapping, bail if it isn't on.
     //top + bottom
     for (int i=0;i<couplerange;i++)
 	{

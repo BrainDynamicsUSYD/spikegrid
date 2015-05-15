@@ -96,7 +96,7 @@ static const model_features Features =
     .STDP		= OFF, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep -
     .STD        = OFF, //               if we need any of these features we can make the changes then.
     .Timestep   = 0.1,
-    .Simlength  = 10000,
+    .Simlength  = 50000,
 
     .output = {{.method = VIDEO,.Output=5,.Delay=20, .Overlay="Trialno"},{.method=GUI,.Output=5,.Delay=10,.Overlay="Timestep"}}
 };

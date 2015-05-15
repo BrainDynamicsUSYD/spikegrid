@@ -84,13 +84,14 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
 void fixboundary(Compute_float* __restrict input)
 {   //theoretically the two sets of loops could be combined but that would be incredibly confusing
     //in particular, the left and right sides can get a     little confused
+    //The zeroing is required for the D/R step
     //top + bottom
     for (int i=0;i<couplerange;i++)
 	{
         for (int j=0;j<conductance_array_size;j++)
 		{
             input[(grid_size+i)*conductance_array_size + j] += input[i*conductance_array_size+j]; //add to bottom
-            input[i*conductance_array_size+j] = 0; 
+            input[i*conductance_array_size+j] = 0;
             input[(i+couplerange)*conductance_array_size+j] += input[(grid_size+couplerange+i)*conductance_array_size+j];//add to top
             input[(grid_size+couplerange+i)*conductance_array_size+j] = 0;
 		}
@@ -195,7 +196,7 @@ void CalcRecoverys(const Compute_float* const __restrict__ Vinput,
 //+ve skip is obvious.  -ve skip does the "inverse" of +ve skip
 int __attribute__((pure,const)) IsActiveNeuron (const int x, const int y,const signed char step)
 {
-    const signed char test = (x % step) == 0 && (y % step) ==0;
+    const char test = (x % step) == 0 && (y % step) ==0;
     return (test && step > 0) || (!test && step < 0);
 }
 
@@ -287,8 +288,9 @@ void tidylayer (layer* l,const Compute_float timemillis,const Compute_float* con
 void step1(model* m)
 {
     const Compute_float timemillis = ((Compute_float)m->timesteps) * Features.Timestep ;
-    memset(m->gE,0,sizeof(Compute_float)*conductance_array_size*conductance_array_size); //zero the gE/gI matrices so they can be reused for this timestep
-    memset(m->gI,0,sizeof(Compute_float)*conductance_array_size*conductance_array_size);
+    //this memcpy based version for initializing gE/gI is marginally slower (probably cache issues) - 
+    memcpy(m->gE,m->gEinit,sizeof(m->gE));
+    memcpy(m->gI,m->gIinit,sizeof(m->gI));
     if (Features.LocalStim==ON)
     {
         if (m->timesteps %1000 < 250) {ApplyLocalBoost(m->gE,20,20);}
@@ -308,12 +310,6 @@ void step1(model* m)
     {
         fixboundary(m->gE);
         fixboundary(m->gI);
-    }
-    // Add constant input to the conductances - note easiest to do this after wrapping - slight inefficiency with border but who cares
-    for (int i = 0;i < conductance_array_size*conductance_array_size;i++)
-    {
-        m->gE[i] += Extinput.gE0;
-        m->gI[i] += Extinput.gI0;
     }
     //from this point the GE and GI are actually fixed - as a result there is no more layer interaction - so do things sequentially to each layer
     FixRD(m->layer1.Rmat,m->layer1.R,m->layer1.Dmat,m->layer1.D,m->gE,m->gI,m->layer1.Layer_is_inhibitory);

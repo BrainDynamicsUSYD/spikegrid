@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include "init.h" //so I can find out the amount of ram to create
 #include "utils.h"
-#include "newparam.h"
 ///Creates the file for submitting the yossarian job
 /// @param outfile The output filename.
 /// @param sweep The parameter being swept over (only needed for the count to know how many jobs to submit)

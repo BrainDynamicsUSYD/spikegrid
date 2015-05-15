@@ -306,11 +306,6 @@ void step1(model* m)
     // Add spiking input to the conductances
     AddSpikes(m->layer1,m->gE,m->gI,m->timesteps);
     if (m->NoLayers==DUALLAYER) {AddSpikes(m->layer2,m->gE,m->gI,m->timesteps);}
-    if (Features.Disablewrapping==OFF)
-    {
-        fixboundary(m->gE);
-        fixboundary(m->gI);
-    }
     //from this point the GE and GI are actually fixed - as a result there is no more layer interaction - so do things sequentially to each layer
     FixRD(m->layer1.Rmat,m->layer1.R,m->layer1.Dmat,m->layer1.D,m->gE,m->gI,m->layer1.Layer_is_inhibitory);
     FixRD(m->layer2.Rmat,m->layer2.R,m->layer2.Dmat,m->layer2.D,m->gE,m->gI,m->layer2.Layer_is_inhibitory);

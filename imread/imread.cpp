@@ -109,6 +109,7 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
         if (fabs(timemodper ) < 0.01) {EndTesting(stdp,(int)(itercount - S.PreconditioningTrials),S);  }
     }
     if (timemodper < 5) { ResetVoltages(voltsin);} //reset before next period.
+
     for (int x=0;x<grid_size;x++)
     {
         for (int y=0;y<grid_size;y++)
@@ -154,3 +155,32 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
         }
     }
 }
+void ApplyContinuousStim(Compute_float* voltsin,const Compute_float timemillis,const Stimulus_parameters S,const Compute_float Timestep)
+{
+    if (cached==false) {imcache=ReadImage(S.ImagePath);cached=true;}
+    const Compute_float I0 = S.I0*Timestep;
+    const Compute_float I1 = S.I1*Timestep;
+    for (int x=0;x<grid_size;x++)
+    {
+        for (int y=0;y<grid_size;y++)
+        {
+        cv::Vec3b pixel = imcache.at<cv::Vec3b>(x,y);
+        //uncomment to print colours - not particularly helpful
+        //std::cout << x << "," << y << " " <<  pixel << std::endl;
+        //constant external input - only makes sense for Euler method
+        if (pixel == cv::Vec3b(0,127,127)) //background (olive)
+            {
+                voltsin[x*grid_size+y] += I0;
+            }
+            else if (pixel == cv::Vec3b(127,0,127)) //foreground (purple)
+            {
+                voltsin[x*grid_size+y] += I1;    
+            }
+        }
+    }
+}
+
+
+
+
+

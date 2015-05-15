@@ -111,7 +111,7 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
                         evolvept_duallayer_STDP((int)x,(int)y,L.connections,L.STDP_data->connections,str,(L.Layer_is_inhibitory?gI:gE));
                     }
                 }
-                if (Features.Random_connections == ON )
+                if (Features.Random_connections == ON ) // No support for this in single layer
                 {
                     RandSpikes(x,y,L,gE,gI,str);
                 }
@@ -136,26 +136,26 @@ void fixboundary(Compute_float* __restrict gE, Compute_float* __restrict gI)
     //in particular, the left and right sides can get a little confused
     //top + bottom
     for (int i=0;i<couplerange;i++)
-	{
+    {
         for (int j=0;j<conductance_array_size;j++)
-		{
+        {
             gE[(grid_size+i)*conductance_array_size + j] += gE[i*conductance_array_size+j]; //add to bottom
             gE[(i+couplerange)*conductance_array_size+j] += gE[(grid_size+couplerange+i)*conductance_array_size+j];//add to top
             gI[(grid_size+i)*conductance_array_size + j] += gI[i*conductance_array_size+j]; //add to bottom
             gI[(i+couplerange)*conductance_array_size+j] += gI[(grid_size+couplerange+i)*conductance_array_size+j];//add to top
-		}
-	}
+        }
+    }
     //left + right boundary condition fix
     for (int i=couplerange;i<couplerange+grid_size;i++)
-	{
+    {
         for (int j=0;j<couplerange;j++)
-		{
+        {
              gE[i*conductance_array_size +grid_size+j ]  += gE[i*conductance_array_size+j];//left
              gE[i*conductance_array_size +couplerange+j] += gE [i*conductance_array_size + grid_size+couplerange+j];//right
              gI[i*conductance_array_size +grid_size+j ]  += gI[i*conductance_array_size+j];//left
              gI[i*conductance_array_size +couplerange+j] += gI [i*conductance_array_size + grid_size+couplerange+j];//right
-		}
-	}
+        }
+    }
 }
 
 ///rhs_func used when integrating the neurons forward through time.  The actual integration is done using the midpoint method
@@ -294,7 +294,14 @@ void tidylayer (layer* l,const Compute_float timemillis,const Compute_float* con
     }
     if (Features.ImageStim==ON)
     {
-        ApplyStim(l->voltages_out,timemillis,l->P->Stim,l->P->potential.Vpk,l->STDP_data);
+        if (l->P->Stim.Periodic)
+        {
+            ApplyStim(l->voltages_out,timemillis,l->P->Stim,l->P->potential.Vpk,l->STDP_data);
+        }
+        else
+        {
+            ApplyContinuousStim(l->voltages_out,timemillis,l->P->Stim,Features.Timestep);
+        }
     }
 }
 ///Steps a model through 1 timestep - quite high-level function

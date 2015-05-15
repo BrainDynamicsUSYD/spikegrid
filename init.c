@@ -78,6 +78,10 @@ layer setuplayer(const parameters p)
         .recoverys_out      = Features.Recovery==ON?calloc(sizeof(Compute_float),grid_size*grid_size):NULL,
         .Layer_is_inhibitory = p.couple.Layertype==DUALLAYER && p.couple.Layer_parameters.dual.W<0,
         .rcinfo             = Features.Random_connections==ON?init_randconns(p.random,p.couple): NULL,
+        .Rmat               = calloc(sizeof(Compute_float),conductance_array_size*conductance_array_size),
+        .Dmat               = calloc(sizeof(Compute_float),conductance_array_size*conductance_array_size),
+        .R                  = p.couple.Layer_parameters.dual.synapse.R,
+        .D                  = p.couple.Layer_parameters.dual.synapse.D,
     };
     return L;
 }
@@ -129,8 +133,21 @@ model* setup(const parameters p,const parameters p2,const LayerNumbers lcount,co
     const layer l1  = setuplayer(p);
     const layer l2  = lcount==DUALLAYER?setuplayer(p2):l1;
     const model m   = {.layer1=l1,.layer2=l2,.NoLayers=lcount,.animal=calloc(sizeof(animal),1),.timesteps=0};
+    Compute_float* giinit = calloc(sizeof(Compute_float),conductance_array_size*conductance_array_size);
+    Compute_float* geinit = calloc(sizeof(Compute_float),conductance_array_size*conductance_array_size);
+    for (int i=0;i<grid_size;i++)
+    {
+        for (int j=0;j<grid_size;j++)
+        {
+            const int idx = Conductance_index(i,j);
+            giinit[idx]=Extinput.gI0;
+            geinit[idx]=Extinput.gE0;
+        }
+    }
     model* m2       = malloc(sizeof(m));
     memcpy(m2,&m,sizeof(m));
+    memcpy(m2->gIinit,giinit,sizeof(m2->gIinit));
+    memcpy(m2->gEinit,geinit,sizeof(m2->gEinit));
     char* buffer = malloc(1024);
     gethostname(buffer,1023);
     if (!strcmp(buffer,"headnode.physics.usyd.edu.au")&& !testing) {printf("DON'T RUN THIS CODE ON HEADNODE\n");exit(EXIT_FAILURE);}

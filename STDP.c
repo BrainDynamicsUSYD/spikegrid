@@ -179,3 +179,19 @@ Compute_float* COMangle(const  STDP_data* const S)
     }
     return ret;
 }
+Compute_float* STDP_str(const STDP_data* const S)
+{
+    Compute_float* ret = malloc(sizeof(*ret)*grid_size*grid_size);
+    for (int i=0;i<grid_size*grid_size;i++)
+    {
+        Compute_float sum = Zero;
+        for (int a=-STDP_RANGE;a<STDP_RANGE;a++)
+        {
+            for (int b=-STDP_RANGE;b<STDP_RANGE;b++)
+            {
+                sum += fabs( S->connections[i*STDP_array_size*STDP_array_size+(a+STDP_RANGE)*STDP_array_size + (b+STDP_RANGE)]);
+            }
+        }
+    }
+    return ret;
+}

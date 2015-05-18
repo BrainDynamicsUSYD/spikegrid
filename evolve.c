@@ -268,15 +268,15 @@ void StoreFiring(layer* L)
                         L->voltages_out[x*grid_size+y]=L->P->potential.Vrt;
                         L->recoverys_out[x*grid_size+y]+=L->P->recovery.Wrt;
                     }
-                    if (L->Layer_is_inhibitory == ON)
+                    if (Features.STDP==OFF)
                     {
                         AddRD(x,y,L->connections, L->Rmat,L->Dmat,L->R,L->D);
                     }
                     else
                     {
-
-                        AddRD(x,y,L->connections, L->Rmat,L->Dmat,L->R,L->D);
+                        AddRD_STDP(x,y,L->connections,L->STDP_data->connections,L->Rmat,L->Dmat,L->R,L->D);
                     }
+
                 }//add random spikes
                 else if (L->P->potential.rate > 0 && //this check is because the compiler doesn't optimize the call to random() otherwise
                             (RandFloat() < (L->P->potential.rate*((Compute_float)0.001)*Features.Timestep)))

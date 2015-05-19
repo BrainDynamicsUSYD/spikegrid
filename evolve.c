@@ -57,33 +57,31 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
     {
         for (unsigned int x=0;x<grid_size;x++)
         {
-
             const unsigned int lagidx = LagIdx(x,y,L.firinglags);
             unsigned int newlagidx = lagidx;
-            
-            if (L.Mytimecourse==NULL) // Single layer
+
+            if (L.Mytimecourse==NULL) // Single layer TODO: change this if to use something more appropriate
             {
+                Compute_float excstr = Zero;
+                Compute_float inhstr = Zero;
 
-                    Compute_float excstr = Zero;
-                    Compute_float inhstr = Zero;
-
-                    while (L.firinglags->lags[newlagidx] != -1)  //Note: I think perf might be overstating the amount of time on this line - although, if it isn't massive potential for perf improvement
+                while (L.firinglags->lags[newlagidx] != -1)  //Note: I think perf might be overstating the amount of time on this line - although, if it isn't massive potential for perf improvement
+                {
+                    Compute_float this_excstr = L.Extimecourse[L.firinglags->lags[newlagidx]];
+                    Compute_float this_inhstr = L.Intimecourse[L.firinglags->lags[newlagidx]];
+                    if (Features.STD == ON)
                     {
-                        Compute_float this_excstr = L.Extimecourse[L.firinglags->lags[newlagidx]];
-                        Compute_float this_inhstr = L.Intimecourse[L.firinglags->lags[newlagidx]];
-                        if (Features.STD == ON)
-                        {
-                            this_excstr = this_excstr * STD_str(L.P->STD,x,y,time,L.firinglags->lags[newlagidx],L.std);
-                            this_inhstr = this_inhstr * STD_str(L.P->STD,x,y,time,L.firinglags->lags[newlagidx],L.std);
-                        }
-                        newlagidx++;
-                        excstr += this_excstr;
-                        inhstr += this_inhstr;
+                        this_excstr = this_excstr * STD_str(L.P->STD,x,y,time,L.firinglags->lags[newlagidx],L.std);
+                        this_inhstr = this_inhstr * STD_str(L.P->STD,x,y,time,L.firinglags->lags[newlagidx],L.std);
                     }
-                    if (newlagidx != lagidx) //only fire if we had a spike.
-                    {
-                        evolvept((int)x,(int)y,L.connections,excstr,inhstr,gE,gI); // No support for STDP in single layer  
-                    }
+                    newlagidx++;
+                    excstr += this_excstr;
+                    inhstr += this_inhstr;
+                }
+                if (newlagidx != lagidx) //only fire if we had a spike.
+                {
+                    evolvept((int)x,(int)y,L.connections,excstr,inhstr,gE,gI); // No support for STDP in single layer
+                }
             }
             else // Dual layer
             {
@@ -108,7 +106,7 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
                 {
                     RandSpikes(x,y,L,gE,gI,str);
                 }
-            } 
+            }
 
         }
     }
@@ -325,7 +323,7 @@ void tidylayer (layer* l,const Compute_float timemillis,const Compute_float* con
     }
     if (Features.ImageStim==ON)
     {
-        if (l->P->Stim.Periodic)
+        if (l->P->Stim.Periodic==ON)
         {
             ApplyStim(l->voltages_out,timemillis,l->P->Stim,l->P->potential.Vpk,l->STDP_data);
         }
@@ -340,7 +338,7 @@ void tidylayer (layer* l,const Compute_float timemillis,const Compute_float* con
 void step1(model* m)
 {
     const Compute_float timemillis = ((Compute_float)m->timesteps) * Features.Timestep ;
-    //this memcpy based version for initializing gE/gI is marginally slower (probably cache issues) - 
+    //this memcpy based version for initializing gE/gI is marginally slower (probably cache issues) -
     memcpy(m->gE,m->gEinit,sizeof(m->gE));
     memcpy(m->gI,m->gIinit,sizeof(m->gI));
     if (Features.LocalStim==ON)

@@ -27,17 +27,19 @@ class PNGoutput : public Output
 {
     int count=0;
     protected:
+        const output_s* out;
         const tagged_array* data;
         const overlaytext* overlay;
     public:
-        PNGoutput(int,int,const tagged_array*,const char* const );
+        PNGoutput(int,int,const output_s*,const char* const );
         void DoOutput_() ;
+        void update();
 };
 class GUIoutput : public PNGoutput
 {
     const char* winname;
     public:
-        GUIoutput(int,int,  const tagged_array*, const char* const,const char* const);
+        GUIoutput(int,int,  const output_s*, const char* const,const char* const);
         void DoOutput_();
 };
 class SingleFileOutput : public Output

@@ -32,10 +32,20 @@ void Output::DoOutput()
 on_off showimages=ON;
 std::vector<Output*> outvec;
 
-PNGoutput::PNGoutput(int idxin ,const int intervalin,const tagged_array* datain,const char* const overlayin) : Output(intervalin,idxin)
+void PNGoutput::update()
 {
-   data=datain;
-    overlay = getOverlayByName(overlayin);
+    if (this->out->Updateable==ON)
+    {
+       this->data=this->out->UpdateFn(this->out->function_arg);
+    }
+}
+
+
+PNGoutput::PNGoutput(int idxin ,const int intervalin,const output_s* datain,const char* const overlayin) : Output(intervalin,idxin)
+{
+   data=datain->data.TA_data;
+   out=datain;
+   overlay = getOverlayByName(overlayin);
 }
 cv::Mat TA_toMat(const tagged_array* const data,const overlaytext* const o)
 {
@@ -76,7 +86,7 @@ void mousecb(int event,int ,int ,int , void* dummy2)
         cv::imwrite(buf,m);
     }
 }
-GUIoutput::GUIoutput(int a,int b, const tagged_array* c, const char* const d, const char* const wname) : PNGoutput(a,b,c,d)
+GUIoutput::GUIoutput(int a,int b, const output_s* c, const char* const d, const char* const wname) : PNGoutput(a,b,c,d)
 {
     if (showimages==ON)
     {
@@ -199,7 +209,7 @@ void MakeOutputs(const output_parameters* const m)
         switch (m[i].method)
         {
             case PICTURE:
-                out = new PNGoutput(i,m[i].Delay,Outputtable[m[i].Output].data.TA_data,m[i].Overlay);
+                out = new PNGoutput(i,m[i].Delay,Outputtable[m[i].Output],m[i].Overlay);
                 outvec.push_back(out);
                 break;
             case TEXT:
@@ -219,7 +229,7 @@ void MakeOutputs(const output_parameters* const m)
                 outvec.push_back(out);
                 break;
             case GUI:
-                out = new GUIoutput(i,m[i].Delay,Outputtable[m[i].Output].data.TA_data,m[i].Overlay,Outputtable[m[i].Output].name);
+                out = new GUIoutput(i,m[i].Delay,,m[i].Overlay,Outputtable[m[i].Output].name);
                 outvec.push_back(out);
                 break;
             default:

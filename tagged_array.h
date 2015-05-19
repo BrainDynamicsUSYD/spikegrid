@@ -16,5 +16,8 @@ typedef struct tagged_array{
 typedef struct fcoords {Compute_float x;Compute_float y;} fcoords;
 Compute_float* taggedarrayTocomputearray(const tagged_array input);
 unsigned int __attribute__((const)) tagged_array_size_(const tagged_array in);
-tagged_array* tagged_array_new(const volatile Compute_float* const data_, const unsigned int size_, const unsigned int offset_, const unsigned int subgrid_, const Compute_float minval_, const Compute_float maxval_);
+tagged_array* tagged_array_new(
+        const volatile Compute_float* const data_, const unsigned int size_,
+        const unsigned int offset_, const unsigned int subgrid_,
+        const Compute_float minval_, const Compute_float maxval_);
 fcoords* taggedArrayCOM(const tagged_array in);

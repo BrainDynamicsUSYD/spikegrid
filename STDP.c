@@ -6,6 +6,7 @@
 #include "STDP.h"
 #include "randconns.h"
 #include "lagstorage.h"
+#include "tagged_array.h"
 typedef struct
 {
     Compute_float Strength_increase;
@@ -179,7 +180,7 @@ Compute_float* COMangle(const  STDP_data* const S)
     }
     return ret;
 }
-Compute_float* STDP_str(const STDP_data* const S)
+Compute_float* STDP_str(const volatile Compute_float* const S) //use volatile here because the tagged array has volatile and the compiler bitches about it.  Not a real problem
 {
     Compute_float* ret = malloc(sizeof(*ret)*grid_size*grid_size);
     for (int i=0;i<grid_size*grid_size;i++)
@@ -189,9 +190,14 @@ Compute_float* STDP_str(const STDP_data* const S)
         {
             for (int b=-STDP_RANGE;b<STDP_RANGE;b++)
             {
-                sum += fabs( S->connections[i*STDP_array_size*STDP_array_size+(a+STDP_RANGE)*STDP_array_size + (b+STDP_RANGE)]);
+                sum += fabs( S[i*STDP_array_size*STDP_array_size+(a+STDP_RANGE)*STDP_array_size + (b+STDP_RANGE)]);
             }
         }
     }
     return ret;
+}
+
+tagged_array* STDP_mag(const tagged_array* const in)
+{
+    return tagged_array_new(STDP_str(in->data),in->size,in->offset,in->subgrid,in->minval,in->maxval);
 }

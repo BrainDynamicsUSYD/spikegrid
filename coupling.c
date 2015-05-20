@@ -86,6 +86,7 @@ Compute_float* Norm_couplematrix(const couple_parameters c, Compute_float* const
                     if (val < 0) {unnormed[i] *= c.normalization_parameters.mult_sep.Infactor;} else {unnormed[i] *= c.normalization_parameters.mult_sep.Exfactor;}
 
                 }
+                return unnormed;
             }
         default:
             printf("unknown normalization method\n");

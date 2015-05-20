@@ -18,13 +18,34 @@ extern "C"
 #include "../lagstorage.h"
 }
 #include "out.h" //and this is c++ again.
+
+void Output::update()
+{
+}
+void Output::DoOutput()
+{
+    this->update();
+    this->DoOutput_();
+}
+
+
 on_off showimages=ON;
 std::vector<Output*> outvec;
 
-PNGoutput::PNGoutput(int idxin ,const int intervalin,const tagged_array* datain,const char* const overlayin) : Output(intervalin,idxin)
+void PNGoutput::update()
 {
-   data=datain;
-    overlay = getOverlayByName(overlayin);
+    if (this->out->Updateable==ON)
+    {
+       this->data=this->out->UpdateFn(this->out->function_arg);
+    }
+}
+
+
+PNGoutput::PNGoutput(int idxin ,const int intervalin,const output_s* datain,const char* const overlayin) : Output(intervalin,idxin)
+{
+   data=datain->data.TA_data;
+   out=datain;
+   overlay = getOverlayByName(overlayin);
 }
 cv::Mat TA_toMat(const tagged_array* const data,const overlaytext* const o)
 {
@@ -39,7 +60,7 @@ cv::Mat TA_toMat(const tagged_array* const data,const overlaytext* const o)
     }
     return m;
 }
-void PNGoutput::DoOutput()
+void PNGoutput::DoOutput_()
 {
 #ifdef OPENCV
     count++;
@@ -65,7 +86,7 @@ void mousecb(int event,int ,int ,int , void* dummy2)
         cv::imwrite(buf,m);
     }
 }
-GUIoutput::GUIoutput(int a,int b, const tagged_array* c, const char* const d, const char* const wname) : PNGoutput(a,b,c,d)
+GUIoutput::GUIoutput(int a,int b, const output_s* c, const char* const d, const char* const wname) : PNGoutput(a,b,c,d)
 {
     if (showimages==ON)
     {
@@ -74,7 +95,7 @@ GUIoutput::GUIoutput(int a,int b, const tagged_array* c, const char* const d, co
         cvSetMouseCallback(wname,mousecb,(void*)wname);
     }
 }
-void GUIoutput::DoOutput()
+void GUIoutput::DoOutput_()
 {
     if (showimages == ON)
     {
@@ -96,7 +117,7 @@ VidOutput::VidOutput(int idxin ,const int intervalin,const tagged_array* datain,
     writer->open(buf,fourcc,60,cvSize(grid_size,grid_size),1);
     data=datain;
 }
-void VidOutput::DoOutput()
+void VidOutput::DoOutput_()
 {
 #ifdef OPENCV
     writer->write(TA_toMat(data,overlay)); //valgrind gives an error here - only on the first frame.  I don't know what causes it but can't see an obvious problem.
@@ -112,7 +133,7 @@ SingleFileOutput::SingleFileOutput(int idxin ,const int intervalin) : Output(int
    if (f==NULL) {printf("fopen failed for %s error is %s\n",buf,strerror(errno));}
 }
 TextOutput::TextOutput(int idxin,const int intervalin,const tagged_array* datain) : SingleFileOutput(idxin,intervalin) {data=datain;}
-void TextOutput::DoOutput()
+void TextOutput::DoOutput_()
 {
     Compute_float* actualdata = taggedarrayTocomputearray(*data);
     const unsigned int size = tagged_array_size_(*data);
@@ -131,7 +152,7 @@ ConsoleOutput::ConsoleOutput(int idxin,const int intervalin,const tagged_array* 
 {
     data=datain;
 }
-void ConsoleOutput::DoOutput()
+void ConsoleOutput::DoOutput_()
 {
     #ifdef OPENCV
     if (!isatty(fileno(stdout))) {return;} //if we are not outputting to a terminal - dont show pictures on console - need to add matlab detection
@@ -162,7 +183,7 @@ void ConsoleOutput::DoOutput()
 #endif
 }
 SpikeOutput::SpikeOutput(int idxin,const int intervalin, const lagstorage* datain) : SingleFileOutput(idxin,intervalin) {data=datain;}
-void SpikeOutput::DoOutput()
+void SpikeOutput::DoOutput_()
 {
     for (int i=0;i<grid_size;i++)
     {
@@ -188,7 +209,7 @@ void MakeOutputs(const output_parameters* const m)
         switch (m[i].method)
         {
             case PICTURE:
-                out = new PNGoutput(i,m[i].Delay,Outputtable[m[i].Output].data.TA_data,m[i].Overlay);
+                out = new PNGoutput(i,m[i].Delay,&Outputtable[m[i].Output],m[i].Overlay);
                 outvec.push_back(out);
                 break;
             case TEXT:
@@ -208,7 +229,7 @@ void MakeOutputs(const output_parameters* const m)
                 outvec.push_back(out);
                 break;
             case GUI:
-                out = new GUIoutput(i,m[i].Delay,Outputtable[m[i].Output].data.TA_data,m[i].Overlay,Outputtable[m[i].Output].name);
+                out = new GUIoutput(i,m[i].Delay,&Outputtable[m[i].Output] ,m[i].Overlay,Outputtable[m[i].Output].name);
                 outvec.push_back(out);
                 break;
             default:

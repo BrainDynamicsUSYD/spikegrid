@@ -70,3 +70,31 @@ fcoords* taggedArrayCOM(const tagged_array in)
     }
     return out;
 }
+Compute_float tagged_arrayMAX(const tagged_array in)
+{
+    const unsigned int size = tagged_array_size_(in);
+    Compute_float ret = 0;
+    for (unsigned int i=0;i<size;i++)
+    {
+        for (unsigned int j=0;j<size;j++)
+        {
+            if (in.data[i*size+j]>ret) {ret=in.data[i*size+j];}
+
+        }
+    }
+    return ret;
+}
+Compute_float tagged_arrayMIN(const tagged_array in)
+{
+    const unsigned int size = tagged_array_size_(in);
+    Compute_float ret = 0;
+    for (unsigned int i=0;i<size;i++)
+    {
+        for (unsigned int j=0;j<size;j++)
+        {
+            if (in.data[i*size+j]<ret) {ret=in.data[i*size+j];}
+
+        }
+    }
+    return ret;
+}

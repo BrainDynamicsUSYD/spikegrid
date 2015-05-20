@@ -9,8 +9,9 @@
 #include "output.h"
 #include "tagged_array.h"
 #include "mymath.h"
+//TODO: This file might work better as C++ (maybe)
 ///Total number of things to be output - occasionally needs to be incremented
-#define output_count   19
+#define output_count   20
 #define overlay_count  3
 //outptu holds an open reference to the model - this enables the mini functions to work
 const model* modelref; //MASSIVE HACK
@@ -45,7 +46,7 @@ overlaytext* __attribute__((pure)) getOverlayByName(const char* const name)
     }
     return NULL;
 }
-int __attribute__((pure)) Trialno()  
+int __attribute__((pure)) Trialno()
 {
     return (int) floor(modelref->timesteps * Features.Timestep /modelref->layer1.P->Stim.timeperiod - modelref->layer1.P->Stim.PreconditioningTrials)  ;
 }
@@ -59,7 +60,7 @@ void output_init(const model* const m)
     //WHEN YOU ADD SOMETHING - INCREASE OUTPUT_COUNT AT TOP OF FILE;
     //ALSO - only add things to the end of the array
     output_s* outdata=(output_s[]){ //note - neat feature - missing elements initailized to 0
-        //Name          data type                  actual data                size                    offset     8bz634
+        //Name          data type                  actual data                size                    offset
         //subgrid,minval,maxval
         {"gE",          FLOAT_DATA, .data.TA_data=tagged_array_new(m->gE,                     conductance_array_size, couplerange,   1,0,2)}, //gE is a 'large' matrix - as it wraps around the edges
         {"gI",          FLOAT_DATA, .data.TA_data=tagged_array_new(m->gI,                     conductance_array_size, couplerange,   1,0,2)}, //gI is a 'large' matrix - as it wraps around the edges
@@ -77,6 +78,11 @@ void output_init(const model* const m)
         {"STDP2",       FLOAT_DATA, .data.TA_data=tagged_array_new(Features.STDP==ON?m->layer2.STDP_data->connections:NULL,grid_size,0,couple_array_size,-0.01,0.01)},
         {"Spike1",      SPIKE_DATA, .data.Lag_data=m->layer1.firinglags},
         {"Spike2",      SPIKE_DATA, .data.Lag_data=m->layer2.firinglags},
+        {"STDP_map",    FLOAT_DATA,
+            .data.TA_data =tagged_array_new(m->layer2.STDP_data->connections,grid_size,0,1,-0.01,0.01),
+            .Updateable=ON, .UpdateFn=&STDP_mag,
+            .function_arg =tagged_array_new(m->layer2.STDP_data->connections,grid_size,0,1,-0.01,0.01)
+        },
         {.name={0}}};         //a marker that we are at the end of the outputabbles list
     output_s* malloced = malloc(sizeof(output_s)*output_count);
     memcpy(malloced,outdata,sizeof(output_s)*output_count);

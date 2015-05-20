@@ -198,7 +198,7 @@ Compute_float* STDP_str(const volatile Compute_float* const S) //use volatile he
     return ret;
 }
 
-tagged_array* STDP_mag(const tagged_array* const in)
+tagged_array* STDP_mag(const tagged_array* const in) //TODO: leaks like crazy - probably not too awful though
 {
     tagged_array* T = tagged_array_new(STDP_str(in->data),in->size,in->offset,in->subgrid,in->minval,in->maxval);
     Compute_float max = tagged_arrayMAX(*T);

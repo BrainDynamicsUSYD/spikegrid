@@ -193,11 +193,15 @@ Compute_float* STDP_str(const volatile Compute_float* const S) //use volatile he
                 sum += fabs( S[i*STDP_array_size*STDP_array_size+(a+STDP_RANGE)*STDP_array_size + (b+STDP_RANGE)]);
             }
         }
+        ret[i]=sum;
     }
     return ret;
 }
 
 tagged_array* STDP_mag(const tagged_array* const in)
 {
-    return tagged_array_new(STDP_str(in->data),in->size,in->offset,in->subgrid,in->minval,in->maxval);
+    tagged_array* T = tagged_array_new(STDP_str(in->data),in->size,in->offset,in->subgrid,in->minval,in->maxval);
+    Compute_float max = tagged_arrayMAX(*T);
+    Compute_float min = tagged_arrayMIN(*T);
+    return tagged_array_new(T->data,in->size,in->offset,in->subgrid,min,max);
 }

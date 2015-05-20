@@ -209,7 +209,7 @@ void MakeOutputs(const output_parameters* const m)
         switch (m[i].method)
         {
             case PICTURE:
-                out = new PNGoutput(i,m[i].Delay,Outputtable[m[i].Output],m[i].Overlay);
+                out = new PNGoutput(i,m[i].Delay,&Outputtable[m[i].Output],m[i].Overlay);
                 outvec.push_back(out);
                 break;
             case TEXT:
@@ -229,7 +229,7 @@ void MakeOutputs(const output_parameters* const m)
                 outvec.push_back(out);
                 break;
             case GUI:
-                out = new GUIoutput(i,m[i].Delay,,m[i].Overlay,Outputtable[m[i].Output].name);
+                out = new GUIoutput(i,m[i].Delay,&Outputtable[m[i].Output] ,m[i].Overlay,Outputtable[m[i].Output].name);
                 outvec.push_back(out);
                 break;
             default:

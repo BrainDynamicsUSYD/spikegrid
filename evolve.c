@@ -214,11 +214,13 @@ void StoreFiring(layer* L)
             {
                 const unsigned int baseidx = LagIdx((unsigned int)x,(unsigned int)y,L->firinglags);
                 modifyLags(L->firinglags,baseidx);
+                if (Features.STDP==ON) {modifyLags(L->STDP_data->lags,LagIdx(x,y,L->STDP_data->lags));}
                 //now - add in new spikes
                 //TODO: restore STDP spike storage
                 if (L->voltages_out[x*grid_size + y]  >= L->P->potential.Vpk)
                 {
                     AddnewSpike(L->firinglags,baseidx);
+                    if (Features.STDP==ON && L->STDP_data->RecordSpikes==ON) {AddnewSpike(L->STDP_data->lags,LagIdx(x,y,L->STDP_data->lags));}
                     if (Features.Recovery==ON) //reset recovery if needed.  Note recovery has no refractory period so a reset is required
                     {
                         L->voltages_out[x*grid_size+y]=L->P->potential.Vrt;

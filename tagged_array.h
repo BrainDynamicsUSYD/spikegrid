@@ -21,3 +21,6 @@ tagged_array* tagged_array_new(
         const unsigned int offset_, const unsigned int subgrid_,
         const Compute_float minval_, const Compute_float maxval_);
 fcoords* taggedArrayCOM(const tagged_array in);
+
+Compute_float tagged_arrayMAX(const tagged_array in);
+Compute_float tagged_arrayMIN(const tagged_array in);

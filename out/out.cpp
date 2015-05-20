@@ -6,7 +6,6 @@
 #include <vector>
 #include <iostream>
 #include <unistd.h>
-#include "opencv2/core/core.hpp" //core opencv
 #include "opencv2/highgui/highgui.hpp" //for video writer
 #include "stdio.h"
 #include "../openCVAPI/api.h" //this is c++

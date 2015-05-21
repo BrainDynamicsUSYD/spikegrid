@@ -312,6 +312,13 @@ void tidylayer (layer* l,const Compute_float timemillis,const Compute_float* con
     if (Features.Recovery==OFF)
     {
         CalcVoltages(l->voltages,gE ,gI,l->P->potential,l->voltages_out);
+        if (Features.ImageStim==ON) //Dodgy fudge
+        {
+            if (!(l->P->Stim.Periodic))
+            {
+            ApplyContinuousStim(l->voltages_out,timemillis,l->P->Stim,Features.Timestep,l->Phimat);
+            }
+        }
         RefractoryVoltages(l->voltages_out,l->P->couple,l->firinglags,l->P->potential);
     }
     else
@@ -328,10 +335,6 @@ void tidylayer (layer* l,const Compute_float timemillis,const Compute_float* con
         if (l->P->Stim.Periodic)
         {
             ApplyStim(l->voltages_out,timemillis,l->P->Stim,l->P->potential.Vpk,l->STDP_data);
-        }
-        else
-        {
-            ApplyContinuousStim(l->voltages_out,timemillis,l->P->Stim,Features.Timestep);
         }
     }
 }

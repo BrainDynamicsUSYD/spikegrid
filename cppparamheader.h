@@ -29,8 +29,10 @@ typedef struct
     const Compute_float Prob1;
     const on_off TestPathChoice;
     const on_off Periodic;
+    const Compute_float I2;
     const Compute_float I1;
     const Compute_float I0;
+    const Compute_float mu;
 } Stimulus_parameters;
 ///Parameters for a layer when it is the only one
 typedef struct

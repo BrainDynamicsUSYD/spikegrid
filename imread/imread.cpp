@@ -155,11 +155,12 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
         }
     }
 }
-void ApplyContinuousStim(Compute_float* voltsin,const Compute_float timemillis,const Stimulus_parameters S,const Compute_float Timestep)
+void ApplyContinuousStim(Compute_float* voltsin,const Compute_float timemillis,const Stimulus_parameters S,const Compute_float Timestep,const Compute_float* Phimat)
 {
     if (cached==false) {imcache=ReadImage(S.ImagePath);cached=true;}
     const Compute_float I0 = S.I0*Timestep;
     const Compute_float I1 = S.I1*Timestep;
+    const Compute_float I2 = S.I2*Timestep;
     for (int x=0;x<grid_size;x++)
     {
         for (int y=0;y<grid_size;y++)
@@ -171,14 +172,17 @@ void ApplyContinuousStim(Compute_float* voltsin,const Compute_float timemillis,c
         if (pixel == cv::Vec3b(0,127,127)) //background (olive)
             {
                 voltsin[x*grid_size+y] += I0;
+                voltsin[x*grid_size+y] += I1*cos(2*M_PI*S.mu*timemillis+Phimat[x*grid_size+y]); //Need to code mu and phi
             }
             else if (pixel == cv::Vec3b(127,0,127)) //foreground (purple)
             {
-                voltsin[x*grid_size+y] += I1;    
+                voltsin[x*grid_size+y] += I2;    
             }
         }
     }
 }
+
+
 
 
 

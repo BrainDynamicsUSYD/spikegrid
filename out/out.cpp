@@ -31,7 +31,7 @@ void Output::DoOutput()
 on_off showimages=ON;
 std::vector<Output*> outvec;
 
-void PNGoutput::update()
+void TAOutput::update()
 {
     if (this->out->Updateable==ON)
     {
@@ -39,11 +39,13 @@ void PNGoutput::update()
     }
 }
 
-
-PNGoutput::PNGoutput(int idxin ,const int intervalin,const output_s* datain,const char* const overlayin) : Output(intervalin,idxin)
+TAOutput::TAOutput(int idxin,const int intervalin,const output_s* datain) : Output(intervalin,idxin)
 {
-   data=datain->data.TA_data;
-   out=datain;
+    data=datain->data.TA_data;
+    out=datain;
+}
+PNGoutput::PNGoutput(int idxin ,const int intervalin,const output_s* datain,const char* const overlayin) : TAOutput(idxin,intervalin,datain)
+{
    overlay = getOverlayByName(overlayin);
 }
 cv::Mat TA_toMat(const tagged_array* const data,const overlaytext* const o)
@@ -106,7 +108,7 @@ void GUIoutput::DoOutput_()
         cv::waitKey(10); //TODO: move this somewhere else
     }
 }
-VidOutput::VidOutput(int idxin ,const int intervalin,const tagged_array* datain,const char* const overlayin) : Output(intervalin,idxin)
+VidOutput::VidOutput(int idxin ,const int intervalin,const output_s* datain,const char* const overlayin) : TAOutput(idxin,intervalin,datain)
 {
     overlay = getOverlayByName(overlayin);
     char buf[100];
@@ -114,7 +116,6 @@ VidOutput::VidOutput(int idxin ,const int intervalin,const tagged_array* datain,
     int fourcc = CV_FOURCC('H','F','Y','U');
     writer = new cv::VideoWriter();
     writer->open(buf,fourcc,60,cvSize(grid_size,grid_size),1);
-    data=datain;
 }
 void VidOutput::DoOutput_()
 {
@@ -147,9 +148,8 @@ void TextOutput::DoOutput_()
     fflush(f);//prevents stalling in matlab
     free(actualdata);
 }
-ConsoleOutput::ConsoleOutput(int idxin,const int intervalin,const tagged_array* datain) : Output(intervalin,idxin)
+ConsoleOutput::ConsoleOutput(int idxin,const int intervalin,const output_s* datain) : TAOutput(idxin,intervalin,datain)
 {
-    data=datain;
 }
 void ConsoleOutput::DoOutput_()
 {
@@ -216,7 +216,7 @@ void MakeOutputs(const output_parameters* const m)
                 outvec.push_back(out);
                 break;
             case CONSOLE:
-                out = new ConsoleOutput(i,m[i].Delay,Outputtable[m[i].Output].data.TA_data);
+                out = new ConsoleOutput(i,m[i].Delay,&Outputtable[m[i].Output]);
                 outvec.push_back(out);
                 break;
             case SPIKES:
@@ -224,7 +224,7 @@ void MakeOutputs(const output_parameters* const m)
                 outvec.push_back(out);
                 break;
             case VIDEO:
-                out = new VidOutput(i,m[i].Delay,Outputtable[m[i].Output].data.TA_data,m[i].Overlay);
+                out = new VidOutput(i,m[i].Delay,&Outputtable[m[i].Output],m[i].Overlay);
                 outvec.push_back(out);
                 break;
             case GUI:

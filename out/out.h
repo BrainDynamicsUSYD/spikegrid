@@ -22,18 +22,25 @@ class Output
         int GetIdx() const {return idx;}
         virtual ~Output() {};
 };
+
+class TAOutput : public Output
+{
+    const output_s* out;
+    protected:
+        const tagged_array* data;
+    public:
+        TAOutput(int,int,const output_s*);
+        void update();
+};
 /// outputs to series of pictures
-class PNGoutput : public Output
+class PNGoutput : public TAOutput
 {
     int count=0;
     protected:
-        const output_s* out;
-        const tagged_array* data;
         const overlaytext* overlay;
     public:
         PNGoutput(int,int,const output_s*,const char* const );
         void DoOutput_() ;
-        void update();
 };
 class GUIoutput : public PNGoutput
 {
@@ -50,27 +57,25 @@ class SingleFileOutput : public Output
         SingleFileOutput(int,int );
         virtual void DoOutput_() {};
 };
-class VidOutput: public Output //This class probably needs a destructor to end the video.  Vlc will probably handle the file just fine though.
+class VidOutput: public TAOutput //This class probably needs a destructor to end the video.  Vlc will probably handle the file just fine though.
 {
-    const tagged_array* data;
     const overlaytext* overlay;
     cv::VideoWriter* writer;
     public:
-        VidOutput(int,int,const tagged_array*,const char* const);
+        VidOutput(int,int,const output_s*,const char* const);
         void DoOutput_();
 };
-class TextOutput : public SingleFileOutput
+class TextOutput : public SingleFileOutput //maybe this should inherit from TAoutput - unclear here
 {
     const tagged_array* data;
     public:
         TextOutput(int,int,const tagged_array* );
         void DoOutput_() ;
 };
-class ConsoleOutput: public Output
+class ConsoleOutput: public TAOutput
 {
-    const tagged_array* data;
     public:
-        ConsoleOutput(int,int,const tagged_array*);
+        ConsoleOutput(int,int,const output_s*);
         void DoOutput_();
 };
 class SpikeOutput: public SingleFileOutput

@@ -18,6 +18,7 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
 STDP_data* STDP_init(const STDP_parameters* const S,const int trefrac_in_ts);
 Compute_float* COMangle(const  STDP_data* const S);
 
+void STDP_decay(const  STDP_data* const S);
 tagged_array* STDP_mag(const tagged_array* const in);
 #ifdef TESTING //for unit testing the code
 int __attribute__((pure,const)) wrap (int n);

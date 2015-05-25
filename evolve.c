@@ -334,6 +334,11 @@ void tidylayer (layer* l,const Compute_float timemillis,const Compute_float* con
             ApplyContinuousStim(l->voltages_out,timemillis,l->P->Stim,Features.Timestep);
         }
     }
+    if (l->P->STDP.STDP_decay_frequency>0 && (int)(timemillis/Features.Timestep) % l->P->STDP.STDP_decay_frequency == 0)
+    {
+        STDP_decay(l->STDP_data);
+    }
+
 }
 ///Steps a model through 1 timestep - quite high-level function
 ///This is the only function in the file that needs model.h

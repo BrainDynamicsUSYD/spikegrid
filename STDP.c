@@ -180,6 +180,20 @@ Compute_float* COMangle(const  STDP_data* const S)
     }
     return ret;
 }
+void STDP_decay(const  STDP_data* const S)
+{
+    Compute_float* ret = malloc(sizeof(*ret)*grid_size*grid_size);
+    for (int i=0;i<grid_size*grid_size;i++)
+    {
+        for (int a=-STDP_RANGE;a<STDP_RANGE;a++)
+        {
+            for (int b=-STDP_RANGE;b<STDP_RANGE;b++)
+            {
+               S->connections[i*STDP_array_size*STDP_array_size+(a+STDP_RANGE)*STDP_array_size + (b+STDP_RANGE)] *= S->P->STDP_decay_factor;
+            }
+        }
+    }
+}
 Compute_float* STDP_str(const volatile Compute_float* const S) //use volatile here because the tagged array has volatile and the compiler bitches about it.  Not a real problem
 {
     Compute_float* ret = malloc(sizeof(*ret)*grid_size*grid_size);

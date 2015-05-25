@@ -69,6 +69,7 @@ void CreateStims(const Compute_float timemodper,const Stimulus_parameters S,cons
     stim1choice = RandFloat() > S.NoUSprob;
     if (stim1choice && (int)itercount > lastonesfire) {onesfire++;lastonesfire=(int)itercount; printf("increase\n");}
 }
+//TODO: this function is getting ridiculously long - needs to be tidied up.
 void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimulus_parameters S,const Compute_float threshold, STDP_data* stdp)
 {
     if (cached==false) {imcache=ReadImage(S.ImagePath);cached=true;}
@@ -83,12 +84,39 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
         {
             lastset=timemillis;
             printf("picking path\n");
-            path1 = (RandFloat() < S.Prob1) && itercount < 21;
-            counts1 += path1==true?1:0;
-            if ((int)itercount==21) {fire1=false;fire2=false;}
-            if ((int)itercount==22) {printf("%i %i %i\n",counts1,fire1,fire2);exit(EXIT_SUCCESS);}
+            if (S.Oscillating_path==ON)
+            {
+                if (fmod(itercount/S.path_osc_freq,2)<1)  //are we on left / right branch
+                {
+                    path1=true;
+                    path2=false;
+                }
+                else
+                {
+                    path1=false;
+                    path2=true;
+                }
+                if (fmod(itercount,S.path_osc_freq)> S.path_osc_freq-1)
+                {
+                    path1 = false;
+                    path2 = false;
+                    fire1 = false;
+                    fire2 = false;
+                }
+                if (fmod(itercount,S.path_osc_freq)==0)
+                {
+                    printf ("Res: %i %i\n",fire1,fire2);
+                }
+            }
+            else
+            {
+                path1 = (RandFloat() < S.Prob1) && itercount < 21;
+                counts1 += path1==true?1:0;
+                if ((int)itercount==21) {fire1=false;fire2=false;}
+                if ((int)itercount==22) {printf("%i %i %i\n",counts1,fire1,fire2);exit(EXIT_SUCCESS);}
+                path2 = !path1 && itercount < 21;
+            }
         }
-        path2 = !path1 && itercount < 21;
     }
     else
     {

@@ -31,6 +31,8 @@ typedef struct
     const on_off Periodic;
     const Compute_float I1;
     const Compute_float I0;
+    const on_off Oscillating_path;
+    const Compute_float path_osc_freq;
 } Stimulus_parameters;
 ///Parameters for a layer when it is the only one
 typedef struct

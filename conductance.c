@@ -259,7 +259,7 @@ int main(int argc,char** argv) //useful for testing w/out matlab
             while (m->timesteps<Features.Simlength)
             {
 
-                if (m->timesteps%10==0){printf("%i\n",m->timesteps);}
+                if (m->timesteps%100==0){printf("%i\n",m->timesteps);}
                 step_(FirstV,SecondV,FirstW,SecondW);//always fine to pass an extra argument here
                 //copy the output to be new input - this does seem slightly inelegant.  There is definitely room for improvement here
                 memcpy ( FirstV, m->layer1.voltages_out, sizeof ( Compute_float)*grid_size*grid_size);

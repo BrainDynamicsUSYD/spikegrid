@@ -45,7 +45,7 @@ static const parameters OneLayerModel = {.couple={0}}; //since unused - shortes 
         .stdp_limit=0.5,    \
         .stdp_tau=20,       \
         .stdp_strength=0.0001,  \
-        .STDP_on=ON\
+        .STDP_on=ON,\
         .STDP_decay_factor=0.9,\
         .STDP_decay_frequency=1000,\
     }

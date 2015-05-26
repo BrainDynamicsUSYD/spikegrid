@@ -60,6 +60,7 @@ void EndTesting(STDP_data* S, const int trialno,const Stimulus_parameters Stim)
     }
 }
 bool path1;
+bool path2; //make compiler happy - need to redo this whole function anyway
 int  counts1;
 Compute_float lastset;
 bool stim1choice=true;
@@ -77,13 +78,11 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
     const Compute_float itercount = timemillis/S.timeperiod;
     if (itercount < 1.0  && S.TestPathChoice) {return;} //do nothing in first period- in test path mode the first period fails so skip over it - is pretty short anyway as no testing
 
-    bool path2=false; //make compiler happy - need to redo this whole function anyway
     if (S.TestPathChoice)
     {
         if (timemodper < 0.001 && fabs(timemillis - lastset) > 0.01)
         {
             lastset=timemillis;
-            printf("picking path\n");
             if (S.Oscillating_path==ON)
             {
                 if (fmod(itercount/S.path_osc_freq,2)<1)  //are we on left / right branch
@@ -96,14 +95,14 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
                     path1=false;
                     path2=true;
                 }
-                if (fmod(itercount,S.path_osc_freq)> S.path_osc_freq-1)
+                if (fmod(itercount,2)< 1)
                 {
                     path1 = false;
                     path2 = false;
                     fire1 = false;
                     fire2 = false;
                 }
-                if (fmod(itercount,S.path_osc_freq)==0)
+                if (fmod(itercount,2)==1)
                 {
                     printf ("Res: %i %i\n",fire1,fire2);
                 }

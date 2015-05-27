@@ -101,10 +101,12 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
                     path2 = false;
                     fire1 = false;
                     fire2 = false;
+                    stdp->RecordSpikes = OFF;
                 }
                 if (fmod(itercount,2)==1)
                 {
                     printf ("Res: %i %i\n",fire1,fire2);
+                    stdp->RecordSpikes = ON;
                 }
             }
             else
@@ -127,6 +129,7 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
         }
 
     }
+    if (S.Oscillating_path==ON) {if (path1==false && path2==false) {stdp->RecordSpikes=OFF;} else {stdp->RecordSpikes=ON;}}
     const bool stim1 = ((fabs(timemodper-80.0)<.01 && stim1choice) && itercount >= S.PreconditioningTrials)  ;  //late wave
     const bool stim2 =  fabs(timemodper-80.0 + S.lag)<.01  || fabs (timemodper-220 - 5 )<.01; //early wave - issues twice - first is normal, second is test trial.
 

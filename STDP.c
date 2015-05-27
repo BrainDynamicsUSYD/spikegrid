@@ -182,7 +182,6 @@ Compute_float* COMangle(const  STDP_data* const S)
 }
 void STDP_decay(const  STDP_data* const S)
 {
-    Compute_float* ret = malloc(sizeof(*ret)*grid_size*grid_size);
     for (int i=0;i<grid_size*grid_size;i++)
     {
         for (int a=-STDP_RANGE;a<STDP_RANGE;a++)

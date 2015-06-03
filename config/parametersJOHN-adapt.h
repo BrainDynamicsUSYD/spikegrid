@@ -44,7 +44,7 @@ static const parameters OneLayerModel = {.couple={0}}; //since unused - shortes 
     {                       \
         .stdp_limit=0.5,    \
         .stdp_tau=20,       \
-        .stdp_strength=0.0001,  \
+        .stdp_strength=0.001,  \
         .STDP_on=ON,\
         .STDP_decay_factor=0.9,\
         .STDP_decay_frequency=1000,\
@@ -136,7 +136,7 @@ static const model_features Features =
 static const extinput Extinput =
 {
     .gE0 = 0.000,
-    .gI0 = 0.15,
+    .gI0 = 0.18,
 };
 ///Parameters for conducting a parameter sweep.
 static const sweepable Sweep =

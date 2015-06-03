@@ -28,6 +28,14 @@ void createyossarianfile (const char* const outfile,const sweepable sweep,const 
 "#PBS -V\n"
 "#PBS -t 0-%i\n"
 "cd %s\n"
-"./a.out -n -s $PBS_ARRAYID\n",MemInMB,cwd,sweep.count,cwd);
+,MemInMB,cwd,sweep.count,cwd);
+    if (sweep.count > 0)
+    {
+        fprintf(file,"./a.out -n -s $PBS_ARRAYID\n");
+    }
+    else
+    {
+        fprintf(file,"./a.out -n\n");
+    }
     fclose(file);
 }

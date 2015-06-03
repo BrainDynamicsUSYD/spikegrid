@@ -169,12 +169,12 @@ void ApplyContinuousStim(Compute_float* voltsin,const Compute_float timemillis,c
         //uncomment to print colours - not particularly helpful
         //std::cout << x << "," << y << " " <<  pixel << std::endl;
         //constant external input - only makes sense for Euler method
-        if (pixel == cv::Vec3b(0,127,127)) //background (olive)
+        if (pixel == cv::Vec3b(0,106,127)) //0,127,127: background (olive - 128,128,0 in GIMP)
             {
                 voltsin[x*grid_size+y] += I0;
                 voltsin[x*grid_size+y] += I1*cos(2*M_PI*S.mu*timemillis+Phimat[x*grid_size+y]); //Need to code mu and phi
             }
-            else if (pixel == cv::Vec3b(127,0,127)) //foreground (purple)
+            else if (pixel == cv::Vec3b(127,0,87)) //127,0,127:foreground (purple - 128,0,128 in GIMP)
             {
                 voltsin[x*grid_size+y] += I2;    
             }

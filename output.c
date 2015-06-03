@@ -79,9 +79,9 @@ void output_init(const model* const m)
         {"Spike1",      SPIKE_DATA, .data.Lag_data=m->layer1.firinglags},
         {"Spike2",      SPIKE_DATA, .data.Lag_data=m->layer2.firinglags},
         {"STDP_map",    FLOAT_DATA,
-            .data.TA_data =tagged_array_new(m->layer2.STDP_data->connections,grid_size,0,1,-0.01,0.01),
+            .data.TA_data =Features.STDP==ON?tagged_array_new(m->layer2.STDP_data->connections,grid_size,0,1,-0.01,0.01):NULL,
             .Updateable=ON, .UpdateFn=&STDP_mag,
-            .function_arg =tagged_array_new(m->layer2.STDP_data->connections,grid_size,0,1,-0.01,0.01)
+            .function_arg =Features.STDP==ON?tagged_array_new(m->layer2.STDP_data->connections,grid_size,0,1,-0.01,0.01):NULL
         },
         {.name={0}}};         //a marker that we are at the end of the outputabbles list
     output_s* malloced = malloc(sizeof(output_s)*output_count);

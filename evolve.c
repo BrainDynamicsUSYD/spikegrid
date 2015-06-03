@@ -60,30 +60,30 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
 
             const unsigned int lagidx = LagIdx(x,y,L.firinglags);
             unsigned int newlagidx = lagidx;
-            
+
             if (L.Mytimecourse==NULL) // Single layer
             {
 
-                    Compute_float excstr = Zero;
-                    Compute_float inhstr = Zero;
+                Compute_float excstr = Zero;
+                Compute_float inhstr = Zero;
 
-                    while (L.firinglags->lags[newlagidx] != -1)  //Note: I think perf might be overstating the amount of time on this line - although, if it isn't massive potential for perf improvement
+                while (L.firinglags->lags[newlagidx] != -1)  //Note: I think perf might be overstating the amount of time on this line - although, if it isn't massive potential for perf improvement
+                {
+                    Compute_float this_excstr = L.Extimecourse[L.firinglags->lags[newlagidx]];
+                    Compute_float this_inhstr = L.Intimecourse[L.firinglags->lags[newlagidx]];
+                    if (Features.STD == ON)
                     {
-                        Compute_float this_excstr = L.Extimecourse[L.firinglags->lags[newlagidx]];
-                        Compute_float this_inhstr = L.Intimecourse[L.firinglags->lags[newlagidx]];
-                        if (Features.STD == ON)
-                        {
-                            this_excstr = this_excstr * STD_str(L.P->STD,x,y,time,L.firinglags->lags[newlagidx],L.std);
-                            this_inhstr = this_inhstr * STD_str(L.P->STD,x,y,time,L.firinglags->lags[newlagidx],L.std);
-                        }
-                        newlagidx++;
-                        excstr += this_excstr;
-                        inhstr += this_inhstr;
+                        this_excstr = this_excstr * STD_str(L.P->STD,x,y,time,L.firinglags->lags[newlagidx],L.std);
+                        this_inhstr = this_inhstr * STD_str(L.P->STD,x,y,time,L.firinglags->lags[newlagidx],L.std);
                     }
-                    if (newlagidx != lagidx) //only fire if we had a spike.
-                    {
-                        evolvept((int)x,(int)y,L.connections,excstr,inhstr,gE,gI); // No support for STDP in single layer  
-                    }
+                    newlagidx++;
+                    excstr += this_excstr;
+                    inhstr += this_inhstr;
+                }
+                if (newlagidx != lagidx) //only fire if we had a spike.
+                {
+                    evolvept((int)x,(int)y,L.connections,excstr,inhstr,gE,gI); // No support for STDP in single layer  
+                }
             }
             else // Dual layer
             {
@@ -133,25 +133,25 @@ void fixboundary(Compute_float* __restrict input)
     for (int i=0;i<couplerange;i++)
     {
         for (int j=0;j<conductance_array_size;j++)
-		{
+        {
             input[(grid_size+i)*conductance_array_size + j] += input[i*conductance_array_size+j]; //add to bottom
             input[i*conductance_array_size+j] = 0;
             input[(i+couplerange)*conductance_array_size+j] += input[(grid_size+couplerange+i)*conductance_array_size+j];//add to top
             input[(grid_size+couplerange+i)*conductance_array_size+j] = 0;
-		}
-	}
+        }
+    }
     //left + right boundary condition fix
     for (int i=couplerange;i<couplerange+grid_size;i++)
     {
         for (int j=0;j<couplerange;j++)
 
-		{
-             input[i*conductance_array_size    +grid_size+j ]  += input[i*conductance_array_size+j];//left
-             input[i*conductance_array_size+j]=0;//left
-             input[i*conductance_array_size +couplerange+j] += input [i*conductance_array_size + grid_size+couplerange+j];//right
-             input [i*conductance_array_size + grid_size+couplerange+j]=0;//right
-		}
-	}
+        {
+            input[i*conductance_array_size    +grid_size+j ]  += input[i*conductance_array_size+j];//left
+            input[i*conductance_array_size+j]=0;//left
+            input[i*conductance_array_size +couplerange+j] += input [i*conductance_array_size + grid_size+couplerange+j];//right
+            input [i*conductance_array_size + grid_size+couplerange+j]=0;//right
+        }
+    }
 }
 //Ideally we change things so that this isn't required - maybe an inline function to get gE/gI using Rvalues
 //note - we need to use the normalised D/R values when we add the initial numbner

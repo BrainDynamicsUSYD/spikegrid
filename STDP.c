@@ -6,6 +6,7 @@
 #include "STDP.h"
 #include "randconns.h"
 #include "lagstorage.h"
+#include "tagged_array.h"
 typedef struct
 {
     Compute_float Strength_increase;
@@ -178,4 +179,42 @@ Compute_float* COMangle(const  STDP_data* const S)
         if (ysum >0) {ret[i]=1;} else {ret[i]=-1;}
     }
     return ret;
+}
+void STDP_decay(const  STDP_data* const S)
+{
+    for (int i=0;i<grid_size*grid_size;i++)
+    {
+        for (int a=-STDP_RANGE;a<STDP_RANGE;a++)
+        {
+            for (int b=-STDP_RANGE;b<STDP_RANGE;b++)
+            {
+               S->connections[i*STDP_array_size*STDP_array_size+(a+STDP_RANGE)*STDP_array_size + (b+STDP_RANGE)] *= S->P->STDP_decay_factor;
+            }
+        }
+    }
+}
+Compute_float* STDP_str(const volatile Compute_float* const S) //use volatile here because the tagged array has volatile and the compiler bitches about it.  Not a real problem
+{
+    Compute_float* ret = malloc(sizeof(*ret)*grid_size*grid_size);
+    for (int i=0;i<grid_size*grid_size;i++)
+    {
+        Compute_float sum = Zero;
+        for (int a=-STDP_RANGE;a<STDP_RANGE;a++)
+        {
+            for (int b=-STDP_RANGE;b<STDP_RANGE;b++)
+            {
+                sum += fabs( S[i*STDP_array_size*STDP_array_size+(a+STDP_RANGE)*STDP_array_size + (b+STDP_RANGE)]);
+            }
+        }
+        ret[i]=sum;
+    }
+    return ret;
+}
+
+tagged_array* STDP_mag(const tagged_array* const in) //TODO: leaks like crazy - probably not too awful though
+{
+    tagged_array* T = tagged_array_new(STDP_str(in->data),in->size,in->offset,in->subgrid,in->minval,in->maxval);
+    Compute_float max = tagged_arrayMAX(*T);
+    Compute_float min = tagged_arrayMIN(*T);
+    return tagged_array_new(T->data,in->size,in->offset,in->subgrid,min,max);
 }

@@ -8,6 +8,17 @@
 #ifndef PARAMETERS  //DO NOT REMOVE
 ///include guard
 #define PARAMETERS  //DO NOT REMOVE
+//disable warnings about float conversion in this file only
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wconversion"
+#else
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wfloat-conversion"
+#pragma GCC diagnostic ignored "-Wconversion"
+#endif
+//the following typedef must be before the include to get the right compute types
+///Whether we are using the single or double layer model
 static const LayerNumbers ModelType = DUALLAYER;
 
 //Fun note - with the right optimisations GCC actually will pull these constants inline (for example disassemble evolvept_STDP with STDP off)
@@ -31,20 +42,31 @@ static const parameters OneLayerModel = {.couple={0}}; //since unused - shortes 
 
 #define STDPparams .STDP=   \
     {                       \
-        .stdp_limit=1.5,    \
+        .stdp_limit=0.5,    \
         .stdp_tau=20,       \
-        .stdp_strength=0.00015,  \
-        .STDP_on=ON\
+        .stdp_strength=0.0001,  \
+        .STDP_on=ON,\
+        .STDP_decay_factor=0.9,\
+        .STDP_decay_frequency=1000,\
+    }
+#define STDparams .STD= \
+    {                   \
+        .U = 0.5,       \
+        .D = 0.2,      \
+        .F = 0.45      \
     }
 #define Stimparams .Stim=\
 {\
-    .ImagePath  = "input_maps/test.png",\
-    .timeperiod=370,\
-    .lag=20,\
+    .ImagePath  = "input_maps/stoch_interact.png",\
+    .timeperiod=150,\
+    .lag=55,\
     .PreconditioningTrials=0,\
     .NoUSprob=0,\
-    .Testing=ON,\
-    .Periodic=ON,\
+    .Testing = OFF,\
+    .TestPathChoice = ON,\
+    .Oscillating_path = ON,\
+    .path_osc_freq = 10,\
+    .Periodic = ON,\
 }
 ///parameters for the inhibitory layer of the double layer model
 static const parameters DualLayerModelIn =
@@ -56,7 +78,7 @@ static const parameters DualLayerModelIn =
         {
             .dual =
             {
-                .W          = -0.5, //-0.40 //-0.57 //-0.70 //-1.25,
+                .W          = -0.71, //-0.40 //-0.57 //-0.70 //-1.25,
                 .sigma      = 90,
                 .synapse    = {.R=0.5,.D=2.0},
             }
@@ -66,6 +88,7 @@ static const parameters DualLayerModelIn =
         .normalization_parameters = {.glob_mult = {.GM=1.0}},
         .tref       = 5,
     },
+    STDparams,
     STDPparams,
     potparams,
     Stimparams,
@@ -81,7 +104,7 @@ static const parameters DualLayerModelEx =
         {
             .dual =
             {
-                .W          =  0.25,
+                .W          =  0.36,
                 .sigma      = 20,
                 .synapse    = {.R=0.5,.D=2.0},
             }
@@ -90,6 +113,7 @@ static const parameters DualLayerModelEx =
         .norm_type = GlobalMultiplier,
         .normalization_parameters = {.glob_mult = {.GM=1.0}},
     },
+    STDparams,
     STDPparams,
     potparams,
     .skip=-2,
@@ -102,11 +126,11 @@ static const model_features Features =
     .STDP		= ON, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep -
     .Random_connections = OFF,
     .Timestep   = 0.1,
-    .Simlength  = 1000000,
+    .Simlength  = 10000000,
     .ImageStim  = ON,
-    .job        = {.initcond = SINGLE_SPIKE, .Voltage_or_count = -70},
+    .job        = {.initcond = RAND_JOB, .Voltage_or_count = 1},
     .Disablewrapping = ON,
-    .output = {{.method = VIDEO,.Output=5,.Delay=20, .Overlay="Trialno"},{.method=GUI,.Output=16,.Delay=10},{.method=GUI,.Output=5,.Delay=10,.Overlay="Timestep"}}
+    .output = {{.method = VIDEO,.Output=5,.Delay=40, .Overlay="Trialno"},{.method=GUI,.Output=5,.Delay=10,.Overlay="Timestep"}}
 };
 ///Constant external input to conductances
 static const extinput Extinput =
@@ -117,13 +141,17 @@ static const extinput Extinput =
 ///Parameters for conducting a parameter sweep.
 static const sweepable Sweep =
 {
-    .offset=offsetof(parameters,Stim.PreconditioningTrials) ,
+    .offset=offsetof(parameters,Stim.Prob1) ,
     .minval = 0.000,
-    .maxval = 10,
-    .count = 10,
+    .maxval = 1,
+    .count = 0,
     .SweepEx = ON,
     .SweepIn = ON,
-    .Intify  = ON,
 };
 
+#ifdef __clang__
+#pragma clang diagnostic pop
+#else
+#pragma GCC diagnostic pop
+#endif
 #endif //DO NOT REMOVE

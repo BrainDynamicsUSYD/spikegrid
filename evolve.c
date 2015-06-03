@@ -57,13 +57,10 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
     {
         for (unsigned int x=0;x<grid_size;x++)
         {
-
             const unsigned int lagidx = LagIdx(x,y,L.firinglags);
             unsigned int newlagidx = lagidx;
-
-            if (L.Mytimecourse==NULL) // Single layer
+            if (L.Mytimecourse==NULL) // Single layer TODO: change this if to use something more appropriate
             {
-
                 Compute_float excstr = Zero;
                 Compute_float inhstr = Zero;
 
@@ -82,7 +79,7 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
                 }
                 if (newlagidx != lagidx) //only fire if we had a spike.
                 {
-                    evolvept((int)x,(int)y,L.connections,excstr,inhstr,gE,gI); // No support for STDP in single layer  
+                    evolvept((int)x,(int)y,L.connections,excstr,inhstr,gE,gI); // No support for STDP in single layer
                 }
             }
             else // Dual layer
@@ -108,7 +105,7 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
                 {
                     RandSpikes(x,y,L,gE,gI,str);
                 }
-            } 
+            }
 
         }
     }
@@ -258,25 +255,27 @@ void StoreFiring(layer* L)
             {
                 const unsigned int baseidx = LagIdx((unsigned int)x,(unsigned int)y,L->firinglags);
                 modifyLags(L->firinglags,baseidx);
+                if (Features.STDP==ON) {modifyLags(L->STDP_data->lags,LagIdx((unsigned int)x,(unsigned int)y,L->STDP_data->lags));}
                 //now - add in new spikes
                 //TODO: restore STDP spike storage
                 if (L->voltages_out[x*grid_size + y]  >= L->P->potential.Vpk)
                 {
                     AddnewSpike(L->firinglags,baseidx);
+                    if (Features.STDP==ON && L->STDP_data->RecordSpikes==ON) {AddnewSpike(L->STDP_data->lags,LagIdx((unsigned int)x,(unsigned int)y,L->STDP_data->lags));}
                     if (Features.Recovery==ON) //reset recovery if needed.  Note recovery has no refractory period so a reset is required
                     {
                         L->voltages_out[x*grid_size+y]=L->P->potential.Vrt;
                         L->recoverys_out[x*grid_size+y]+=L->P->recovery.Wrt;
                     }
-                    if (L->Layer_is_inhibitory == ON)
+                    if (Features.STDP==OFF)
                     {
                         AddRD(x,y,L->connections, L->Rmat,L->Dmat,L->R,L->D);
                     }
                     else
                     {
-
-                        AddRD(x,y,L->connections, L->Rmat,L->Dmat,L->R,L->D);
+                        AddRD_STDP(x,y,L->connections,L->STDP_data->connections,L->Rmat,L->Dmat,L->R,L->D);
                     }
+
                 }//add random spikes
                 else if (L->P->potential.rate > 0 && //this check is because the compiler doesn't optimize the call to random() otherwise
                             (RandFloat() < (L->P->potential.rate*((Compute_float)0.001)*Features.Timestep)))
@@ -332,18 +331,23 @@ void tidylayer (layer* l,const Compute_float timemillis,const Compute_float* con
     }
     if (Features.ImageStim==ON)
     {
-        if (l->P->Stim.Periodic)
+        if (l->P->Stim.Periodic==ON)
         {
             ApplyStim(l->voltages_out,timemillis,l->P->Stim,l->P->potential.Vpk,l->STDP_data);
         }
     }
+    if (l->P->STDP.STDP_decay_frequency>0 && (int)(timemillis/Features.Timestep) % l->P->STDP.STDP_decay_frequency == 0)
+    {
+        STDP_decay(l->STDP_data);
+    }
+
 }
 ///Steps a model through 1 timestep - quite high-level function
 ///This is the only function in the file that needs model.h
 void step1(model* m)
 {
     const Compute_float timemillis = ((Compute_float)m->timesteps) * Features.Timestep ;
-    //this memcpy based version for initializing gE/gI is marginally slower (probably cache issues) - 
+    //this memcpy based version for initializing gE/gI is marginally slower (probably cache issues) -
     memcpy(m->gE,m->gEinit,sizeof(m->gE));
     memcpy(m->gI,m->gIinit,sizeof(m->gI));
     if (Features.LocalStim==ON)

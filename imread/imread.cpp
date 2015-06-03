@@ -60,6 +60,7 @@ void EndTesting(STDP_data* S, const int trialno,const Stimulus_parameters Stim)
     }
 }
 bool path1;
+bool path2; //make compiler happy - need to redo this whole function anyway
 int  counts1;
 Compute_float lastset;
 bool stim1choice=true;
@@ -69,6 +70,7 @@ void CreateStims(const Compute_float timemodper,const Stimulus_parameters S,cons
     stim1choice = RandFloat() > S.NoUSprob;
     if (stim1choice && (int)itercount > lastonesfire) {onesfire++;lastonesfire=(int)itercount; printf("increase\n");}
 }
+//TODO: this function is getting ridiculously long - needs to be tidied up.
 void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimulus_parameters S,const Compute_float threshold, STDP_data* stdp)
 {
     if (cached==false) {imcache=ReadImage(S.ImagePath);cached=true;}
@@ -76,19 +78,46 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
     const Compute_float itercount = timemillis/S.timeperiod;
     if (itercount < 1.0  && S.TestPathChoice) {return;} //do nothing in first period- in test path mode the first period fails so skip over it - is pretty short anyway as no testing
 
-    bool path2=false; //make compiler happy - need to redo this whole function anyway
     if (S.TestPathChoice)
     {
         if (timemodper < 0.001 && fabs(timemillis - lastset) > 0.01)
         {
             lastset=timemillis;
-            printf("picking path\n");
-            path1 = (RandFloat() < S.Prob1) && itercount < 21;
-            counts1 += path1==true?1:0;
-            if ((int)itercount==21) {fire1=false;fire2=false;}
-            if ((int)itercount==22) {printf("%i %i %i\n",counts1,fire1,fire2);exit(EXIT_SUCCESS);}
+            if (S.Oscillating_path==ON)
+            {
+                if (fmod(itercount/S.path_osc_freq,2)<1)  //are we on left / right branch
+                {
+                    path1=true;
+                    path2=false;
+                }
+                else
+                {
+                    path1=false;
+                    path2=true;
+                }
+                if (fmod(itercount,2)< 1)
+                {
+                    path1 = false;
+                    path2 = false;
+                    fire1 = false;
+                    fire2 = false;
+                    stdp->RecordSpikes = OFF;
+                }
+                if (fmod(itercount,2)==1)
+                {
+                    printf ("Res: %i %i\n",fire1,fire2);
+                    stdp->RecordSpikes = ON;
+                }
+            }
+            else
+            {
+                path1 = (RandFloat() < S.Prob1) && itercount < 21;
+                counts1 += path1==true?1:0;
+                if ((int)itercount==21) {fire1=false;fire2=false;}
+                if ((int)itercount==22) {printf("%i %i %i\n",counts1,fire1,fire2);exit(EXIT_SUCCESS);}
+                path2 = !path1 && itercount < 21;
+            }
         }
-        path2 = !path1 && itercount < 21;
     }
     else
     {
@@ -100,6 +129,7 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
         }
 
     }
+    if (S.Oscillating_path==ON) {if (path1==false && path2==false) {stdp->RecordSpikes=OFF;} else {stdp->RecordSpikes=ON;}}
     const bool stim1 = ((fabs(timemodper-80.0)<.01 && stim1choice) && itercount >= S.PreconditioningTrials)  ;  //late wave
     const bool stim2 =  fabs(timemodper-80.0 + S.lag)<.01  || fabs (timemodper-220 - 5 )<.01; //early wave - issues twice - first is normal, second is test trial.
 

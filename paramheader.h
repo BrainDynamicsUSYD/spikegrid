@@ -1,7 +1,6 @@
 /// \file
 #ifndef PARAMHEADER
 #define PARAMHEADER
-#include "typedefs.h"
 #include "cppparamheader.h" //I am not a huge fan of this particular include - but unfortuneately it is the simplest solutionit is the simplest solutiontypedef struct
 
 
@@ -40,6 +39,8 @@ typedef struct STDP_parameters
     const Compute_float stdp_tau;       ///<tau for STDP (controls timescale of window function)
     const Compute_float stdp_strength;  ///< controls the amount of STDP
     const on_off        STDP_on;
+    const Compute_float STDP_decay_factor;
+    const int STDP_decay_frequency;
 } STDP_parameters;
 ///Parameters controlling the shape of the STD recovery
 ///see various markram papers for details

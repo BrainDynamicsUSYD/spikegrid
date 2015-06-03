@@ -15,6 +15,7 @@ typedef struct lagstorage lagstorage;
 //would cause problems (segfaults that are stack overflows)
 typedef struct layer
 {
+    Compute_float* const Phimat;
     Compute_float* const connections;     ///<Matrix of connections coming from a single point
     Compute_float* voltages;                    ///<Input voltages
     Compute_float* voltages_out;                ///<return value

@@ -29,8 +29,10 @@ typedef struct
     const Compute_float Prob1;
     const on_off TestPathChoice;
     const on_off Periodic;
+    const Compute_float I2;
     const Compute_float I1;
     const Compute_float I0;
+    const Compute_float mu;
     const on_off Oscillating_path;
     const Compute_float path_osc_freq;
 } Stimulus_parameters;

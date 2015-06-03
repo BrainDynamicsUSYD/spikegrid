@@ -3,6 +3,7 @@
 #include <string.h>
 #include <unistd.h> //gethostname
 #include <stdio.h>
+#include "phi.h"
 #include "coupling.h"
 #include "output.h"
 #include "printstruct.h"
@@ -65,6 +66,7 @@ layer setuplayer(const parameters p)
         .STDP_data          = Features.STDP==ON?STDP_init(&P->STDP,trefrac_in_ts):NULL, //problem - P defd later
         .connections        = CreateCouplingMatrix(p.couple),
         .std                = Features.STD==ON?STD_init(p.STD):NULL,
+        .Phimat             = (p.Stim.Periodic==OFF)?CreatePhiMatrix():NULL,
         .Extimecourse       = p.couple.Layertype==SINGLELAYER?
             Synapse_timecourse_cache((unsigned int)cap,p.couple.Layer_parameters.single.Ex,Features.Timestep):NULL,
         .Intimecourse       = p.couple.Layertype==SINGLELAYER?

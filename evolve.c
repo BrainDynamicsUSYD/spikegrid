@@ -59,7 +59,6 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
         {
             const unsigned int lagidx = LagIdx(x,y,L.firinglags);
             unsigned int newlagidx = lagidx;
-
             if (L.Mytimecourse==NULL) // Single layer TODO: change this if to use something more appropriate
             {
                 Compute_float excstr = Zero;
@@ -131,25 +130,25 @@ void fixboundary(Compute_float* __restrict input)
     for (int i=0;i<couplerange;i++)
     {
         for (int j=0;j<conductance_array_size;j++)
-		{
+        {
             input[(grid_size+i)*conductance_array_size + j] += input[i*conductance_array_size+j]; //add to bottom
             input[i*conductance_array_size+j] = 0;
             input[(i+couplerange)*conductance_array_size+j] += input[(grid_size+couplerange+i)*conductance_array_size+j];//add to top
             input[(grid_size+couplerange+i)*conductance_array_size+j] = 0;
-		}
-	}
+        }
+    }
     //left + right boundary condition fix
     for (int i=couplerange;i<couplerange+grid_size;i++)
     {
         for (int j=0;j<couplerange;j++)
 
-		{
-             input[i*conductance_array_size    +grid_size+j ]  += input[i*conductance_array_size+j];//left
-             input[i*conductance_array_size+j]=0;//left
-             input[i*conductance_array_size +couplerange+j] += input [i*conductance_array_size + grid_size+couplerange+j];//right
-             input [i*conductance_array_size + grid_size+couplerange+j]=0;//right
-		}
-	}
+        {
+            input[i*conductance_array_size    +grid_size+j ]  += input[i*conductance_array_size+j];//left
+            input[i*conductance_array_size+j]=0;//left
+            input[i*conductance_array_size +couplerange+j] += input [i*conductance_array_size + grid_size+couplerange+j];//right
+            input [i*conductance_array_size + grid_size+couplerange+j]=0;//right
+        }
+    }
 }
 //Ideally we change things so that this isn't required - maybe an inline function to get gE/gI using Rvalues
 //note - we need to use the normalised D/R values when we add the initial numbner
@@ -312,6 +311,13 @@ void tidylayer (layer* l,const Compute_float timemillis,const Compute_float* con
     if (Features.Recovery==OFF)
     {
         CalcVoltages(l->voltages,gE ,gI,l->P->potential,l->voltages_out);
+        if (Features.ImageStim==ON) //Dodgy fudge
+        {
+            if (!(l->P->Stim.Periodic))
+            {
+                ApplyContinuousStim(l->voltages_out,timemillis,l->P->Stim,Features.Timestep,l->Phimat);
+            }
+        }
         RefractoryVoltages(l->voltages_out,l->P->couple,l->firinglags,l->P->potential);
     }
     else
@@ -328,10 +334,6 @@ void tidylayer (layer* l,const Compute_float timemillis,const Compute_float* con
         if (l->P->Stim.Periodic==ON)
         {
             ApplyStim(l->voltages_out,timemillis,l->P->Stim,l->P->potential.Vpk,l->STDP_data);
-        }
-        else
-        {
-            ApplyContinuousStim(l->voltages_out,timemillis,l->P->Stim,Features.Timestep);
         }
     }
     if (l->P->STDP.STDP_decay_frequency>0 && (int)(timemillis/Features.Timestep) % l->P->STDP.STDP_decay_frequency == 0)

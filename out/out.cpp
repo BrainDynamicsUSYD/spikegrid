@@ -115,6 +115,7 @@ VidOutput::VidOutput(int idxin ,const int intervalin,const output_s* datain,cons
     sprintf(buf,"%s/%i.avi",outdir,idxin);
     int fourcc = CV_FOURCC('H','F','Y','U');
     writer = new cv::VideoWriter();
+            //   fname,code,fps,size,color
     writer->open(buf,fourcc,60,cvSize(grid_size,grid_size),1);
 }
 void VidOutput::DoOutput_()
@@ -122,7 +123,7 @@ void VidOutput::DoOutput_()
 #ifdef OPENCV
     writer->write(TA_toMat(data,overlay)); //valgrind gives an error here - only on the first frame.  I don't know what causes it but can't see an obvious problem.
 #else
-    printf("Using PNG outout without opencv is not possible\n");
+    printf("Using video outout without opencv is not possible\n");
 #endif
 }
 SingleFileOutput::SingleFileOutput(int idxin ,const int intervalin) : Output(intervalin,idxin)

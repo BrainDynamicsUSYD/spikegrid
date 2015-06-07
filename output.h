@@ -1,6 +1,9 @@
 /// \file
 #ifndef OUTPUT
 #define OUTPUT
+#ifdef _WIN32
+#include "VS\VS\Winheader.h"
+#endif
 #include "enums.h"
 typedef struct model model;
 typedef struct lagstorage lagstorage;

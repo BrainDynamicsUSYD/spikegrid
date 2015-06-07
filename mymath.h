@@ -6,6 +6,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include "typedefs.h"
+#include "VS\VS\Winheader.h"
 #ifdef FAST
 #define exp(x)   expf(x)
 #define fabs(x)  fabsf(x)

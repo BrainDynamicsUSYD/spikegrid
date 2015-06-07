@@ -1,7 +1,7 @@
 /// \file
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h> //gethostname
+//#include <unistd.h> //gethostname
 #include <stdio.h>
 #include "phi.h"
 #include "coupling.h"
@@ -17,11 +17,12 @@
 #include "animal.h"
 #include "randconns.h"
 #include "lagstorage.h"
+#ifndef _WIN32
 #define max(a,b) \
     ({ __typeof__ (a) _a = (a);\
        __typeof__ (b) _b = (b); \
         _a>_b?_a:_b;})
-
+#endif
 ///creates a random initial condition - assumes random is already seeded
 ///This is generated as small fluctuations away from Vrt
 /// @param input    The input matrix - Modified in place

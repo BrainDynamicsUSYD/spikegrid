@@ -1,0 +1,8 @@
+Build instructions for windows
+================================
+
+These instructions are for VS 2015
+
+Get OpenCV: http://opencv.org/downloads.html
+
+Extract it to the opencv directory in the VS folder

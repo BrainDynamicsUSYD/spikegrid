@@ -115,7 +115,7 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\openCVAPI\api.cpp" />
+    <ClCompile Include="..\..\out\api.cpp" />
     <ClCompile Include="..\..\out\out.cpp" />
   </ItemGroup>
   <ItemGroup>

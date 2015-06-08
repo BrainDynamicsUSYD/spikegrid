@@ -64,7 +64,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LibraryPath>"C:\Users\john\Documents\GitHubVisualStudio\spikegrid\VS\packages\OpenCV.2.4.6-nuget\build\native\lib\x64\v110\Release";"C:\Users\john\Documents\GitHubVisualStudio\spikegrid\VS\packages\OpenCV.2.4.6-nuget\build\native\bin\x64\v110\Release";$(LibraryPath)</LibraryPath>
     <LinkIncremental>false</LinkIncremental>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>true</RunCodeAnalysis>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -104,10 +104,15 @@
       <CompileAs>CompileAsC</CompileAs>
       <PreprocessorDefinitions>_USE_MATH_DEFINES;OPENCV</PreprocessorDefinitions>
       <EnablePREfast>true</EnablePREfast>
+      <Optimization>Full</Optimization>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
     </ClCompile>
     <Link>
       <AdditionalDependencies>Ws2_32.lib;opencv_calib3d246.lib;opencv_core246.lib;opencv_contrib246.lib;opencv_highgui246.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ShowProgress>LinkVerbose</ShowProgress>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
     <ProjectReference>
       <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>
@@ -123,6 +128,7 @@
     <ClInclude Include="Winheader.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\animal.c" />
     <ClCompile Include="..\..\cleanup.c" />
     <ClCompile Include="..\..\conductance.c" />
     <ClCompile Include="..\..\coupling.c" />
@@ -133,8 +139,10 @@
     <ClCompile Include="..\..\output.c" />
     <ClCompile Include="..\..\phi.c" />
     <ClCompile Include="..\..\randconns.c" />
+    <ClCompile Include="..\..\STD.c" />
     <ClCompile Include="..\..\STDP.c" />
     <ClCompile Include="..\..\tagged_array.c" />
+    <ClCompile Include="..\..\theta.c" />
     <ClCompile Include="..\..\utils.c" />
   </ItemGroup>
   <ItemGroup>

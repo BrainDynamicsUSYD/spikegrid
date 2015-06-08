@@ -18,7 +18,7 @@
     <ClCompile Include="..\..\out\out.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\openCVAPI\api.cpp">
+    <ClCompile Include="..\..\out\api.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

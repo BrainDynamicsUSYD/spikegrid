@@ -1,25 +1,12 @@
 /// \file
 #define _CRT_SECURE_NO_WARNINGS 1
-//#include <stdlib.h>
-//#include <stdio.h>
-//#include <string.h>
-//#include <errno.h>
-//#include <vector>
-//#include <iostream>
-//#include <map>
 #ifndef _WIN32
 #include <unistd.h> //what is this actually for?
 #include "opencv2/highgui/highgui.hpp" //for video writer
 #else
-
 #include <opencv2\highgui\highgui.hpp>
-//#include "opencv2/imgproc.hpp"
-//#include "opencv2/highgui/highgui.hpp" //for video writer
-
 #endif
-
-//#include "stdio.h"
-#include "../openCVAPI/api.h" //this is c++
+#include "api.h" //this is c++
 extern "C"
 {
 #include "../tagged_array.h"

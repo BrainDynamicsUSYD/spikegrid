@@ -6,12 +6,11 @@ VERSION_HASH = $(shell git rev-parse HEAD)
 export CONFIG=whichparam.h config/*
 export CONFIG-SUBD=$(shell pwd)/whichparam.h $(shell pwd)/config/*
 export VIEWERBIN=$(shell pwd)/watch
-export CVClib=$(shell pwd)/cv.o
 export outlib=$(shell pwd)/out.o
 export imreadlib=$(shell pwd)/imread.o
 export maskgen=$(shell pwd)/mask
 
-OFILES=${imreadlib} ${outlib} ${CVClib}
+OFILES=${imreadlib} ${outlib}
 .PHONY: profile clean submit docs debug params matlabparams viewer ${VIEWERBIN}  force_look TEST watch
 ###########
 #Actually compile
@@ -43,7 +42,6 @@ TEST:
 	mv whichparam.h whichparambackup.h #backup config choice
 	echo -e '#include "config/parametersCANONICAL.h"' > whichparam.h
 	$(MAKE) evolvegen.c
-	$(MAKE) ${CVClib}
 	$(MAKE) ${outlib}
 	$(MAKE) ${imreadlib}
 	${CC}  ${CFLAGS} ${opencvcflags} -fno-omit-frame-pointer ${SOURCES} ${OFILES} -o ${BINARY} ${LDFLAGS}  ${opencvldflags}
@@ -71,8 +69,6 @@ viewer: ${VIEWERBIN}
 ${VIEWERBIN} :
 	$(MAKE) -C viewer ${VIEWERBIN}
 #libs / o files / generated source
-${CVClib} : force_look
-	$(MAKE) -C openCVAPI ${CVClib}
 ${maskgen} : force_look ${CONFIG}
 	$(MAKE) -C maskgen ${maskgen}
 ${outlib}: force_look ${CONFIG}

@@ -23,7 +23,7 @@ static const LayerNumbers ModelType = DUALLAYER;
 
 //Fun note - with the right optimisations GCC actually will pull these constants inline (for example disassemble evolvept_STDP with STDP off)
 ///Parameters for the single layer model
-static const parameters OneLayerModel = {.couple={0}}; //since unused - shortes possible definition that produces no warnings
+static const parameters OneLayerModel = {0}; //since unused - shortes possible definition that produces no warnings
 
 #define potparams  .potential =     \
     {                               \
@@ -109,7 +109,7 @@ static const extinput Extinput =
 ///Parameters for conducting a parameter sweep.
 static const sweepable Sweep =
 {
-    .offset=offsetof(parameters,couple)+offsetof(couple_parameters,Layer_parameters) +0+ /*offset in the union is always 0*/  + offsetof(duallayer_parameters,W),
+    //.offset=offsetof(parameters,couple)+offsetof(couple_parameters,Layer_parameters) +0+ /*offset in the union is always 0*/  + offsetof(duallayer_parameters,W),
     .minval = 0.0,
     .maxval = 1.0,
     .count = 100

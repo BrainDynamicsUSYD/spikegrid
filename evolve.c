@@ -1,6 +1,9 @@
 ///\file
 #include <string.h> //memset
 #include <stdio.h>  //useful when we need to print things
+#include "enums.h"
+#include "paramheader.h"
+#include "whichparam.h"
 #include "STDP.h"
 #include "model.h"
 #include "theta.h"

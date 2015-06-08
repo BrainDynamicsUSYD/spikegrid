@@ -1,7 +1,7 @@
 /// \file
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h> //gethostname
+//#include <unistd.h> //gethostname
 #include <stdio.h>
 #include "phi.h"
 #include "coupling.h"
@@ -17,11 +17,12 @@
 #include "animal.h"
 #include "randconns.h"
 #include "lagstorage.h"
+#ifndef _WIN32
 #define max(a,b) \
     ({ __typeof__ (a) _a = (a);\
        __typeof__ (b) _b = (b); \
         _a>_b?_a:_b;})
-
+#endif
 ///creates a random initial condition - assumes random is already seeded
 ///This is generated as small fluctuations away from Vrt
 /// @param input    The input matrix - Modified in place
@@ -134,7 +135,11 @@ model* setup(const parameters p,const parameters p2,const LayerNumbers lcount,co
    // printout_struct(&p2,"parameters",outdir,1);    //save the second parameters object and display everything
     const layer l1  = setuplayer(p);
     const layer l2  = lcount==DUALLAYER?setuplayer(p2):l1;
-    const model m   = {.layer1=l1,.layer2=l2,.NoLayers=lcount,.animal=calloc(sizeof(animal),1),.timesteps=0};
+#ifdef _WIN32 //this might be a bug in VS - maybe only intellisense?
+    model m   = {l1,l2,0,lcount,calloc(sizeof(animal),1)};
+#else
+	const model m = { .layer1 = l1,.layer2 = l2,.NoLayers = lcount,.animal = calloc(sizeof(animal),1),.timesteps = 0 };
+#endif
     Compute_float* giinit = calloc(sizeof(Compute_float),conductance_array_size*conductance_array_size);
     Compute_float* geinit = calloc(sizeof(Compute_float),conductance_array_size*conductance_array_size);
     for (int i=0;i<grid_size;i++)

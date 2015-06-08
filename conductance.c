@@ -2,7 +2,7 @@
 //for debugging
 #define _GNU_SOURCE
 #include <string.h> //memcpy
-#include <getopt.h> //getopt
+//#include <getopt.h> //getopt
 #include <stdlib.h> //exit
 #include <fenv.h>   //for some debugging
 #include <stdio.h>
@@ -169,9 +169,12 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
 }
 #else
 ///Structure which holds the command line options that the program recognises
+#ifndef _WIN32
 struct option long_options[] = {{"help",no_argument,0,'h'},{"generate",no_argument,0,'g'},{"sweep",required_argument,0,'s'},{"nocv",no_argument,0,'n'},{"nosegfault",no_argument,0,'f'},{0,0,0,0}};
+
 void processopts (int argc,char** argv,parameters** newparam,parameters** newparamEx,parameters** newparamIn,on_off* OpenCv)
 {
+
     while (1)
     {
         int option_index=0;
@@ -220,6 +223,13 @@ void processopts (int argc,char** argv,parameters** newparam,parameters** newpar
         }
     }
 }
+#else
+void processopts(int argc, char** argv, parameters** newparam, parameters** newparamEx, parameters** newparamIn, on_off* OpenCv)
+{
+	//TODO: command line not done on windows
+}
+#endif
+
 ///Main function for the entire program
 /// @param argc number of cmdline args
 /// @param argv what the parameters actually are

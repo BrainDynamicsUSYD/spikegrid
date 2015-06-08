@@ -1,13 +1,24 @@
 /// \file
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <errno.h>
-#include <vector>
-#include <iostream>
-#include <unistd.h>
+#define _CRT_SECURE_NO_WARNINGS 1
+//#include <stdlib.h>
+//#include <stdio.h>
+//#include <string.h>
+//#include <errno.h>
+//#include <vector>
+//#include <iostream>
+//#include <map>
+#ifndef _WIN32
+#include <unistd.h> //what is this actually for?
 #include "opencv2/highgui/highgui.hpp" //for video writer
-#include "stdio.h"
+#else
+
+#include <opencv2\highgui\highgui.hpp>
+//#include "opencv2/imgproc.hpp"
+//#include "opencv2/highgui/highgui.hpp" //for video writer
+
+#endif
+
+//#include "stdio.h"
 #include "../openCVAPI/api.h" //this is c++
 extern "C"
 {
@@ -48,6 +59,7 @@ PNGoutput::PNGoutput(int idxin ,const int intervalin,const output_s* datain,cons
 {
    overlay = getOverlayByName(overlayin);
 }
+
 cv::Mat TA_toMat(const tagged_array* const data,const overlaytext* const o)
 {
     const unsigned int size = tagged_array_size_(*data)*data->subgrid;
@@ -57,7 +69,11 @@ cv::Mat TA_toMat(const tagged_array* const data,const overlaytext* const o)
     if (o != NULL)
     {
         std::string s = std::to_string(o->func());
-        putText(m,s,cv::Point(0,size), cv::FONT_HERSHEY_PLAIN,1.0,cv::Scalar(255,255,255));
+#ifdef _WIN32
+		putText(m, s, cv::Point(0, size), cv::FONT_HERSHEY_PLAIN, 1.0, cv::Scalar(255, 255, 255));
+#else
+        PutText(m,s,cv::Point(0,size), cv::FONT_HERSHEY_PLAIN,1.0,cv::Scalar(255,255,255));
+#endif
     }
     return m;
 }
@@ -154,7 +170,7 @@ ConsoleOutput::ConsoleOutput(int idxin,const int intervalin,const output_s* data
 }
 void ConsoleOutput::DoOutput_()
 {
-    #ifdef OPENCV
+    #if defined(OPENCV) && !defined(_WIN32)
     if (!isatty(fileno(stdout))) {return;} //if we are not outputting to a terminal - dont show pictures on console - need to add matlab detection
     char* buf = (char*)malloc(sizeof(char)*1000*1000);//should be plenty
     char* upto = buf;
@@ -179,7 +195,7 @@ void ConsoleOutput::DoOutput_()
     usleep(50000);//let terminal catch up - nasty hacky solution
     free(buf);free(red);free(green);free(blue);
 #else
-    printf("Using console output requires opencv (to get the color mappings)");
+    printf("Using console output requires opencv and linux (to get the color mappings)");
 #endif
 }
 SpikeOutput::SpikeOutput(int idxin,const int intervalin, const lagstorage* datain) : SingleFileOutput(idxin,intervalin) {data=datain;}

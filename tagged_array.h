@@ -1,4 +1,5 @@
 /// \file
+#include "VS/VS/Winheader.h"
 #include "typedefs.h"
 //It is possible that we don't actually need any of the volatiles here.  The perf impact of leaving them shouldn't be too bad though
 ///used for storing arrays with their size.  Allows for the matlab_output (and other) function to take both the big and large arrays

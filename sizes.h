@@ -1,6 +1,9 @@
 /// \file
 #ifndef SIZES
 #define SIZES
+#ifdef _WIN32
+#include "VS\VS\Winheader.h"
+#endif
 #define PARAMETERS
 #include "whichparam.h"
 #undef  PARAMETERS

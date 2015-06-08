@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <malloc.h>
+#include "VS\VS\Winheader.h"
 //massive ugly hack.  However, this does appear to be the simplest way to recursively
 //create a directory
 void recursive_mkdir(const char* const dirname)
@@ -21,7 +22,7 @@ void* newdata(const void* const input,const unsigned int size)
     memcpy(ret,input,size);
     return ret;
 }
-
+#ifndef _WIN32
 long long int total_malloced;
 //need to disable a warning for the rest of the file.  TODO: find a better solution than __malloc_hook
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
@@ -48,3 +49,6 @@ void Hook_malloc()
         __malloc_hook = my_malloc_hook;
     }
 }
+#else
+void Hook_malloc() {} //do nothing
+#endif

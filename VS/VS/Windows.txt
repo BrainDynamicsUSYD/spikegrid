@@ -1,0 +1,11 @@
+Build instructions for windows
+================================
+
+These instructions are for VS 2015
+
+Get OpenCV: http://opencv.org/downloads.html
+
+Extract it to the opencv directory in the VS folder
+
+add the directory like C:\Users\john\Documents\GitHubVisualStudio\spikegrid\VS\packages\OpenCV.2.4.6-nuget\build\native\bin\x64\v110\Release
+to PATH

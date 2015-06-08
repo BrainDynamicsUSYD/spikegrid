@@ -2,7 +2,9 @@
 //for debugging
 #define _GNU_SOURCE
 #include <string.h> //memcpy
-//#include <getopt.h> //getopt
+#ifndef _WIN32
+#include <getopt.h> //getopt
+#endif
 #include <stdlib.h> //exit
 #include <fenv.h>   //for some debugging
 #include <stdio.h>

@@ -69,11 +69,7 @@ cv::Mat TA_toMat(const tagged_array* const data,const overlaytext* const o)
     if (o != NULL)
     {
         std::string s = std::to_string(o->func());
-#ifdef _WIN32
 		putText(m, s, cv::Point(0, size), cv::FONT_HERSHEY_PLAIN, 1.0, cv::Scalar(255, 255, 255));
-#else
-        PutText(m,s,cv::Point(0,size), cv::FONT_HERSHEY_PLAIN,1.0,cv::Scalar(255,255,255));
-#endif
     }
     return m;
 }

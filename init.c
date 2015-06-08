@@ -1,7 +1,9 @@
 /// \file
 #include <stdlib.h>
 #include <string.h>
-//#include <unistd.h> //gethostname
+#ifndef _WIN32
+#include <unistd.h> //gethostname
+#endif
 #include <stdio.h>
 #include "phi.h"
 #include "coupling.h"

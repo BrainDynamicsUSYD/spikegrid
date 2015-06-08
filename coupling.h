@@ -1,6 +1,6 @@
 /// \file
 #include "typedefs.h"
-#include "VS\VS\Winheader.h"
+#include "VS/VS/Winheader.h"
 typedef struct couple_parameters couple_parameters;
 typedef struct decay_parameters decay_parameters;
 Compute_float* CreateCouplingMatrix(const couple_parameters c);

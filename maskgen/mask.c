@@ -1,7 +1,9 @@
 /// \file
+#define _CRT_SECURE_NO_WARNINGS 1
 #include <stdio.h>
 #include <math.h>
 #include "../sizes.h" //so we get the correct parameter values
+
 int __attribute__((const)) min(const int a,const int b) {if (a<b) {return a;} else {return b;}}
 //calculate the circle
 int __attribute__((const)) getoffset(const int range, const int i)

@@ -66,5 +66,11 @@
     <ClCompile Include="..\..\tagged_array.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\maskgen.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>

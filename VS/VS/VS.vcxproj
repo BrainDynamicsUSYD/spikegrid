@@ -135,6 +135,7 @@
     <ClCompile Include="..\..\evolve.c" />
     <ClCompile Include="..\..\init.c" />
     <ClCompile Include="..\..\lagstorage.c" />
+    <ClCompile Include="..\..\localstim.c" />
     <ClCompile Include="..\..\maskgen.c" />
     <ClCompile Include="..\..\output.c" />
     <ClCompile Include="..\..\phi.c" />
@@ -146,6 +147,9 @@
     <ClCompile Include="..\..\utils.c" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\imread\imread.vcxproj">
+      <Project>{9473811b-26ff-4c65-8798-1dd0e5f19f1f}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\Out\Out.vcxproj">
       <Project>{4ead2045-c38e-45c9-81e3-380c2283fe50}</Project>
     </ProjectReference>

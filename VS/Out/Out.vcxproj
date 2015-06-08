@@ -110,6 +110,9 @@
       <SubSystem>NotSet</SubSystem>
       <AdditionalDependencies>opencv_calib3d246.lib;opencv_core246.lib;opencv_contrib246.lib;opencv_highgui246.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <ClCompile>
+      <PreprocessorDefinitions>OPENCV</PreprocessorDefinitions>
+    </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\openCVAPI\api.cpp" />

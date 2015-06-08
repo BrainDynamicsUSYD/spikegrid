@@ -64,6 +64,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LibraryPath>"C:\Users\john\Documents\GitHubVisualStudio\spikegrid\VS\packages\OpenCV.2.4.6-nuget\build\native\lib\x64\v110\Release";"C:\Users\john\Documents\GitHubVisualStudio\spikegrid\VS\packages\OpenCV.2.4.6-nuget\build\native\bin\x64\v110\Release";$(LibraryPath)</LibraryPath>
     <LinkIncremental>false</LinkIncremental>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -100,7 +102,8 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <CompileAs>CompileAsC</CompileAs>
-      <PreprocessorDefinitions>_USE_MATH_DEFINES</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_USE_MATH_DEFINES;OPENCV</PreprocessorDefinitions>
+      <EnablePREfast>true</EnablePREfast>
     </ClCompile>
     <Link>
       <AdditionalDependencies>Ws2_32.lib;opencv_calib3d246.lib;opencv_core246.lib;opencv_contrib246.lib;opencv_highgui246.lib;%(AdditionalDependencies)</AdditionalDependencies>

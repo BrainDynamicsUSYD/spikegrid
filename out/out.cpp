@@ -170,7 +170,7 @@ ConsoleOutput::ConsoleOutput(int idxin,const int intervalin,const output_s* data
 }
 void ConsoleOutput::DoOutput_()
 {
-    #ifdef OPENCV
+    #if defined(OPENCV) && !defined(_WIN32)
     if (!isatty(fileno(stdout))) {return;} //if we are not outputting to a terminal - dont show pictures on console - need to add matlab detection
     char* buf = (char*)malloc(sizeof(char)*1000*1000);//should be plenty
     char* upto = buf;
@@ -195,7 +195,7 @@ void ConsoleOutput::DoOutput_()
     usleep(50000);//let terminal catch up - nasty hacky solution
     free(buf);free(red);free(green);free(blue);
 #else
-    printf("Using console output requires opencv (to get the color mappings)");
+    printf("Using console output requires opencv and linux (to get the color mappings)");
 #endif
 }
 SpikeOutput::SpikeOutput(int idxin,const int intervalin, const lagstorage* datain) : SingleFileOutput(idxin,intervalin) {data=datain;}

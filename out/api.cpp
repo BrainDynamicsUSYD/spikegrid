@@ -2,6 +2,11 @@
 #include <stdlib.h>
 #include "opencv2/contrib/contrib.hpp"
 #include "api.h"
+extern "C"
+{
+	#include "../tagged_array.h"
+	#include "../output.h"
+}
 using namespace cv;
 Mat ProcessMatrix(const double* data,const double min,const double max,const unsigned int size)
 {
@@ -35,4 +40,17 @@ void getcolors(const double* data, const double min, const double max, const uns
             red[i*size+j]   = intensity.val[2];
         }
     }
+}
+cv::Mat TA_toMat(const tagged_array* const data, const overlaytext* const o)
+{
+	const unsigned int size = tagged_array_size_(*data)*data->subgrid;
+	Compute_float* actualdata = taggedarrayTocomputearray(*data);
+	cv::Mat m = ProcessMatrix(actualdata, data->minval, data->maxval, size);
+	free(actualdata);
+	if (o != NULL)
+	{
+		std::string s = std::to_string(o->func());
+		putText(m, s, cv::Point(0, size), cv::FONT_HERSHEY_PLAIN, 1.0, cv::Scalar(255, 255, 255));
+	}
+	return m;
 }

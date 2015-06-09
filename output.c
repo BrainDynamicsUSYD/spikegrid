@@ -13,6 +13,10 @@
 ///Total number of things to be output - occasionally needs to be incremented
 #define output_count   20
 #define overlay_count  3
+//declare the extern variables from the header
+char outdir[100];
+output_s* Outputtable;
+overlaytext* overlays;
 //outptu holds an open reference to the model - this enables the mini functions to work
 const model* modelref; //MASSIVE HACK
 ///Finds an output which matches the given name - case sensitive

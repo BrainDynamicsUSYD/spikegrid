@@ -10,7 +10,7 @@ typedef struct lagstorage lagstorage;
 typedef struct tagged_array tagged_array;
 
 ///The directory that we are outputting to
-char outdir [100];
+extern char outdir [100];
 ///The type of data to output
 typedef enum {FLOAT_DATA=0,SPIKE_DATA=1} data_type;
 ///Holds data for outputtting in various ways
@@ -35,6 +35,6 @@ output_s __attribute__((pure)) getOutputByName(const char* const name);
 overlaytext* __attribute__((pure)) getOverlayByName(const char* const name);
 void output_init(const model* const m);
 void CleanupOutput();
-output_s* Outputtable;
-overlaytext* overlays;
+extern output_s* Outputtable;
+extern overlaytext* overlays;
 #endif //OUTPUT

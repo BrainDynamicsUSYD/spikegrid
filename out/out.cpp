@@ -16,18 +16,15 @@ extern "C"
 }
 #include "out.h" //and this is c++ again.
 
-void Output::update()
-{
-}
+on_off showimages = ON;
+std::vector<Output*> outvec;
+
+void Output::update() {}
 void Output::DoOutput()
 {
     this->update();
     this->DoOutput_();
 }
-
-
-on_off showimages=ON;
-std::vector<Output*> outvec;
 
 void TAOutput::update()
 {
@@ -36,29 +33,15 @@ void TAOutput::update()
        this->data=this->out->UpdateFn(this->out->function_arg);
     }
 }
-
 TAOutput::TAOutput(int idxin,const int intervalin,const output_s* datain) : Output(intervalin,idxin)
 {
     data=datain->data.TA_data;
     out=datain;
 }
+
 PNGoutput::PNGoutput(int idxin ,const int intervalin,const output_s* datain,const char* const overlayin) : TAOutput(idxin,intervalin,datain)
 {
    overlay = getOverlayByName(overlayin);
-}
-
-cv::Mat TA_toMat(const tagged_array* const data,const overlaytext* const o)
-{
-    const unsigned int size = tagged_array_size_(*data)*data->subgrid;
-    Compute_float* actualdata=taggedarrayTocomputearray(*data);
-    cv::Mat m =ProcessMatrix(actualdata,data->minval,data->maxval,size);
-    free(actualdata);
-    if (o != NULL)
-    {
-        std::string s = std::to_string(o->func());
-		putText(m, s, cv::Point(0, size), cv::FONT_HERSHEY_PLAIN, 1.0, cv::Scalar(255, 255, 255));
-    }
-    return m;
 }
 void PNGoutput::DoOutput_()
 {
@@ -107,6 +90,7 @@ void GUIoutput::DoOutput_()
         cv::waitKey(10); //TODO: move this somewhere else
     }
 }
+
 VidOutput::VidOutput(int idxin ,const int intervalin,const output_s* datain,const char* const overlayin) : TAOutput(idxin,intervalin,datain)
 {
     overlay = getOverlayByName(overlayin);
@@ -132,6 +116,7 @@ SingleFileOutput::SingleFileOutput(int idxin ,const int intervalin) : Output(int
    f=fopen(buf,"w");
    if (f==NULL) {printf("fopen failed for %s error is %s\n",buf,strerror(errno));}
 }
+
 TextOutput::TextOutput(int idxin,const int intervalin,const tagged_array* datain) : SingleFileOutput(idxin,intervalin) {data=datain;}
 void TextOutput::DoOutput_()
 {
@@ -148,9 +133,7 @@ void TextOutput::DoOutput_()
     fflush(f);//prevents stalling in matlab
     free(actualdata);
 }
-ConsoleOutput::ConsoleOutput(int idxin,const int intervalin,const output_s* datain) : TAOutput(idxin,intervalin,datain)
-{
-}
+ConsoleOutput::ConsoleOutput(int idxin, const int intervalin, const output_s* datain) : TAOutput(idxin, intervalin, datain) {}
 void ConsoleOutput::DoOutput_()
 {
     #if defined(OPENCV) && !defined(_WIN32)
@@ -181,6 +164,7 @@ void ConsoleOutput::DoOutput_()
     printf("Using console output requires opencv and linux (to get the color mappings)");
 #endif
 }
+
 SpikeOutput::SpikeOutput(int idxin,const int intervalin, const lagstorage* datain) : SingleFileOutput(idxin,intervalin) {data=datain;}
 void SpikeOutput::DoOutput_()
 {
@@ -196,7 +180,6 @@ void SpikeOutput::DoOutput_()
     }
     fprintf(f,"\n");
     fflush(f);
-
 }
 
 void MakeOutputs(const output_parameters* const m)

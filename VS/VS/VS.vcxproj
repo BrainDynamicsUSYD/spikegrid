@@ -123,7 +123,6 @@
     <Text Include="Windows.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Winheader.h" />
   </ItemGroup>

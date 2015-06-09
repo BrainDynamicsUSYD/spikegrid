@@ -65,7 +65,7 @@
     <LibraryPath>"C:\Users\john\Documents\GitHubVisualStudio\spikegrid\VS\packages\OpenCV.2.4.6-nuget\build\native\lib\x64\v110\Release";"C:\Users\john\Documents\GitHubVisualStudio\spikegrid\VS\packages\OpenCV.2.4.6-nuget\build\native\bin\x64\v110\Release";$(LibraryPath)</LibraryPath>
     <LinkIncremental>false</LinkIncremental>
     <CodeAnalysisRuleSet>NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <RunCodeAnalysis>true</RunCodeAnalysis>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -103,7 +103,7 @@
     <ClCompile>
       <CompileAs>CompileAsC</CompileAs>
       <PreprocessorDefinitions>_USE_MATH_DEFINES;OPENCV</PreprocessorDefinitions>
-      <EnablePREfast>true</EnablePREfast>
+      <EnablePREfast>false</EnablePREfast>
       <Optimization>Full</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
@@ -123,6 +123,35 @@
     <Text Include="Windows.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\animal.h" />
+    <ClInclude Include="..\..\cleanup.h" />
+    <ClInclude Include="..\..\coupling.h" />
+    <ClInclude Include="..\..\cppparamheader.h" />
+    <ClInclude Include="..\..\enums.h" />
+    <ClInclude Include="..\..\evolve.h" />
+    <ClInclude Include="..\..\evolvegen.h" />
+    <ClInclude Include="..\..\init.h" />
+    <ClInclude Include="..\..\lagstorage.h" />
+    <ClInclude Include="..\..\layer.h" />
+    <ClInclude Include="..\..\localstim.h" />
+    <ClInclude Include="..\..\matlab_includes.h" />
+    <ClInclude Include="..\..\model.h" />
+    <ClInclude Include="..\..\mymath.h" />
+    <ClInclude Include="..\..\newparam.h" />
+    <ClInclude Include="..\..\output.h" />
+    <ClInclude Include="..\..\paramheader.h" />
+    <ClInclude Include="..\..\phi.h" />
+    <ClInclude Include="..\..\printstruct.h" />
+    <ClInclude Include="..\..\randconns.h" />
+    <ClInclude Include="..\..\sizes.h" />
+    <ClInclude Include="..\..\STD.h" />
+    <ClInclude Include="..\..\STDP.h" />
+    <ClInclude Include="..\..\tagged_array.h" />
+    <ClInclude Include="..\..\theta.h" />
+    <ClInclude Include="..\..\typedefs.h" />
+    <ClInclude Include="..\..\utils.h" />
+    <ClInclude Include="..\..\whichparam.h" />
+    <ClInclude Include="..\..\yossarian.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Winheader.h" />
   </ItemGroup>

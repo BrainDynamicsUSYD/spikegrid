@@ -22,7 +22,7 @@ void* newdata(const void* const input,const unsigned int size)
     memcpy(ret,input,size);
     return ret;
 }
-#ifndef _WIN32
+#ifndef _WIN32 //the whole malloc hook tghing is very linux specific
 long long int total_malloced;
 //need to disable a warning for the rest of the file.  TODO: find a better solution than __malloc_hook
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"

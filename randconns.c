@@ -24,8 +24,7 @@ randconns_info* init_randconns(const randconn_parameters rparam,const couple_par
     for (unsigned int x=0;x<grid_size;x++)
     {
         for (unsigned int y=0;y<grid_size;y++)
-        {
-
+        {	//the specials is if we only have a limited number of neurons with random connections
             if (x*grid_size+y < rcinfo.nospecials || rcinfo.nospecials==0)
             {
                 for (unsigned int i=0;i<rparam.numberper;i++)
@@ -79,22 +78,4 @@ randomconnection** GetRandomConnsArriving(const int x,const int y,const randconn
 {
     *numberconns = rcinfo.rev_pp[x*grid_size+y];
     return &(rcinfo.randconns_reverse[(x*grid_size+y)*(int)rcinfo.numberper*(int)overkill_factor]); //Ensure you return the address of this object - it is definitely required
-}
-Compute_float* RandConnsToMat(const randconns_info* const rcinfo)
-{
-    Compute_float* strmat = calloc(sizeof(Compute_float),grid_size*grid_size);
-    for (unsigned int x=0;x<grid_size;x++)
-    {
-        for(unsigned int y=0;y<grid_size;y++)
-        {
-            unsigned int nconns;
-            randomconnection* rc = GetRandomConnsLeaving(x,y,*rcinfo,&nconns);
-            for (unsigned int i=0;i<nconns;i++)
-            {
-                strmat[rc[i].destination.x*grid_size+rc[i].destination.y] += rc[i].stdp_strength;
-            }
-        }
-    }
-    return strmat;
-
 }

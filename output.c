@@ -48,7 +48,7 @@ overlaytext* __attribute__((pure)) getOverlayByName(const char* const name)
         }
         outidx++;
     }
-    return NULL;
+    return NULL; //this needs to return null as we can have an empty overlay
 }
 int __attribute__((pure)) Trialno()
 {

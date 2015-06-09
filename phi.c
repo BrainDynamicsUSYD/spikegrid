@@ -1,5 +1,5 @@
 #include "typedefs.h"
-#include "paramheader.h"
+#include "sizes.h"
 #include "mymath.h"
 Compute_float* CreatePhiMatrix(void)
 {

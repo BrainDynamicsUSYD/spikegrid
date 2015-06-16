@@ -49,7 +49,6 @@
 #define TESTING
 extern "C"
 {
-#include "../cppparamheader.h"
 #include "../sizes.h"
 #include "../STDP.h"
 #include "../evolve.h"

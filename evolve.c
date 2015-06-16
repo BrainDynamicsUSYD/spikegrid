@@ -258,7 +258,6 @@ void StoreFiring(layer* L)
                 modifyLags(L->firinglags,baseidx);
                 if (Features.STDP==ON) {modifyLags(L->STDP_data->lags,LagIdx((unsigned int)x,(unsigned int)y,L->STDP_data->lags));}
                 //now - add in new spikes
-                //TODO: restore STDP spike storage
                 if (L->voltages_out[x*grid_size + y]  >= L->P->potential.Vpk)
                 {
                     AddnewSpike(L->firinglags,baseidx);

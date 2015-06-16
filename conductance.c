@@ -193,15 +193,15 @@ void processopts (int argc,char** argv,parameters** newparam,parameters** newpar
                         "   -f --nosegfault prevents almost all segfaults - very reliable method");
                 exit(EXIT_SUCCESS);
             case 'g':
-                *OpenCv = OFF;
+                *OpenCv = OFF; //need to disable gui for generation of yossarin file
                 if (ModelType == SINGLELAYER)
                 {
-                    createyossarianfile("yossarian.csh",Sweep,OneLayerModel,OneLayerModel);
+                    createyossarianfile("yossarian.csh",Sweep,OneLayerModel,OneLayerModel); //It doesn't really matter too much, but use the original parameters here
                 }
-                else 
+                else
                 {
-                    createyossarianfile("yossarian.csh",Sweep,DualLayerModelIn,DualLayerModelEx);   
-                } 
+                    createyossarianfile("yossarian.csh",Sweep,DualLayerModelIn,DualLayerModelEx);
+                }
                 exit(EXIT_SUCCESS);
             case 's':
                 {

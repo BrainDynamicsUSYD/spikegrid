@@ -49,12 +49,7 @@ static const parameters OneLayerModel = {.couple={0}}; //since unused - shortes 
         .STDP_decay_factor=0.9,\
         .STDP_decay_frequency=1000,\
     }
-#define STDparams .STD= \
-    {                   \
-        .U = 0.5,       \
-        .D = 0.2,      \
-        .F = 0.45      \
-    }
+
 #define Stimparams .Stim=\
 {\
     .ImagePath  = "input_maps/stoch_interact.png",\

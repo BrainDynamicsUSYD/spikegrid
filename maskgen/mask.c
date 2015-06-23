@@ -125,4 +125,5 @@ int main()
     RDAdd();
     RDAdd_STDP();
     checkfn();
+    printf("\n"); //newline at EOF
 }

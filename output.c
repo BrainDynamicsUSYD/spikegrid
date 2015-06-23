@@ -52,7 +52,7 @@ overlaytext* __attribute__((pure)) getOverlayByName(const char* const name)
 }
 int __attribute__((pure)) Trialno()
 {
-    return (int) floor(modelref->timesteps * Features.Timestep /modelref->layer1.P->Stim.timeperiod - modelref->layer1.P->Stim.PreconditioningTrials)  ;
+    return (int) (floor(modelref->timesteps * Features.Timestep /modelref->layer1.P->Stim.timeperiod - modelref->layer1.P->Stim.PreconditioningTrials))  ;
 }
 int __attribute__((pure)) Timestep() {return (int) modelref->timesteps;}
 ///Set up the outputtables for a given model

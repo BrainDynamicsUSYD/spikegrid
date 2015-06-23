@@ -14,13 +14,13 @@ class Output
     int interval; /// <- how often to output data
     int idx;      /// <- used to store a prefix for the output file
     public:
-        Output(int intervalin,int idxin) {interval=intervalin;idx=idxin;};
+        Output(int intervalin,int idxin) {interval=intervalin;idx=idxin;}
         virtual void DoOutput_() {}
         virtual void update();
         void DoOutput();
         int GetInterval() const {return interval;}
         int GetIdx() const {return idx;}
-        virtual ~Output() {};
+        virtual ~Output() {}
 };
 
 class TAOutput : public Output
@@ -55,7 +55,7 @@ class SingleFileOutput : public Output
         FILE* f;
     public:
         SingleFileOutput(int,int );
-        virtual void DoOutput_() {};
+        virtual void DoOutput_() {}
 };
 class VidOutput: public TAOutput //This class probably needs a destructor to end the video.  Vlc will probably handle the file just fine though.
 {

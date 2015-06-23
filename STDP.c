@@ -1,4 +1,4 @@
-;/// \file
+/// \file
 #include <string.h>
 #include <stdio.h>
 #include "paramheader.h"

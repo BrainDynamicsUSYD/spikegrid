@@ -1,0 +1,667 @@
+
+#### Start: Footprint Computation for min ####
+#### [FUNCTION min] ... OK #####
+#### Finished: Footprint Computation for min (8 nodes containing 8 states) ####
+#### [FUNCTION min] Footprint Analysis result ####
+PROP 1:[path: linear paths: -1. max length: -1 has repetitions: 1 of node 2
+n2(s1).n5(s2).n7(s3).n9(s4).n3]
+((old_b - old_a) <= 0) ;
+return = @f$0: ; 
+old_b = @f$0: ; 
+old_a = @f$1:
+[footprint
+   ((old_b - old_a) <= 0) *
+   b = @f$0: ; 
+   a = @f$1:  ]
+PROP 2:[path: linear paths: -1. max length: -1 has repetitions: 1 of node 2
+n2(s1).n5(s2).n6(s5).n8(s6).n3]
+((old_a - old_b) <= -1) ;
+return = @f$0: ; 
+old_b = @f$1: ; 
+old_a = @f$0:
+[footprint
+   ((old_a - old_b) <= -1) *
+   b = @f$1: ; 
+   a = @f$0:  ]
+
+Specs changed: added new pre
+((a - b) <= -1) ;
+b = val$1: ; 
+a = val$2:
+Specs changed: added new pre
+((b - a) <= 0) ;
+b = val$1: ; 
+a = val$2:
+Adding summary for min
+  int min(int a, int b)
+  Timestamp: 1
+  Status: INACTIVE
+  Phase: FOOTRPRINT
+  Dependency_map: 
+  TIME:0.005130 s TIMEOUT:N SYMOPS:23 CALLS:5,0
+  ERRORS: 
+  --------------------------- 1 of 2 [nvisited: 7] ---------------------------
+  PRE:
+  ((b - a) <= 0) ;
+  b = val$1: ; 
+  a = val$2:
+  POST 1 of 1:
+  ((return - a) <= 0) ;
+  return = val$1: ; 
+  b = val$1: ; 
+  a = val$2:
+  ----------------------------------------------------------------
+  --------------------------- 2 of 2 [nvisited: 7] ---------------------------
+  PRE:
+  ((a - b) <= -1) ;
+  b = val$1: ; 
+  a = val$2:
+  POST 1 of 1:
+  ((return - b) <= -1) ;
+  return = val$2: ; 
+  b = val$1: ; 
+  a = val$2:
+  ----------------------------------------------------------------
+  
+Transition min from footprint to re-exe
+Adding summary for min
+  int min(int a, int b)
+  Timestamp: 0
+  Status: INACTIVE
+  Phase: RE_EXECUTION
+  Dependency_map: 
+  TIME:0.005130 s TIMEOUT:N SYMOPS:23 CALLS:5,0
+  ERRORS: 
+  --------------------------- 1 of 2 [nvisited:] ---------------------------
+  PRE:
+  ((a - b) <= -1) ;
+  b = val$1: ; 
+  a = val$2:
+  
+  ----------------------------------------------------------------
+  --------------------------- 2 of 2 [nvisited:] ---------------------------
+  PRE:
+  ((b - a) <= 0) ;
+  b = val$1: ; 
+  a = val$2:
+  
+  ----------------------------------------------------------------
+  
+
+#### Start: Re-Execution for min ####
+Finished re-execution for precondition 1 (8 nodes containing 6 states) (pass)
+Finished re-execution for precondition 2 (8 nodes containing 6 states) (pass)
+#### [FUNCTION min] ... OK #####
+#### Finished: Re-Execution for min ####
+
+
+================================================
+ *** CANDIDATE PRECONDITIONS FOR min: 
+================================================
+
+PROP 1:
+((a - b) <= -1) ;
+b = val$1: ; 
+a = val$2:
+PROP 2:
+((b - a) <= 0) ;
+b = val$1: ; 
+a = val$2: 
+
+
+
+================================================
+ *** VALID PRECONDITIONS FOR min: 
+================================================
+
+PROP 1:
+((a - b) <= -1) ;
+b = val$1: ; 
+a = val$2:
+PROP 2:
+((b - a) <= 0) ;
+b = val$1: ; 
+a = val$2: 
+
+Specs changed: added new post
+PROP 1 of 1:
+((return - val$1) <= -1) ;
+return = val$2:
+Specs changed: added new post
+PROP 1 of 1:
+((return - val$2) <= 0) ;
+return = val$1:
+Adding summary for min
+  int min(int a, int b)
+  Timestamp: 1
+  Status: INACTIVE
+  Phase: RE_EXECUTION
+  Dependency_map: 
+  TIME:0.011883 s TIMEOUT:N SYMOPS:51 CALLS:5,0
+  ERRORS: 
+  --------------------------- 1 of 2 [nvisited: 7] ---------------------------
+  PRE:
+  ((b - a) <= 0) ;
+  b = val$1: ; 
+  a = val$2:
+  POST 1 of 1:
+  ((return - a) <= 0) ;
+  return = val$1: ; 
+  b = val$1: ; 
+  a = val$2:
+  ----------------------------------------------------------------
+  --------------------------- 2 of 2 [nvisited: 7] ---------------------------
+  PRE:
+  ((a - b) <= -1) ;
+  b = val$1: ; 
+  a = val$2:
+  POST 1 of 1:
+  ((return - b) <= -1) ;
+  return = val$2: ; 
+  b = val$1: ; 
+  a = val$2:
+  ----------------------------------------------------------------
+  
+
+#### Start: Footprint Computation for getoffset ####
+Adding summary for sqrt
+  double sqrt(double x)
+  Timestamp: 1
+  Status: INACTIVE
+  Phase: RE_EXECUTION
+  Dependency_map: 
+  TIME:0.005270 s TIMEOUT:N SYMOPS:18 CALLS:0,1
+  ERRORS: 
+  --------------------------- 1 of 1 [nvisited: 790 792 793] ---------------------------
+  PRE:
+  x = val$1:
+  POST 1 of 1:
+  DANGL<UNINIT>(return) ;
+  x = val$1: ; 
+  return = val$2:
+  ----------------------------------------------------------------
+  
+#### [FUNCTION getoffset] ... OK #####
+#### Finished: Footprint Computation for getoffset (10 nodes containing 11 states) ####
+#### [FUNCTION getoffset] Footprint Analysis result ####
+PROP 1:[path: linear paths: -1. max length: -1 has repetitions: 1 of node 2
+(P3 + P4)where
+P2 = n2(s8).n5(s9).n6(s11).n8(s12).n3
+P4 = n10(s1).n19(s2).n18(s3).n14(s4).n15(s6).n17(s7).n11
+P3 = (P1{P2})(s9).n11
+P1 = n10(s1).n19(s2).n18(s3).n14(s4).n16(s5).n13(s8).n12
+]
+return = @f$0: ; 
+old_range = @f$0: ; 
+old_i = @f$1:
+[footprint
+   range = @f$0: ; 
+   i = @f$1:  ]
+PROP 2:[path: linear paths: -1. max length: -1 has repetitions: 1 of node 2
+(P1{P2})(s9).n11where
+P2 = n2(s14).n5(s15).n7(s16).n9(s17).n3
+P1 = n10(s1).n19(s2).n18(s3).n14(s4).n16(s5).n13(s8).n12
+]
+((return - old_range) <= 0) ;  DANGL<UNINIT>(return) ;
+return = _t$0: ; 
+old_range = @f$0: ; 
+old_i = @f$1:
+[footprint
+   range = @f$0: ; 
+   i = @f$1:  ]
+
+Specs changed: added new pre
+range = val$1: ; 
+i = val$2:
+Adding summary for getoffset
+  int getoffset(int range, int i)
+  Timestamp: 1
+  Status: INACTIVE
+  Phase: FOOTRPRINT
+  Dependency_map: min=0 
+  TIME:0.009363 s TIMEOUT:N SYMOPS:53 CALLS:4,2
+  ERRORS: 
+  --------------------------- 1 of 1 [nvisited: 9 11 12 13 14 15] ---------------------------
+  PRE:
+  range = val$1: ; 
+  i = val$2:
+  POST 1 of 2:
+  ((return - range) <= 0) ;  DANGL<UNINIT>(return) ;
+  return = val$3: ; 
+  range = val$1: ; 
+  i = val$2:
+  POST 2 of 2:
+  return = val$1: ; 
+  range = val$1: ; 
+  i = val$2:
+  ----------------------------------------------------------------
+  
+Transition getoffset from footprint to re-exe
+Adding summary for getoffset
+  int getoffset(int range, int i)
+  Timestamp: 0
+  Status: INACTIVE
+  Phase: RE_EXECUTION
+  Dependency_map: min=-1 
+  TIME:0.009363 s TIMEOUT:N SYMOPS:53 CALLS:4,2
+  ERRORS: 
+  --------------------------- 1 of 1 [nvisited:] ---------------------------
+  PRE:
+  range = val$1: ; 
+  i = val$2:
+  
+  ----------------------------------------------------------------
+  
+
+#### Start: Re-Execution for getoffset ####
+Finished re-execution for precondition 1 (10 nodes containing 11 states) (pass)
+#### [FUNCTION getoffset] ... OK #####
+#### Finished: Re-Execution for getoffset ####
+
+
+================================================
+ *** CANDIDATE PRECONDITIONS FOR getoffset: 
+================================================
+
+PROP 1:
+range = val$1: ; 
+i = val$2: 
+
+
+
+================================================
+ *** VALID PRECONDITIONS FOR getoffset: 
+================================================
+
+PROP 1:
+range = val$1: ; 
+i = val$2: 
+
+Specs changed: added new post
+PROP 1 of 2:
+return = val$1:
+PROP 2 of 2:
+((return - val$1) <= 0) ;  DANGL<UNINIT>(return) ;
+return = val$3:
+Adding summary for getoffset
+  int getoffset(int range, int i)
+  Timestamp: 1
+  Status: INACTIVE
+  Phase: RE_EXECUTION
+  Dependency_map: min=0 
+  TIME:0.017154 s TIMEOUT:N SYMOPS:106 CALLS:4,2
+  ERRORS: 
+  --------------------------- 1 of 1 [nvisited: 9 11 12 13 14 15] ---------------------------
+  PRE:
+  range = val$1: ; 
+  i = val$2:
+  POST 1 of 2:
+  ((return - range) <= 0) ;  DANGL<UNINIT>(return) ;
+  return = val$3: ; 
+  range = val$1: ; 
+  i = val$2:
+  POST 2 of 2:
+  return = val$1: ; 
+  range = val$1: ; 
+  i = val$2:
+  ----------------------------------------------------------------
+  
+
+#### Start: Footprint Computation for withSTDP ####
+Adding summary for printf
+  int printf(char *format)
+  Timestamp: 1
+  Status: INACTIVE
+  Phase: RE_EXECUTION
+  Dependency_map: 
+  TIME:0.005641 s TIMEOUT:N SYMOPS:54 CALLS:0,1
+  ERRORS: 
+  --------------------------- 1 of 1 [nvisited: 1192 1195 1196 1197 1198] ---------------------------
+  PRE:
+  format = val$1:
+  POST 1 of 1:
+  (-1 < return) ;  DANGL<UNINIT>(return) ;
+  return = val$2: ; 
+  format = val$1:
+  ----------------------------------------------------------------
+  
+Adding summary for sprintf
+  int sprintf(char *s, char *format)
+  Timestamp: 1
+  Status: INACTIVE
+  Phase: RE_EXECUTION
+  Dependency_map: 
+  TIME:0.008115 s TIMEOUT:N SYMOPS:68 CALLS:0,1
+  ERRORS: 
+  --------------------------- 1 of 1 [nvisited: 1223 1227 1228 1229 1230 1231] ---------------------------
+  PRE:
+  s = val$1: ; 
+  format = val$3: ;
+  s|->[val$2|]:
+  POST 1 of 1:
+  (-1 < return) ;  DANGL<UNINIT>(return) ;
+  s = val$1: ; 
+  return = val$4: ; 
+  format = val$3: ;
+  s|->[val$2|]:
+  ----------------------------------------------------------------
+  
+#### [FUNCTION withSTDP] ... OK #####
+#### Finished: Footprint Computation for withSTDP (20 nodes containing 82 states) ####
+#### [FUNCTION withSTDP] Footprint Analysis result ####
+
+Adding summary for withSTDP
+  void withSTDP()
+  Timestamp: 1
+  Status: INACTIVE
+  Phase: FOOTRPRINT
+  Dependency_map: getoffset=0 
+  TIME:0.126498 s TIMEOUT:Y SYMOPS:334 CALLS:1,5
+  ERRORS: 
+  
+Transition withSTDP from footprint to re-exe
+Adding summary for withSTDP
+  void withSTDP()
+  Timestamp: 0
+  Status: INACTIVE
+  Phase: RE_EXECUTION
+  Dependency_map: getoffset=-1 
+  TIME:0.126498 s TIMEOUT:Y SYMOPS:334 CALLS:1,5
+  ERRORS: 
+  
+
+#### Start: Re-Execution for withSTDP ####
+#### [FUNCTION withSTDP] ... OK #####
+#### Finished: Re-Execution for withSTDP ####
+
+
+================================================
+ *** CANDIDATE PRECONDITIONS FOR withSTDP: 
+================================================
+
+ 
+
+
+
+================================================
+ *** VALID PRECONDITIONS FOR withSTDP: 
+================================================
+
+ 
+
+Adding summary for withSTDP
+  void withSTDP()
+  Timestamp: 1
+  Status: INACTIVE
+  Phase: RE_EXECUTION
+  Dependency_map: getoffset=0 
+  TIME:0.126636 s TIMEOUT:Y SYMOPS:334 CALLS:1,5
+  ERRORS: 
+  
+
+#### Start: Footprint Computation for checkfn ####
+#### [FUNCTION checkfn] ... OK #####
+#### Finished: Footprint Computation for checkfn (10 nodes containing 10 states) ####
+#### [FUNCTION checkfn] Footprint Analysis result ####
+PROP 1:[path: linear paths: -1. max length: -1 has repetitions: 1 of node 40
+n40(s1).n49(s2).n48(s3).n47(s4).n46(s5).n45(s6).n44(s7).n43(s8).n42(s9).n41]
+return = _t$0:
+
+Specs changed: added new pre
+
+Adding summary for checkfn
+  void checkfn()
+  Timestamp: 1
+  Status: INACTIVE
+  Phase: FOOTRPRINT
+  Dependency_map: 
+  TIME:0.007166 s TIMEOUT:N SYMOPS:28 CALLS:1,1
+  ERRORS: 
+  --------------------------- 1 of 1 [nvisited: 39 41 42 43 44 45 46 47 48 50] ---------------------------
+  PRE:
+  
+  POST 1 of 1:
+  return = val$1:
+  ----------------------------------------------------------------
+  
+Transition checkfn from footprint to re-exe
+Adding summary for checkfn
+  void checkfn()
+  Timestamp: 0
+  Status: INACTIVE
+  Phase: RE_EXECUTION
+  Dependency_map: 
+  TIME:0.007166 s TIMEOUT:N SYMOPS:28 CALLS:1,1
+  ERRORS: 
+  --------------------------- 1 of 1 [nvisited:] ---------------------------
+  PRE:
+  
+  
+  ----------------------------------------------------------------
+  
+
+#### Start: Re-Execution for checkfn ####
+Finished re-execution for precondition 1 (10 nodes containing 10 states) (pass)
+#### [FUNCTION checkfn] ... OK #####
+#### Finished: Re-Execution for checkfn ####
+
+
+================================================
+ *** CANDIDATE PRECONDITIONS FOR checkfn: 
+================================================
+
+PROP 1:
+ 
+
+
+
+================================================
+ *** VALID PRECONDITIONS FOR checkfn: 
+================================================
+
+PROP 1:
+ 
+
+Specs changed: added new post
+PROP 1 of 1:
+return = val$1:
+Adding summary for checkfn
+  void checkfn()
+  Timestamp: 1
+  Status: INACTIVE
+  Phase: RE_EXECUTION
+  Dependency_map: 
+  TIME:0.014639 s TIMEOUT:N SYMOPS:56 CALLS:1,1
+  ERRORS: 
+  --------------------------- 1 of 1 [nvisited: 39 41 42 43 44 45 46 47 48 50] ---------------------------
+  PRE:
+  
+  POST 1 of 1:
+  return = val$1:
+  ----------------------------------------------------------------
+  
+
+#### Start: Footprint Computation for RDAdd_STDP ####
+#### [FUNCTION RDAdd_STDP] ... OK #####
+#### Finished: Footprint Computation for RDAdd_STDP (23 nodes containing 80 states) ####
+#### [FUNCTION RDAdd_STDP] Footprint Analysis result ####
+
+Adding summary for RDAdd_STDP
+  void RDAdd_STDP()
+  Timestamp: 1
+  Status: INACTIVE
+  Phase: FOOTRPRINT
+  Dependency_map: getoffset=0 
+  TIME:0.156656 s TIMEOUT:Y SYMOPS:334 CALLS:1,5
+  ERRORS: 
+  
+Transition RDAdd_STDP from footprint to re-exe
+Adding summary for RDAdd_STDP
+  void RDAdd_STDP()
+  Timestamp: 0
+  Status: INACTIVE
+  Phase: RE_EXECUTION
+  Dependency_map: getoffset=-1 
+  TIME:0.156656 s TIMEOUT:Y SYMOPS:334 CALLS:1,5
+  ERRORS: 
+  
+
+#### Start: Re-Execution for RDAdd_STDP ####
+#### [FUNCTION RDAdd_STDP] ... OK #####
+#### Finished: Re-Execution for RDAdd_STDP ####
+
+
+================================================
+ *** CANDIDATE PRECONDITIONS FOR RDAdd_STDP: 
+================================================
+
+ 
+
+
+
+================================================
+ *** VALID PRECONDITIONS FOR RDAdd_STDP: 
+================================================
+
+ 
+
+Adding summary for RDAdd_STDP
+  void RDAdd_STDP()
+  Timestamp: 1
+  Status: INACTIVE
+  Phase: RE_EXECUTION
+  Dependency_map: getoffset=0 
+  TIME:0.156754 s TIMEOUT:Y SYMOPS:334 CALLS:1,5
+  ERRORS: 
+  
+
+#### Start: Footprint Computation for RDAdd ####
+#### [FUNCTION RDAdd] ... OK #####
+#### Finished: Footprint Computation for RDAdd (23 nodes containing 85 states) ####
+#### [FUNCTION RDAdd] Footprint Analysis result ####
+
+Adding summary for RDAdd
+  void RDAdd()
+  Timestamp: 1
+  Status: INACTIVE
+  Phase: FOOTRPRINT
+  Dependency_map: getoffset=0 
+  TIME:0.112935 s TIMEOUT:Y SYMOPS:334 CALLS:1,5
+  ERRORS: 
+  
+Transition RDAdd from footprint to re-exe
+Adding summary for RDAdd
+  void RDAdd()
+  Timestamp: 0
+  Status: INACTIVE
+  Phase: RE_EXECUTION
+  Dependency_map: getoffset=-1 
+  TIME:0.112935 s TIMEOUT:Y SYMOPS:334 CALLS:1,5
+  ERRORS: 
+  
+
+#### Start: Re-Execution for RDAdd ####
+#### [FUNCTION RDAdd] ... OK #####
+#### Finished: Re-Execution for RDAdd ####
+
+
+================================================
+ *** CANDIDATE PRECONDITIONS FOR RDAdd: 
+================================================
+
+ 
+
+
+
+================================================
+ *** VALID PRECONDITIONS FOR RDAdd: 
+================================================
+
+ 
+
+Adding summary for RDAdd
+  void RDAdd()
+  Timestamp: 1
+  Status: INACTIVE
+  Phase: RE_EXECUTION
+  Dependency_map: getoffset=0 
+  TIME:0.113040 s TIMEOUT:Y SYMOPS:334 CALLS:1,5
+  ERRORS: 
+  
+
+#### Start: Footprint Computation for main ####
+#### [FUNCTION main] ... OK #####
+#### Finished: Footprint Computation for main (31 nodes containing 87 states) ####
+#### [FUNCTION main] Footprint Analysis result ####
+
+Adding summary for main
+  int main()
+  Timestamp: 1
+  Status: INACTIVE
+  Phase: FOOTRPRINT
+  Dependency_map: RDAdd=0 RDAdd_STDP=0 checkfn=0 getoffset=0 withSTDP=0 
+  TIME:0.100135 s TIMEOUT:N SYMOPS:332 CALLS:0,9
+  ERRORS: 
+  
+Transition main from footprint to re-exe
+Adding summary for main
+  int main()
+  Timestamp: 0
+  Status: INACTIVE
+  Phase: RE_EXECUTION
+  Dependency_map: RDAdd=-1 RDAdd_STDP=-1 checkfn=-1 getoffset=-1 withSTDP=-1 
+  TIME:0.100135 s TIMEOUT:N SYMOPS:332 CALLS:0,9
+  ERRORS: 
+  
+
+#### Start: Re-Execution for main ####
+#### [FUNCTION main] ... OK #####
+#### Finished: Re-Execution for main ####
+
+
+================================================
+ *** CANDIDATE PRECONDITIONS FOR main: 
+================================================
+
+ 
+
+
+
+================================================
+ *** VALID PRECONDITIONS FOR main: 
+================================================
+
+ 
+
+Adding summary for main
+  int main()
+  Timestamp: 1
+  Status: INACTIVE
+  Phase: RE_EXECUTION
+  Dependency_map: RDAdd=0 RDAdd_STDP=0 checkfn=0 getoffset=0 withSTDP=0 
+  TIME:0.100250 s TIMEOUT:N SYMOPS:332 CALLS:0,9
+  ERRORS: 
+  
+
+++++++++++++++++++++++++++++++++++++++++++++++++++
++ FILE: maskgen/mask.c  LOC: 0  VISITED: 26/26 SYMOPS: 1547
++  num_procs: 7 (3 ok, 3 timeouts, 0 errors, 0 warnings, 0 infos)
++  detail procs:
++    - No Errors and No Specs: 4
++    - Some Errors and No Specs: 0
++    - No Errors and Some Specs: 3
++    - Some Errors and Some Specs: 0
++  errors: 
++  warnings: 
++  infos: 
++  specs: 4
+++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Detailed errors during footprint phase:
+
+Detailed errors during re-execution phase:
+
+Detailed warnings during footprint phase:
+
+Detailed warnings during re-execution phase:
+Interprocedural footprint analysis terminated in 0.547911 sec

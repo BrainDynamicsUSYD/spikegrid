@@ -1,0 +1,8 @@
+name,name_id,specs,time,to,symop,err,file,line,loc,top,signature,weight,proof_coverage,rank,in_calls,out_calls,proof_trace,cyclomatic
+"RDAdd_STDP","RDAdd_STDP{98B5}",0,0,TO,334,0,maskgen/mask.c,74,0,N,"void RDAdd_STDP()",23,0.00,0.85,1,5,,2
+"RDAdd","RDAdd{98B5}",0,0,TO,334,0,maskgen/mask.c,51,0,N,"void RDAdd()",23,0.00,0.85,1,5,,2
+"checkfn","checkfn{98B5}",1,0,  ,56,0,maskgen/mask.c,39,0,N,"void checkfn()",10,1.00,0.48,1,1,39 41 42 43 44 45 46 47 48 50,1
+"getoffset","getoffset{C634}",1,0,  ,106,0,maskgen/mask.c,9,0,N,"int getoffset(int range, int i)",10,1.00,0.85,4,2,9 11 12 13 14 15,2
+"main","main{250F}",0,0,  ,332,0,maskgen/mask.c,97,0,N,"int main()",31,0.00,1.00,0,9,,2
+"min","min{C634}",2,0,  ,51,0,maskgen/mask.c,7,0,N,"int min(int a, int b)",8,0.88,0.78,5,0,7,2
+"withSTDP","withSTDP{98B5}",0,0,TO,334,0,maskgen/mask.c,17,0,N,"void withSTDP()",20,0.00,0.85,1,5,,2

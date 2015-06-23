@@ -18,7 +18,8 @@ Mat ProcessMatrix(const double* data,const double min,const double max,const uns
 			dispmat[i*size+j]=(data[i*size+j] - min)/(max-min);
 		}
 	}
-	Mat m(size,size,CV_64F,dispmat);
+    //unfortunately the constructor here takes an int - but should really take unsigned int
+	Mat m((int)size,(int)size,CV_64F,dispmat);
     Mat n;
     m.convertTo(n, CV_8UC1, 255.0 , 0);
 	Mat outmat;

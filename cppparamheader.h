@@ -8,7 +8,7 @@
 typedef struct output_parameters
 {
     const output_method method;         ///< Are we outputting something
-    const unsigned int Output;          ///< What will be outputted
+    const char Output[20];          ///< What will be outputted
     const unsigned int Delay;           ///< how often to output it
     const char Overlay[20];
 } output_parameters;

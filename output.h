@@ -31,7 +31,7 @@ typedef struct overlaytext
     const char name[20];
     int (*func)();
 } overlaytext;
-output_s __attribute__((pure)) getOutputByName(const char* const name);
+//output_s __attribute__((pure)) getOutputByName(const char* const name);
 overlaytext* __attribute__((pure)) getOverlayByName(const char* const name);
 void output_init(const model* const m);
 void CleanupOutput();

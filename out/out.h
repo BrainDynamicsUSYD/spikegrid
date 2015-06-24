@@ -44,7 +44,7 @@ class PNGoutput : public TAOutput
 };
 class GUIoutput : public PNGoutput
 {
-    const char* winname;
+    char* winname;
     public:
         GUIoutput(int,int,  const output_s*, const char* const,const char* const);
         void DoOutput_();

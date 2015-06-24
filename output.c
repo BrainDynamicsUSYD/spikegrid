@@ -9,6 +9,7 @@
 #include "output.h"
 #include "tagged_array.h"
 #include "mymath.h"
+#include "out/outputtable.h"
 //TODO: This file might work better as C++ (maybe)
 ///Total number of things to be output - occasionally needs to be incremented
 #define output_count   20
@@ -19,22 +20,7 @@ output_s* Outputtable;
 overlaytext* overlays;
 //outptu holds an open reference to the model - this enables the mini functions to work
 const model* modelref; //MASSIVE HACK
-///Finds an output which matches the given name - case sensitive
-///@param name the name of the outputtable
-output_s __attribute__((pure)) getOutputByName(const char* const name)
-{
-    int outidx=0;
-    while (strlen(Outputtable[outidx].name) != 0)
-    {
-        if (!strcmp(Outputtable[outidx].name,name))
-        {
-            return Outputtable[outidx];
-        }
-        outidx++;
-    }
-    printf("tried to get unknown thing to output called -%s-\n",name);
-    exit(EXIT_FAILURE);
-}
+
 ///Finds an overlay which matches the given name - case sensitive
 ///@param name the name of the overlayt
 overlaytext* __attribute__((pure)) getOverlayByName(const char* const name)
@@ -91,6 +77,10 @@ void output_init(const model* const m)
     output_s* malloced = malloc(sizeof(output_s)*output_count);
     memcpy(malloced,outdata,sizeof(output_s)*output_count);
     Outputtable = malloced;
+    for (int i=0;i<output_count-1;i++)
+    {
+        CreateOutputtable(Outputtable[i]);
+    }
     overlaytext* overdata = (overlaytext[]){
         {"Trialno", Trialno},
         {"Timestep", Timestep},

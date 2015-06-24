@@ -7,6 +7,7 @@
 #include <opencv2\highgui\highgui.hpp>
 #endif
 #include "api.h" //this is c++
+#include "outputtable.h"
 extern "C"
 {
 #include "../tagged_array.h"
@@ -73,7 +74,8 @@ GUIoutput::GUIoutput(int a,int b, const output_s* c, const char* const d, const 
 {
     if (showimages==ON)
     {
-        winname = wname;
+        winname=(char*)malloc(20);
+        strcpy(winname,wname);
         cvNamedWindow(wname,CV_WINDOW_NORMAL);
         cvSetMouseCallback(wname,mousecb,(void*)wname);
     }
@@ -87,7 +89,7 @@ void GUIoutput::DoOutput_()
         std::string s(winname);
         delete matmap[s]; //delete the old value
         matmap[s]=m;
-        cv::waitKey(10); //TODO: move this somewhere else
+        cv::waitKey(10); //TODO: move this somewhere else - bad for perf
     }
 }
 
@@ -188,30 +190,31 @@ void MakeOutputs(const output_parameters* const m)
     while (m[i].method != NO_OUTPUT)
     {
         Output* out;
+        output_s outt = GetOutputByName(m[i].Output);
         switch (m[i].method)
         {
             case PICTURE:
-                out = new PNGoutput(i,m[i].Delay,&Outputtable[m[i].Output],m[i].Overlay);
+                out = new PNGoutput(i,m[i].Delay,&outt,m[i].Overlay);
                 outvec.push_back(out);
                 break;
             case TEXT:
-                out = new TextOutput(i,m[i].Delay,Outputtable[m[i].Output].data.TA_data);
+                out = new TextOutput(i,m[i].Delay,outt.data.TA_data);
                 outvec.push_back(out);
                 break;
             case CONSOLE:
-                out = new ConsoleOutput(i,m[i].Delay,&Outputtable[m[i].Output]);
+                out = new ConsoleOutput(i,m[i].Delay,&outt);
                 outvec.push_back(out);
                 break;
             case SPIKES:
-                out = new SpikeOutput(i,m[i].Delay,Outputtable[m[i].Output].data.Lag_data);
+                out = new SpikeOutput(i,m[i].Delay,outt.data.Lag_data);
                 outvec.push_back(out);
                 break;
             case VIDEO:
-                out = new VidOutput(i,m[i].Delay,&Outputtable[m[i].Output],m[i].Overlay);
+                out = new VidOutput(i,m[i].Delay,&outt,m[i].Overlay);
                 outvec.push_back(out);
                 break;
             case GUI:
-                out = new GUIoutput(i,m[i].Delay,&Outputtable[m[i].Output] ,m[i].Overlay,Outputtable[m[i].Output].name);
+                out = new GUIoutput(i,m[i].Delay,&outt ,m[i].Overlay,outt.name);
                 outvec.push_back(out);
                 break;
             default:

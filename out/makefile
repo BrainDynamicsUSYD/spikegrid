@@ -1,2 +1,2 @@
-${outlib}: out.cpp api.cpp
-	${CXX} ${CXXFLAGS} -g -fpic -Wall -Wextra  ${opencvcflags} api.cpp out.cpp -o ${outlib} -shared
+${outlib}: out.cpp api.cpp outputtable.cpp
+	${CXX} ${CXXFLAGS} -g -fpic -Wall -Wextra  ${opencvcflags} $^ -o ${outlib} -shared

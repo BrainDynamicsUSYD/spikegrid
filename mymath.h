@@ -16,6 +16,6 @@
 #define round(x) roundf(x)
 #endif
 static inline Compute_float RandFloat()
-{   /* don't need to cast random as int/double uses double division */
-    return random() / (Compute_float) RAND_MAX;
+{   /* funny casting try to keep clang and gcc happy */
+    return (Compute_float)(random()) / (Compute_float) RAND_MAX;
 }

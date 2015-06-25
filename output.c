@@ -17,25 +17,10 @@
 //declare the extern variables from the header
 char outdir[100];
 output_s* Outputtable;
-overlaytext* overlays;
 //outptu holds an open reference to the model - this enables the mini functions to work
 const model* modelref; //MASSIVE HACK
 
-///Finds an overlay which matches the given name - case sensitive
-///@param name the name of the overlayt
-overlaytext* __attribute__((pure)) getOverlayByName(const char* const name)
-{
-    int outidx=0;
-    while (strlen(overlays[outidx].name) != 0)
-    {
-        if (!strcmp(overlays[outidx].name,name))
-        {
-            return &overlays[outidx];
-        }
-        outidx++;
-    }
-    return NULL; //this needs to return null as we can have an empty overlay
-}
+
 int __attribute__((pure)) Trialno()
 {
     return (int) (floor(modelref->timesteps * Features.Timestep /modelref->layer1.P->Stim.timeperiod - modelref->layer1.P->Stim.PreconditioningTrials))  ;
@@ -81,14 +66,10 @@ void output_init(const model* const m)
     {
         CreateOutputtable(Outputtable[i]);
     }
-    overlaytext* overdata = (overlaytext[]){
-        {"Trialno", Trialno},
-        {"Timestep", Timestep},
-        {.name={0}}
+
     };
-    overlaytext* overmalloc = malloc(sizeof(overlaytext)*overlay_count);
-    memcpy(overmalloc,overdata,sizeof(overlaytext)*overlay_count);
-    overlays = overmalloc;
+    CreateOverlay((overlaytext){"Trialno",Trialno});
+    CreateOverlay((overlaytext){"Timestep",Timestep});
 }
 ///Cleans up memory and file handles that are used by the outputtables object
 void CleanupOutput()

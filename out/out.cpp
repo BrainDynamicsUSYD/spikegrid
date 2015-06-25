@@ -42,7 +42,7 @@ TAOutput::TAOutput(int idxin,const int intervalin,const output_s* datain) : Outp
 
 PNGoutput::PNGoutput(int idxin ,const int intervalin,const output_s* datain,const char* const overlayin) : TAOutput(idxin,intervalin,datain)
 {
-   overlay = getOverlayByName(overlayin);
+   overlay = GetOverlayByName(overlayin);
 }
 void PNGoutput::DoOutput_()
 {
@@ -95,7 +95,7 @@ void GUIoutput::DoOutput_()
 
 VidOutput::VidOutput(int idxin ,const int intervalin,const output_s* datain,const char* const overlayin) : TAOutput(idxin,intervalin,datain)
 {
-    overlay = getOverlayByName(overlayin);
+    overlay = GetOverlayByName(overlayin);
     char buf[100];
     sprintf(buf,"%s/%i.avi",outdir,idxin);
     int fourcc = CV_FOURCC('H','F','Y','U');

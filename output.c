@@ -32,42 +32,27 @@ int __attribute__((pure)) Timestep() {return (int) modelref->timesteps;}
 void output_init(const model* const m)
 {
     modelref = m; //store ref to model.
-    //WHEN YOU ADD SOMETHING - INCREASE OUTPUT_COUNT AT TOP OF FILE;
-    //ALSO - only add things to the end of the array
-    output_s* outdata=(output_s[]){ //note - neat feature - missing elements initailized to 0
-        //Name          data type                  actual data                size                    offset
-        //subgrid,minval,maxval
-        {"gE",          FLOAT_DATA, .data.TA_data=tagged_array_new(m->gE,                     conductance_array_size, couplerange,   1,0,2)}, //gE is a 'large' matrix - as it wraps around the edges
-        {"gI",          FLOAT_DATA, .data.TA_data=tagged_array_new(m->gI,                     conductance_array_size, couplerange,   1,0,2)}, //gI is a 'large' matrix - as it wraps around the edges
-        {"Coupling1",   FLOAT_DATA, .data.TA_data=tagged_array_new(m->layer1.connections,     couple_array_size,      0,             1,-0.5,0.5)}, //return the coupling matrix of layer 1 //TODO: fix min and max values
-        {"Coupling2",   FLOAT_DATA, .data.TA_data=tagged_array_new(m->layer2.connections,     couple_array_size,      0,             1,-0.5,0.5)}, //return the coupling matrix of layer 2
-        {"V1",          FLOAT_DATA, .data.TA_data=tagged_array_new(m->layer1.voltages_out,    grid_size,              0,             1,m->layer1.P->potential.Vin,m->layer1.P->potential.Vpk)},
-        {"V2",          FLOAT_DATA, .data.TA_data=tagged_array_new(m->layer2.voltages_out,    grid_size,              0,             1,m->layer2.P->potential.Vin,m->layer2.P->potential.Vpk)},
-        {"Recovery1",   FLOAT_DATA, .data.TA_data=tagged_array_new(m->layer1.recoverys_out,   grid_size,              0,             1,0,100)}, //TODO: ask adam for max and min recovery values
-        {"Recovery2",   FLOAT_DATA, .data.TA_data=tagged_array_new(m->layer2.recoverys_out,   grid_size,              0,             1,0,100)}, //TODO: ask adam for max and min recovery values
-        {"STDU1",       FLOAT_DATA, .data.TA_data=tagged_array_new(Features.STD==ON?m->layer1.std->U:NULL, grid_size, 0,             1,0,1)},
-        {"STDR1",       FLOAT_DATA, .data.TA_data=tagged_array_new(Features.STD==ON?m->layer1.std->R:NULL, grid_size, 0,             1,0,1)},
-        {"STDU2",       FLOAT_DATA, .data.TA_data=tagged_array_new(Features.STD==ON?m->layer2.std->U:NULL, grid_size, 0,             1,0,1)},
-        {"STDR2",       FLOAT_DATA, .data.TA_data=tagged_array_new(Features.STD==ON?m->layer2.std->R:NULL, grid_size, 0,             1,0,1)},
-        {"STDP1",       FLOAT_DATA, .data.TA_data=tagged_array_new(Features.STDP==ON?m->layer1.STDP_data->connections:NULL,grid_size,0,couple_array_size,-0.01,0.01)},
-        {"STDP2",       FLOAT_DATA, .data.TA_data=tagged_array_new(Features.STDP==ON?m->layer2.STDP_data->connections:NULL,grid_size,0,couple_array_size,-0.01,0.01)},
-        {"Spike1",      SPIKE_DATA, .data.Lag_data=m->layer1.firinglags},
-        {"Spike2",      SPIKE_DATA, .data.Lag_data=m->layer2.firinglags},
-        {"STDP_map",    FLOAT_DATA,
+    CreateOutputtable((output_s){"gE",          FLOAT_DATA, .data.TA_data=tagged_array_new(m->gE,                     conductance_array_size, couplerange,   1,0,2)}); //gE is a 'large' matrix - as it wraps around the edges
+    CreateOutputtable((output_s){"gI",          FLOAT_DATA, .data.TA_data=tagged_array_new(m->gI,                     conductance_array_size, couplerange,   1,0,2)});
+    CreateOutputtable((output_s){"Coupling1",   FLOAT_DATA, .data.TA_data=tagged_array_new(m->layer1.connections,     couple_array_size,      0,             1,-0.5,0.5)});
+    CreateOutputtable((output_s){"Coupling2",   FLOAT_DATA, .data.TA_data=tagged_array_new(m->layer2.connections,     couple_array_size,      0,             1,-0.5,0.5)});
+    CreateOutputtable((output_s){"V1",          FLOAT_DATA, .data.TA_data=tagged_array_new(m->layer1.voltages_out,    grid_size,              0,             1,m->layer1.P->potential.Vin,m->layer1.P->potential.Vpk)});
+    CreateOutputtable((output_s){"V2",          FLOAT_DATA, .data.TA_data=tagged_array_new(m->layer2.voltages_out,    grid_size,              0,             1,m->layer2.P->potential.Vin,m->layer2.P->potential.Vpk)});
+    CreateOutputtable((output_s){"Recovery1",   FLOAT_DATA, .data.TA_data=tagged_array_new(m->layer1.recoverys_out,   grid_size,              0,             1,0,100)});
+    CreateOutputtable((output_s){"Recovery2",   FLOAT_DATA, .data.TA_data=tagged_array_new(m->layer2.recoverys_out,   grid_size,              0,             1,0,100)});
+    CreateOutputtable((output_s){"STDU1",       FLOAT_DATA, .data.TA_data=tagged_array_new(Features.STD==ON?m->layer1.std->U:NULL, grid_size, 0,             1,0,1)});
+    CreateOutputtable((output_s){"STDR1",       FLOAT_DATA, .data.TA_data=tagged_array_new(Features.STD==ON?m->layer1.std->R:NULL, grid_size, 0,             1,0,1)});
+    CreateOutputtable((output_s){"STDU2",       FLOAT_DATA, .data.TA_data=tagged_array_new(Features.STD==ON?m->layer2.std->U:NULL, grid_size, 0,             1,0,1)});
+    CreateOutputtable((output_s){"STDR2",       FLOAT_DATA, .data.TA_data=tagged_array_new(Features.STD==ON?m->layer2.std->R:NULL, grid_size, 0,             1,0,1)});
+    CreateOutputtable((output_s){"STDP1",       FLOAT_DATA, .data.TA_data=tagged_array_new(Features.STDP==ON?m->layer1.STDP_data->connections:NULL,grid_size,0,couple_array_size,-0.01,0.01)});
+    CreateOutputtable((output_s){"STDP2",       FLOAT_DATA, .data.TA_data=tagged_array_new(Features.STDP==ON?m->layer2.STDP_data->connections:NULL,grid_size,0,couple_array_size,-0.01,0.01)});
+    CreateOutputtable((output_s){"Spike1",      SPIKE_DATA, .data.Lag_data=m->layer1.firinglags});
+    CreateOutputtable((output_s){"Spike2",      SPIKE_DATA, .data.Lag_data=m->layer2.firinglags});
+    CreateOutputtable((output_s){"STDP_map",    FLOAT_DATA,
             .data.TA_data =Features.STDP==ON?tagged_array_new(m->layer2.STDP_data->connections,grid_size,0,1,-0.01,0.01):NULL,
             .Updateable=ON, .UpdateFn=&STDP_mag,
             .function_arg =Features.STDP==ON?tagged_array_new(m->layer2.STDP_data->connections,grid_size,0,1,-0.01,0.01):NULL
-        },
-        {.name={0}}};         //a marker that we are at the end of the outputabbles list
-    output_s* malloced = malloc(sizeof(output_s)*output_count);
-    memcpy(malloced,outdata,sizeof(output_s)*output_count);
-    Outputtable = malloced;
-    for (int i=0;i<output_count-1;i++)
-    {
-        CreateOutputtable(Outputtable[i]);
-    }
-
-    };
+        });
     CreateOverlay((overlaytext){"Trialno",Trialno});
     CreateOverlay((overlaytext){"Timestep",Timestep});
 }

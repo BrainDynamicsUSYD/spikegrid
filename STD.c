@@ -2,6 +2,10 @@
 #include "STD.h"
 #include "mymath.h"
 #include "paramheader.h"
+#include "output.h"
+#include "out/outputtable.h"
+#include "tagged_array.h"
+int layerinitcount=0;
 ///Initialise the STD parameters to their initial values.
 ///Failing to call this before using STD will give incorrect results initially.
 ///It is possible that results will converge after some time, but best not to risk it.
@@ -17,6 +21,17 @@ STD_data* __attribute__((const)) STD_init(const STD_parameters s)
         ret->ftimes[i] = 0; //probably not required as you can gurantee that the memory is set to 0 by default
         ret->U[i]      = s.U;
         ret->R[i]      = One;
+    }
+    if (layerinitcount==0)
+    {
+        CreateOutputtable((output_s){"STDU1",FLOAT_DATA, .data.TA_data=tagged_array_new(ret->U, grid_size, 0,1,0,1)});
+        CreateOutputtable((output_s){"STDR1",FLOAT_DATA, .data.TA_data=tagged_array_new(ret->R, grid_size, 0,1,0,1)});
+        layerinitcount++;
+    }
+    else
+    {
+        CreateOutputtable((output_s){"STDU2",FLOAT_DATA, .data.TA_data=tagged_array_new(ret->U, grid_size, 0,1,0,1)});
+        CreateOutputtable((output_s){"STDR2",FLOAT_DATA, .data.TA_data=tagged_array_new(ret->R, grid_size, 0,1,0,1)});
     }
     return ret;
 }

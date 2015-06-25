@@ -2,7 +2,6 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "STD.h"
 #include "paramheader.h" //needed because some of the max/min values are obtained from parameters
 #include "STDP.h"
 #include "model.h"
@@ -40,10 +39,6 @@ void output_init(const model* const m)
     CreateOutputtable((output_s){"V2",          FLOAT_DATA, .data.TA_data=tagged_array_new(m->layer2.voltages_out,    grid_size,              0,             1,m->layer2.P->potential.Vin,m->layer2.P->potential.Vpk)});
     CreateOutputtable((output_s){"Recovery1",   FLOAT_DATA, .data.TA_data=tagged_array_new(m->layer1.recoverys_out,   grid_size,              0,             1,0,100)});
     CreateOutputtable((output_s){"Recovery2",   FLOAT_DATA, .data.TA_data=tagged_array_new(m->layer2.recoverys_out,   grid_size,              0,             1,0,100)});
-    CreateOutputtable((output_s){"STDU1",       FLOAT_DATA, .data.TA_data=tagged_array_new(Features.STD==ON?m->layer1.std->U:NULL, grid_size, 0,             1,0,1)});
-    CreateOutputtable((output_s){"STDR1",       FLOAT_DATA, .data.TA_data=tagged_array_new(Features.STD==ON?m->layer1.std->R:NULL, grid_size, 0,             1,0,1)});
-    CreateOutputtable((output_s){"STDU2",       FLOAT_DATA, .data.TA_data=tagged_array_new(Features.STD==ON?m->layer2.std->U:NULL, grid_size, 0,             1,0,1)});
-    CreateOutputtable((output_s){"STDR2",       FLOAT_DATA, .data.TA_data=tagged_array_new(Features.STD==ON?m->layer2.std->R:NULL, grid_size, 0,             1,0,1)});
     CreateOutputtable((output_s){"STDP1",       FLOAT_DATA, .data.TA_data=tagged_array_new(Features.STDP==ON?m->layer1.STDP_data->connections:NULL,grid_size,0,couple_array_size,-0.01,0.01)});
     CreateOutputtable((output_s){"STDP2",       FLOAT_DATA, .data.TA_data=tagged_array_new(Features.STDP==ON?m->layer2.STDP_data->connections:NULL,grid_size,0,couple_array_size,-0.01,0.01)});
     CreateOutputtable((output_s){"Spike1",      SPIKE_DATA, .data.Lag_data=m->layer1.firinglags});

@@ -37,3 +37,10 @@ overlaytext* GetOverlayByName(const char* const name)
         //do something when outputtable not found
     }
 }
+
+void CleanupOutput()
+{
+    //TODO: massive hackery - but it should work fine
+    outt = *new std::map<std::string,output_s>();
+    overlaymap = *new std::map<std::string,overlaytext>();
+}

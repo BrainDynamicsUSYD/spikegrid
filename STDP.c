@@ -7,6 +7,7 @@
 #include "randconns.h"
 #include "lagstorage.h"
 #include "tagged_array.h"
+#include "out/outputtable.h"
 typedef struct
 {
     Compute_float Strength_increase;
@@ -142,6 +143,7 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
         }
     }
 }
+int initcount=0;
 //Look - we can write constructors for objects in C
 STDP_data* STDP_init(const STDP_parameters* const S,const int trefrac_in_ts)
 {
@@ -157,6 +159,24 @@ STDP_data* STDP_init(const STDP_parameters* const S,const int trefrac_in_ts)
         .P = S,
     };
     memcpy(ret,&D,sizeof(*ret));
+    if (initcount==0)
+    {
+        CreateOutputtable((output_s){"STDP1",       FLOAT_DATA, .data.TA_data=tagged_array_new(ret->connections,grid_size,0,couple_array_size,-0.01,0.01)});
+        CreateOutputtable((output_s){"STDP_map1",    FLOAT_DATA,
+            .data.TA_data =tagged_array_new(ret->connections,grid_size,0,1,-0.01,0.01),
+            .Updateable=ON, .UpdateFn=&STDP_mag,
+            .function_arg =tagged_array_new(ret->connections,grid_size,0,1,-0.01,0.01)
+        });
+    }
+    else
+    {
+        CreateOutputtable((output_s){"STDP2",       FLOAT_DATA, .data.TA_data=tagged_array_new(ret->connections,grid_size,0,couple_array_size,-0.01,0.01)});
+        CreateOutputtable((output_s){"STDP_map2",    FLOAT_DATA,
+            .data.TA_data =tagged_array_new(ret->connections,grid_size,0,1,-0.01,0.01),
+            .Updateable=ON, .UpdateFn=&STDP_mag,
+            .function_arg =tagged_array_new(ret->connections,grid_size,0,1,-0.01,0.01)
+        });
+    }
     return ret;
 }
 ///this function would

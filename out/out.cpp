@@ -11,7 +11,6 @@
 extern "C"
 {
 #include "../tagged_array.h"
-#include "../output.h" //but this is C
 #include "../cppparamheader.h"
 #include "../lagstorage.h"
 }

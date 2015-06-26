@@ -1,8 +1,5 @@
 #include <map>
 #include "outputtable.h"
-extern "C" {
-#include "../output.h"
-}
 std::map<std::string,output_s> outt;
 std::map<std::string,overlaytext> overlaymap;
 void CreateOutputtable (const output_s out)

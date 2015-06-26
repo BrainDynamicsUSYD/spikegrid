@@ -1,10 +1,7 @@
 /// \file
-#include <string.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include "paramheader.h" //needed because some of the max/min values are obtained from parameters
 #include "model.h"
-#include "output.h"
 #include "tagged_array.h"
 #include "mymath.h"
 #include "out/outputtable.h"

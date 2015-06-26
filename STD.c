@@ -2,7 +2,6 @@
 #include "STD.h"
 #include "mymath.h"
 #include "paramheader.h"
-#include "output.h"
 #include "out/outputtable.h"
 #include "tagged_array.h"
 int layerinitcount=0;

@@ -15,6 +15,7 @@ int __attribute__((pure)) Trialno()
 {
     return (int) (floor(modelref->timesteps * Features.Timestep /modelref->layer1.P->Stim.timeperiod - modelref->layer1.P->Stim.PreconditioningTrials))  ;
 }
+//Used for the simple overlay of timesteps
 int __attribute__((pure)) Timestep() {return (int) modelref->timesteps;}
 ///Set up the outputtables for a given model
 ///This function should probably move to the C++ code
@@ -22,6 +23,7 @@ int __attribute__((pure)) Timestep() {return (int) modelref->timesteps;}
 void output_init(const model* const m)
 {
     modelref = m; //store ref to model.
+    //define model based outputs - this could move to model.c
     CreateOutputtable((output_s){"gE",          FLOAT_DATA, .data.TA_data=tagged_array_new(m->gE,                     conductance_array_size, couplerange,   1,0,2)}); //gE is a 'large' matrix - as it wraps around the edges
     CreateOutputtable((output_s){"gI",          FLOAT_DATA, .data.TA_data=tagged_array_new(m->gI,                     conductance_array_size, couplerange,   1,0,2)});
     CreateOutputtable((output_s){"Coupling1",   FLOAT_DATA, .data.TA_data=tagged_array_new(m->layer1.connections,     couple_array_size,      0,             1,-0.5,0.5)});
@@ -30,11 +32,10 @@ void output_init(const model* const m)
     CreateOutputtable((output_s){"V2",          FLOAT_DATA, .data.TA_data=tagged_array_new(m->layer2.voltages_out,    grid_size,              0,             1,m->layer2.P->potential.Vin,m->layer2.P->potential.Vpk)});
     CreateOutputtable((output_s){"Recovery1",   FLOAT_DATA, .data.TA_data=tagged_array_new(m->layer1.recoverys_out,   grid_size,              0,             1,0,100)});
     CreateOutputtable((output_s){"Recovery2",   FLOAT_DATA, .data.TA_data=tagged_array_new(m->layer2.recoverys_out,   grid_size,              0,             1,0,100)});
-    
     CreateOutputtable((output_s){"Spike1",      SPIKE_DATA, .data.Lag_data=m->layer1.firinglags});
     CreateOutputtable((output_s){"Spike2",      SPIKE_DATA, .data.Lag_data=m->layer2.firinglags});
-    
     //note: some outputs defined elsewhere - it seems more convenient
+    //Create the overlays - the functions are defined earlier in the file.
     CreateOverlay((overlaytext){"Trialno",Trialno});
     CreateOverlay((overlaytext){"Timestep",Timestep});
 }

@@ -37,13 +37,13 @@ ifeq ($(MATLAB),yes) #this has to be an if due to errors
 endif
 #set up some non-matlab variables
 export DEBUGFLAGS= -g -std=gnu11 ${DEFINES}
-export CXXDEBUGFLAGS= -g --std=c++11 ${DEFINES}
+export CXXDEBUGFLAGS= -g -std=c++11 ${DEFINES}
 export CLIBFLAGS= -fPIC -shared
 export LDFLAGS= -lm -g
 export opencvcflags=$(shell  pkg-config --cflags opencv)
 export opencvldflags=$(shell  pkg-config --libs opencv)
 CFLAGS += ${SPEEDFLAG} ${DEFINES} -fno-omit-frame-pointer
 export CXXFLAGS:=${CFLAGS} #use := to create an actual copy
-CFLAGS += --std=gnu11 ${cspecificwarnings}
-CXXFLAGS += --std=c++11
+CFLAGS += -std=gnu11 ${cspecificwarnings}
+CXXFLAGS += -std=c++11
 

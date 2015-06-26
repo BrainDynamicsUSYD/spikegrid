@@ -1,4 +1,5 @@
 #include <map>
+#include <stdio.h>
 #include "outputtable.h"
 std::map<std::string,output_s> outt;
 std::map<std::string,overlaytext> overlaymap;

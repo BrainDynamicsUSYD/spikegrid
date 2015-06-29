@@ -9,7 +9,7 @@
 /// There is a small memory cost so do some benchmarking
 typedef struct lagstorage //TODO question - could this be moved out of .h?
 {
-    int16_t*    lags; //since the maximum time delay should be short, don't bother with a full int, using int16 will halve memory usage.  In the no-STDP case, lagstorage is a pretty significant amount of RAM usage
+    int16_t*    lags; //since the maximum time delay should be short, don't bother with a full int, using int16 will halve memory usage.  In the no-STDP case, lagstorage is a pretty significant amount of RAM usage.  Note - with small lags we could even go to int8_t
     const int   cap;
     const unsigned int   lagsperpoint;
 } lagstorage;

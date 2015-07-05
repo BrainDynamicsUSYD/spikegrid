@@ -98,7 +98,7 @@ static const model_features Features =
     .Timestep   = 0.1,
     .Simlength  = 50000,
 
-    .output = {{.method = VIDEO,.Output=5,.Delay=20, .Overlay="Trialno"},{.method=GUI,.Output=5,.Delay=10,.Overlay="Timestep"}}
+    .output = {{.method = VIDEO,.Output="V2",.Delay=20, .Overlay="Trialno"},{.method=GUI,.Output="V2",.Delay=10,.Overlay="Timestep"}}
 };
 ///Constant external input to conductances
 static const extinput Extinput =

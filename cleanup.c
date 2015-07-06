@@ -3,6 +3,7 @@
 #include "output.h"
 #include "model.h"
 #include "out/out.h"
+#include "lagstorage.h"
 ///Free a pointer if it is not null
 ///@param v pointer to free
 void FreeIfNotNull(void* v)
@@ -22,6 +23,9 @@ void CleanupLayer(layer* l)
     FreeIfNotNull(l->Intimecourse);
     FreeIfNotNull(l->P);
     FreeIfNotNull(l->std);
+    lagstorage_dtor(l->firinglags);
+    free(l->Rmat);
+    free(l->Dmat);
  //   CleanupRingBuffer(&l->spikes);
    // CleanupRingBuffer(&l->spikes_STDP);
 //    FreeIfNotNull(l->spikes.data);

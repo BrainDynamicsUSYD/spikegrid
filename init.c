@@ -69,7 +69,7 @@ layer setuplayer(const parameters p)
         .STDP_data          = Features.STDP==ON?STDP_init(&P->STDP,trefrac_in_ts):NULL, //problem - P defd later
         .connections        = CreateCouplingMatrix(p.couple),
         .std                = Features.STD==ON?STD_init(p.STD):NULL,
-        .Phimat             = (p.Stim.Periodic==OFF)?CreatePhiMatrix():NULL,
+        .Phimat             = (p.Stim.Periodic==OFF && Features.ImageStim==ON)?CreatePhiMatrix():NULL,
         .Extimecourse       = p.couple.Layertype==SINGLELAYER?
             Synapse_timecourse_cache((unsigned int)cap,p.couple.Layer_parameters.single.Ex,Features.Timestep):NULL,
         .Intimecourse       = p.couple.Layertype==SINGLELAYER?
@@ -157,6 +157,8 @@ model* setup(const parameters p,const parameters p2,const LayerNumbers lcount,co
     memcpy(m2,&m,sizeof(m));
     memcpy(m2->gIinit,giinit,sizeof(m2->gIinit));
     memcpy(m2->gEinit,geinit,sizeof(m2->gEinit));
+    free(giinit);
+    free(geinit);
     char* buffer = malloc(1024);
     gethostname(buffer,1023);
     if (!strcmp(buffer,"headnode.physics.usyd.edu.au")&& !testing) {printf("DON'T RUN THIS CODE ON HEADNODE\n");exit(EXIT_FAILURE);}

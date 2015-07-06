@@ -14,6 +14,7 @@ typedef struct lagstorage //TODO question - could this be moved out of .h?
     const unsigned int   lagsperpoint;
 } lagstorage;
 lagstorage* lagstorage_init(const unsigned int flagcount,const int cap);
+void lagstorage_dtor(lagstorage* l);
 void AddnewSpike(lagstorage* L,const unsigned int baseidx);
 void modifyLags(lagstorage* L,unsigned int baseidx);
 int16_t __attribute__((const,pure)) CurrentShortestLag(const lagstorage* const L,const unsigned int baseidx);

@@ -26,6 +26,12 @@ lagstorage* lagstorage_init(const unsigned int flagcount,const int cap)
     return l;
 }
 
+void lagstorage_dtor(lagstorage* l)
+{
+    free(l->lags);
+    free(l); //lagstorages are always allocated with malloc
+}
+
 int16_t __attribute__((const,pure)) CurrentShortestLag(const lagstorage* const L,const unsigned int baseidx)
 {
     unsigned int idx=0;

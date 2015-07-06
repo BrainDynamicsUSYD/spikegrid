@@ -26,33 +26,33 @@ static const LayerNumbers ModelType = DUALLAYER;
 static const parameters OneLayerModel = {.couple={0}}; //since unused - shortes possible definition that produces no warnings
 
 #define potparams .potential =     \
-    {                                  \
-        .type    =                     \
-        {                           \
-            .type = LIF,            \
-        },                          \
-        .Vrt     = -70,             \
-        .Vpk    = -55,              \
-        .Vlk     = -70,             \
-        .Vex     = 0,               \
-        .Vin     = -80,             \
-        .glk     = 0.05,            \
-        .rate = 0,                  \
-    }
+{                                  \
+    .type    =                     \
+    {                           \
+        .type = LIF,            \
+    },                          \
+    .Vrt     = -70,             \
+    .Vpk    = -55,              \
+    .Vlk     = -70,             \
+    .Vex     = 0,               \
+    .Vin     = -80,             \
+    .glk     = 0.05,            \
+    .rate = 0,                  \
+}
 
 #define STDPparams .STDP=   \
-    {                       \
-        .stdp_limit=0.5,    \
-        .stdp_tau=20,       \
-        .stdp_strength=0.0001,  \
-        .STDP_on=ON\
-    }
+{                       \
+    .stdp_limit=0.5,    \
+    .stdp_tau=20,       \
+    .stdp_strength=0.0001,  \
+    .STDP_on=ON\
+}
 #define STDparams .STD= \
-    {                   \
-        .U = 0.5,       \
-        .D = 0.2,      \
-        .F = 0.45      \
-    }
+{                   \
+    .U = 0.5,       \
+    .D = 0.2,      \
+    .F = 0.45      \
+}
 #define Stimparams .Stim=\
 {\
     .ImagePath  = "input_maps/stoch_interact.png",\
@@ -63,6 +63,15 @@ static const parameters OneLayerModel = {.couple={0}}; //since unused - shortes 
     .Testing = OFF,\
     .TestPathChoice = ON,\
     .Periodic = ON,\
+}
+#define Rparams .RandConns=\
+{ \
+    .numberper = grid_size*grid_size/10, \
+    .str=1,\
+    .Specials=0,\
+    .FancySpecials=ON,\
+    .SpecialAInd=100,\
+    .SpecialBInd=200,\
 }
 ///parameters for the inhibitory layer of the double layer model
 static const parameters DualLayerModelIn =
@@ -120,7 +129,7 @@ static const model_features Features =
 {
     .STD        = OFF,
     .STDP		= ON, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep -
-    .Random_connections = OFF,
+    .Random_connections = ON,
     .Timestep   = 0.1,
     .Simlength  = 100000,
     .ImageStim  = ON,

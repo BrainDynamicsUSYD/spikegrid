@@ -63,6 +63,9 @@ typedef struct randconn_parameters
     const unsigned int numberper;
     const Compute_float str;
     const unsigned int Specials;
+    const on_off FancySpecials;
+    const unsigned int SpecialAInd;
+    const unsigned int SpecialBInd;
 } randconn_parameters;
 /// External input
 typedef struct

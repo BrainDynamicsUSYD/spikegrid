@@ -21,6 +21,7 @@ void CleanupLayer(layer* l)
     FreeIfNotNull(l->connections);
     FreeIfNotNull(l->Extimecourse);
     FreeIfNotNull(l->Intimecourse);
+    FreeIfNotNull(l->Mytimecourse);
     FreeIfNotNull(l->P);
     FreeIfNotNull(l->std);
     lagstorage_dtor(l->firinglags);

@@ -191,31 +191,31 @@ void MakeOutputs(const output_parameters* const m)
     while (m[i].method != NO_OUTPUT)
     {
         Output* out;
-        output_s outt = GetOutputByName(m[i].Output);
+        output_s* outt = GetOutputByName(m[i].Output);
         switch (m[i].method)
         {
             case PICTURE:
-                out = new PNGoutput(i,m[i].Delay,&outt,m[i].Overlay);
+                out = new PNGoutput(i,m[i].Delay,outt,m[i].Overlay);
                 outvec.push_back(out);
                 break;
             case TEXT:
-                out = new TextOutput(i,m[i].Delay,outt.data.TA_data);
+                out = new TextOutput(i,m[i].Delay,outt->data.TA_data);
                 outvec.push_back(out);
                 break;
             case CONSOLE:
-                out = new ConsoleOutput(i,m[i].Delay,&outt);
+                out = new ConsoleOutput(i,m[i].Delay,outt);
                 outvec.push_back(out);
                 break;
             case SPIKES:
-                out = new SpikeOutput(i,m[i].Delay,outt.data.Lag_data);
+                out = new SpikeOutput(i,m[i].Delay,outt->data.Lag_data);
                 outvec.push_back(out);
                 break;
             case VIDEO:
-                out = new VidOutput(i,m[i].Delay,&outt,m[i].Overlay);
+                out = new VidOutput(i,m[i].Delay,outt,m[i].Overlay);
                 outvec.push_back(out);
                 break;
             case GUI:
-                out = new GUIoutput(i,m[i].Delay,&outt ,m[i].Overlay,outt.name);
+                out = new GUIoutput(i,m[i].Delay,outt ,m[i].Overlay,outt->name);
                 outvec.push_back(out);
                 break;
             default:

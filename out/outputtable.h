@@ -5,7 +5,7 @@ extern "C" {
 void CreateOutputtable (const output_s out);
 void CreateOverlay(const overlaytext overlay);
 void CleanupOutput();
-output_s GetOutputByName(const char* const name);
+output_s* GetOutputByName(const char* const name);
 overlaytext* GetOverlayByName(const char* const name);
 #ifdef __cplusplus
 }

@@ -11,16 +11,16 @@ void CreateOverlay(const overlaytext overlay)
 {
     overlaymap.insert(std::make_pair(std::string(overlay.name),overlay));
 }
-output_s GetOutputByName(const char* const name)
+output_s* GetOutputByName(const char* const name)
 {
     if (outt.find(std::string(name)) != outt.end())
     {
-        return outt.at(std::string(name));
+        return &outt.at(std::string(name));
     }
     else
     {
-        printf("failed to return something\n");
-        //do something when outputtable not found
+        printf("failed to return something - tried to get %s \n  This is probably catastrophic and as a result the program should quit",name);
+        return NULL;
     }
 }
 overlaytext* GetOverlayByName(const char* const name)
@@ -31,8 +31,7 @@ overlaytext* GetOverlayByName(const char* const name)
     }
     else
     {
-        printf("failed to return something\n");
-        //do something when outputtable not found
+        return NULL;
     }
 }
 

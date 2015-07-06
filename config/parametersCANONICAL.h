@@ -177,32 +177,32 @@ static const model_features Features =
     {
         {
             .method=PICTURE,
-            .Output=0, //gE
+            .Output="gE",
             .Delay=5
         },
         {
             .method=PICTURE,
-            .Output=1,//gI
+            .Output="gI",
             .Delay=5
         },
         {
             .method=TEXT,
-            .Output=2,//coupling1
+            .Output="Coupling1",
             .Delay=1000
         },
         {
             .method=TEXT,
-            .Output=3,//coupling2
+            .Output="Coupling2",
             .Delay=1000
         },
         {
             .method=PICTURE,
-            .Output=4,//V1
+            .Output="V1",
             .Delay=5
         },
         {
             .method=PICTURE,
-            .Output=5,//V2
+            .Output="V2",
             .Delay=5
         },
     }

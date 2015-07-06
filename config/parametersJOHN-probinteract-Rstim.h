@@ -1,10 +1,10 @@
 /// \file
 #include <stddef.h> //offsetof
 //these first few parameters actually escape into the paramheader file through magic
-#define grid_size 100
+#define grid_size 300
 ///Total size of the grid
 ///Coupling range
-#define couplerange 15
+#define couplerange 25
 #ifndef PARAMETERS  //DO NOT REMOVE
 ///include guard
 #define PARAMETERS  //DO NOT REMOVE
@@ -23,11 +23,11 @@ static const LayerNumbers ModelType = DUALLAYER;
 
 //Fun note - with the right optimisations GCC actually will pull these constants inline (for example disassemble evolvept_STDP with STDP off)
 ///Parameters for the single layer model
-static const parameters OneLayerModel = {0}; //since unused - shortes possible definition that produces no warnings
+static const parameters OneLayerModel = {.couple={0}}; //since unused - shortes possible definition that produces no warnings
 
-#define potparams  .potential =     \
-    {                               \
-        .type    =                  \
+#define potparams .potential =     \
+    {                                  \
+        .type    =                     \
         {                           \
             .type = LIF,            \
         },                          \
@@ -44,8 +44,26 @@ static const parameters OneLayerModel = {0}; //since unused - shortes possible d
     {                       \
         .stdp_limit=0.5,    \
         .stdp_tau=20,       \
-        .stdp_strength=0.01  \
+        .stdp_strength=0.0001,  \
+        .STDP_on=ON\
     }
+#define STDparams .STD= \
+    {                   \
+        .U = 0.5,       \
+        .D = 0.2,      \
+        .F = 0.45      \
+    }
+#define Stimparams .Stim=\
+{\
+    .ImagePath  = "input_maps/stoch_interact.png",\
+    .timeperiod=150,\
+    .lag=55,\
+    .PreconditioningTrials=0,\
+    .NoUSprob=0,\
+    .Testing = OFF,\
+    .TestPathChoice = ON,\
+    .Periodic = ON,\
+}
 ///parameters for the inhibitory layer of the double layer model
 static const parameters DualLayerModelIn =
 {
@@ -56,16 +74,20 @@ static const parameters DualLayerModelIn =
         {
             .dual =
             {
-                .W          = -0.79, //-0.40 //-0.57 //-0.70 //-1.25,
+                .W          = -0.71, //-0.40 //-0.57 //-0.70 //-1.25,
                 .sigma      = 90,
-                .synapse    = {.R=0.5,.D=7.0},
+                .synapse    = {.R=0.5,.D=2.0},
             }
         },
-        .norm_type = None,
+
+        .norm_type = GlobalMultiplier,
+        .normalization_parameters = {.glob_mult = {.GM=1.0}},
         .tref       = 5,
     },
-    potparams,
+    STDparams,
     STDPparams,
+    potparams,
+    Stimparams,
     .skip=2,
 };
 ///parameters for the excitatory layer of the double layer model
@@ -78,41 +100,49 @@ static const parameters DualLayerModelEx =
         {
             .dual =
             {
-                .W          =  0.24,
-                .sigma      = 12,
+                .W          =  0.36,
+                .sigma      = 20,
                 .synapse    = {.R=0.5,.D=2.0},
             }
         },
         .tref       = 5,
-        .norm_type = None,
+        .norm_type = GlobalMultiplier,
+        .normalization_parameters = {.glob_mult = {.GM=1.0}},
     },
+    STDparams,
     STDPparams,
     potparams,
-    .skip=1,
+    .skip=-2,
+    Stimparams,
 };
 ///Some global features that can be turned on and off
 static const model_features Features =
 {
-    .STDP		= OFF, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep -
-    .STD        = OFF, //               if we need any of these features we can make the changes then.
+    .STD        = OFF,
+    .STDP		= ON, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep -
+    .Random_connections = OFF,
     .Timestep   = 0.1,
-    .Simlength  = 50000,
-
+    .Simlength  = 100000,
+    .ImageStim  = ON,
+    .job        = {.initcond = RAND_JOB, .Voltage_or_count = 1},
+    .Disablewrapping = ON,
     .output = {{.method = VIDEO,.Output="V2",.Delay=20, .Overlay="Trialno"},{.method=GUI,.Output="V2",.Delay=10,.Overlay="Timestep"}}
 };
 ///Constant external input to conductances
 static const extinput Extinput =
 {
-    .gE0 = 0.015,
-    .gI0 = 0.0,
+    .gE0 = 0.000,
+    .gI0 = 0.15,
 };
 ///Parameters for conducting a parameter sweep.
 static const sweepable Sweep =
 {
-    //.offset=offsetof(parameters,couple)+offsetof(couple_parameters,Layer_parameters) +0+ /*offset in the union is always 0*/  + offsetof(duallayer_parameters,W),
-    .minval = 0.0,
-    .maxval = 1.0,
-    .count = 100
+    .offset=offsetof(parameters,Stim.Prob1) ,
+    .minval = 0.000,
+    .maxval = 1,
+    .count = 300,
+    .SweepEx = ON,
+    .SweepIn = ON,
 };
 
 #ifdef __clang__

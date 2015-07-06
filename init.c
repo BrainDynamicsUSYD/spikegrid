@@ -5,6 +5,7 @@
 #include <unistd.h> //gethostname
 #endif
 #include <stdio.h>
+#include "mymath.h"
 #include "phi.h"
 #include "coupling.h"
 #include "output.h"
@@ -34,7 +35,7 @@ void randinit(Compute_float* input,const Compute_float minval,const Compute_floa
 {
     for (int x=0;x<grid_size*grid_size;x++)
     {
-            input[x] = ((Compute_float)(random()))/((Compute_float)RAND_MAX)*(maxval-minval)+minval;
+            input[x] = RandFloat()*(maxval-minval)+minval;
     }
 }
 ///Create an initial condition where all neurons have the same voltage except for the one in the middle

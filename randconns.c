@@ -35,8 +35,8 @@ randconns_info* init_randconns(const randconn_parameters rparam,const couple_par
                         .stdp_strength = Zero,
                         .destination =
                         {   //pick a random destination
-                            .x = (Neuron_coord)(((Compute_float)(random()) / (Compute_float)RAND_MAX) * (Compute_float)grid_size),
-                            .y = (Neuron_coord)(((Compute_float)(random()) / (Compute_float)RAND_MAX) * (Compute_float)grid_size),
+                            .x = (Neuron_coord)(RandFloat() * (Compute_float)grid_size),
+                            .y = (Neuron_coord)(RandFloat() * (Compute_float)grid_size),
                         },
                         .source = {.x=(Neuron_coord)x,.y=(Neuron_coord)y},
                     };

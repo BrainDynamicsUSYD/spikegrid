@@ -1,4 +1,4 @@
-/// \file
+//This file uses a very large amount of ram.  Useful for stress testing a PC
 #warning "using canonical parameters"
 #include <stddef.h> //offsetof
 //these first few parameters actually escape into the paramheader file through magic

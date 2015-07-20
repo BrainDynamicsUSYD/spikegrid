@@ -184,15 +184,12 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
                     fire2 = true;
                 }
             }
-            else if (pixel == cv::Vec3b(0,255,255))
+            else if (pixel == cv::Vec3b(0,255,255)) //yellow
             {
-                std::cout << x << "," << y << " " <<  pixel << std::endl;
-                printf("yellow pixel at %i\n",x*grid_size+y);
+                voltsin[x*grid_size+y]=100;
             }
-            else if (pixel == cv::Vec3b(255,0,255))
+            else if (pixel == cv::Vec3b(255,0,255)) //purple
             {
-                std::cout << x << "," << y << " " <<  pixel << std::endl;
-                printf("purple pixel at %i\n",x*grid_size+y);
             }
         }
     }
@@ -218,7 +215,7 @@ void ApplyContinuousStim(Compute_float* voltsin,const Compute_float timemillis,c
             }
             else if (pixel == cv::Vec3b(127,0,87)) //127,0,127:foreground (purple - 128,0,128 in GIMP)
             {
-                voltsin[x*grid_size+y] += I2;    
+                voltsin[x*grid_size+y] += I2;
             }
         }
     }

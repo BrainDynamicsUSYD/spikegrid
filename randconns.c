@@ -18,6 +18,7 @@ randconns_info* init_randconns(const randconn_parameters rparam,const couple_par
         .SpecialAInd        = rparam.SpecialAInd,
         .SpecialBInd        = rparam.SpecialBInd,
     };
+    //I will need to tweak this structure for the clever specials - otherwise we use too much ram - even the first one here fails
     rcinfo.randconns= calloc(sizeof(randomconnection),(size_t)(grid_size*grid_size*rparam.numberper));
     //bigmat will store the points coming towards somewhere (but we don't know precisely how many there will be, so use overkill factor)
     randomconnection** bigmat = calloc(sizeof(randomconnection*),grid_size*grid_size*rparam.numberper*overkill_factor);
@@ -33,8 +34,10 @@ randconns_info* init_randconns(const randconn_parameters rparam,const couple_par
     {
         for (unsigned int y=0;y<grid_size;y++)
         {	//the specials is if we only have a limited number of neurons with random connections
-            if (x*grid_size+y < rcinfo.nospecials || rcinfo.nospecials==0 || (rcinfo.UsingFancySpecials && (x*grid_size+y==rcinfo.SpecialAInd || x*grid_size+y==rcinfo.SpecialBInd) ) ) //massive hacky conditional
+            //this conditional is crazy and stupid - TODO fixme
+            if (x*grid_size+y < rcinfo.nospecials || (rcinfo.nospecials==0 && !rcinfo.UsingFancySpecials) || (rcinfo.UsingFancySpecials && (x*grid_size+y==rcinfo.SpecialAInd || x*grid_size+y==rcinfo.SpecialBInd) ) ) //massive hacky conditional
             {
+                printf("makeing connections at %i Aind %i Bind %i\n",x*grid_size+y,rcinfo.SpecialAInd,rcinfo.SpecialBInd);
                 for (unsigned int i=0;i<rparam.numberper;i++)
                 {
                     const randomconnection rc =

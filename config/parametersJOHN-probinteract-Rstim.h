@@ -64,7 +64,7 @@ static const parameters OneLayerModel = {.couple={0}}; //since unused - shortes 
     .TestPathChoice = ON,\
     .Periodic = ON,\
 }
-#define Rparams .RandConns=\
+#define Rparams .random=\
 { \
     .numberper = grid_size*grid_size/10, \
     .str=1,\
@@ -97,12 +97,13 @@ static const parameters DualLayerModelIn =
     STDPparams,
     potparams,
     Stimparams,
+    Rparams,
     .skip=2,
 };
 ///parameters for the excitatory layer of the double layer model
 static const parameters DualLayerModelEx =
 {
-    .couple =
+     .couple =
     {
         .Layertype = DUALLAYER,
         .Layer_parameters =
@@ -123,6 +124,7 @@ static const parameters DualLayerModelEx =
     potparams,
     .skip=-2,
     Stimparams,
+    Rparams,
 };
 ///Some global features that can be turned on and off
 static const model_features Features =

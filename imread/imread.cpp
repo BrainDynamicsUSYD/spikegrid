@@ -143,6 +143,9 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
     {
         for (int y=0;y<grid_size;y++)
         {
+            //--------------
+            //NOTE: opencv is completely nuts.  The returned order of color channels is BGR (NOT RGB)
+            //--------------
             cv::Vec3b pixel = imcache.at<cv::Vec3b>(x,y);
             //uncomment to print colours - not particularly helpful
             //std::cout << x << "," << y << " " <<  pixel << std::endl;
@@ -180,6 +183,16 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
                 {
                     fire2 = true;
                 }
+            }
+            else if (pixel == cv::Vec3b(0,255,255))
+            {
+                std::cout << x << "," << y << " " <<  pixel << std::endl;
+                printf("yellow pixel at %i\n",x*grid_size+y);
+            }
+            else if (pixel == cv::Vec3b(255,0,255))
+            {
+                std::cout << x << "," << y << " " <<  pixel << std::endl;
+                printf("purple pixel at %i\n",x*grid_size+y);
             }
         }
     }

@@ -1,3 +1,4 @@
+#!/bin/bash
 vars=$(
 for x in job.o* 
 do

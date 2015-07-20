@@ -11,8 +11,9 @@ FILE=$(dialog --title "select a parameter file" --stdout --title "select a param
 #correct the file name to use the config directory
 if [ -z "${FILE}" ]; then
     #for computers without dialog, specify a default file
-    FILE='config/parametersJOHN-travelling.h' 
+    FILE='config/parametersJOHN-travelling.h'
 else
+    #fix up the path to be correct
     FILE=$(echo config/$FILE)
 fi
 #now generate the actual.h file

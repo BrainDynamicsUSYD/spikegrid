@@ -153,6 +153,14 @@ randomconnection* GetRandomConnsLeaving(const unsigned int x,const unsigned int 
 }
 randomconnection** GetRandomConnsArriving(const int x,const int y,const randconns_info rcinfo, unsigned int* numberconns)
 {
+    //the number is always fine to get
     *numberconns = rcinfo.rev_pp[x*grid_size+y];
-    return &(rcinfo.randconns_reverse[(x*grid_size+y)*(int)rcinfo.numberper*(int)overkill_factor]); //Ensure you return the address of this object - it is definitely required
+    if (rcinfo.UsingFancySpecials==ON)
+    {
+        return &(rcinfo.randconns_reverse[(x*grid_size+y)*(int)overkill_factor]); //Ensure you return the address of this object - it is definitely required
+    }
+    else
+    {
+        return &(rcinfo.randconns_reverse[(x*grid_size+y)*(int)rcinfo.numberper*(int)overkill_factor]); //Ensure you return the address of this object - it is definitely required
+    }
 }

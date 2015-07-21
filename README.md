@@ -14,3 +14,9 @@ Other Note: doing `CC=Clang CXX=clang make` will compile the code with clang (if
 
 #Documentation
 Some developer documentation can be auto-generated from the code using Doxygen with the following command: `make docs`
+
+#Long term code cleanup tasks:
+
+Things that need to be done:
+
+1. In some places, we might need to use `size_t` for things which are indexes in arrays.  There are at least a few places where we have assumed that `unsigned int` or `int` are sufficiently large.  For large grids with STDP / random connections, this may not actually be true.

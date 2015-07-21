@@ -8,20 +8,95 @@
 //creat a rather ridiculously sized matrix
 //allows for 10x the avg number of connections per point.  Incredibly wasteful.  It would be really nice to have some c++ vectors here
 const unsigned int overkill_factor = 10;
+
+randconns_info init_randconns_info(const randconn_parameters p)
+{
+    return (randconns_info) {
+        .numberper          = p.numberper,
+        .nospecials         = p.Specials,
+        .UsingFancySpecials = p.FancySpecials,
+        .SpecialAInd        = p.SpecialAInd,
+        .SpecialBInd        = p.SpecialBInd,
+    };
+}
+
+void StoreNewRandconn(const randconns_info* rcinfo,const randomconnection rc,const unsigned int sourceidx,randomconnection** bigmat,unsigned int* const bigmatcounts)
+{
+    const unsigned int sourcegrididx=rc.source.x*(unsigned)grid_size+rc.source.y;
+    randomconnection* rcp; //use this as a reference once we have put the connection in the storage location for the forward direction
+    //store forward randconn
+    if (rcinfo->UsingFancySpecials==ON)
+    {
+        if (sourcegrididx==rcinfo->SpecialAInd)
+        {
+            rcinfo->Aconns[sourceidx]=rc;
+            rcp = &rcinfo->Aconns[sourceidx];
+        }
+        else if (sourcegrididx==rcinfo->SpecialBInd)
+        {
+            rcinfo->Bconns[sourceidx]=rc;
+            rcp = &rcinfo->Bconns[sourceidx];
+        }
+        else
+        {
+            printf("Massive error in init_randconns - tried to create a randconn when using fancy specials that didn't go from a special index\n");
+            exit(EXIT_FAILURE);
+        }
+    }
+    else
+    { //the easy case
+        const unsigned int myidx=sourcegrididx*rcinfo->numberper+sourceidx;
+        rcinfo->randconns[myidx]=rc;
+        rcp = &rcinfo->randconns[myidx];
+    }
+    //store the reverse one
+    const unsigned int destgrididx=rc.destination.x*(unsigned)grid_size+rc.destination.y;
+    if (rcinfo->UsingFancySpecials==ON)
+    {
+        //do something tricky here
+        //The trick we use is that we assume that the number of connections/neuron << overkill factor
+        //This should be OK as there is no reason for more than 1 connection / neuron
+        //current parameters work out at 0.2 connections/neuron so should be fine
+        //TODO: later on this will need to be taken in to account
+        bigmat[destgrididx*overkill_factor +bigmatcounts[destgrididx]]= rcp;
+        bigmatcounts[destgrididx]++;
+        if(bigmatcounts[destgrididx] > overkill_factor)
+        {
+            printf("Overkill factor is not large enough - please make it bigger at dx = %i dy = %i\n",rc.destination.x,rc.destination.y);
+            exit(EXIT_FAILURE);
+        }
+    }
+    else
+    {
+        bigmat[destgrididx*rcinfo->numberper*overkill_factor +bigmatcounts[destgrididx]]=rcp;
+        bigmatcounts[destgrididx]++;
+        if(bigmatcounts[destgrididx] > overkill_factor*rcinfo->numberper)
+        {
+            printf("Overkill factor is not large enough - please make it bigger at dx = %i dy = %i\n",rc.destination.x,rc.destination.y);
+            exit(EXIT_FAILURE);
+        }
+    }
+
+}
+
 randconns_info* init_randconns(const randconn_parameters rparam,const couple_parameters couple)
 {
-    randconns_info rcinfo =
-    {
-        .numberper          = rparam.numberper,
-        .nospecials         = rparam.Specials,
-        .UsingFancySpecials = rparam.FancySpecials,
-        .SpecialAInd        = rparam.SpecialAInd,
-        .SpecialBInd        = rparam.SpecialBInd,
-    };
+    randconns_info rcinfo = init_randconns_info(rparam);
+    const size_t number_randcons = rcinfo.UsingFancySpecials==ON?rcinfo.numberper*2:rcinfo.numberper*grid_size*grid_size;
     //I will need to tweak this structure for the clever specials - otherwise we use too much ram - even the first one here fails
-    rcinfo.randconns= calloc(sizeof(randomconnection),(size_t)(grid_size*grid_size*rparam.numberper));
+    if (rcinfo.UsingFancySpecials==ON)
+    {
+        rcinfo.randconns= calloc(sizeof(randomconnection),(size_t)(grid_size*grid_size*rparam.numberper));
+    }
+    else
+    {
+        rcinfo.Aconns= calloc(sizeof(randomconnection),(size_t)rparam.numberper);
+        rcinfo.Bconns= calloc(sizeof(randomconnection),(size_t)rparam.numberper);
+    }
     //bigmat will store the points coming towards somewhere (but we don't know precisely how many there will be, so use overkill factor)
-    randomconnection** bigmat = calloc(sizeof(randomconnection*),grid_size*grid_size*rparam.numberper*overkill_factor);
+    randomconnection** bigmat = calloc(sizeof(randomconnection*),
+            (rcinfo.UsingFancySpecials==ON?1:rparam.numberper) *
+            grid_size*grid_size*overkill_factor );
     //store the actual counts of connections to a point in bigmatcounts
     unsigned int* bigmatcounts = calloc(sizeof(unsigned int),grid_size*grid_size);
     int nonzcount; //number of non-zero entries in coupling matrix (used for creating coupling strengths)
@@ -51,16 +126,7 @@ randconns_info* init_randconns(const randconn_parameters rparam,const couple_par
                         },
                         .source = {.x=(Neuron_coord)x,.y=(Neuron_coord)y},
                     };
-                    rcinfo.randconns[(x*grid_size+y)*rparam.numberper + i] = rc; //and store it (forward direction)
-                    //the normal matrix stores by where they come from.  Also need to store where they got to.
-                    const int tocoordidx = rc.destination.x*grid_size+rc.destination.y;
-                    bigmat[tocoordidx*(int)rparam.numberper*(int)overkill_factor +(int)bigmatcounts[tocoordidx]]=&rcinfo.randconns[(x*grid_size+y)*rparam.numberper + i];
-                    bigmatcounts[tocoordidx]++;
-                    if(bigmatcounts[tocoordidx] > overkill_factor*rparam.numberper)
-                    {
-                        printf("Overkill factor is not large enough - please make it bigger at dx = %i dy = %i\n",rc.destination.x,rc.destination.y);
-                        exit(EXIT_FAILURE);
-                    }
+                    StoreNewRandconn(&rcinfo,rc,i,bigmat,bigmatcounts);
                 }
             }
         }

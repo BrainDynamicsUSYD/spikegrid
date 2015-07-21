@@ -21,6 +21,8 @@ typedef struct randconns_info
     const on_off UsingFancySpecials;
     const unsigned int SpecialAInd;
     const unsigned int SpecialBInd;
+    randomconnection* Aconns;
+    randomconnection* Bconns;
 } randconns_info;
 
 randconns_info* init_randconns();

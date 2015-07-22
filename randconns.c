@@ -84,7 +84,7 @@ randconns_info* init_randconns(const randconn_parameters rparam,const couple_par
     randconns_info rcinfo = init_randconns_info(rparam);
     const size_t number_randcons = rcinfo.UsingFancySpecials==ON?rcinfo.numberper*2:rcinfo.numberper*grid_size*grid_size;
     //I will need to tweak this structure for the clever specials - otherwise we use too much ram - even the first one here fails
-    if (rcinfo.UsingFancySpecials==ON)
+    if (rcinfo.UsingFancySpecials==OFF)
     {
         rcinfo.randconns= calloc(sizeof(randomconnection),(size_t)(grid_size*grid_size*rparam.numberper));
     }
@@ -139,13 +139,32 @@ randconns_info* init_randconns(const randconn_parameters rparam,const couple_par
 }
 randomconnection* GetRandomConnsLeaving(const unsigned int x,const unsigned int y,const randconns_info rcinfo, unsigned int* numberconns)
 {
-    if ((x*grid_size+y < rcinfo.nospecials || rcinfo.nospecials==0) ||(rcinfo.UsingFancySpecials && (x*grid_size+y==rcinfo.SpecialAInd || x*grid_size+y==rcinfo.SpecialBInd) )  )
+    const unsigned int idx = x*grid_size+y;
+    if (rcinfo.UsingFancySpecials==ON) //first case - fancy specials
     {
-        const unsigned int randbase=(x*grid_size+y)*rcinfo.numberper;
+        if (idx==rcinfo.SpecialAInd)
+        {
+            *numberconns=rcinfo.numberper;
+            return rcinfo.Aconns;
+        }
+        else if (idx==rcinfo.SpecialBInd)
+        {
+            *numberconns=rcinfo.numberper;
+            return rcinfo.Bconns;
+        }
+        else
+        {
+            *numberconns=0;
+            return NULL;
+        }
+    }
+    else if (idx < rcinfo.nospecials || rcinfo.nospecials==0 ) //normal case - normalspecials==0 or we have one of the specials
+    {
+        const unsigned int randbase=idx*rcinfo.numberper;
         *numberconns = rcinfo.numberper;
         return &(rcinfo.randconns[randbase]);
     }
-    else
+    else //should only happen when normal specials are used and we have a large input index
     {
         *numberconns=0;
         return NULL;
@@ -156,7 +175,7 @@ randomconnection** GetRandomConnsArriving(const int x,const int y,const randconn
     //the number is always fine to get
     *numberconns = rcinfo.rev_pp[x*grid_size+y];
     if (rcinfo.UsingFancySpecials==ON)
-    {
+    {   //the fancy specials store less stuff in the reverse array, so we can just use it with a modified index
         return &(rcinfo.randconns_reverse[(x*grid_size+y)*(int)overkill_factor]); //Ensure you return the address of this object - it is definitely required
     }
     else

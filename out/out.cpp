@@ -2,6 +2,7 @@
 #define _CRT_SECURE_NO_WARNINGS 1
 #include <stdio.h> //printf in c++ yay
 #include <errno.h>
+#include <map>
 #ifndef _WIN32
 #include <unistd.h> //what is this actually for?
 #include "opencv2/highgui/highgui.hpp" //for video writer

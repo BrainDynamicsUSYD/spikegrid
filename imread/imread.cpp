@@ -1,4 +1,4 @@
-#include "opencv2/contrib/contrib.hpp"
+//#include "opencv2/contrib/contrib.hpp"
 #include "opencv2/core/core.hpp"
 #include "opencv2/highgui/highgui.hpp"
 #include <stdio.h>
@@ -186,6 +186,7 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
             }
             else if (pixel == cv::Vec3b(0,255,255)) //yellow
             {
+                printf("massive yellow spike\n");
                 voltsin[x*grid_size+y]=100;
             }
             else if (pixel == cv::Vec3b(255,0,255)) //purple

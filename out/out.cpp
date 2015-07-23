@@ -3,6 +3,7 @@
 #include <stdio.h> //printf in c++ yay
 #include <errno.h>
 #include <map>
+#include <iostream>
 #ifndef _WIN32
 #include <unistd.h> //what is this actually for?
 #include "opencv2/highgui/highgui.hpp" //for video writer
@@ -104,6 +105,11 @@ VidOutput::VidOutput(int idxin ,const int intervalin,const output_s* datain,cons
     writer = new cv::VideoWriter();
             //   fname,code,fps,size,color
     writer->open(buf,fourcc,60,cvSize(grid_size,grid_size),1);
+    if (writer->isOpened()==false)
+    {
+        std::cout <<"failed to open output stream for a video - quitting" << std::endl;
+        exit(EXIT_FAILURE);
+    }
 }
 void VidOutput::DoOutput_()
 {

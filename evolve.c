@@ -52,7 +52,7 @@ void evolvept (const int x,const int y,const Compute_float* const __restrict con
 
 ///Adds the effect of the spikes that have fired in the past to the gE and gI arrays as appropriate
 /// currently, single layer doesn't work (correctly)
-void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restrict__ gI,const unsigned int time)
+void AddSpikes_single_layer(layer L, Compute_float* __restrict__ gE, Compute_float* __restrict__ gI,const unsigned int time)
 {
     for (unsigned int y=0;y<grid_size;y++)
     {
@@ -85,29 +85,9 @@ void AddSpikes(layer L, Compute_float* __restrict__ gE, Compute_float* __restric
             }
             else // Dual layer
             {
-                Compute_float str = Zero;
-
-                while (L.firinglags->lags[newlagidx] != -1)  //Note: I think perf might be overstating the amount of time on this line - although, if it isn't massive potential for perf improvement
-                {
-                    Compute_float this_str =L.Mytimecourse[L.firinglags->lags[newlagidx]];
-                    if (Features.STD == ON)
-                    {
-                        this_str = this_str * STD_str(L.P->STD,x,y,time,L.firinglags->lags[newlagidx],L.std);
-                    }
-                    newlagidx++;
-                    str += this_str;
-                }
-                if (L.Layer_is_inhibitory) {str = (-str);} //invert strength for inhib conns.
-                if (newlagidx != lagidx) //only fire if we had a spike.
-                {
-
-                }
-                if (Features.Random_connections == ON ) // No support for this in single layer
-                {
-                    RandSpikes(x,y,L,gE,gI,str);
-                }
+                printf("Addspikes_single called for a dual layer model - quitting\n");
+                exit(EXIT_FAILURE);
             }
-
         }
     }
 }
@@ -363,8 +343,7 @@ void step1(model* m)
         AnimalEffects(*m->animal,m->gE,timemillis);
     }
     // Add spiking input to the conductances
-    AddSpikes(m->layer1,m->gE,m->gI,m->timesteps);
-    if (m->NoLayers==DUALLAYER) {AddSpikes(m->layer2,m->gE,m->gI,m->timesteps);}
+    if (m->NoLayers==SINGLELAYER) {AddSpikes_single_layer(m->layer2,m->gE,m->gI,m->timesteps);}
     //from this point the GE and GI are actually fixed - as a result there is no more layer interaction - so do things sequentially to each layer
     if (m->NoLayers==DUALLAYER)
     {

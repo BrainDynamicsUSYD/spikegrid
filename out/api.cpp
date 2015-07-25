@@ -1,6 +1,8 @@
 /// \file
 #include <stdlib.h>
-#include "opencv2/imgproc.hpp"
+//sometimes this is in a different spot
+//#include "opencv2/imgproc.hpp"
+#include "opencv2/contrib/contrib.hpp"
 #include "api.h"
 extern "C"
 {

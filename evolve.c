@@ -93,6 +93,7 @@ void AddSpikes_single_layer(layer L, Compute_float* __restrict__ gE, Compute_flo
 }
 ///This function adds in the overlapping bits back into the original matrix.  It is slightly opaque but using pictures you can convince yourself that it works
 ///To keep the evolvept code simple we use an array like this:
+///since the change to the D and R method this trick is less useful, for perf but makes the code much simpler and still does give some perf.
 ///~~~~
 ///     +-––––––––––––––––+
 ///     |Extra for Overlap|
@@ -234,6 +235,9 @@ void StoreFiring(layer* L)
         {
             if (IsActiveNeuron(x,y,skip))
             {
+                //--------------- *************************
+                //TODO: For maddie - make this know about STD.
+                //---------------**************
                 const unsigned int baseidx = LagIdx((unsigned int)x,(unsigned int)y,L->firinglags);
                 modifyLags(L->firinglags,baseidx);
                 if (Features.STDP==ON) {modifyLags(L->STDP_data->lags,LagIdx((unsigned int)x,(unsigned int)y,L->STDP_data->lags));}
@@ -256,12 +260,16 @@ void StoreFiring(layer* L)
                         AddRD_STDP(x,y,L->connections,L->STDP_data->connections,L->Rmat,L->Dmat,L->R,L->D);
                     }
 
-                }//add random spikes
+                }//add spikes that occur randomly (as opposed to random connectivity)
                 else if (L->P->potential.rate > 0 && //this check is because the compiler doesn't optimize the call to random() otherwise
                             (RandFloat() < (L->P->potential.rate*((Compute_float)0.001)*Features.Timestep)))
                 {
                     L->voltages_out[x*grid_size+y]=L->P->potential.Vpk+(Compute_float)0.1;//make sure it fires - the neuron will actually fire next timestep
                     AddRD(x,y,L->connections,L-> Rmat,L->Dmat,L->R,L->D);
+                }
+                if (Features.Random_connections==ON)
+                {
+                    AddRandomRD(x,y,L->rcinfo
                 }
             }
             else //non-active neurons never get to fire

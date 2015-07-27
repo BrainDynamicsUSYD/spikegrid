@@ -8,9 +8,11 @@ John and Adams spiking conductance based model with STDP.
 
 Following the instructions for setting up GCC should also pull in a version of openCV that I have compiled.
 
-Note: compiling openCV will also require CMake
+Note: compiling openCV will also require CMake - but most systems will come with it preinstalled
 
-Other Note: doing `CC=Clang CXX=clang make` will compile the code with clang (if installed).  This can be useful as clang will warn on different things to GCC. I would like to reduce the very large number of warnings this generates
+Other Note: doing `CC=Clang CXX=clang make` will compile the code with clang (if installed).  This can be useful as clang will warn on different things to GCC. I would like to reduce the very large number of warnings this generates.  The clang build is secondary though and the primary compiler is still gcc.
+
+If you are on yossarian, I have created builds using `Anaconda` (a python distribution) to compile opencv/ffmpeg.  The repository is here: https://github.com/BrainDynamicsUSYD/conda-recipes and the instructions are here: https://github.com/BrainDynamicsUSYD/cs-archive/wiki/Setting-up-dependencies-for-spikegrid
 
 #Documentation
 Some developer documentation can be auto-generated from the code using Doxygen with the following command: `make docs`

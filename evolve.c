@@ -223,7 +223,19 @@ int __attribute__((pure,const)) IsActiveNeuron (const int x, const int y,const s
     const char test = (x % step) == 0 && (y % step) ==0;
     return (test && step > 0) || (!test && step < 0);
 }
-
+void AddRandomRD(const unsigned int x,const unsigned int y,const randconns_info* const rcinfo, Compute_float* Rmat,Compute_float* Dmat,const Compute_float R,const Compute_float D)
+{
+    const Compute_float InitStr = 1/(D-R);
+    unsigned int count;
+    const randomconnection* const rcsleaving = GetRandomConnsLeaving(x,y,*rcinfo,&count);
+    for (unsigned int i=0;i<count;i++)
+    {
+        const randomconnection rc = rcsleaving[i];
+        const unsigned int destidx = Conductance_index(rc.destination.x,rc.destination.y);
+        Rmat[destidx] += InitStr*(rc.strength+rc.stdp_strength);
+        Dmat[destidx] += InitStr*(rc.strength+rc.stdp_strength);
+    }
+}
 ///Store current firing spikes also apply random spikes
 ///TODO: make faster - definitely room for improvement here
 void StoreFiring(layer* L)
@@ -261,6 +273,8 @@ void StoreFiring(layer* L)
                     }
 
                 }//add spikes that occur randomly (as opposed to random connectivity)
+                //this addition is done by setting the voltage to greater than threshold.
+                //TODO - for simplification, just force a spike
                 else if (L->P->potential.rate > 0 && //this check is because the compiler doesn't optimize the call to random() otherwise
                             (RandFloat() < (L->P->potential.rate*((Compute_float)0.001)*Features.Timestep)))
                 {
@@ -269,7 +283,7 @@ void StoreFiring(layer* L)
                 }
                 if (Features.Random_connections==ON)
                 {
-                    AddRandomRD(x,y,L->rcinfo
+                    AddRandomRD((unsigned)x,(unsigned)y,L->rcinfo,L->Rmat,L->Dmat,L->R,L->D);
                 }
             }
             else //non-active neurons never get to fire

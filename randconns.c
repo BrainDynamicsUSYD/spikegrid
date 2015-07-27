@@ -82,7 +82,6 @@ void StoreNewRandconn(const randconns_info* rcinfo,const randomconnection rc,con
 randconns_info* init_randconns(const randconn_parameters rparam,const couple_parameters couple)
 {
     randconns_info rcinfo = init_randconns_info(rparam);
-    const size_t number_randcons = rcinfo.UsingFancySpecials==ON?rcinfo.numberper*2:rcinfo.numberper*grid_size*grid_size;
     //I will need to tweak this structure for the clever specials - otherwise we use too much ram - even the first one here fails
     if (rcinfo.UsingFancySpecials==OFF)
     {

@@ -8,6 +8,8 @@
 #include "imread.h"
 extern "C"
 {
+    //TODO: these includes have no business being in this file - need to restructure the dependencies here
+#include "../randconns.h"
 #include "../mymath.h"
 #include "../STDP.h"
 #include "../sizes.h"
@@ -70,7 +72,8 @@ void CreateStims(const Compute_float timemodper,const Stimulus_parameters S,cons
     if (stim1choice && (int)itercount > lastonesfire) {onesfire++;lastonesfire=(int)itercount; printf("increase\n");}
 }
 //TODO: this function is getting ridiculously long - needs to be tidied up.
-void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimulus_parameters S,const Compute_float threshold, STDP_data* stdp)
+//TODO: above note still true, adding extra parameters anyway
+void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimulus_parameters S,const Compute_float threshold, STDP_data* stdp,const randconns_info* const rcinfo)
 {
     if (cached==false) {imcache=ReadImage(S.ImagePath);cached=true;}
     const Compute_float timemodper = fmod(timemillis,S.timeperiod);
@@ -184,6 +187,11 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
                     fire2 = true;
                 }
             }
+            else if (pixel == cv::Vec3b(50,50,50))
+            {
+                if (path1) {voltsin[rcinfo->SpecialAInd]=100; }
+                else       {voltsin[rcinfo->SpecialBInd]=100;}
+            }
             else if (pixel == cv::Vec3b(0,255,255)) //yellow
             {
                 printf("massive yellow spike\n");
@@ -195,6 +203,7 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
         }
     }
 }
+
 void ApplyContinuousStim(Compute_float* voltsin,const Compute_float timemillis,const Stimulus_parameters S,const Compute_float Timestep,const Compute_float* Phimat)
 {
     if (cached==false) {imcache=ReadImage(S.ImagePath);cached=true;}

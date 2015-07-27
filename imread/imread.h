@@ -4,7 +4,8 @@
 #endif
 #include "../cppparamheader.h"
 typedef struct STDP_data STDP_data;
-void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimulus_parameters S,const Compute_float threshold, STDP_data* stdp);
+typedef struct randconns_info randconns_info;
+void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimulus_parameters S,const Compute_float threshold, STDP_data* stdp,const randconns_info* const rcinfo);
 void ApplyContinuousStim(Compute_float* voltsin,const Compute_float timemillis,const Stimulus_parameters S,const Compute_float Timestep,const Compute_float* Phimat);
 int trialno ();
 #ifdef __cplusplus

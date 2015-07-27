@@ -335,7 +335,7 @@ void tidylayer (layer* l,const Compute_float timemillis,const Compute_float* con
     {
         if (l->P->Stim.Periodic==ON)
         {
-            ApplyStim(l->voltages_out,timemillis,l->P->Stim,l->P->potential.Vpk,l->STDP_data);
+            ApplyStim(l->voltages_out,timemillis,l->P->Stim,l->P->potential.Vpk,l->STDP_data,l->rcinfo);
         }
     }
     if (l->P->STDP.STDP_decay_frequency>0 && (int)(timemillis/Features.Timestep) % l->P->STDP.STDP_decay_frequency == 0)

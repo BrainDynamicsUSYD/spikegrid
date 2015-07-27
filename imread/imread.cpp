@@ -189,8 +189,11 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
             }
             else if (pixel == cv::Vec3b(50,50,50))
             {
-                if (path1) {voltsin[rcinfo->SpecialAInd]=100; }
-                else       {voltsin[rcinfo->SpecialBInd]=100;}
+                if (voltsin[x*grid_size+y] > threshold)
+                {
+                    if (path1) {voltsin[rcinfo->SpecialAInd]=100; }
+                    else       {voltsin[rcinfo->SpecialBInd]=100;}
+                }
             }
             else if (pixel == cv::Vec3b(0,255,255)) //yellow
             {

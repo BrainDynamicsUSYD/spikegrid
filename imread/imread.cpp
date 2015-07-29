@@ -191,6 +191,7 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
             {
                 if (voltsin[x*grid_size+y] > threshold)
                 {
+                    printf("making a random spike\n");
                     if (path1) {voltsin[rcinfo->SpecialAInd]=100; }
                     else       {voltsin[rcinfo->SpecialBInd]=100;}
                 }

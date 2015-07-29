@@ -271,6 +271,10 @@ void StoreFiring(layer* L)
                     {
                         AddRD_STDP(x,y,L->connections,L->STDP_data->connections,L->Rmat,L->Dmat,L->R,L->D);
                     }
+                    if (Features.Random_connections==ON)
+                    {
+                        AddRandomRD((unsigned)x,(unsigned)y,L->rcinfo,L->Rmat,L->Dmat,L->R,L->D);
+                    }
 
                 }//add spikes that occur randomly (as opposed to random connectivity)
                 //this addition is done by setting the voltage to greater than threshold.
@@ -281,10 +285,7 @@ void StoreFiring(layer* L)
                     L->voltages_out[x*grid_size+y]=L->P->potential.Vpk+(Compute_float)0.1;//make sure it fires - the neuron will actually fire next timestep
                     AddRD(x,y,L->connections,L-> Rmat,L->Dmat,L->R,L->D);
                 }
-                if (Features.Random_connections==ON)
-                {
-                    AddRandomRD((unsigned)x,(unsigned)y,L->rcinfo,L->Rmat,L->Dmat,L->R,L->D);
-                }
+
             }
             else //non-active neurons never get to fire
             {

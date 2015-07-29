@@ -20,7 +20,7 @@ class Output
         void DoOutput();
         int GetInterval() const {return interval;}
         int GetIdx() const {return idx;}
-        virtual ~Output() {}
+        ~Output() {}
 };
 
 class TAOutput : public Output

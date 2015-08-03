@@ -237,7 +237,7 @@ void AddRandomRD(const unsigned int x,const unsigned int y,const randconns_info*
 }
 ///Store current firing spikes also apply random spikes
 ///TODO: make faster - definitely room for improvement here
-void StoreFiring(layer* L)
+void StoreFiring(layer* L,const unsigned int timestep)
 {
     const signed char skip = (signed char) (L->P->skip);
     for (int x=0;x<grid_size;x++)
@@ -268,7 +268,11 @@ void StoreFiring(layer* L)
                         L->voltages_out[x*grid_size+y]=L->P->potential.Vrt;
                         L->recoverys_out[x*grid_size+y]+=L->P->recovery.Wrt;
                     }
-                    const Compute_float spikestr = 1.0/(L->D - L->R);
+                    Compute_float spikestr = 1.0/(L->D - L->R);
+                    if (Features.STD==ON)
+                    {
+                        spikestr = spikestr * STD_str(L->P->STD,(unsigned)x,(unsigned)y,timestep,1,L->std); //since we only emit a spike once, use 1 to force an update
+                    }
                     if (Features.STDP==OFF)
                     {
                         AddRD(x,y,L->connections, L->Rmat,L->Dmat,spikestr);
@@ -285,7 +289,7 @@ void StoreFiring(layer* L)
             }
             else //non-active neurons never get to fire
             {
-                L->voltages_out[x*grid_size+y]=-1000; //skipped neurons set to -1000 - probably not required but perf impact should be minimal - also ensures they will never be >Vpk
+                L->voltages_out[x*grid_size+y]=-1000; //skipped neurons set to -1000 - probably not required but perf impact should be minimal - also ensures they will never be >Vpk  - removing this would make the pictures smoother
             }
         }
     }
@@ -305,7 +309,7 @@ void RefractoryVoltages(Compute_float* const __restrict Vout,const couple_parame
 }
 #include "imread/imread.h"
 ///This function takes up way too much time in the code - mostly in storefiring - slightly annoying as this is essentially all pure overhead.  It would be really nice to significantly reduce the amount of time this function takes.
-void tidylayer (layer* l,const Compute_float timemillis,const Compute_float* const gE,const Compute_float* const gI)
+void tidylayer (layer* l,const Compute_float timemillis,const Compute_float* const gE,const Compute_float* const gI,const unsigned int timestep)
 {
     if (Features.Recovery==OFF)
     {
@@ -323,7 +327,7 @@ void tidylayer (layer* l,const Compute_float timemillis,const Compute_float* con
     {
         CalcRecoverys(l->voltages,l->recoverys,gE,gI,l->P->potential,l->P->recovery,l->voltages_out,l->recoverys_out);
     }
-    StoreFiring(l);
+    StoreFiring(l,timestep);
     if (Features.Theta==ON)
     {
         dotheta(l->voltages_out,l->P->theta,timemillis);
@@ -374,8 +378,8 @@ void step1(model* m)
         fixboundary(m->gE);
         fixboundary(m->gI);
     }
-    tidylayer(&m->layer1,timemillis,m->gE,m->gI);
-    if (m->NoLayers==DUALLAYER){tidylayer(&m->layer2,timemillis,m->gE,m->gI);}
+    tidylayer(&m->layer1,timemillis,m->gE,m->gI,m->timesteps);
+    if (m->NoLayers==DUALLAYER){tidylayer(&m->layer2,timemillis,m->gE,m->gI,m->timesteps);}
     if (Features.STDP==ON)
     {
         DoSTDP(m->layer1.connections,m->layer2.connections,m->layer1.STDP_data,m->layer2.STDP_data,m->layer1.rcinfo);

@@ -34,6 +34,7 @@ STD_data* __attribute__((const)) STD_init(const STD_parameters s)
     }
     return ret;
 }
+//note - when this calculates the STD strength, it also can adjust the STD parameters to register the spike
 Compute_float STD_str (const STD_parameters s, const unsigned int x, const unsigned int y,const unsigned int time,const int16_t lag, STD_data* const d)
 {
     const unsigned int stdidx=x*grid_size+y;

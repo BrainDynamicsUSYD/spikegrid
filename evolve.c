@@ -253,7 +253,13 @@ void StoreFiring(layer* L)
                 modifyLags(L->firinglags,baseidx);
                 if (Features.STDP==ON) {modifyLags(L->STDP_data->lags,LagIdx((unsigned int)x,(unsigned int)y,L->STDP_data->lags));}
                 //now - add in new spikes
-                if (L->voltages_out[x*grid_size + y]  >= L->P->potential.Vpk)
+                if (L->voltages_out[x*grid_size + y]  >= L->P->potential.Vpk
+                        ||
+                        //next part - add random spikes - TODO check if there has been a perf loss - I think there might be
+(L->P->potential.rate > 0 && //this check is because the compiler doesn't optimize the call to random() otherwise
+                            (RandFloat() < (L->P->potential.rate*((Compute_float)0.001)*Features.Timestep)))
+
+                        )
                 {
                     AddnewSpike(L->firinglags,baseidx);
                     if (Features.STDP==ON && L->STDP_data->RecordSpikes==ON) {AddnewSpike(L->STDP_data->lags,LagIdx((unsigned int)x,(unsigned int)y,L->STDP_data->lags));}
@@ -275,17 +281,7 @@ void StoreFiring(layer* L)
                     {
                         AddRandomRD((unsigned)x,(unsigned)y,L->rcinfo,L->Rmat,L->Dmat,spikestr);
                     }
-
-                }//add spikes that occur randomly (as opposed to random connectivity)
-                //this addition is done by setting the voltage to greater than threshold.
-                //TODO - for simplification, just force a spike
-                else if (L->P->potential.rate > 0 && //this check is because the compiler doesn't optimize the call to random() otherwise
-                            (RandFloat() < (L->P->potential.rate*((Compute_float)0.001)*Features.Timestep)))
-                {
-                    L->voltages_out[x*grid_size+y]=L->P->potential.Vpk + (Compute_float)0.1;
-                    AddRD(x,y,L->connections,L->Rmat,L->Dmat,1.0/(L->D - L->R));
                 }
-
             }
             else //non-active neurons never get to fire
             {

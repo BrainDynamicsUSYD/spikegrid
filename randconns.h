@@ -26,6 +26,6 @@ typedef struct randconns_info
 
 randconns_info* init_randconns();
 
-randomconnection** GetRandomConnsArriving(const int x,const int y,const randconns_info rcinfo, unsigned int* numberconns);
-randomconnection* GetRandomConnsLeaving (const coords coord ,const randconns_info rcinfo, unsigned int* numberconns);
+randomconnection** GetRandomConnsArriving(const coords coord, const randconns_info rcinfo, unsigned int* numberconns);
+randomconnection* GetRandomConnsLeaving  (const coords coord, const randconns_info rcinfo, unsigned int* numberconns);
 #endif

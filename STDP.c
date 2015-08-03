@@ -60,7 +60,7 @@ STDP_change STDP_change_calc (const unsigned int destneuronidx,const unsigned in
     return ret;
 }
 
-//invert a vector joining 2 points (not really - applied after there has been some additions and also does some tidying up) - the inverse 
+//invert a vector joining 2 points (not really - applied after there has been some additions and also does some tidying up) - the inverse
 inline static int invertdist(int v) {return ((2*couplerange) - v);}
 void STDP_At_point(const int x, const int y,STDP_data* const data,STDP_data* const revdata,const int xoffset,const int yoffset,
         const Compute_float* const const_couples,const Compute_float* const revconst_couples)
@@ -129,7 +129,7 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
                     }
                     //random connections to (x,y) - these will be getting increased - code is almost identical - except sign of change is reversed
                    unsigned int noconsArriving;
-                   randomconnection** rcbase = GetRandomConnsArriving(x,y,*rcs,&noconsArriving);
+                   randomconnection** rcbase = GetRandomConnsArriving(coord,*rcs,&noconsArriving);
                    for (unsigned int i=0;i<noconsArriving;i++)
                    {
                        randomconnection* rc = rcbase[i];

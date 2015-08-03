@@ -160,7 +160,7 @@ randomconnection* GetRandomConnsLeaving(const coords coord ,const randconns_info
     }
     else if (idx < rcinfo.nospecials || rcinfo.nospecials==0 ) //normal case - normalspecials==0 or we have one of the specials
     {
-        const unsigned int randbase=idx*rcinfo.numberper;
+        const size_t randbase=idx*rcinfo.numberper;
         *numberconns = rcinfo.numberper;
         return &(rcinfo.randconns[randbase]);
     }
@@ -170,16 +170,17 @@ randomconnection* GetRandomConnsLeaving(const coords coord ,const randconns_info
         return NULL;
     }
 }
-randomconnection** GetRandomConnsArriving(const int x,const int y,const randconns_info rcinfo, unsigned int* numberconns)
+randomconnection** GetRandomConnsArriving(const coords coord,const randconns_info rcinfo, unsigned int* numberconns)
 {
+    const size_t idx = grid_index(coord);
     //the number is always fine to get
-    *numberconns = rcinfo.rev_pp[x*grid_size+y];
+    *numberconns = rcinfo.rev_pp[idx];
     if (rcinfo.UsingFancySpecials==ON)
     {   //the fancy specials store less stuff in the reverse array, so we can just use it with a modified index
-        return &(rcinfo.randconns_reverse[(x*grid_size+y)*(int)overkill_factor]); //Ensure you return the address of this object - it is definitely required
+        return &(rcinfo.randconns_reverse[idx*(size_t)overkill_factor]); //Ensure you return the address of this object - it is definitely required
     }
     else
     {
-        return &(rcinfo.randconns_reverse[(x*grid_size+y)*(int)rcinfo.numberper*(int)overkill_factor]); //Ensure you return the address of this object - it is definitely required
+        return &(rcinfo.randconns_reverse[idx*(size_t)rcinfo.numberper*(size_t)overkill_factor]); //Ensure you return the address of this object - it is definitely required
     }
 }

@@ -2,7 +2,6 @@
 #define RANDCONNS
 #include "typedefs.h"
 #include "enums.h"
-typedef struct coords {Neuron_coord x; /**<x coord*/Neuron_coord y;/**<y coord*/} coords;
 typedef struct randconn_parameters randconn_parameters;
 typedef struct randomconnection
 {
@@ -28,5 +27,5 @@ typedef struct randconns_info
 randconns_info* init_randconns();
 
 randomconnection** GetRandomConnsArriving(const int x,const int y,const randconns_info rcinfo, unsigned int* numberconns);
-randomconnection* GetRandomConnsLeaving (const unsigned int x,const unsigned int y,const randconns_info rcinfo, unsigned int* numberconns);
+randomconnection* GetRandomConnsLeaving (const coords coord ,const randconns_info rcinfo, unsigned int* numberconns);
 #endif

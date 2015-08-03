@@ -18,18 +18,6 @@
     #include <android/log.h>
 #endif
 
-void RandSpikes(const unsigned int x,const unsigned int y,const layer L,condmat* const __restrict cond_mat, const Compute_float str)
-{
-    unsigned int norand;
-    const randomconnection* rcs = GetRandomConnsLeaving(x,y,*L.rcinfo,&norand);
-    for (unsigned int i=0;i<norand;i++)
-    {
-        const int condindex = Conductance_index(rcs[i].destination.x,rcs[i].destination.y);
-        if (L.Layer_is_inhibitory) {cond_mat->gI[condindex] += str * (rcs[i].strength + rcs[i].stdp_strength);}
-        else                       {cond_mat->gE[condindex] += str * (rcs[i].strength + rcs[i].stdp_strength);}
-    }
-}
-
 void evolvept (const int x,const int y,const Compute_float* const __restrict connections,const Compute_float Estrmod,const Compute_float Istrmod,condmat* __restrict cond_mat)
 {
     for (int i = 0; i < couple_array_size;i++)
@@ -138,11 +126,11 @@ void FixRD(Compute_float* __restrict R,const Compute_float Rm,Compute_float* __r
 {
     fixboundary(R);
     fixboundary(D);
-    for (int i=0;i<grid_size;i++)
+    for (Neuron_coord i=0;i<grid_size;i++)
     {
-        for (int j=0;j<grid_size;j++)
+        for (Neuron_coord j=0;j<grid_size;j++)
         {
-            const int idx = Conductance_index(i,j);
+            const size_t idx = Conductance_index((coords){.x=i,.y=j});
             R[idx] *= exp(-Features.Timestep/Rm);
             D[idx] *= exp(-Features.Timestep/Dm);
             if (inhib==ON)
@@ -179,12 +167,13 @@ void CalcVoltages(const Compute_float* const __restrict__ Vinput,
         const conductance_parameters C,
         Compute_float* const __restrict__ Vout)
 {
-    for (int x=0;x<grid_size;x++)
+    for (Neuron_coord x=0;x<grid_size;x++)
     {
-        for (int y=0;y<grid_size;y++)
+        for (Neuron_coord y=0;y<grid_size;y++)
         {
-            const int idx =Conductance_index(x,y);
-            const int idx2=  x*grid_size+y;
+            const coords c = {.x=x,.y=y};
+            const size_t idx =Conductance_index(c);
+            const size_t idx2=  grid_index(c);
             const Compute_float rhs = rhs_func(Vinput[idx2],cond_mat->gE[idx],cond_mat->gI[idx],C);
             Vout[idx2]=Vinput[idx2]+Features.Timestep*rhs;
         }
@@ -200,12 +189,13 @@ void CalcRecoverys(const Compute_float* const __restrict__ Vinput,
         Compute_float* const __restrict__ Vout,
         Compute_float* const __restrict__ Wout)
 {    // Adaptive quadratic integrate-and-fire
-    for (int x=0;x<grid_size;x++)
+    for (Neuron_coord x=0;x<grid_size;x++)
     {
-        for (int y=0;y<grid_size;y++)
+        for (Neuron_coord y=0;y<grid_size;y++)
         {   //step all neurons through time - use Euler method
-            const int idx = Conductance_index(x,y);
-            const int idx2 = x*grid_size+y;       //index for voltage/recovery
+            const coords c = {.x=x,.y=y};
+            const size_t idx =Conductance_index(c);
+            const size_t idx2=  grid_index(c);
             const Compute_float rhsV=rhs_func(Vinput[idx2],cond_mat->gE[idx],cond_mat->gI[idx],C)-Winput[idx2];
             const Compute_float rhsW=R.Wcv*(R.Wir*(Vinput[idx2]-C.Vlk) - Winput[idx2]);
             Vout[idx2] = Vinput[idx2] + Features.Timestep*rhsV;
@@ -221,14 +211,14 @@ int __attribute__((pure,const)) IsActiveNeuron (const int x, const int y,const s
     const char test = (x % step) == 0 && (y % step) ==0;
     return (test && step > 0) || (!test && step < 0);
 }
-void AddRandomRD(const unsigned int x,const unsigned int y,const randconns_info* const rcinfo, Compute_float* Rmat,Compute_float* Dmat,const Compute_float InitStr)
+void AddRandomRD(const coords c ,const randconns_info* const rcinfo, Compute_float* Rmat,Compute_float* Dmat,const Compute_float InitStr)
 {
     unsigned int count;
-    const randomconnection* const rcsleaving = GetRandomConnsLeaving(x,y,*rcinfo,&count);
+    const randomconnection* const rcsleaving = GetRandomConnsLeaving(c,*rcinfo,&count);
     for (unsigned int i=0;i<count;i++)
     {
         const randomconnection rc = rcsleaving[i];
-        const int destidx = Conductance_index(rc.destination.x,rc.destination.y);
+        const size_t destidx = Conductance_index(rc.destination);
         Rmat[destidx] += InitStr*(rc.strength+rc.stdp_strength);
         Dmat[destidx] += InitStr*(rc.strength+rc.stdp_strength);
     }
@@ -259,6 +249,7 @@ void StoreFiring(layer* L,const unsigned int timestep)
 
                    )
                 {
+                    const coords c = {.x=x,.y=y};
                     AddnewSpike(L->firinglags,baseidx);
                     if (Features.STDP==ON && L->STDP_data->RecordSpikes==ON) {AddnewSpike(L->STDP_data->lags,LagIdx((unsigned int)x,(unsigned int)y,L->STDP_data->lags));}
                     if (Features.Recovery==ON) //reset recovery if needed.  Note recovery has no refractory period so a reset is required
@@ -271,6 +262,7 @@ void StoreFiring(layer* L,const unsigned int timestep)
                     {
                         spikestr = spikestr * STD_str(L->P->STD,(unsigned)x,(unsigned)y,timestep,1,L->std); //since we only emit a spike once, use 1 to force an update
                     }
+                    //all the different ways to add a spike
                     if (Features.STDP==OFF)
                     {
                         AddRD(x,y,L->connections, L->Rmat,L->Dmat,spikestr);
@@ -281,7 +273,7 @@ void StoreFiring(layer* L,const unsigned int timestep)
                     }
                     if (Features.Random_connections==ON)
                     {
-                        AddRandomRD((unsigned)x,(unsigned)y,L->rcinfo,L->Rmat,L->Dmat,spikestr);
+                        AddRandomRD(c,L->rcinfo,L->Rmat,L->Dmat,spikestr);
                     }
                 }
             }

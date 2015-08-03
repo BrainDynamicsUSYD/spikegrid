@@ -52,7 +52,7 @@ void RDAdd()
 {
     printf("void AddRD (const int x,const int y,const Compute_float* const __restrict connections, Compute_float* __restrict Rmat,Compute_float* __restrict Dmat, const Compute_float initstr)\n");
     printf("{\n");
-    printf("c++;");
+    printf("spikecount++;");
     //start the loop
     for (int i = 0; i < couple_array_size;i++)
     {
@@ -99,10 +99,10 @@ int main()
     printf("#include \"sizes.h\"\n");
     printf("#include \"mymath.h\"\n");
     printf("#include \"paramheader.h\"\n");
-    printf("long long int c  = 0;\n");
+    printf("long long int spikecount  = 0;\n");
     printf("void evolvept_duallayer (const int x,const int y,const Compute_float* const __restrict connections,const Compute_float strmod, Compute_float* __restrict condmat)\n");
     printf("{\n");
-    printf("c++;");
+    printf("spikecount++;");
     //start the loop
     for (int i = 0; i < couple_array_size;i++)
     {

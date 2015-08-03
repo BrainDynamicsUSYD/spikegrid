@@ -97,10 +97,11 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
 {
     //whilst this looks like O(n^4) (n=gridsize), it is actually O(n^2) as STDP_RANGE is always fixed
     if (data->P->STDP_on ==OFF) {return;}
-    for (int x=0;x<grid_size;x++)
+    for (Neuron_coord x=0;x<grid_size;x++)
     {
-        for (int y=0;y<grid_size;y++)
+        for (Neuron_coord y=0;y<grid_size;y++)
         {
+            const coords coord = {.x=x,.y=y};
             const unsigned int baseidx = LagIdx((unsigned)x,(unsigned)y,data->lags);
             //first - check if the neuron has fired this timestep
             if ( CurrentShortestLag(data->lags,baseidx)==1) //so the neuron did actually fire at the last timestep
@@ -117,7 +118,7 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
                 if (Features.Random_connections == ON)
                 {
                     unsigned int norand;
-                    randomconnection* randconns = GetRandomConnsLeaving((unsigned)x,(unsigned)y,*rcs,&norand);
+                    randomconnection* randconns = GetRandomConnsLeaving(coord,*rcs,&norand);
                     //random connections away from (x,y) - these will be getting decreased
                     for (unsigned int i = 0;i<norand;i++)
                     {

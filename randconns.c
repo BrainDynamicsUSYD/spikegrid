@@ -5,6 +5,7 @@
 #include "paramheader.h"
 #include "coupling.h"
 #include "mymath.h"
+#include "sizes.h"
 //creat a rather ridiculously sized matrix
 //allows for 10x the avg number of connections per point.  Incredibly wasteful.  It would be really nice to have some c++ vectors here
 const unsigned int overkill_factor = 10;
@@ -136,9 +137,9 @@ randconns_info* init_randconns(const randconn_parameters rparam,const couple_par
     memcpy(rcpoint,&rcinfo,sizeof(*rcpoint));
     return rcpoint;
 }
-randomconnection* GetRandomConnsLeaving(const unsigned int x,const unsigned int y,const randconns_info rcinfo, unsigned int* numberconns)
+randomconnection* GetRandomConnsLeaving(const coords coord ,const randconns_info rcinfo, unsigned int* numberconns)
 {
-    const unsigned int idx = x*grid_size+y;
+    const size_t idx = grid_index(coord);
     if (rcinfo.UsingFancySpecials==ON) //first case - fancy specials
     {
         if (idx==rcinfo.SpecialAInd)

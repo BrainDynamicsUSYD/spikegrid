@@ -139,11 +139,11 @@ model* setup(const parameters p,const parameters p2,const LayerNumbers lcount,co
     const layer l1  = setuplayer(p);
     const layer l2  = lcount==DUALLAYER?setuplayer(p2):l1;
     condmat* condmatinit = calloc(sizeof(condmat),1);
-    for (int i=0;i<grid_size;i++)
+    for (Neuron_coord i=0;i<grid_size;i++)
     {
-        for (int j=0;j<grid_size;j++)
+        for (Neuron_coord j=0;j<grid_size;j++)
         {
-            const int idx = Conductance_index(i,j);
+            const size_t idx = Conductance_index((coords){.x=i,.y=j});
             condmatinit->gI[idx]=Extinput.gI0;
             condmatinit->gE[idx]=Extinput.gE0;
         }

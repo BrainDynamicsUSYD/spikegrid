@@ -9,8 +9,8 @@ void AnimalEffects(const animal a,Compute_float* gE,const Compute_float timemill
     ApplyLocalBoost(gE,(int)a.X,(int)a.Y);
     const Compute_float timeperiodfrac = fmod(timemillis,period) / period;
     if (timemillis<period) {return;} //avoid first iteration effects
-    if (timeperiodfrac < 0.01) {gE[Conductance_index(0,0)]+=30;}
-    else if (fabs(timeperiodfrac-0.5)<0.005) {gE[Conductance_index(0,1)]+=30;}
+    if (timeperiodfrac < 0.01) {gE[Conductance_index((coords){.x=0,.y=0})]+=30;}
+    else if (fabs(timeperiodfrac-0.5)<0.005) {gE[Conductance_index((coords){.x=0,.y=1})]+=30;}
 }
 void MoveAnimal(animal* a, const Compute_float timemillis)
 {

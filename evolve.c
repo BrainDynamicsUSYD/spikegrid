@@ -18,11 +18,11 @@
     #include <android/log.h>
 #endif
 
-void evolvept (const int x,const int y,const Compute_float* const __restrict connections,const Compute_float Estrmod,const Compute_float Istrmod,condmat* __restrict cond_mat)
+void evolvept (const coords c ,const Compute_float* const __restrict connections,const Compute_float Estrmod,const Compute_float Istrmod,condmat* __restrict cond_mat)
 {
     for (int i = 0; i < couple_array_size;i++)
     {
-        const int outoff = (x + i)*conductance_array_size +y;//as gE and gI are larger than he neuron grid size, don't have to worry about wrapping
+        const int outoff = (c.x + i)*conductance_array_size +c.y;//as gE and gI are larger than he neuron grid size, don't have to worry about wrapping
         for (int j = 0 ; j<couple_array_size;j++)
         {
             const int coupleidx = i*couple_array_size + j;
@@ -42,10 +42,11 @@ void evolvept (const int x,const int y,const Compute_float* const __restrict con
 /// currently, single layer doesn't work (correctly)
 void AddSpikes_single_layer(layer L, condmat* __restrict__ cond_mat,const unsigned int time)
 {
-    for (unsigned int y=0;y<grid_size;y++)
+    for (Neuron_coord y=0;y<grid_size;y++)
     {
-        for (unsigned int x=0;x<grid_size;x++)
+        for (Neuron_coord x=0;x<grid_size;x++)
         {
+            const coords c = {.x=x,.y=y};
             const unsigned int lagidx = LagIdx(x,y,L.firinglags);
             unsigned int newlagidx = lagidx;
             if (L.Mytimecourse==NULL) // Single layer TODO: change this if to use something more appropriate
@@ -68,7 +69,7 @@ void AddSpikes_single_layer(layer L, condmat* __restrict__ cond_mat,const unsign
                 }
                 if (newlagidx != lagidx) //only fire if we had a spike.
                 {
-                    evolvept((int)x,(int)y,L.connections,excstr,inhstr,cond_mat); // No support for STDP in single layer
+                    evolvept(c,L.connections,excstr,inhstr,cond_mat); // No support for STDP in single layer
                 }
             }
             else // Dual layer

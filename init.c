@@ -138,35 +138,32 @@ model* setup(const parameters p,const parameters p2,const LayerNumbers lcount,co
    // printout_struct(&p2,"parameters",outdir,1);    //save the second parameters object and display everything
     const layer l1  = setuplayer(p);
     const layer l2  = lcount==DUALLAYER?setuplayer(p2):l1;
-#ifdef _WIN32 //this might be a bug in VS - maybe only intellisense?
-    model m   = {l1,l2,0,lcount,calloc(sizeof(animal),1)};
-#else
-	const model m = 
-        { 
-            .layer1 = l1,
-            .layer2 = l2,
-            .NoLayers = lcount,
-            .animal = calloc(sizeof(animal),1),
-            .cond_matrices = calloc(sizeof(condmat),1),
-            .timesteps = 0 }; 
-#endif
-    Compute_float* giinit = calloc(sizeof(Compute_float),conductance_array_size*conductance_array_size);
-    Compute_float* geinit = calloc(sizeof(Compute_float),conductance_array_size*conductance_array_size);
+    condmat* condmatinit = calloc(sizeof(condmat),1);
     for (int i=0;i<grid_size;i++)
     {
         for (int j=0;j<grid_size;j++)
         {
             const int idx = Conductance_index(i,j);
-            giinit[idx]=Extinput.gI0;
-            geinit[idx]=Extinput.gE0;
+            condmatinit->gI[idx]=Extinput.gI0;
+            condmatinit->gE[idx]=Extinput.gE0;
         }
     }
+
+#ifdef _WIN32 //this might be a bug in VS - maybe only intellisense?
+    model m   = {l1,l2,0,lcount,calloc(sizeof(animal),1)};
+#else
+	const model m =
+        {
+            .layer1 = l1,
+            .layer2 = l2,
+            .NoLayers = lcount,
+            .animal = calloc(sizeof(animal),1),
+            .cond_matrices = calloc(sizeof(condmat),1),
+            .cond_matrices_init = condmatinit,
+            .timesteps = 0 };
+#endif
     model* m2       = malloc(sizeof(m));
     memcpy(m2,&m,sizeof(m));
-    memcpy(m2->gIinit,giinit,sizeof(m2->gIinit));
-    memcpy(m2->gEinit,geinit,sizeof(m2->gEinit));
-    free(giinit);
-    free(geinit);
     char* buffer = malloc(1024);
     gethostname(buffer,1023);
     if (!strcmp(buffer,"headnode.physics.usyd.edu.au")&& !testing) {printf("DON'T RUN THIS CODE ON HEADNODE\n");exit(EXIT_FAILURE);}

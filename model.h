@@ -17,8 +17,7 @@ typedef struct model
 	animal*         animal;
     ///Make these part of the struct to ensure they are nearby in memory - however it means you can't allocate a model on the stack
     condmat* const __restrict cond_matrices;
-    Compute_float gIinit [conductance_array_size*conductance_array_size];   ///<gI matrix (large)
-    Compute_float gEinit [conductance_array_size*conductance_array_size];   ///<gI matrix (large)
+    const condmat* const __restrict cond_matrices_init;
 
 } model;
 //void SaveModel(const model* const m);

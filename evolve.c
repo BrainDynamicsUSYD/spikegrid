@@ -349,8 +349,7 @@ void step1(model* m)
 {
     const Compute_float timemillis = ((Compute_float)m->timesteps) * Features.Timestep ;
     //this memcpy based version for initializing gE/gI is marginally slower (probably cache issues) -
-    memcpy(m->cond_matrices->gE,m->gEinit,sizeof(m->cond_matrices->gE));
-    memcpy(m->cond_matrices->gI,m->gIinit,sizeof(m->cond_matrices->gI));
+    memcpy(m->cond_matrices,m->cond_matrices_init,sizeof(*m->cond_matrices));
     if (Features.LocalStim==ON)
     {
         if (m->timesteps %1000 < 250) {ApplyLocalBoost(m->cond_matrices->gE,20,20);}

@@ -223,9 +223,8 @@ int __attribute__((pure,const)) IsActiveNeuron (const int x, const int y,const s
     const char test = (x % step) == 0 && (y % step) ==0;
     return (test && step > 0) || (!test && step < 0);
 }
-void AddRandomRD(const unsigned int x,const unsigned int y,const randconns_info* const rcinfo, Compute_float* Rmat,Compute_float* Dmat,const Compute_float R,const Compute_float D)
+void AddRandomRD(const unsigned int x,const unsigned int y,const randconns_info* const rcinfo, Compute_float* Rmat,Compute_float* Dmat,const Compute_float InitStr)
 {
-    const Compute_float InitStr = 1/(D-R);
     unsigned int count;
     const randomconnection* const rcsleaving = GetRandomConnsLeaving(x,y,*rcinfo,&count);
     for (unsigned int i=0;i<count;i++)
@@ -263,17 +262,18 @@ void StoreFiring(layer* L)
                         L->voltages_out[x*grid_size+y]=L->P->potential.Vrt;
                         L->recoverys_out[x*grid_size+y]+=L->P->recovery.Wrt;
                     }
+                    const Compute_float spikestr = 1.0/(L->D - L->R);
                     if (Features.STDP==OFF)
                     {
-                        AddRD(x,y,L->connections, L->Rmat,L->Dmat,L->R,L->D);
+                        AddRD(x,y,L->connections, L->Rmat,L->Dmat,spikestr);
                     }
                     else
                     {
-                        AddRD_STDP(x,y,L->connections,L->STDP_data->connections,L->Rmat,L->Dmat,L->R,L->D);
+                        AddRD_STDP(x,y,L->connections,L->STDP_data->connections,L->Rmat,L->Dmat,spikestr);
                     }
                     if (Features.Random_connections==ON)
                     {
-                        AddRandomRD((unsigned)x,(unsigned)y,L->rcinfo,L->Rmat,L->Dmat,L->R,L->D);
+                        AddRandomRD((unsigned)x,(unsigned)y,L->rcinfo,L->Rmat,L->Dmat,spikestr);
                     }
 
                 }//add spikes that occur randomly (as opposed to random connectivity)
@@ -282,8 +282,8 @@ void StoreFiring(layer* L)
                 else if (L->P->potential.rate > 0 && //this check is because the compiler doesn't optimize the call to random() otherwise
                             (RandFloat() < (L->P->potential.rate*((Compute_float)0.001)*Features.Timestep)))
                 {
-                    L->voltages_out[x*grid_size+y]=L->P->potential.Vpk+(Compute_float)0.1;//make sure it fires - the neuron will actually fire next timestep
-                    AddRD(x,y,L->connections,L-> Rmat,L->Dmat,L->R,L->D);
+                    L->voltages_out[x*grid_size+y]=L->P->potential.Vpk + (Compute_float)0.1;
+                    AddRD(x,y,L->connections,L->Rmat,L->Dmat,1.0/(L->D - L->R));
                 }
 
             }

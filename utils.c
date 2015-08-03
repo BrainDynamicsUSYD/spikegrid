@@ -36,8 +36,14 @@ static void * my_malloc_hook (size_t size, __attribute__((unused)) const void * 
   // Call recursively - have to have the hook disabled
   result = malloc (size);
   total_malloced += (long long int)size;
+  if (result==NULL)
+  {
+      printf("Malloc failed - returned NULL - quitting early\n");
+      exit(EXIT_FAILURE);
+  }
   // Restore our own hooks */
   __malloc_hook = my_malloc_hook;
+
   return result;
 }
 //set up malloc hook.  With multiple jobs, this can be called multiple times, so only change the hook once.

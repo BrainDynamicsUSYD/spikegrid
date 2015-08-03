@@ -50,11 +50,9 @@ void checkfn()
 }
 void RDAdd()
 {
-    printf("void AddRD (const int x,const int y,const Compute_float* const __restrict connections, Compute_float* __restrict Rmat,Compute_float* __restrict Dmat, const Compute_float R,const Compute_float D)\n");
+    printf("void AddRD (const int x,const int y,const Compute_float* const __restrict connections, Compute_float* __restrict Rmat,Compute_float* __restrict Dmat, const Compute_float initstr)\n");
     printf("{\n");
     printf("c++;");
-    printf("const Compute_float Rstr = 1/(D-R);// * exp(-1*Features.Timestep/R) ;\n");
-    printf("const Compute_float Dstr = 1/(D-R);// * exp(-1*Features.Timestep/D);\n");
     //start the loop
     for (int i = 0; i < couple_array_size;i++)
     {
@@ -65,18 +63,16 @@ void RDAdd()
         const int off = getoffset(couplerange,i);
         printf("    for (int kk=(couplerange-%i);kk<=(couplerange+%i);kk++)\n",off,off); //this is the key part - offsets are now known at compile time
         printf("    {\n");
-        printf("        Rmat[outoff%i + kk] += connections[conoff%i+kk]*Rstr;\n",i,i);
-        printf("        Dmat[outoff%i + kk] += connections[conoff%i+kk]*Dstr;\n",i,i);
+        printf("        Rmat[outoff%i + kk] += connections[conoff%i+kk]*initstr;\n",i,i);
+        printf("        Dmat[outoff%i + kk] += connections[conoff%i+kk]*initstr;\n",i,i);
         printf("    }\n");
     }
     printf("}\n");
 }
 void RDAdd_STDP()
 {
-    printf("void AddRD_STDP (const int x,const int y,const Compute_float* const __restrict connections,const Compute_float* const __restrict STDP_connections,Compute_float* __restrict Rmat, Compute_float* __restrict Dmat,const Compute_float R, const Compute_float D )\n");
+    printf("void AddRD_STDP (const int x,const int y,const Compute_float* const __restrict connections,const Compute_float* const __restrict STDP_connections,Compute_float* __restrict Rmat, Compute_float* __restrict Dmat,const Compute_float initstr )\n");
     printf("{\n");
-    printf("const Compute_float Rstr = 1/(D-R);// * exp(-1*Features.Timestep/R) ;\n");
-    printf("const Compute_float Dstr = 1/(D-R);// * exp(-1*Features.Timestep/D);\n");
     //start the loop
     for (int i = 0; i < couple_array_size;i++)
     {
@@ -88,8 +84,8 @@ void RDAdd_STDP()
         const int off = getoffset(couplerange,i);
         printf("    for (int kk=(couplerange-%i);kk<=(couplerange+%i);kk++)\n",off,off); //this is the key part - offsets are now known at compile time
         printf("    {\n");
-        printf("        Rmat[outoff%i + kk] += (connections[conoff%i+kk] + STDP_connections[STDPoff%i+kk])*Rstr;\n",i,i,i); //include base connection and STDP-modified connection
-        printf("        Dmat[outoff%i + kk] += (connections[conoff%i+kk] + STDP_connections[STDPoff%i+kk])*Dstr;\n",i,i,i); //include base connection and STDP-modified connection
+        printf("        Rmat[outoff%i + kk] += (connections[conoff%i+kk] + STDP_connections[STDPoff%i+kk])*initstr;\n",i,i,i); //include base connection and STDP-modified connection
+        printf("        Dmat[outoff%i + kk] += (connections[conoff%i+kk] + STDP_connections[STDPoff%i+kk])*initstr;\n",i,i,i); //include base connection and STDP-modified connection
         printf("    }\n");
     }
     printf("}\n");

@@ -2,12 +2,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include "tagged_array.h"
-unsigned int __attribute__((const)) tagged_array_size_(const tagged_array in)
+unsigned int __attribute__((const,used)) tagged_array_size_(const tagged_array in) //something else affected by flto bug
 {
     return in.size - (2*in.offset);
 }
 ///Extracts the actual information out of a tagged array and converts it to a simple square matrix
-Compute_float* taggedarrayTocomputearray(const tagged_array input)
+Compute_float* __attribute((used)) taggedarrayTocomputearray(const tagged_array input)
 {
     const unsigned int size = tagged_array_size_(input);
     Compute_float * ret = calloc(sizeof(*ret),size*size*input.subgrid*input.subgrid);

@@ -6,7 +6,7 @@
 #include "mymath.h"
 #include "out/outputtable.h"
 //declare the extern variables from the header
-char outdir[100];
+char __attribute__((used)) outdir[100]; //using flto on ubuntu hides this symbol for some reason.  Adding used fixes it
 //outptu holds an open reference to the model - this enables the mini functions to work
 const model* modelref; //MASSIVE HACK
 

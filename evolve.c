@@ -47,8 +47,8 @@ void AddSpikes_single_layer(layer L, condmat* __restrict__ cond_mat,const unsign
         for (Neuron_coord x=0;x<grid_size;x++)
         {
             const coords c = {.x=x,.y=y};
-            const unsigned int lagidx = LagIdx(x,y,L.firinglags);
-            unsigned int newlagidx = lagidx;
+            const size_t lagidx = LagIdx(c,L.firinglags);
+            size_t newlagidx = lagidx;
             if (L.Mytimecourse==NULL) // Single layer TODO: change this if to use something more appropriate
             {
                 Compute_float excstr = Zero;
@@ -229,18 +229,19 @@ void AddRandomRD(const coords c ,const randconns_info* const rcinfo, Compute_flo
 void StoreFiring(layer* L,const unsigned int timestep)
 {
     const signed char skip = (signed char) (L->P->skip);
-    for (int x=0;x<grid_size;x++)
+    for (Neuron_coord x=0;x<grid_size;x++)
     {
-        for (int y=0;y<grid_size;y++)
+        for (Neuron_coord y=0;y<grid_size;y++)
         {
+            const coords coord = {.x=x,.y=y};
             if (IsActiveNeuron(x,y,skip))
             {
                 //--------------- *************************
                 //TODO: For maddie - make this know about STD.
                 //---------------**************
-                const unsigned int baseidx = LagIdx((unsigned int)x,(unsigned int)y,L->firinglags);
+                const size_t baseidx = LagIdx(coord,L->firinglags);
                 modifyLags(L->firinglags,baseidx);
-                if (Features.STDP==ON) {modifyLags(L->STDP_data->lags,LagIdx((unsigned int)x,(unsigned int)y,L->STDP_data->lags));}
+                if (Features.STDP==ON) {modifyLags(L->STDP_data->lags,LagIdx(coord,L->STDP_data->lags));}
                 //now - add in new spikes
                 if (L->voltages_out[x*grid_size + y]  >= L->P->potential.Vpk
                         ||
@@ -252,7 +253,7 @@ void StoreFiring(layer* L,const unsigned int timestep)
                 {
                     const coords c = {.x=x,.y=y};
                     AddnewSpike(L->firinglags,baseidx);
-                    if (Features.STDP==ON && L->STDP_data->RecordSpikes==ON) {AddnewSpike(L->STDP_data->lags,LagIdx((unsigned int)x,(unsigned int)y,L->STDP_data->lags));}
+                    if (Features.STDP==ON && L->STDP_data->RecordSpikes==ON) {AddnewSpike(L->STDP_data->lags,LagIdx(coord,L->STDP_data->lags));}
                     if (Features.Recovery==ON) //reset recovery if needed.  Note recovery has no refractory period so a reset is required
                     {
                         L->voltages_out[x*grid_size+y]=L->P->potential.Vrt;

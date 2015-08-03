@@ -14,11 +14,12 @@ lagstorage* lagstorage_init(const unsigned int flagcount,const int cap)
         .cap          = cap,
         .lagsperpoint = flagcount
     };
-    for (unsigned int x = 0;x<grid_size;x++)
+    for (Neuron_coord x = 0;x<grid_size;x++)
     { //initialize firing lags - essentially sets up an initial condition with no spikes in the past.  If you wanted spikes before the start of the simulation - change this
-        for (unsigned int y = 0;y<grid_size;y++)
+        for (Neuron_coord y = 0;y<grid_size;y++)
         {
-            firinglags.lags[LagIdx(x,y,&firinglags)]= -1;
+            const coords c = {.x=x,.y=y};
+            firinglags.lags[LagIdx(c,&firinglags)]= -1;
         }
     }
     lagstorage* l = malloc(sizeof(*l)); //otherwise we are returning a stack variable
@@ -32,7 +33,7 @@ void lagstorage_dtor(lagstorage* l)
     free(l); //lagstorages are always allocated with malloc
 }
 
-int16_t __attribute__((const,pure)) CurrentShortestLag(const lagstorage* const L,const unsigned int baseidx)
+int16_t __attribute__((const,pure)) CurrentShortestLag(const lagstorage* const L,const size_t  baseidx)
 {
     unsigned int idx=0;
     while (L->lags[baseidx + idx] != -1)
@@ -46,7 +47,7 @@ int16_t __attribute__((const,pure)) CurrentShortestLag(const lagstorage* const L
     else {return INT16_MAX;}
 
 }
-void AddnewSpike(lagstorage* L,const unsigned int baseidx)
+void AddnewSpike(lagstorage* L,const size_t baseidx)
 {
     //find the empty idx
     unsigned int idx = 0;
@@ -60,7 +61,7 @@ void AddnewSpike(lagstorage* L,const unsigned int baseidx)
     L->lags[baseidx + idx+1]= -1;
 }
 //called for every neuron on every timestep
-void RemoveDeadSpike(lagstorage* L,const unsigned int baseidx)
+void RemoveDeadSpike(lagstorage* L,const size_t baseidx)
 {
     if (L->lags[baseidx] == L->cap )//if first entry is at cap - remove and shuffle everything down
     {
@@ -74,7 +75,7 @@ void RemoveDeadSpike(lagstorage* L,const unsigned int baseidx)
 }
 //be careful - this function uses a pretty significant amount of time - called for every neuron at every timestep (twice with STDP)
 //
-void modifyLags(lagstorage* L,unsigned int baseidx)
+void modifyLags(lagstorage* L,size_t baseidx)
 {
     //increment the firing lags.
     unsigned int idx = 0;

@@ -11,8 +11,7 @@ typedef struct STD_data
     Compute_float* R;       ///< R STD parameter
 } STD_data;
 STD_data* STD_init(const STD_parameters s);
-Compute_float STD_str (const STD_parameters s, const unsigned int x,
-        const unsigned int y, const unsigned int time,
+Compute_float STD_str (const STD_parameters s,const coords c, const unsigned int time,
         const int16_t lag, STD_data* const d);
 ///calculation of STD strength.  In .h file for inlining (might not be required)
 #endif

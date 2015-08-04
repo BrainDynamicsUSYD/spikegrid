@@ -60,8 +60,8 @@ void AddSpikes_single_layer(layer L, condmat* __restrict__ cond_mat,const unsign
                     Compute_float this_inhstr = L.Intimecourse[L.firinglags->lags[newlagidx]];
                     if (Features.STD == ON)
                     {
-                        this_excstr = this_excstr * STD_str(L.P->STD,x,y,time,L.firinglags->lags[newlagidx],L.std);
-                        this_inhstr = this_inhstr * STD_str(L.P->STD,x,y,time,L.firinglags->lags[newlagidx],L.std);
+                        this_excstr = this_excstr * STD_str(L.P->STD,c,time,L.firinglags->lags[newlagidx],L.std);
+                        this_inhstr = this_inhstr * STD_str(L.P->STD,c,time,L.firinglags->lags[newlagidx],L.std);
                     }
                     newlagidx++;
                     excstr += this_excstr;
@@ -207,6 +207,7 @@ void CalcRecoverys(const Compute_float* const __restrict__ Vinput,
 //detect if a neuron is active - may be useful elsewhere - used to maintain an appropriate ratio of ex/in neurons
 //note when we have STDP, if you have one layer with skip +x and another with -x the code is massively simpler.
 //+ve skip is obvious.  -ve skip does the "inverse" of +ve skip
+//this function here could maybe use the coords - but it is very time sensitive, so leave as is
 int __attribute__((pure,const)) IsActiveNeuron (const int x, const int y,const signed char step)
 {
     const char test = (x % step) == 0 && (y % step) ==0;
@@ -233,12 +234,9 @@ void StoreFiring(layer* L,const unsigned int timestep)
     {
         for (Neuron_coord y=0;y<grid_size;y++)
         {
-            const coords coord = {.x=x,.y=y};
             if (IsActiveNeuron(x,y,skip))
             {
-                //--------------- *************************
-                //TODO: For maddie - make this know about STD.
-                //---------------**************
+                const coords coord = {.x=x,.y=y};
                 const size_t baseidx = LagIdx(coord,L->firinglags);
                 modifyLags(L->firinglags,baseidx);
                 if (Features.STDP==ON) {modifyLags(L->STDP_data->lags,LagIdx(coord,L->STDP_data->lags));}
@@ -251,22 +249,22 @@ void StoreFiring(layer* L,const unsigned int timestep)
 
                    )
                 {
-                    const coords c = {.x=x,.y=y};
                     AddnewSpike(L->firinglags,baseidx);
                     if (Features.STDP==ON && L->STDP_data->RecordSpikes==ON) {AddnewSpike(L->STDP_data->lags,LagIdx(coord,L->STDP_data->lags));}
                     if (Features.Recovery==ON) //reset recovery if needed.  Note recovery has no refractory period so a reset is required
                     {
-                        L->voltages_out[x*grid_size+y]=L->P->potential.Vrt;
-                        L->recoverys_out[x*grid_size+y]+=L->P->recovery.Wrt;
+                        L->voltages_out[grid_index(coord)]=L->P->potential.Vrt;
+                        L->recoverys_out[grid_index(coord)]+=L->P->recovery.Wrt;
                     }
                     Compute_float spikestr = 1.0/(L->D - L->R);
                     if (Features.STD==ON)
                     {
-                        spikestr = spikestr * STD_str(L->P->STD,(unsigned)x,(unsigned)y,timestep,1,L->std); //since we only emit a spike once, use 1 to force an update
+                        spikestr = spikestr * STD_str(L->P->STD,coord,timestep,1,L->std); //since we only emit a spike once, use 1 to force an update
                     }
                     //all the different ways to add a spike
                     if (Features.STDP==OFF)
                     {
+                        //TODO: maybe the Addrd functions should take coords
                         AddRD(x,y,L->connections, L->Rmat,L->Dmat,spikestr);
                     }
                     else
@@ -275,7 +273,7 @@ void StoreFiring(layer* L,const unsigned int timestep)
                     }
                     if (Features.Random_connections==ON)
                     {
-                        AddRandomRD(c,L->rcinfo,L->Rmat,L->Dmat,spikestr);
+                        AddRandomRD(coord,L->rcinfo,L->Rmat,L->Dmat,spikestr);
                     }
                 }
             }

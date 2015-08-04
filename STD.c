@@ -4,6 +4,7 @@
 #include "paramheader.h"
 #include "out/outputtable.h"
 #include "tagged_array.h"
+#include "sizes.h"
 int layerinitcount=0;
 ///Initialise the STD parameters to their initial values.
 ///Failing to call this before using STD will give incorrect results initially.
@@ -35,9 +36,9 @@ STD_data* __attribute__((const)) STD_init(const STD_parameters s)
     return ret;
 }
 //note - when this calculates the STD strength, it also can adjust the STD parameters to register the spike
-Compute_float STD_str (const STD_parameters s, const unsigned int x, const unsigned int y,const unsigned int time,const int16_t lag, STD_data* const d)
+Compute_float STD_str (const STD_parameters s, const coords c ,const unsigned int time,const int16_t lag, STD_data* const d)
 {
-    const unsigned int stdidx=x*grid_size+y;
+    const size_t stdidx=grid_index(c);
     if (lag==1) //recalculate after spiking
     {
         const Compute_float spike_interval = ((Compute_float)(time-(d->ftimes[stdidx])))/((Compute_float)1000.0)*Features.Timestep;//calculate inter spike interval in seconds

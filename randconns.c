@@ -23,7 +23,7 @@ randconns_info init_randconns_info(const randconn_parameters p)
 
 void StoreNewRandconn(const randconns_info* rcinfo,const randomconnection rc,const unsigned int sourceidx,randomconnection** bigmat,unsigned int* const bigmatcounts)
 {
-    const unsigned int sourcegrididx=rc.source.x*(unsigned)grid_size+rc.source.y;
+    const unsigned int sourcegrididx=grid_index(rc.source);
     randomconnection* rcp; //use this as a reference once we have put the connection in the storage location for the forward direction
     //store forward randconn
     if (rcinfo->UsingFancySpecials==ON)
@@ -51,7 +51,7 @@ void StoreNewRandconn(const randconns_info* rcinfo,const randomconnection rc,con
         rcp = &rcinfo->randconns[myidx];
     }
     //store the reverse one
-    const unsigned int destgrididx=rc.destination.x*(unsigned)grid_size+rc.destination.y;
+    const unsigned int destgrididx=grid_index(rc.destination);
     if (rcinfo->UsingFancySpecials==ON)
     {
         //do something tricky here
@@ -105,12 +105,14 @@ randconns_info* init_randconns(const randconn_parameters rparam,const couple_par
     srandom((unsigned)0); //seed RNG - WHY???? should probably remove this!!!
     //RCS need some connection strength scaling.  We abuse the globalmultiplier normalization most of the time, when coming from a single point boost them unfairly
     const Compute_float Strmod = (rparam.Specials>0 || rcinfo.UsingFancySpecials==ON )?2.0: One - couple.normalization_parameters.glob_mult.GM;
-    for (unsigned int x=0;x<grid_size;x++)
+    for (Neuron_coord x=0;x<grid_size;x++)
     {
-        for (unsigned int y=0;y<grid_size;y++)
-        {	//the specials is if we only have a limited number of neurons with random connections
+        for (Neuron_coord y=0;y<grid_size;y++)
+        {
+            const coords c = {.x=x,.y=y};
+            //the specials is if we only have a limited number of neurons with random connections
             //this conditional is crazy and stupid - TODO fixme
-            if (x*grid_size+y < rcinfo.nospecials || (rcinfo.nospecials==0 && !rcinfo.UsingFancySpecials) || (rcinfo.UsingFancySpecials && (x*grid_size+y==rcinfo.SpecialAInd || x*grid_size+y==rcinfo.SpecialBInd) ) ) //massive hacky conditional
+            if (grid_index(c) < rcinfo.nospecials || (rcinfo.nospecials==0 && !rcinfo.UsingFancySpecials) || (rcinfo.UsingFancySpecials && (grid_index(c)==rcinfo.SpecialAInd || grid_index(c)==rcinfo.SpecialBInd) ) ) //massive hacky conditional
             {
                 printf("makeing connections at %i Aind %i Bind %i\n",x*grid_size+y,rcinfo.SpecialAInd,rcinfo.SpecialBInd);
                 for (unsigned int i=0;i<rparam.numberper;i++)
@@ -124,7 +126,7 @@ randconns_info* init_randconns(const randconn_parameters rparam,const couple_par
                             .x = (Neuron_coord)(RandFloat() * (Compute_float)grid_size),
                             .y = (Neuron_coord)(RandFloat() * (Compute_float)grid_size),
                         },
-                        .source = {.x=(Neuron_coord)x,.y=(Neuron_coord)y},
+                        .source = c,
                     };
                     StoreNewRandconn(&rcinfo,rc,i,bigmat,bigmatcounts);
                 }

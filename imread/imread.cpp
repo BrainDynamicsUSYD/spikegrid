@@ -142,10 +142,12 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
     }
     if (timemodper < 5) { ResetVoltages(voltsin);} //reset before next period.
 
-    for (int x=0;x<grid_size;x++)
+    for (Neuron_coord x=0;x<grid_size;x++)
     {
-        for (int y=0;y<grid_size;y++)
+        for (Neuron_coord y=0;y<grid_size;y++)
         {
+            const coord c = {.x=x,.y=y};
+            const size_t idx = grid_index(c);
             //--------------
             //NOTE: opencv is completely nuts.  The returned order of color channels is BGR (NOT RGB)
             //--------------
@@ -154,42 +156,42 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
             //std::cout << x << "," << y << " " <<  pixel << std::endl;
             if (pixel == cv::Vec3b(0,0,0))
             {
-                voltsin[x*grid_size+y]=-100;
+                voltsin[idx]=-100;
             }
             else if ( stim1 && pixel == cv::Vec3b(0,0,255))
             {
-                voltsin[x*grid_size+y]=100;
+                voltsin[idx]=100;
             }
             else if (stim2 && pixel == cv::Vec3b(255,0,0))
             {
-                voltsin[x*grid_size+y]=100;
+                voltsin[idx]=100;
             }
             else if (path1 && pixel == cv::Vec3b(0,255,0))
             {
-                voltsin[x*grid_size+y] = -100;
+                voltsin[idx] = -100;
             }
             else if (path2 && pixel == cv::Vec3b(0,100,0))
             {
-                voltsin[x*grid_size+y] = -100;
+                voltsin[idx] = -100;
             }
             //detection loop - keep in a separate statement for now
             if (pixel == cv::Vec3b(100,100,100))
             {
-                if (voltsin[x*grid_size+y] > threshold )
+                if (voltsin[idx] > threshold )
                 {
                     fire1 = true;
                 }
             }
             else if (pixel == cv::Vec3b(150,150,150))
             {
-                if (voltsin[x*grid_size+y] > threshold )
+                if (voltsin[idx] > threshold )
                 {
                     fire2 = true;
                 }
             }
             else if (pixel == cv::Vec3b(50,50,50))
             {
-                if (voltsin[x*grid_size+y] > threshold)
+                if (voltsin[idx] > threshold)
                 {
                     printf("making a random spike\n");
                     if (path1) {voltsin[rcinfo->SpecialAInd]=100; }
@@ -212,22 +214,23 @@ void ApplyContinuousStim(Compute_float* voltsin,const Compute_float timemillis,c
     const Compute_float I0 = S.I0*Timestep;
     const Compute_float I1 = S.I1*Timestep;
     const Compute_float I2 = S.I2*Timestep;
-    for (int x=0;x<grid_size;x++)
+    for (Neuron_coord x=0;x<grid_size;x++)
     {
-        for (int y=0;y<grid_size;y++)
+        for (Neuron_coord y=0;y<grid_size;y++)
         {
-        cv::Vec3b pixel = imcache.at<cv::Vec3b>(x,y);
-        //uncomment to print colours - not particularly helpful
-        //std::cout << x << "," << y << " " <<  pixel << std::endl;
-        //constant external input - only makes sense for Euler method
-        if (pixel == cv::Vec3b(0,106,127)) //0,127,127: background (olive - 128,128,0 in GIMP)
+            const size_t idx = grid_index((coords){.x=x,.y=y});
+            cv::Vec3b pixel = imcache.at<cv::Vec3b>(x,y);
+            //uncomment to print colours - not particularly helpful
+            //std::cout << x << "," << y << " " <<  pixel << std::endl;
+            //constant external input - only makes sense for Euler method
+            if (pixel == cv::Vec3b(0,106,127)) //0,127,127: background (olive - 128,128,0 in GIMP)
             {
-                voltsin[x*grid_size+y] += I0;
-                voltsin[x*grid_size+y] += I1*cos(2*M_PI*S.mu*timemillis+Phimat[x*grid_size+y]); //Need to code mu and phi
+                voltsin[idx] += I0;
+                voltsin[idx] += I1*cos(2*M_PI*S.mu*timemillis+Phimat[idx]); //Need to code mu and phi
             }
             else if (pixel == cv::Vec3b(127,0,87)) //127,0,127:foreground (purple - 128,0,128 in GIMP)
             {
-                voltsin[x*grid_size+y] += I2;
+                voltsin[idx] += I2;
             }
         }
     }

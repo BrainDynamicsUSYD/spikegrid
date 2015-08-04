@@ -1,7 +1,6 @@
 /// \file
 #ifndef LAGSTORAGE
 #define LAGSTORAGE
-#include <stdint.h>
 #include "sizes.h"
 /// TODO: Much of the time in the code appears to be in bracnch mispredicts caused by while loops in lagstorage
 /// One solution would be to also add a count of the spikes in here - then we can count down to 0

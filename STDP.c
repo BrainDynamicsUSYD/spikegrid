@@ -204,13 +204,13 @@ Compute_float* COMangle(const  STDP_data* const S)
 }
 void STDP_decay(const  STDP_data* const S)
 {
-    for (int i=0;i<grid_size*grid_size;i++)
+    for (size_t i=0;i<grid_size*grid_size;i++)
     {
         for (int a=-STDP_RANGE;a<STDP_RANGE;a++)
         {
             for (int b=-STDP_RANGE;b<STDP_RANGE;b++)
             {
-               S->connections[i*STDP_array_size*STDP_array_size+(a+STDP_RANGE)*STDP_array_size + (b+STDP_RANGE)] *= S->P->STDP_decay_factor;
+               S->connections[i*STDP_array_size*STDP_array_size+(size_t)(a+STDP_RANGE)*STDP_array_size + (size_t)(b+STDP_RANGE)] *= S->P->STDP_decay_factor;
             }
         }
     }

@@ -152,6 +152,11 @@ model* setup(const parameters p,const parameters p2,const LayerNumbers lcount,co
 #ifdef _WIN32 //this might be a bug in VS - maybe only intellisense?
     model m   = {l1,l2,0,lcount,calloc(sizeof(animal),1)};
 #else
+    //we construct this model as some of the features are const
+    //as a result, as some of the objects are const, they can't be copied in to the result -
+    //model* m = malloc(sizeof(*m));
+    //m->layer1 = ...   will fail
+    //this pattern is used in a few places
 	const model m =
         {
             .layer1 = l1,
@@ -164,6 +169,7 @@ model* setup(const parameters p,const parameters p2,const LayerNumbers lcount,co
 #endif
     model* m2       = malloc(sizeof(m));
     memcpy(m2,&m,sizeof(m));
+    //on the cluster, the code shouldn't be run on the main cluster node, so stop it from running
     char* buffer = malloc(1024);
     gethostname(buffer,1023);
     if (!strcmp(buffer,"headnode.physics.usyd.edu.au")&& !testing) {printf("DON'T RUN THIS CODE ON HEADNODE\n");exit(EXIT_FAILURE);}

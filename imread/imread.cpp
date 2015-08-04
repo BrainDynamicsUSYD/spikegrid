@@ -146,7 +146,7 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
     {
         for (Neuron_coord y=0;y<grid_size;y++)
         {
-            const coord c = {.x=x,.y=y};
+            const coords c = {.x=x,.y=y};
             const size_t idx = grid_index(c);
             //--------------
             //NOTE: opencv is completely nuts.  The returned order of color channels is BGR (NOT RGB)

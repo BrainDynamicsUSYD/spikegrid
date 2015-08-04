@@ -23,7 +23,7 @@ randconns_info init_randconns_info(const randconn_parameters p)
 
 void StoreNewRandconn(const randconns_info* rcinfo,const randomconnection rc,const unsigned int sourceidx,randomconnection** bigmat,unsigned int* const bigmatcounts)
 {
-    const unsigned int sourcegrididx=grid_index(rc.source);
+    const size_t sourcegrididx=grid_index(rc.source);
     randomconnection* rcp; //use this as a reference once we have put the connection in the storage location for the forward direction
     //store forward randconn
     if (rcinfo->UsingFancySpecials==ON)
@@ -46,12 +46,12 @@ void StoreNewRandconn(const randconns_info* rcinfo,const randomconnection rc,con
     }
     else
     { //the easy case
-        const unsigned int myidx=sourcegrididx*rcinfo->numberper+sourceidx;
+        const size_t myidx=sourcegrididx*rcinfo->numberper+sourceidx;
         rcinfo->randconns[myidx]=rc;
         rcp = &rcinfo->randconns[myidx];
     }
     //store the reverse one
-    const unsigned int destgrididx=grid_index(rc.destination);
+    const size_t destgrididx=grid_index(rc.destination);
     if (rcinfo->UsingFancySpecials==ON)
     {
         //do something tricky here

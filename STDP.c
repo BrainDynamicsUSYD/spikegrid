@@ -155,7 +155,7 @@ STDP_data* STDP_init(const STDP_parameters* const S,const int trefrac_in_ts)
     STDP_data D =
     {
         .lags = lagstorage_init(stdplagcount,STDP_cap), //in the normal model, the lagstorage uses all the ram.  However, in the STDP code, the couplings use it all, so while we could do some trickery to avoid the duplicate lagstorages, it is not a huge issue - except we are doing some unnecersarry work here.  So it might be possible to eliminate this to improve performance.
-        .connections =  calloc(sizeof(Compute_float),grid_size*grid_size*STDP_array_size*STDP_array_size), //This is a truly epic sized matrix.  For example a 300x300 grid with a coupling range of 25 will take up 1.7GB/layer.  Unfortuneately, I suspect that reductions in this size may cause perf problems.  Regardless we have 6GB/core on yossarian, so this is still OK.  Although maybe this calculation should use `long` to avoid overflow.
+        .connections =  calloc(sizeof(Compute_float),(size_t)grid_size*grid_size*STDP_array_size*STDP_array_size), //This is a truly epic sized matrix.  For example a 300x300 grid with a coupling range of 25 will take up 1.7GB/layer.  Unfortuneately, I suspect that reductions in this size may cause perf problems.  Regardless we have 6GB/core on yossarian, so this is still OK.  Although maybe this calculation should use `long` to avoid overflow.
         //roughly 20% of the ram here can be saved if we don't store the zero entries.  Bigger saving would be in eliminating inactive neurons that would be 50%
         .RecordSpikes = ON,
         .P = S,

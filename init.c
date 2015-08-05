@@ -84,11 +84,10 @@ layer setuplayer(const parameters p)
         .recoverys_out      = Features.Recovery==ON?calloc(sizeof(Compute_float),grid_size*grid_size):NULL,
         .Layer_is_inhibitory = p.couple.Layertype==DUALLAYER && p.couple.Layer_parameters.dual.W<0,
         .rcinfo             = Features.Random_connections==ON?init_randconns(p.random,p.couple): NULL,
-        .Rmat               = calloc(sizeof(Compute_float),conductance_array_size*conductance_array_size),
-        .Dmat               = calloc(sizeof(Compute_float),conductance_array_size*conductance_array_size),
-        .R                  = p.couple.Layer_parameters.dual.synapse.R,
-        .D                  = p.couple.Layer_parameters.dual.synapse.D,
+        .RD                 = calloc(sizeof(RD_data),1),
     };
+    L.RD->R=p.couple.Layer_parameters.dual.synapse.R;
+    L.RD->D=p.couple.Layer_parameters.dual.synapse.D;
     return L;
 }
 //sets the output directory - note output directory is a global

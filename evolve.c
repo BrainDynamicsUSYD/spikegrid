@@ -123,24 +123,24 @@ void fixboundary(Compute_float* __restrict input)
 }
 //Ideally we change things so that this isn't required - maybe an inline function to get gE/gI using Rvalues
 //note - we need to use the normalised D/R values when we add the initial numbner
-void FixRD(Compute_float* __restrict R,const Compute_float Rm,Compute_float* __restrict D, const Compute_float Dm,condmat* __restrict cond_mat,const on_off inhib)
+void FixRD(RD_data* __restrict RD,condmat* __restrict cond_mat,const on_off inhib)
 {
-    fixboundary(R);
-    fixboundary(D);
+    fixboundary(RD->Rmat);
+    fixboundary(RD->Dmat);
     for (Neuron_coord i=0;i<grid_size;i++)
     {
         for (Neuron_coord j=0;j<grid_size;j++)
         {
             const size_t idx = Conductance_index((coords){.x=i,.y=j});
-            R[idx] *= exp(-Features.Timestep/Rm);
-            D[idx] *= exp(-Features.Timestep/Dm);
+            RD->Rmat[idx] *= exp(-Features.Timestep/RD->R);
+            RD->Dmat[idx] *= exp(-Features.Timestep/RD->D);
             if (inhib==ON)
             {
-                cond_mat->gI[idx] += -(D[idx]-R[idx]);
+                cond_mat->gI[idx] += -(RD->Dmat[idx]-RD->Rmat[idx]);
             }
             else
             {
-                cond_mat->gE[idx] += D[idx]-R[idx]; //question - calculate this first or second?
+                cond_mat->gE[idx] += RD->Dmat[idx]-RD->Rmat[idx]; //question - calculate this first or second?
             }
         }
     }
@@ -213,7 +213,7 @@ int __attribute__((pure,const)) IsActiveNeuron (const int x, const int y,const s
     const char test = (x % step) == 0 && (y % step) ==0;
     return (test && step > 0) || (!test && step < 0);
 }
-void AddRandomRD(const coords c ,const randconns_info* const rcinfo, Compute_float* Rmat,Compute_float* Dmat,const Compute_float InitStr)
+void AddRandomRD(const coords c ,const randconns_info* const rcinfo, RD_data* __restrict RD,const Compute_float InitStr)
 {
     unsigned int count;
     const randomconnection* const rcsleaving = GetRandomConnsLeaving(c,*rcinfo,&count);
@@ -221,8 +221,8 @@ void AddRandomRD(const coords c ,const randconns_info* const rcinfo, Compute_flo
     {
         const randomconnection rc = rcsleaving[i];
         const size_t destidx = Conductance_index(rc.destination);
-        Rmat[destidx] += InitStr*(rc.strength+rc.stdp_strength);
-        Dmat[destidx] += InitStr*(rc.strength+rc.stdp_strength);
+        RD->Rmat[destidx] += InitStr*(rc.strength+rc.stdp_strength);
+        RD->Dmat[destidx] += InitStr*(rc.strength+rc.stdp_strength);
     }
 }
 ///Store current firing spikes also apply random spikes
@@ -256,7 +256,7 @@ void StoreFiring(layer* L,const unsigned int timestep)
                         L->voltages_out[grid_index(coord)]=L->P->potential.Vrt;
                         L->recoverys_out[grid_index(coord)]+=L->P->recovery.Wrt;
                     }
-                    Compute_float spikestr = 1.0/(L->D - L->R);
+                    Compute_float spikestr = 1.0/(L->RD->D - L->RD->R);
                     if (Features.STD==ON)
                     {
                         spikestr = spikestr * STD_str(L->P->STD,coord,timestep,1,L->std); //since we only emit a spike once, use 1 to force an update
@@ -265,15 +265,15 @@ void StoreFiring(layer* L,const unsigned int timestep)
                     if (Features.STDP==OFF)
                     {
                         //TODO: maybe the Addrd functions should take coords
-                        AddRD(x,y,L->connections, L->Rmat,L->Dmat,spikestr);
+                        AddRD(coord,L->connections, L->RD,spikestr);
                     }
                     else
                     {
-                        AddRD_STDP(x,y,L->connections,L->STDP_data->connections,L->Rmat,L->Dmat,spikestr);
+                        AddRD_STDP(coord,L->connections,L->STDP_data->connections,L->RD,spikestr);
                     }
                     if (Features.Random_connections==ON)
                     {
-                        AddRandomRD(coord,L->rcinfo,L->Rmat,L->Dmat,spikestr);
+                        AddRandomRD(coord,L->rcinfo,L->RD,spikestr);
                     }
                 }
             }
@@ -359,8 +359,8 @@ void step1(model* m)
     //from this point the GE and GI are actually fixed - as a result there is no more layer interaction - so do things sequentially to each layer
     if (m->NoLayers==DUALLAYER)
     {
-        FixRD(m->layer1.Rmat,m->layer1.R,m->layer1.Dmat,m->layer1.D,m->cond_matrices,m->layer1.Layer_is_inhibitory);
-        FixRD(m->layer2.Rmat,m->layer2.R,m->layer2.Dmat,m->layer2.D,m->cond_matrices,m->layer2.Layer_is_inhibitory);
+        FixRD(m->layer1.RD,m->cond_matrices,m->layer1.Layer_is_inhibitory);
+        FixRD(m->layer2.RD,m->cond_matrices,m->layer2.Layer_is_inhibitory);
     }
     else
     {

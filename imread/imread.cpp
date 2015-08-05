@@ -17,6 +17,7 @@ extern "C"
 typedef enum {Normal=0,Testing=1} Net_state;
 bool cached=false;
 Net_state state = Normal;
+//I think that these global cv::mats are causing the pure virtual function problem
 cv::Mat imcache; //elements have type Vec3b
 cv::Mat ReadImage(const char* const path)
 {

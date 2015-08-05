@@ -10,7 +10,7 @@ typedef struct lagstorage lagstorage;
 typedef struct tagged_array tagged_array;
 
 ///The directory that we are outputting to
-extern char outdir [100];
+extern char outdir [100]; 
 ///The type of data to output
 typedef enum {FLOAT_DATA=0,SPIKE_DATA=1} data_type;
 ///Holds data for outputtting in various ways

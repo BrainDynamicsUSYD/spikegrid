@@ -18,33 +18,21 @@
     #include <android/log.h>
 #endif
 
-void RandSpikes(const unsigned int x,const unsigned int y,const layer L,Compute_float* __restrict__ gE, Compute_float* __restrict__ gI,const Compute_float str)
-{
-    unsigned int norand;
-    const randomconnection* rcs = GetRandomConnsLeaving(x,y,*L.rcinfo,&norand);
-    for (unsigned int i=0;i<norand;i++)
-    {
-        const int condindex = Conductance_index(rcs[i].destination.x,rcs[i].destination.y);
-        if (L.Layer_is_inhibitory) {gI[condindex] += str * (rcs[i].strength + rcs[i].stdp_strength);}
-        else                       {gE[condindex] += str * (rcs[i].strength + rcs[i].stdp_strength);}
-    }
-}
-
-void evolvept (const int x,const int y,const Compute_float* const __restrict connections,const Compute_float Estrmod,const Compute_float Istrmod,Compute_float* __restrict gE,Compute_float* __restrict gI)
+void evolvept (const coords c ,const Compute_float* const __restrict connections,const Compute_float Estrmod,const Compute_float Istrmod,condmat* __restrict cond_mat)
 {
     for (int i = 0; i < couple_array_size;i++)
     {
-        const int outoff = (x + i)*conductance_array_size +y;//as gE and gI are larger than he neuron grid size, don't have to worry about wrapping
+        const int outoff = (c.x + i)*conductance_array_size +c.y;//as gE and gI are larger than he neuron grid size, don't have to worry about wrapping
         for (int j = 0 ; j<couple_array_size;j++)
         {
             const int coupleidx = i*couple_array_size + j;
             if (connections[coupleidx] > 0)
             {
-                gE[outoff+j] += connections[coupleidx]*Estrmod;
+                cond_mat->gE[outoff+j] += connections[coupleidx]*Estrmod;
             }
             else
             {
-                gI[outoff+j] += -(connections[coupleidx]*Istrmod);
+                cond_mat->gI[outoff+j] += -(connections[coupleidx]*Istrmod);
             }
         }
     }
@@ -52,14 +40,15 @@ void evolvept (const int x,const int y,const Compute_float* const __restrict con
 
 ///Adds the effect of the spikes that have fired in the past to the gE and gI arrays as appropriate
 /// currently, single layer doesn't work (correctly)
-void AddSpikes_single_layer(layer L, Compute_float* __restrict__ gE, Compute_float* __restrict__ gI,const unsigned int time)
+void AddSpikes_single_layer(layer L, condmat* __restrict__ cond_mat,const unsigned int time)
 {
-    for (unsigned int y=0;y<grid_size;y++)
+    for (Neuron_coord y=0;y<grid_size;y++)
     {
-        for (unsigned int x=0;x<grid_size;x++)
+        for (Neuron_coord x=0;x<grid_size;x++)
         {
-            const unsigned int lagidx = LagIdx(x,y,L.firinglags);
-            unsigned int newlagidx = lagidx;
+            const coords c = {.x=x,.y=y};
+            const size_t lagidx = LagIdx(c,L.firinglags);
+            size_t newlagidx = lagidx;
             if (L.Mytimecourse==NULL) // Single layer TODO: change this if to use something more appropriate
             {
                 Compute_float excstr = Zero;
@@ -71,8 +60,8 @@ void AddSpikes_single_layer(layer L, Compute_float* __restrict__ gE, Compute_flo
                     Compute_float this_inhstr = L.Intimecourse[L.firinglags->lags[newlagidx]];
                     if (Features.STD == ON)
                     {
-                        this_excstr = this_excstr * STD_str(L.P->STD,x,y,time,L.firinglags->lags[newlagidx],L.std);
-                        this_inhstr = this_inhstr * STD_str(L.P->STD,x,y,time,L.firinglags->lags[newlagidx],L.std);
+                        this_excstr = this_excstr * STD_str(L.P->STD,c,time,L.firinglags->lags[newlagidx],L.std);
+                        this_inhstr = this_inhstr * STD_str(L.P->STD,c,time,L.firinglags->lags[newlagidx],L.std);
                     }
                     newlagidx++;
                     excstr += this_excstr;
@@ -80,7 +69,7 @@ void AddSpikes_single_layer(layer L, Compute_float* __restrict__ gE, Compute_flo
                 }
                 if (newlagidx != lagidx) //only fire if we had a spike.
                 {
-                    evolvept((int)x,(int)y,L.connections,excstr,inhstr,gE,gI); // No support for STDP in single layer
+                    evolvept(c,L.connections,excstr,inhstr,cond_mat); // No support for STDP in single layer
                 }
             }
             else // Dual layer
@@ -134,24 +123,24 @@ void fixboundary(Compute_float* __restrict input)
 }
 //Ideally we change things so that this isn't required - maybe an inline function to get gE/gI using Rvalues
 //note - we need to use the normalised D/R values when we add the initial numbner
-void FixRD(Compute_float* __restrict R,const Compute_float Rm,Compute_float* __restrict D, const Compute_float Dm,Compute_float* __restrict gE, Compute_float* __restrict gI,const on_off inhib)
+void FixRD(RD_data* __restrict RD,condmat* __restrict cond_mat,const on_off inhib)
 {
-    fixboundary(R);
-    fixboundary(D);
-    for (int i=0;i<grid_size;i++)
+    fixboundary(RD->Rmat);
+    fixboundary(RD->Dmat);
+    for (Neuron_coord i=0;i<grid_size;i++)
     {
-        for (int j=0;j<grid_size;j++)
+        for (Neuron_coord j=0;j<grid_size;j++)
         {
-            const int idx = Conductance_index(i,j);
-            R[idx] *= exp(-Features.Timestep/Rm);
-            D[idx] *= exp(-Features.Timestep/Dm);
+            const size_t idx = Conductance_index((coords){.x=i,.y=j});
+            RD->Rmat[idx] *= exp(-Features.Timestep/RD->R);
+            RD->Dmat[idx] *= exp(-Features.Timestep/RD->D);
             if (inhib==ON)
             {
-                gI[idx] += - ( D[idx]-R[idx]);
+                cond_mat->gI[idx] += -(RD->Dmat[idx]-RD->Rmat[idx]);
             }
             else
             {
-                gE[idx] += D[idx]-R[idx]; //question - calculate this first or second?
+                cond_mat->gE[idx] += RD->Dmat[idx]-RD->Rmat[idx]; //question - calculate this first or second?
             }
         }
     }
@@ -175,18 +164,18 @@ Compute_float __attribute__((const,pure)) rhs_func  (const Compute_float V,const
 ///Uses precalculated gE and gI to integrate the voltages forward through time.
 ///Uses eulers method
 void CalcVoltages(const Compute_float* const __restrict__ Vinput,
-        const Compute_float* const __restrict__ gE,
-        const Compute_float* const __restrict__ gI,
+        const condmat * const __restrict__ cond_mat,
         const conductance_parameters C,
         Compute_float* const __restrict__ Vout)
 {
-    for (int x=0;x<grid_size;x++)
+    for (Neuron_coord x=0;x<grid_size;x++)
     {
-        for (int y=0;y<grid_size;y++)
+        for (Neuron_coord y=0;y<grid_size;y++)
         {
-            const int idx =Conductance_index(x,y);
-            const int idx2=  x*grid_size+y;
-            const Compute_float rhs = rhs_func(Vinput[idx2],gE[idx],gI[idx],C);
+            const coords c = {.x=x,.y=y};
+            const size_t idx =Conductance_index(c);
+            const size_t idx2=  grid_index(c);
+            const Compute_float rhs = rhs_func(Vinput[idx2],cond_mat->gE[idx],cond_mat->gI[idx],C);
             Vout[idx2]=Vinput[idx2]+Features.Timestep*rhs;
         }
     }
@@ -195,20 +184,20 @@ void CalcVoltages(const Compute_float* const __restrict__ Vinput,
 //this should probably take a struct as input - way too many arguments
 void CalcRecoverys(const Compute_float* const __restrict__ Vinput,
         const Compute_float* const __restrict__ Winput,
-        const Compute_float* const __restrict__ gE,
-        const Compute_float* const __restrict__ gI,
+        const condmat* const __restrict__ cond_mat,
         const conductance_parameters C,
         const recovery_parameters R,
         Compute_float* const __restrict__ Vout,
         Compute_float* const __restrict__ Wout)
 {    // Adaptive quadratic integrate-and-fire
-    for (int x=0;x<grid_size;x++)
+    for (Neuron_coord x=0;x<grid_size;x++)
     {
-        for (int y=0;y<grid_size;y++)
+        for (Neuron_coord y=0;y<grid_size;y++)
         {   //step all neurons through time - use Euler method
-            const int idx = Conductance_index(x,y);
-            const int idx2 = x*grid_size+y;       //index for voltage/recovery
-            const Compute_float rhsV=rhs_func(Vinput[idx2],gE[idx],gI[idx],C)-Winput[idx2];
+            const coords c = {.x=x,.y=y};
+            const size_t idx =Conductance_index(c);
+            const size_t idx2=  grid_index(c);
+            const Compute_float rhsV=rhs_func(Vinput[idx2],cond_mat->gE[idx],cond_mat->gI[idx],C)-Winput[idx2];
             const Compute_float rhsW=R.Wcv*(R.Wir*(Vinput[idx2]-C.Vlk) - Winput[idx2]);
             Vout[idx2] = Vinput[idx2] + Features.Timestep*rhsV;
             Wout[idx2] = Winput[idx2] + Features.Timestep*rhsW;
@@ -218,78 +207,79 @@ void CalcRecoverys(const Compute_float* const __restrict__ Vinput,
 //detect if a neuron is active - may be useful elsewhere - used to maintain an appropriate ratio of ex/in neurons
 //note when we have STDP, if you have one layer with skip +x and another with -x the code is massively simpler.
 //+ve skip is obvious.  -ve skip does the "inverse" of +ve skip
+//this function here could maybe use the coords - but it is very time sensitive, so leave as is
 int __attribute__((pure,const)) IsActiveNeuron (const int x, const int y,const signed char step)
 {
     const char test = (x % step) == 0 && (y % step) ==0;
     return (test && step > 0) || (!test && step < 0);
 }
-void AddRandomRD(const unsigned int x,const unsigned int y,const randconns_info* const rcinfo, Compute_float* Rmat,Compute_float* Dmat,const Compute_float R,const Compute_float D)
+void AddRandomRD(const coords c ,const randconns_info* const rcinfo, RD_data* __restrict RD,const Compute_float InitStr)
 {
-    const Compute_float InitStr = 1/(D-R);
     unsigned int count;
-    const randomconnection* const rcsleaving = GetRandomConnsLeaving(x,y,*rcinfo,&count);
+    const randomconnection* const rcsleaving = GetRandomConnsLeaving(c,*rcinfo,&count);
     for (unsigned int i=0;i<count;i++)
     {
         const randomconnection rc = rcsleaving[i];
-        const unsigned int destidx = Conductance_index(rc.destination.x,rc.destination.y);
-        Rmat[destidx] += InitStr*(rc.strength+rc.stdp_strength);
-        Dmat[destidx] += InitStr*(rc.strength+rc.stdp_strength);
+        const size_t destidx = Conductance_index(rc.destination);
+        RD->Rmat[destidx] += InitStr*(rc.strength+rc.stdp_strength);
+        RD->Dmat[destidx] += InitStr*(rc.strength+rc.stdp_strength);
     }
 }
 ///Store current firing spikes also apply random spikes
 ///TODO: make faster - definitely room for improvement here
-void StoreFiring(layer* L)
+void StoreFiring(layer* L,const unsigned int timestep)
 {
     const signed char skip = (signed char) (L->P->skip);
-    for (int x=0;x<grid_size;x++)
+    for (Neuron_coord x=0;x<grid_size;x++)
     {
-        for (int y=0;y<grid_size;y++)
+        for (Neuron_coord y=0;y<grid_size;y++)
         {
             if (IsActiveNeuron(x,y,skip))
             {
-                //--------------- *************************
-                //TODO: For maddie - make this know about STD.
-                //---------------**************
-                const unsigned int baseidx = LagIdx((unsigned int)x,(unsigned int)y,L->firinglags);
+                const coords coord = {.x=x,.y=y};
+                const size_t baseidx = LagIdx(coord,L->firinglags);
                 modifyLags(L->firinglags,baseidx);
-                if (Features.STDP==ON) {modifyLags(L->STDP_data->lags,LagIdx((unsigned int)x,(unsigned int)y,L->STDP_data->lags));}
+                if (Features.STDP==ON) {modifyLags(L->STDP_data->lags,LagIdx(coord,L->STDP_data->lags));}
                 //now - add in new spikes
-                if (L->voltages_out[x*grid_size + y]  >= L->P->potential.Vpk)
+                if (L->voltages_out[grid_index(coord)]  >= L->P->potential.Vpk
+                        ||
+                        //next part - add random spikes
+                        (L->P->potential.rate > 0 && //this check is because the compiler doesn't optimize the call to random() otherwise
+                         (RandFloat() < (L->P->potential.rate*((Compute_float)0.001)*Features.Timestep)))
+
+                   )
                 {
                     AddnewSpike(L->firinglags,baseidx);
-                    if (Features.STDP==ON && L->STDP_data->RecordSpikes==ON) {AddnewSpike(L->STDP_data->lags,LagIdx((unsigned int)x,(unsigned int)y,L->STDP_data->lags));}
+                    if (Features.STDP==ON && L->STDP_data->RecordSpikes==ON) {AddnewSpike(L->STDP_data->lags,LagIdx(coord,L->STDP_data->lags));}
                     if (Features.Recovery==ON) //reset recovery if needed.  Note recovery has no refractory period so a reset is required
                     {
-                        L->voltages_out[x*grid_size+y]=L->P->potential.Vrt;
-                        L->recoverys_out[x*grid_size+y]+=L->P->recovery.Wrt;
+                        L->voltages_out[grid_index(coord)]=L->P->potential.Vrt;
+                        L->recoverys_out[grid_index(coord)]+=L->P->recovery.Wrt;
                     }
+                    Compute_float spikestr = 1.0/(L->RD->D - L->RD->R);
+                    if (Features.STD==ON)
+                    {
+                        spikestr = spikestr * STD_str(L->P->STD,coord,timestep,1,L->std); //since we only emit a spike once, use 1 to force an update
+                    }
+                    //all the different ways to add a spike
                     if (Features.STDP==OFF)
                     {
-                        AddRD(x,y,L->connections, L->Rmat,L->Dmat,L->R,L->D);
+                        //TODO: maybe the Addrd functions should take coords
+                        AddRD(coord,L->connections, L->RD,spikestr);
                     }
                     else
                     {
-                        AddRD_STDP(x,y,L->connections,L->STDP_data->connections,L->Rmat,L->Dmat,L->R,L->D);
+                        AddRD_STDP(coord,L->connections,L->STDP_data->connections,L->RD,spikestr);
                     }
                     if (Features.Random_connections==ON)
                     {
-                        AddRandomRD((unsigned)x,(unsigned)y,L->rcinfo,L->Rmat,L->Dmat,L->R,L->D);
+                        AddRandomRD(coord,L->rcinfo,L->RD,spikestr);
                     }
-
-                }//add spikes that occur randomly (as opposed to random connectivity)
-                //this addition is done by setting the voltage to greater than threshold.
-                //TODO - for simplification, just force a spike
-                else if (L->P->potential.rate > 0 && //this check is because the compiler doesn't optimize the call to random() otherwise
-                            (RandFloat() < (L->P->potential.rate*((Compute_float)0.001)*Features.Timestep)))
-                {
-                    L->voltages_out[x*grid_size+y]=L->P->potential.Vpk+(Compute_float)0.1;//make sure it fires - the neuron will actually fire next timestep
-                    AddRD(x,y,L->connections,L-> Rmat,L->Dmat,L->R,L->D);
                 }
-
             }
             else //non-active neurons never get to fire
             {
-                L->voltages_out[x*grid_size+y]=-1000; //skipped neurons set to -1000 - probably not required but perf impact should be minimal - also ensures they will never be >Vpk
+                L->voltages_out[x*grid_size+y]=-1000; //skipped neurons set to -1000 - probably not required but perf impact should be minimal - also ensures they will never be >Vpk  - removing this would make the pictures smoother
             }
         }
     }
@@ -309,11 +299,11 @@ void RefractoryVoltages(Compute_float* const __restrict Vout,const couple_parame
 }
 #include "imread/imread.h"
 ///This function takes up way too much time in the code - mostly in storefiring - slightly annoying as this is essentially all pure overhead.  It would be really nice to significantly reduce the amount of time this function takes.
-void tidylayer (layer* l,const Compute_float timemillis,const Compute_float* const gE,const Compute_float* const gI)
+void tidylayer (layer* l,const Compute_float timemillis,const condmat* const __restrict cond_mat,const unsigned int timestep)
 {
     if (Features.Recovery==OFF)
     {
-        CalcVoltages(l->voltages,gE ,gI,l->P->potential,l->voltages_out);
+        CalcVoltages(l->voltages,cond_mat,l->P->potential,l->voltages_out);
         if (Features.ImageStim==ON) //Dodgy fudge
         {
             if (!(l->P->Stim.Periodic))
@@ -325,9 +315,9 @@ void tidylayer (layer* l,const Compute_float timemillis,const Compute_float* con
     }
     else
     {
-        CalcRecoverys(l->voltages,l->recoverys,gE,gI,l->P->potential,l->P->recovery,l->voltages_out,l->recoverys_out);
+        CalcRecoverys(l->voltages,l->recoverys,cond_mat,l->P->potential,l->P->recovery,l->voltages_out,l->recoverys_out);
     }
-    StoreFiring(l);
+    StoreFiring(l,timestep);
     if (Features.Theta==ON)
     {
         dotheta(l->voltages_out,l->P->theta,timemillis);
@@ -351,35 +341,34 @@ void step1(model* m)
 {
     const Compute_float timemillis = ((Compute_float)m->timesteps) * Features.Timestep ;
     //this memcpy based version for initializing gE/gI is marginally slower (probably cache issues) -
-    memcpy(m->gE,m->gEinit,sizeof(m->gE));
-    memcpy(m->gI,m->gIinit,sizeof(m->gI));
+    memcpy(m->cond_matrices,m->cond_matrices_init,sizeof(*m->cond_matrices));
     if (Features.LocalStim==ON)
     {
-        if (m->timesteps %1000 < 250) {ApplyLocalBoost(m->gE,20,20);}
-        else if (m->timesteps % 1000 < 500) {ApplyLocalBoost(m->gE,20,60);}
-        else if (m->timesteps % 1000 < 750) {ApplyLocalBoost(m->gE,60,20);}
-        else  {ApplyLocalBoost(m->gE,60,60);}
+        if (m->timesteps %1000 < 250) {ApplyLocalBoost(m->cond_matrices->gE,20,20);}
+        else if (m->timesteps % 1000 < 500) {ApplyLocalBoost(m->cond_matrices->gE,20,60);}
+        else if (m->timesteps % 1000 < 750) {ApplyLocalBoost(m->cond_matrices->gE,60,20);}
+        else  {ApplyLocalBoost(m->cond_matrices->gE,60,60);}
     }
     if(Features.UseAnimal==ON)
     {
         MoveAnimal(m->animal,timemillis);
-        AnimalEffects(*m->animal,m->gE,timemillis);
+        AnimalEffects(*m->animal,m->cond_matrices->gE,timemillis);
     }
     // Add spiking input to the conductances
-    if (m->NoLayers==SINGLELAYER) {AddSpikes_single_layer(m->layer2,m->gE,m->gI,m->timesteps);}
+    if (m->NoLayers==SINGLELAYER) {AddSpikes_single_layer(m->layer2,m->cond_matrices,m->timesteps);}
     //from this point the GE and GI are actually fixed - as a result there is no more layer interaction - so do things sequentially to each layer
     if (m->NoLayers==DUALLAYER)
     {
-        FixRD(m->layer1.Rmat,m->layer1.R,m->layer1.Dmat,m->layer1.D,m->gE,m->gI,m->layer1.Layer_is_inhibitory);
-        FixRD(m->layer2.Rmat,m->layer2.R,m->layer2.Dmat,m->layer2.D,m->gE,m->gI,m->layer2.Layer_is_inhibitory);
+        FixRD(m->layer1.RD,m->cond_matrices,m->layer1.Layer_is_inhibitory);
+        FixRD(m->layer2.RD,m->cond_matrices,m->layer2.Layer_is_inhibitory);
     }
     else
     {
-        fixboundary(m->gE);
-        fixboundary(m->gI);
+        fixboundary(m->cond_matrices->gE);
+        fixboundary(m->cond_matrices->gI);
     }
-    tidylayer(&m->layer1,timemillis,m->gE,m->gI);
-    if (m->NoLayers==DUALLAYER){tidylayer(&m->layer2,timemillis,m->gE,m->gI);}
+    tidylayer(&m->layer1,timemillis,m->cond_matrices,m->timesteps);
+    if (m->NoLayers==DUALLAYER){tidylayer(&m->layer2,timemillis,m->cond_matrices,m->timesteps);}
     if (Features.STDP==ON)
     {
         DoSTDP(m->layer1.connections,m->layer2.connections,m->layer1.STDP_data,m->layer2.STDP_data,m->layer1.rcinfo);

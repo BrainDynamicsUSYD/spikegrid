@@ -1,7 +1,6 @@
 /// \file
 #ifndef LAGSTORAGE
 #define LAGSTORAGE
-#include <stdint.h>
 #include "sizes.h"
 /// TODO: Much of the time in the code appears to be in bracnch mispredicts caused by while loops in lagstorage
 /// One solution would be to also add a count of the spikes in here - then we can count down to 0
@@ -15,9 +14,9 @@ typedef struct lagstorage //TODO question - could this be moved out of .h?
 } lagstorage;
 lagstorage* lagstorage_init(const unsigned int flagcount,const int cap);
 void lagstorage_dtor(lagstorage* l);
-void AddnewSpike(lagstorage* L,const unsigned int baseidx);
-void modifyLags(lagstorage* L,unsigned int baseidx);
-int16_t __attribute__((const,pure)) CurrentShortestLag(const lagstorage* const L,const unsigned int baseidx);
+void AddnewSpike(lagstorage* L,const size_t baseidx);
+void modifyLags(lagstorage* L,size_t baseidx);
+int16_t __attribute__((const,pure)) CurrentShortestLag(const lagstorage* const L,const size_t baseidx);
 ///A small helper function to calculate the base idx for the lags at a given x and y coordinate.  Mostly just for convenience
-static inline unsigned int __attribute__((const,pure)) LagIdx(const unsigned int x,const unsigned int y,const lagstorage* L) {return (x*grid_size+y)*L->lagsperpoint;}
+static inline size_t __attribute__((const,pure)) LagIdx(const coords c ,const lagstorage* L) {return (grid_index(c))*L->lagsperpoint;}
 #endif

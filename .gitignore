@@ -59,3 +59,5 @@ cson/json-parser
 cson/select-to-json
 cson/test-cpdo
 cson/test-sq3
+maskgen.c
+whichparambackup.h

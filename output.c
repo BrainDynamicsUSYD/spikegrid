@@ -6,7 +6,7 @@
 #include "mymath.h"
 #include "out/outputtable.h"
 //declare the extern variables from the header
-char outdir[100];
+char __attribute__((used)) outdir[100]; //using flto on ubuntu hides this symbol for some reason.  Adding used fixes it
 //outptu holds an open reference to the model - this enables the mini functions to work
 const model* modelref; //MASSIVE HACK
 
@@ -24,8 +24,8 @@ void output_init(const model* const m)
 {
     modelref = m; //store ref to model.
     //define model based outputs - this could move to model.c
-    CreateOutputtable((output_s){"gE",          FLOAT_DATA, .data.TA_data=tagged_array_new(m->gE,                     conductance_array_size, couplerange,   1,0,2)}); //gE is a 'large' matrix - as it wraps around the edges
-    CreateOutputtable((output_s){"gI",          FLOAT_DATA, .data.TA_data=tagged_array_new(m->gI,                     conductance_array_size, couplerange,   1,0,2)});
+    CreateOutputtable((output_s){"gE",          FLOAT_DATA, .data.TA_data=tagged_array_new(m->cond_matrices->gE,                     conductance_array_size, couplerange,   1,0,2)}); //gE is a 'large' matrix - as it wraps around the edges
+    CreateOutputtable((output_s){"gI",          FLOAT_DATA, .data.TA_data=tagged_array_new(m->cond_matrices->gI,                     conductance_array_size, couplerange,   1,0,2)});
     CreateOutputtable((output_s){"Coupling1",   FLOAT_DATA, .data.TA_data=tagged_array_new(m->layer1.connections,     couple_array_size,      0,             1,-0.5,0.5)});
     CreateOutputtable((output_s){"Coupling2",   FLOAT_DATA, .data.TA_data=tagged_array_new(m->layer2.connections,     couple_array_size,      0,             1,-0.5,0.5)});
     CreateOutputtable((output_s){"V1",          FLOAT_DATA, .data.TA_data=tagged_array_new(m->layer1.voltages_out,    grid_size,              0,             1,m->layer1.P->potential.Vin,m->layer1.P->potential.Vpk)});

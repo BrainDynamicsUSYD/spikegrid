@@ -25,8 +25,7 @@ void CleanupLayer(layer* l)
     FreeIfNotNull(l->P);
     FreeIfNotNull(l->std);
     lagstorage_dtor(l->firinglags);
-    free(l->Rmat);
-    free(l->Dmat);
+    free(l->RD);
  //   CleanupRingBuffer(&l->spikes);
    // CleanupRingBuffer(&l->spikes_STDP);
 //    FreeIfNotNull(l->spikes.data);

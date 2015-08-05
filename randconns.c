@@ -5,6 +5,7 @@
 #include "paramheader.h"
 #include "coupling.h"
 #include "mymath.h"
+#include "sizes.h"
 //creat a rather ridiculously sized matrix
 //allows for 10x the avg number of connections per point.  Incredibly wasteful.  It would be really nice to have some c++ vectors here
 const unsigned int overkill_factor = 10;
@@ -22,7 +23,7 @@ randconns_info init_randconns_info(const randconn_parameters p)
 
 void StoreNewRandconn(const randconns_info* rcinfo,const randomconnection rc,const unsigned int sourceidx,randomconnection** bigmat,unsigned int* const bigmatcounts)
 {
-    const unsigned int sourcegrididx=rc.source.x*(unsigned)grid_size+rc.source.y;
+    const size_t sourcegrididx=grid_index(rc.source);
     randomconnection* rcp; //use this as a reference once we have put the connection in the storage location for the forward direction
     //store forward randconn
     if (rcinfo->UsingFancySpecials==ON)
@@ -45,12 +46,12 @@ void StoreNewRandconn(const randconns_info* rcinfo,const randomconnection rc,con
     }
     else
     { //the easy case
-        const unsigned int myidx=sourcegrididx*rcinfo->numberper+sourceidx;
+        const size_t myidx=sourcegrididx*rcinfo->numberper+sourceidx;
         rcinfo->randconns[myidx]=rc;
         rcp = &rcinfo->randconns[myidx];
     }
     //store the reverse one
-    const unsigned int destgrididx=rc.destination.x*(unsigned)grid_size+rc.destination.y;
+    const size_t destgrididx=grid_index(rc.destination);
     if (rcinfo->UsingFancySpecials==ON)
     {
         //do something tricky here
@@ -104,12 +105,14 @@ randconns_info* init_randconns(const randconn_parameters rparam,const couple_par
     srandom((unsigned)0); //seed RNG - WHY???? should probably remove this!!!
     //RCS need some connection strength scaling.  We abuse the globalmultiplier normalization most of the time, when coming from a single point boost them unfairly
     const Compute_float Strmod = (rparam.Specials>0 || rcinfo.UsingFancySpecials==ON )?2.0: One - couple.normalization_parameters.glob_mult.GM;
-    for (unsigned int x=0;x<grid_size;x++)
+    for (Neuron_coord x=0;x<grid_size;x++)
     {
-        for (unsigned int y=0;y<grid_size;y++)
-        {	//the specials is if we only have a limited number of neurons with random connections
+        for (Neuron_coord y=0;y<grid_size;y++)
+        {
+            const coords c = {.x=x,.y=y};
+            //the specials is if we only have a limited number of neurons with random connections
             //this conditional is crazy and stupid - TODO fixme
-            if (x*grid_size+y < rcinfo.nospecials || (rcinfo.nospecials==0 && !rcinfo.UsingFancySpecials) || (rcinfo.UsingFancySpecials && (x*grid_size+y==rcinfo.SpecialAInd || x*grid_size+y==rcinfo.SpecialBInd) ) ) //massive hacky conditional
+            if (grid_index(c) < rcinfo.nospecials || (rcinfo.nospecials==0 && !rcinfo.UsingFancySpecials) || (rcinfo.UsingFancySpecials && (grid_index(c)==rcinfo.SpecialAInd || grid_index(c)==rcinfo.SpecialBInd) ) ) //massive hacky conditional
             {
                 printf("makeing connections at %i Aind %i Bind %i\n",x*grid_size+y,rcinfo.SpecialAInd,rcinfo.SpecialBInd);
                 for (unsigned int i=0;i<rparam.numberper;i++)
@@ -123,7 +126,7 @@ randconns_info* init_randconns(const randconn_parameters rparam,const couple_par
                             .x = (Neuron_coord)(RandFloat() * (Compute_float)grid_size),
                             .y = (Neuron_coord)(RandFloat() * (Compute_float)grid_size),
                         },
-                        .source = {.x=(Neuron_coord)x,.y=(Neuron_coord)y},
+                        .source = c,
                     };
                     StoreNewRandconn(&rcinfo,rc,i,bigmat,bigmatcounts);
                 }
@@ -136,9 +139,9 @@ randconns_info* init_randconns(const randconn_parameters rparam,const couple_par
     memcpy(rcpoint,&rcinfo,sizeof(*rcpoint));
     return rcpoint;
 }
-randomconnection* GetRandomConnsLeaving(const unsigned int x,const unsigned int y,const randconns_info rcinfo, unsigned int* numberconns)
+randomconnection* GetRandomConnsLeaving(const coords coord ,const randconns_info rcinfo, unsigned int* numberconns)
 {
-    const unsigned int idx = x*grid_size+y;
+    const size_t idx = grid_index(coord);
     if (rcinfo.UsingFancySpecials==ON) //first case - fancy specials
     {
         if (idx==rcinfo.SpecialAInd)
@@ -159,7 +162,7 @@ randomconnection* GetRandomConnsLeaving(const unsigned int x,const unsigned int 
     }
     else if (idx < rcinfo.nospecials || rcinfo.nospecials==0 ) //normal case - normalspecials==0 or we have one of the specials
     {
-        const unsigned int randbase=idx*rcinfo.numberper;
+        const size_t randbase=idx*rcinfo.numberper;
         *numberconns = rcinfo.numberper;
         return &(rcinfo.randconns[randbase]);
     }
@@ -169,16 +172,17 @@ randomconnection* GetRandomConnsLeaving(const unsigned int x,const unsigned int 
         return NULL;
     }
 }
-randomconnection** GetRandomConnsArriving(const int x,const int y,const randconns_info rcinfo, unsigned int* numberconns)
+randomconnection** GetRandomConnsArriving(const coords coord,const randconns_info rcinfo, unsigned int* numberconns)
 {
+    const size_t idx = grid_index(coord);
     //the number is always fine to get
-    *numberconns = rcinfo.rev_pp[x*grid_size+y];
+    *numberconns = rcinfo.rev_pp[idx];
     if (rcinfo.UsingFancySpecials==ON)
     {   //the fancy specials store less stuff in the reverse array, so we can just use it with a modified index
-        return &(rcinfo.randconns_reverse[(x*grid_size+y)*(int)overkill_factor]); //Ensure you return the address of this object - it is definitely required
+        return &(rcinfo.randconns_reverse[idx*(size_t)overkill_factor]); //Ensure you return the address of this object - it is definitely required
     }
     else
     {
-        return &(rcinfo.randconns_reverse[(x*grid_size+y)*(int)rcinfo.numberper*(int)overkill_factor]); //Ensure you return the address of this object - it is definitely required
+        return &(rcinfo.randconns_reverse[idx*(size_t)rcinfo.numberper*(size_t)overkill_factor]); //Ensure you return the address of this object - it is definitely required
     }
 }

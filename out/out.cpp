@@ -178,11 +178,11 @@ void ConsoleOutput::DoOutput_()
 SpikeOutput::SpikeOutput(int idxin,const int intervalin, const lagstorage* datain) : SingleFileOutput(idxin,intervalin) {data=datain;}
 void SpikeOutput::DoOutput_()
 {
-    for (int i=0;i<grid_size;i++)
+    for (Neuron_coord i=0;i<grid_size;i++)
     {
-        for (int j=0;j<grid_size;j++)
+        for (Neuron_coord j=0;j<grid_size;j++)
         {
-            if (CurrentShortestLag(data,(i*grid_size+j)*data->lagsperpoint) == 1)
+            if (CurrentShortestLag(data,grid_index((coords){.x=i,.y=j})*data->lagsperpoint) == 1)
             {
                 fprintf(f,"%i,%i:",i,j);
             }

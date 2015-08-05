@@ -66,7 +66,7 @@ layer setuplayer(const parameters p)
     parameters* P = (parameters*)newdata(&p,sizeof(p));
     layer L =
     {   //I am not particularly happy with this block.  It is highly complicated.  One idea: have the init functions themselves decide to return null
-        .firinglags         = lagstorage_init(flagcount,cap),
+        .firinglags         = lagstorage_init(flagcount,cap), //TODO: this can be reduced as we now only need to keep track of things for the refractory period
         .STDP_data          = Features.STDP==ON?STDP_init(&P->STDP,trefrac_in_ts):NULL, //problem - P defd later
         .connections        = CreateCouplingMatrix(p.couple),
         .std                = Features.STD==ON?STD_init(p.STD):NULL,
@@ -84,19 +84,15 @@ layer setuplayer(const parameters p)
         .recoverys_out      = Features.Recovery==ON?calloc(sizeof(Compute_float),grid_size*grid_size):NULL,
         .Layer_is_inhibitory = p.couple.Layertype==DUALLAYER && p.couple.Layer_parameters.dual.W<0,
         .rcinfo             = Features.Random_connections==ON?init_randconns(p.random,p.couple): NULL,
-        .Rmat               = calloc(sizeof(Compute_float),conductance_array_size*conductance_array_size),
-        .Dmat               = calloc(sizeof(Compute_float),conductance_array_size*conductance_array_size),
-        .R                  = p.couple.Layer_parameters.dual.synapse.R,
-        .D                  = p.couple.Layer_parameters.dual.synapse.D,
+        .RD                 = calloc(sizeof(RD_data),1),
     };
+    L.RD->R=p.couple.Layer_parameters.dual.synapse.R;
+    L.RD->D=p.couple.Layer_parameters.dual.synapse.D;
     return L;
 }
-
-///The idea here is that "one-off" setup occurs here, whilst per-layer setup occurs in setuplayer
-model* setup(const parameters p,const parameters p2,const LayerNumbers lcount,const int jobnumber,const int yossarianjobnumber,const int testing)
+//sets the output directory - note output directory is a global
+void PickOutputDir(const int jobnumber,const int yossarianjobnumber)
 {
-    Hook_malloc(); //this makes malloc record total number of bytes requested.
-    check(); //check evolvegen   is correct
     if (jobnumber <0 && yossarianjobnumber <0)
     {
         sprintf(outdir,"output/");
@@ -131,35 +127,54 @@ model* setup(const parameters p,const parameters p2,const LayerNumbers lcount,co
     }
     recursive_mkdir(outdir);
     printf("outdir is %s\n",outdir);
-    char buf[100];
+}
+
+
+///The idea here is that "one-off" setup occurs here, whilst per-layer setup occurs in setuplayer
+model* setup(const parameters p,const parameters p2,const LayerNumbers lcount,const int jobnumber,const int yossarianjobnumber,const int testing)
+{
+    PickOutputDir(jobnumber,yossarianjobnumber);
+    Hook_malloc(); //this makes malloc record total number of bytes requested.
+    check(); //check evolvegen   is correct
+        char buf[100];
     sprintf(buf,"%s/struct.dump",outdir);
     remove(buf);//cleanup the old struct file
    // printout_struct(&p,"parameters",outdir,0);     //save the first parameters object
    // printout_struct(&p2,"parameters",outdir,1);    //save the second parameters object and display everything
     const layer l1  = setuplayer(p);
     const layer l2  = lcount==DUALLAYER?setuplayer(p2):l1;
+    condmat* condmatinit = calloc(sizeof(condmat),1);
+    for (Neuron_coord i=0;i<grid_size;i++)
+    {
+        for (Neuron_coord j=0;j<grid_size;j++)
+        {
+            const size_t idx = Conductance_index((coords){.x=i,.y=j});
+            condmatinit->gI[idx]=Extinput.gI0;
+            condmatinit->gE[idx]=Extinput.gE0;
+        }
+    }
+
 #ifdef _WIN32 //this might be a bug in VS - maybe only intellisense?
     model m   = {l1,l2,0,lcount,calloc(sizeof(animal),1)};
 #else
-	const model m = { .layer1 = l1,.layer2 = l2,.NoLayers = lcount,.animal = calloc(sizeof(animal),1),.timesteps = 0 }; //this calloc leaks - fix
-#endif
-    Compute_float* giinit = calloc(sizeof(Compute_float),conductance_array_size*conductance_array_size);
-    Compute_float* geinit = calloc(sizeof(Compute_float),conductance_array_size*conductance_array_size);
-    for (int i=0;i<grid_size;i++)
-    {
-        for (int j=0;j<grid_size;j++)
+    //we construct this model as some of the features are const
+    //as a result, as some of the objects are const, they can't be copied in to the result -
+    //model* m = malloc(sizeof(*m));
+    //m->layer1 = ...   will fail
+    //this pattern is used in a few places
+	const model m =
         {
-            const int idx = Conductance_index(i,j);
-            giinit[idx]=Extinput.gI0;
-            geinit[idx]=Extinput.gE0;
-        }
-    }
+            .layer1 = l1,
+            .layer2 = l2,
+            .NoLayers = lcount,
+            .animal = calloc(sizeof(animal),1),
+            .cond_matrices = calloc(sizeof(condmat),1),
+            .cond_matrices_init = condmatinit,
+            .timesteps = 0 };
+#endif
     model* m2       = malloc(sizeof(m));
     memcpy(m2,&m,sizeof(m));
-    memcpy(m2->gIinit,giinit,sizeof(m2->gIinit));
-    memcpy(m2->gEinit,geinit,sizeof(m2->gEinit));
-    free(giinit);
-    free(geinit);
+    //on the cluster, the code shouldn't be run on the main cluster node, so stop it from running
     char* buffer = malloc(1024);
     gethostname(buffer,1023);
     if (!strcmp(buffer,"headnode.physics.usyd.edu.au")&& !testing) {printf("DON'T RUN THIS CODE ON HEADNODE\n");exit(EXIT_FAILURE);}

@@ -50,46 +50,42 @@ void checkfn()
 }
 void RDAdd()
 {
-    printf("void AddRD (const int x,const int y,const Compute_float* const __restrict connections, Compute_float* __restrict Rmat,Compute_float* __restrict Dmat, const Compute_float R,const Compute_float D)\n");
+    printf("void AddRD (const coords c ,const Compute_float* const __restrict connections, RD_data* __restrict RD, const Compute_float initstr)\n");
     printf("{\n");
-    printf("c++;");
-    printf("const Compute_float Rstr = 1/(D-R);// * exp(-1*Features.Timestep/R) ;\n");
-    printf("const Compute_float Dstr = 1/(D-R);// * exp(-1*Features.Timestep/D);\n");
+    printf("spikecount++;");
     //start the loop
     for (int i = 0; i < couple_array_size;i++)
     {
-        printf("    const int outoff%i = ((x+%i)*%i + y);\n",i,i,conductance_array_size);
+        printf("    const int outoff%i = ((c.x+%i)*%i + c.y);\n",i,i,conductance_array_size);
         printf("    const int conoff%i = %i*couple_array_size;\n",i,i);
         char buf [1000];
         sprintf(buf,"((x+%i)*%i + y)",i,conductance_array_size);
         const int off = getoffset(couplerange,i);
         printf("    for (int kk=(couplerange-%i);kk<=(couplerange+%i);kk++)\n",off,off); //this is the key part - offsets are now known at compile time
         printf("    {\n");
-        printf("        Rmat[outoff%i + kk] += connections[conoff%i+kk]*Rstr;\n",i,i);
-        printf("        Dmat[outoff%i + kk] += connections[conoff%i+kk]*Dstr;\n",i,i);
+        printf("        RD->Rmat[outoff%i + kk] += connections[conoff%i+kk]*initstr;\n",i,i);
+        printf("        RD->Dmat[outoff%i + kk] += connections[conoff%i+kk]*initstr;\n",i,i);
         printf("    }\n");
     }
     printf("}\n");
 }
 void RDAdd_STDP()
 {
-    printf("void AddRD_STDP (const int x,const int y,const Compute_float* const __restrict connections,const Compute_float* const __restrict STDP_connections,Compute_float* __restrict Rmat, Compute_float* __restrict Dmat,const Compute_float R, const Compute_float D )\n");
+    printf("void AddRD_STDP (const coords c ,const Compute_float* const __restrict connections,const Compute_float* const __restrict STDP_connections, RD_data* __restrict RD,const Compute_float initstr )\n");
     printf("{\n");
-    printf("const Compute_float Rstr = 1/(D-R);// * exp(-1*Features.Timestep/R) ;\n");
-    printf("const Compute_float Dstr = 1/(D-R);// * exp(-1*Features.Timestep/D);\n");
     //start the loop
     for (int i = 0; i < couple_array_size;i++)
     {
-        printf("    const int outoff%i = ((x+%i)*%i + y);\n",i,i,conductance_array_size);
-        printf("    const int conoff%i = %i*couple_array_size;\n",i,i);
-        printf("    const int STDPoff%i = (x*grid_size+y)*couple_array_size*couple_array_size + conoff%i;\n" ,i,i);
+        printf("    const size_t outoff%i = ((c.x+%iUL)*%iUL + c.y);\n",i,i,conductance_array_size);
+        printf("    const size_t conoff%i = %i*couple_array_size;\n",i,i);
+        printf("    const size_t STDPoff%i = grid_index(c)*couple_array_size*couple_array_size + conoff%i;\n" ,i,i);
         char buf [1000];
         sprintf(buf,"((x+%i)*%i + y)",i,conductance_array_size);
         const int off = getoffset(couplerange,i);
-        printf("    for (int kk=(couplerange-%i);kk<=(couplerange+%i);kk++)\n",off,off); //this is the key part - offsets are now known at compile time
+        printf("    for (size_t kk=(couplerange-%i);kk<=(couplerange+%i);kk++)\n",off,off); //this is the key part - offsets are now known at compile time
         printf("    {\n");
-        printf("        Rmat[outoff%i + kk] += (connections[conoff%i+kk] + STDP_connections[STDPoff%i+kk])*Rstr;\n",i,i,i); //include base connection and STDP-modified connection
-        printf("        Dmat[outoff%i + kk] += (connections[conoff%i+kk] + STDP_connections[STDPoff%i+kk])*Dstr;\n",i,i,i); //include base connection and STDP-modified connection
+        printf("        RD->Rmat[outoff%i + kk] += (connections[conoff%i+kk] + STDP_connections[STDPoff%i+kk])*initstr;\n",i,i,i); //include base connection and STDP-modified connection
+        printf("        RD->Dmat[outoff%i + kk] += (connections[conoff%i+kk] + STDP_connections[STDPoff%i+kk])*initstr;\n",i,i,i); //include base connection and STDP-modified connection
         printf("    }\n");
     }
     printf("}\n");
@@ -103,10 +99,11 @@ int main()
     printf("#include \"sizes.h\"\n");
     printf("#include \"mymath.h\"\n");
     printf("#include \"paramheader.h\"\n");
-    printf("long long int c  = 0;\n");
+    printf("#include \"layer.h\"\n");
+    printf("long long int spikecount  = 0;\n");
     printf("void evolvept_duallayer (const int x,const int y,const Compute_float* const __restrict connections,const Compute_float strmod, Compute_float* __restrict condmat)\n");
     printf("{\n");
-    printf("c++;");
+    printf("spikecount++;");
     //start the loop
     for (int i = 0; i < couple_array_size;i++)
     {

@@ -35,6 +35,7 @@ typedef struct
     const Compute_float mu;
     const on_off Oscillating_path;
     const Compute_float path_osc_freq;
+    const on_off LotsofTesting;
 } Stimulus_parameters;
 ///Parameters for a layer when it is the only one
 typedef struct

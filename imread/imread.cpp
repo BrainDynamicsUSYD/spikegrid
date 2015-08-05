@@ -113,11 +113,35 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
             }
             else
             {
-                path1 = (RandFloat() < S.Prob1) && itercount < 21;
-                counts1 += path1==true?1:0;
-                if ((int)itercount==21) {fire1=false;fire2=false;}
-                if ((int)itercount==22) {printf("%i %i %i\n",counts1,fire1,fire2);exit(EXIT_SUCCESS);}
-                path2 = !path1 && itercount < 21;
+                if (S.LotsofTesting==OFF)
+                {
+                    path1 = (RandFloat() < S.Prob1) && itercount < 21;
+                    counts1 += path1==true?1:0;
+                    if ((int)itercount==21) {fire1=false;fire2=false;}
+                    if ((int)itercount==22) {printf("%i %i %i\n",counts1,fire1,fire2);exit(EXIT_SUCCESS);}
+                    path2 = !path1 && itercount < 21;
+                }
+                else
+                {
+                    if ((int)itercount % 2 == 0)
+                    {
+                        //run a test - i.e. do nothing
+                        path1=false;
+                        path2=false;
+                        fire1=false;
+                        fire2=false;
+                        //but we still want to activate the stimulus somehow - where do I do that? - later on - if both false, path2 rand stim will be activated
+                    }
+                    else
+                    {
+                        //so we ran a test on the previous trial - get result
+                        printf("RESULT - %i %i\n",fire1,fire2);
+                        //now pick where we simulate
+                        path1 = (RandFloat() < S.Prob1);
+                        path2 = !path1;
+
+                    }
+                }
             }
         }
     }
@@ -193,7 +217,7 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
             {
                 if (voltsin[idx] > threshold)
                 {
-                    printf("making a random spike\n");
+                    //if both set to false, this will activate stimulus 2 for testing
                     if (path1) {voltsin[rcinfo->SpecialAInd]=100; }
                     else       {voltsin[rcinfo->SpecialBInd]=100;}
                 }

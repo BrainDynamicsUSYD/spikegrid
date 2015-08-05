@@ -66,7 +66,7 @@ layer setuplayer(const parameters p)
     parameters* P = (parameters*)newdata(&p,sizeof(p));
     layer L =
     {   //I am not particularly happy with this block.  It is highly complicated.  One idea: have the init functions themselves decide to return null
-        .firinglags         = lagstorage_init(flagcount,cap),
+        .firinglags         = lagstorage_init(flagcount,cap), //TODO: this can be reduced as we now only need to keep track of things for the refractory period
         .STDP_data          = Features.STDP==ON?STDP_init(&P->STDP,trefrac_in_ts):NULL, //problem - P defd later
         .connections        = CreateCouplingMatrix(p.couple),
         .std                = Features.STD==ON?STD_init(p.STD):NULL,
@@ -91,12 +91,9 @@ layer setuplayer(const parameters p)
     };
     return L;
 }
-
-///The idea here is that "one-off" setup occurs here, whilst per-layer setup occurs in setuplayer
-model* setup(const parameters p,const parameters p2,const LayerNumbers lcount,const int jobnumber,const int yossarianjobnumber,const int testing)
+//sets the output directory - note output directory is a global
+void PickOutputDir(const int jobnumber,const int yossarianjobnumber)
 {
-    Hook_malloc(); //this makes malloc record total number of bytes requested.
-    check(); //check evolvegen   is correct
     if (jobnumber <0 && yossarianjobnumber <0)
     {
         sprintf(outdir,"output/");
@@ -131,7 +128,16 @@ model* setup(const parameters p,const parameters p2,const LayerNumbers lcount,co
     }
     recursive_mkdir(outdir);
     printf("outdir is %s\n",outdir);
-    char buf[100];
+}
+
+
+///The idea here is that "one-off" setup occurs here, whilst per-layer setup occurs in setuplayer
+model* setup(const parameters p,const parameters p2,const LayerNumbers lcount,const int jobnumber,const int yossarianjobnumber,const int testing)
+{
+    PickOutputDir(jobnumber,yossarianjobnumber);
+    Hook_malloc(); //this makes malloc record total number of bytes requested.
+    check(); //check evolvegen   is correct
+        char buf[100];
     sprintf(buf,"%s/struct.dump",outdir);
     remove(buf);//cleanup the old struct file
    // printout_struct(&p,"parameters",outdir,0);     //save the first parameters object

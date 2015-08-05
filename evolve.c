@@ -241,7 +241,7 @@ void StoreFiring(layer* L,const unsigned int timestep)
                 modifyLags(L->firinglags,baseidx);
                 if (Features.STDP==ON) {modifyLags(L->STDP_data->lags,LagIdx(coord,L->STDP_data->lags));}
                 //now - add in new spikes
-                if (L->voltages_out[x*grid_size + y]  >= L->P->potential.Vpk
+                if (L->voltages_out[grid_index(coord)]  >= L->P->potential.Vpk
                         ||
                         //next part - add random spikes
                         (L->P->potential.rate > 0 && //this check is because the compiler doesn't optimize the call to random() otherwise

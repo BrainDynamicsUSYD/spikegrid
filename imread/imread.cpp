@@ -135,7 +135,7 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
                     else
                     {
                         //so we ran a test on the previous trial - get result
-                        printf("RESULT - %i %i\n",fire1,fire2);
+                        printf("RESULT - %i %i %i\n",(int)itercount,fire1,fire2);
                         //now pick where we simulate
                         path1 = (RandFloat() < S.Prob1);
                         path2 = !path1;

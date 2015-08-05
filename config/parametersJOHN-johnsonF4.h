@@ -59,7 +59,7 @@ static const parameters OneLayerModel = {.couple={0}}; //since unused - shortes 
     .TestPathChoice = ON,\
     .Periodic = ON,\
     .LotsofTesting = ON,\
-    .Prob1=0.5.\
+    .Prob1=0.5,\
 }
 #define Rparams .random=\
 { \

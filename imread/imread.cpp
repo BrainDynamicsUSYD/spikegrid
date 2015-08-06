@@ -22,7 +22,7 @@ cv::Mat imcache; //elements have type Vec3b
 cv::Mat ReadImage(const char* const path)
 {
     cv::Mat m =cv::imread(path); //the pixels are stored with type cv::Vec3b - third element is red.  0 is black, 255 is white?
-    if (m.data==NULL) 
+    if (m.data==NULL)
     {
         std::cout << "Tried to read image from " << path << " failed - exiting" << std::endl;
         exit(EXIT_FAILURE);

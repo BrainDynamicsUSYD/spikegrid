@@ -45,8 +45,8 @@ static const parameters OneLayerModel = {.couple={0}}; //since unused - shortes 
 {                       \
     .stdp_limit=0.5,    \
     .stdp_tau=20,       \
-    .stdp_strength=0.0001,  \
-    .STDP_on=OFF\
+    .stdp_strength=0.001,  \
+    .STDP_on=ON\
 }
 #define Stimparams .Stim=\
 {\
@@ -125,8 +125,8 @@ static const parameters DualLayerModelEx =
 static const model_features Features =
 {
     .STD        = OFF,
-    .STDP       = OFF,
-    .Random_connections = OFF,
+    .STDP       = ON,
+    .Random_connections = ON,
     .Timestep   = 0.1,
     .Simlength  = 100000,
     .ImageStim  = ON,

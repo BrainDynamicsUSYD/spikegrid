@@ -1,30 +1,20 @@
 //Simple file for testing with STD
-#include <stddef.h> //offsetof
-//these first few parameters actually escape into the paramheader file through magic
-#define grid_size 100
 ///Total size of the grid
+#define grid_size 100
 ///Coupling range
 #define couplerange 15
 #ifndef PARAMETERS  //DO NOT REMOVE
 ///include guard
 #define PARAMETERS  //DO NOT REMOVE
-//disable warnings about float conversion in this file only
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wconversion"
-#else
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wfloat-conversion"
-#pragma GCC diagnostic ignored "-Wconversion"
-#endif
-//the following typedef must be before the include to get the right compute types
 ///Whether we are using the single or double layer model
 static const LayerNumbers ModelType = DUALLAYER;
 
-//Fun note - with the right optimisations GCC actually will pull these constants inline (for example disassemble evolvept_STDP with STDP off)
-///Parameters for the single layer model
-static const parameters OneLayerModel = {0}; //since unused - shortes possible definition that produces no warnings
 
+///Parameters for the single layer model - we are not using this
+static const parameters OneLayerModel = {0}; //since unused - shortest possible definition that produces no warnings
+
+//first define some parameters that are common across both layers
+//these define some parameters of a single neuron - things like threshold voltage etc.
 #define potparams  .potential =     \
     {                               \
         .type    =                  \
@@ -40,6 +30,7 @@ static const parameters OneLayerModel = {0}; //since unused - shortes possible d
         .rate = 0,                  \
     }
 
+//parameters for the STD.  Parameter names are as per the Tsodkys papers
 #define STDparams .STD =   \
 {                           \
     .U= 0.5,\
@@ -53,6 +44,7 @@ static const parameters DualLayerModelIn =
     .couple =
     {
         .Layertype = DUALLAYER,
+        //define how neurons are coupled as well as the spike shape
         .Layer_parameters =
         {
             .dual =
@@ -69,7 +61,7 @@ static const parameters DualLayerModelIn =
     STDparams,
     .skip=2,
 };
-///parameters for the excitatory layer of the double layer model
+///parameters for the excitatory layer of the double layer model - mostly similar to the excitatory layer
 static const parameters DualLayerModelEx =
 {
     .couple =
@@ -94,31 +86,21 @@ static const parameters DualLayerModelEx =
 ///Some global features that can be turned on and off
 static const model_features Features =
 {
-    .STDP		= OFF, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep -
-    .STD        = ON, //               if we need any of these features we can make the changes then.
+    .STD        = ON,
     .Timestep   = 0.1,
     .Simlength  = 50000,
-
+    //What will be output.  For various reasons, layer "2" is excitatory, which has output that is easier to understand
     .output = {{.method = VIDEO,.Output="V2",.Delay=20, .Overlay="Trialno"},{.method=GUI,.Output="V2",.Delay=10,.Overlay="Timestep"}, {.method=GUI,.Output="STDU2",.Delay=10},{.method=GUI,.Output="STDR2",.Delay=10}}
 };
-///Constant external input to conductances
+///Constant external input to conductances - used to drive some initial spiking
 static const extinput Extinput =
 {
     .gE0 = 0.015,
     .gI0 = 0.0,
 };
-///Parameters for conducting a parameter sweep.
+///Parameters for conducting a parameter sweep. = unused
 static const sweepable Sweep =
 {
-    //.offset=offsetof(parameters,couple)+offsetof(couple_parameters,Layer_parameters) +0+ /*offset in the union is always 0*/  + offsetof(duallayer_parameters,W),
-    .minval = 0.0,
-    .maxval = 1.0,
-    .count = 100
+    0
 };
-
-#ifdef __clang__
-#pragma clang diagnostic pop
-#else
-#pragma GCC diagnostic pop
-#endif
 #endif //DO NOT REMOVE

@@ -1,6 +1,7 @@
 /// \file
 #ifndef SIZES
 #define SIZES
+#include <stddef.h> //for size_t
 #ifdef _WIN32
 #include "VS\VS\Winheader.h"
 #endif

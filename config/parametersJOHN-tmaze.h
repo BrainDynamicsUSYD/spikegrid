@@ -2,7 +2,7 @@
 /// this will try using a t-maze rather than the y-maze from before
 #include <stddef.h> //offsetof
 //these first few parameters actually escape into the paramheader file through magic
-#define grid_size 300
+#define grid_size 200
 ///Total size of the grid
 ///Coupling range
 #define couplerange 25

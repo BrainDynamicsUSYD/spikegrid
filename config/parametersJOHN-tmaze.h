@@ -67,7 +67,7 @@ static const parameters OneLayerModel = {.couple={0}}; //since unused - shortes 
     .str=1,\
     .Specials=0,\
     .FancySpecials=ON,\
-    .SpecialAInd=100,\
+    .SpecialAInd=300,\
     .SpecialBInd=200,\
 }
 ///parameters for the inhibitory layer of the double layer model

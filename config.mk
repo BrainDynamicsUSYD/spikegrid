@@ -6,10 +6,19 @@ export DEFINES=-DOPENCV
 ##########
 #set up some variables for compiling
 ##########
+
+#graphite optimizations are hard on some systems - so disable them
+ifneq ($(shell gcc -v 2>&1 | grep with-isl ) ,)
+	optflags=-floop-interchange -floop-strip-mine -floop-block
+else
+	#hack to get a warning
+	IGNORE := $(shell >&2 echo no ISL - some gcc optimizations have been disabled)
+endif
 ifeq ($(CC),clang)
 	export CFLAGS= -g -Wno-padded -Wno-missing-prototypes -Wno-missing-variable-declarations -Weverything -pedantic  -Ofast -Wno-documentation-unknown-command -Wno-covered-switch-default -Wno-old-style-cast -Wno-extended-offsetof
 else #gcc
-	optflags=  -Ofast -msse -msse2 -msse3 -funsafe-loop-optimizations -mtune=native -march=native  -floop-interchange -ftree-loop-optimize -floop-strip-mine -floop-block -flto  -fassociative-math -fno-signed-zeros -freciprocal-math -ffinite-math-only -fno-trapping-math -ftree-vectorize
+	optflags:=${optflags} -Ofast -msse -msse2 -msse3 -funsafe-loop-optimizations -mtune=native -march=native  -ftree-loop-optimize   -flto  -fassociative-math -fno-signed-zeros -freciprocal-math -ffinite-math-only -fno-trapping-math -ftree-vectorize
+
 	extrawarnings=-Wstrict-aliasing -fstrict-aliasing   -Wshadow  -Wconversion -Wdouble-promotion -Wformat=2 -Wunused -Wuninitialized -Wfloat-equal -Wunsafe-loop-optimizations -Wcast-qual -Wcast-align -Wwrite-strings  -Wlogical-op  -Wvector-operation-performance -Wno-pragmas
 	extraextrawarnings=-Wsuggest-attribute=pure  -Wsuggest-attribute=noreturn -Wstrict-overflow=4
 	export CFLAGS=-g -ggdb -Wall -Wextra  ${optflags} ${extrawarnings} ${extraextrawarnings} -Werror-implicit-function-declaration -fno-builtin-malloc

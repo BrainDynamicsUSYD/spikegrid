@@ -44,7 +44,8 @@ static const parameters OneLayerModel = {.couple={0}}; //since unused - shortes 
     .lag=20,\
     .PreconditioningTrials=0,\
     .NoUSprob=0,\
-    .Testing=ON\
+    .Testing=ON,\
+    .Periodic=ON,\
 }
 ///parameters for the inhibitory layer of the double layer model
 static const parameters DualLayerModelIn =
@@ -101,12 +102,12 @@ static const model_features Features =
     .STD        = OFF,
     .STDP		= ON, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep -
     .Random_connections = OFF,
-    .Timestep   = 0.1,
+    .Timestep   = 0.05,
     .Simlength  = 1000000,
     .ImageStim  = ON,
     .job        = {.initcond = SINGLE_SPIKE, .Voltage_or_count = -70},
     .Disablewrapping = ON,
-    .output = {{.method = VIDEO,.Output=5,.Delay=20, .Overlay="Trialno"},{.method=GUI,.Output=5,.Delay=10,.Overlay="Timestep"}}
+    .output = {{.method = VIDEO,.Output="V2",.Delay=20, .Overlay="Trialno"},{.method=GUI,.Output="V2",.Delay=10,.Overlay="Timestep"}},
 };
 ///Constant external input to conductances
 static const extinput Extinput =

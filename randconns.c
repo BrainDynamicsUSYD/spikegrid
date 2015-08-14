@@ -102,7 +102,6 @@ randconns_info* init_randconns(const randconn_parameters rparam,const couple_par
     int nonzcount; //number of non-zero entries in coupling matrix (used for creating coupling strengths)
     Compute_float* interestingconns; //a pointer to use for storing the non-zero entries
     Non_zerocouplings(couple,&interestingconns,&nonzcount);//get non-zero couplings - note these are unnormalized
-    srandom((unsigned)0); //seed RNG - WHY???? should probably remove this!!!
     //RCS need some connection strength scaling.  We abuse the globalmultiplier normalization most of the time, when coming from a single point boost them unfairly
     const Compute_float Strmod = (rparam.Specials>0 || rcinfo.UsingFancySpecials==ON )?2.0: One - couple.normalization_parameters.glob_mult.GM;
     for (Neuron_coord x=0;x<grid_size;x++)

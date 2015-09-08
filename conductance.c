@@ -269,10 +269,25 @@ int main(int argc,char** argv) //useful for testing w/out matlab
             Compute_float *FirstV,*SecondV,*FirstW,*SecondW;
             setuppointers(&FirstV,&SecondV,&FirstW,&SecondW,job,&actualsingle,&actualDualIn,&actualDualEx);
             //actually runs the model
+            struct timespec start;
+            struct timespec end;
+            clock_gettime(CLOCK_MONOTONIC,&end);
+            const unsigned int printfreq = 200;
             while (m->timesteps<Features.Simlength)
             {
 
-                if (m->timesteps%100==0){printf("%i\n",m->timesteps);}
+                if (m->timesteps%printfreq==0)
+                {
+                    start = end;
+                    clock_gettime(CLOCK_MONOTONIC,&end);
+                    Compute_float nanoseconds = (Compute_float)(end.tv_nsec - start.tv_nsec) + (Compute_float)(end.tv_sec - start.tv_sec)*(Compute_float)1e9;
+                    Compute_float timeperstep = 1.0/(nanoseconds /(Compute_float)printfreq/(Compute_float)1e9);
+                    Compute_float secondstofinish = (Features.Simlength-m->timesteps)/timeperstep;
+                    printf("%i timesteps / second.  Finishing in %i seconds, %i%% done\n",
+                            (int)timeperstep,
+                            (int)secondstofinish,
+                            (int)((Compute_float)m->timesteps/Features.Simlength*100.0));
+                }
                 step_(FirstV,SecondV,FirstW,SecondW);//always fine to pass an extra argument here
                 //copy the output to be new input - this does seem slightly inelegant.  There is definitely room for improvement here
                 memcpy ( FirstV, m->layer1.voltages_out, sizeof ( Compute_float)*grid_size*grid_size);

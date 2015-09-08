@@ -271,20 +271,20 @@ int main(int argc,char** argv) //useful for testing w/out matlab
             //actually runs the model
             struct timespec start;
             struct timespec end;
-            clock_gettime(CLOCK_MONOTONIC,&end);
+            clock_gettime(CLOCK_MONOTONIC,&end); //we want a monotonic clock here to avoid problems
             const unsigned int printfreq = 200;
             while (m->timesteps<Features.Simlength)
             {
-
+                //every now and then we print some statistics about when we are going to be finished - 
                 if (m->timesteps%printfreq==0)
                 {
                     start = end;
                     clock_gettime(CLOCK_MONOTONIC,&end);
-                    Compute_float nanoseconds = (Compute_float)(end.tv_nsec - start.tv_nsec) + (Compute_float)(end.tv_sec - start.tv_sec)*(Compute_float)1e9;
+                    Compute_float nanoseconds = (Compute_float)(end.tv_nsec - start.tv_nsec) + (Compute_float)(end.tv_sec - start.tv_sec)*(Compute_float)1e9; //This is the most ridiculous stupid api ever.  Just use a bigger data type people
                     Compute_float timeperstep = 1.0/(nanoseconds /(Compute_float)printfreq/(Compute_float)1e9);
                     Compute_float secondstofinish = (Features.Simlength-m->timesteps)/timeperstep;
                     printf("%i timesteps / second.  Finishing in %i seconds, %i%% done\n",
-                            (int)timeperstep,
+                            (int)timeperstep, //print everything as ints to make the display a little nicer - don't need perfect accuraccy
                             (int)secondstofinish,
                             (int)((Compute_float)m->timesteps/Features.Simlength*100.0));
                 }

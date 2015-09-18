@@ -8,7 +8,7 @@ open System.Linq
 let readline (parsed:System.IO.StreamReader) =
     match parsed.ReadLine() with
     |null -> [||]
-    |t->t.Split(';')
+    |t->t.Split(':')
         |> Array.filter (fun t -> t <> "")
         |> Array.choose (fun t -> 
                 match t.Split(',') with

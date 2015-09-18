@@ -1,6 +1,8 @@
 This folder currently contains two classification programs.  They can be compiled with `make`.
 
 
+For Ubuntu, you will need to install F# - see http://fsharp.org/use/linux/
+
 Classify.exe will take a sequence of `x1,y1;x2,y2;` coordinates with each time step on a new line and convert it to a sequence of wave center locations.
 
 Analysis.exe will then calculate the MSD.

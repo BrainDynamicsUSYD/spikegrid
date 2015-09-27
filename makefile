@@ -9,8 +9,8 @@ export VIEWERBIN=$(shell pwd)/watch
 export outlib=$(shell pwd)/out.o
 export imreadlib=$(shell pwd)/imread.o
 export maskgen=$(shell pwd)/mask
-
-OFILES=${imreadlib} ${outlib}
+export tracklib=$(shell pwd)/track.o
+OFILES=${imreadlib} ${outlib} ${tracklib}
 .PHONY: profile clean submit docs debug params matlabparams viewer ${VIEWERBIN}  force_look TEST watch
 ###########
 #Actually compile
@@ -37,13 +37,12 @@ whichparam.h:
 debug: CFLAGS = ${DEBUGFLAGS}
 debug: CXXFLAGS = ${CXXDEBUGFLAGS}
 debug: ${BINARY}
-TEST: 
+TEST:
 	rm -rf jobtest/*
 	mv whichparam.h whichparambackup.h #backup config choice
 	echo -e '#include "config/parametersCANONICAL.h"' > whichparam.h
-	$(MAKE) evolvegen.c
-	$(MAKE) ${outlib}
-	$(MAKE) ${imreadlib}
+	$(MAKE) clean
+	$(MAKE)
 	${CC}  ${CFLAGS} ${opencvcflags} -fno-omit-frame-pointer ${SOURCES} ${OFILES} -o ${BINARY} ${LDFLAGS}  ${opencvldflags}
 	mv whichparambackup.h whichparam.h #restore config choice
 	time ./a.out -n
@@ -73,9 +72,10 @@ ${maskgen} : force_look ${CONFIG}
 	$(MAKE) -C maskgen ${maskgen}
 ${outlib}: force_look ${CONFIG}
 	$(MAKE) -C out ${outlib}
-imread.o : ${imreadlib}
 ${imreadlib}: force_look ${CONFIG}
 	$(MAKE) -C imread ${imreadlib}
+${tracklib}: force_look ${CONFIG}
+	$(MAKE) -C CPP-tracking ${tracklib}
 #cson is currently unused - but clear the variables so that CSON's makefile works
 cson/libcson.a: CFLAGS=
 cson/libcson.a: CXXFLAGS =

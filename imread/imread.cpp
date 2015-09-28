@@ -225,10 +225,13 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
             {
                 if (voltsin[idx] > threshold)
                 {
-                    printf("rand spike\n");
-                    //if both set to false, this will activate stimulus 2 for testing
-                    if (path1) {voltsin[rcinfo->SpecialAInd]=100; }
-                    else       {voltsin[rcinfo->SpecialBInd]=100;}
+                    if (rcinfo != NULL)
+                    {
+                        printf("rand spike\n");
+                        //if both set to false, this will activate stimulus 2 for testing
+                        if (path1) {voltsin[rcinfo->SpecialAInd]=100; }
+                        else       {voltsin[rcinfo->SpecialBInd]=100;}
+                    }
                 }
             }
             else if (pixel == cv::Vec3b(0,255,255)) //yellow

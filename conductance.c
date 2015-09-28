@@ -233,6 +233,7 @@ void processopts(int argc, char** argv, parameters** newparam, parameters** newp
 }
 #endif
 
+Compute_float starttimeNS;
 ///Main function for the entire program
 /// @param argc number of cmdline args
 /// @param argv what the parameters actually are
@@ -269,19 +270,18 @@ int main(int argc,char** argv) //useful for testing w/out matlab
             Compute_float *FirstV,*SecondV,*FirstW,*SecondW;
             setuppointers(&FirstV,&SecondV,&FirstW,&SecondW,job,&actualsingle,&actualDualIn,&actualDualEx);
             //actually runs the model
-            struct timespec start;
-            struct timespec end;
-            clock_gettime(CLOCK_MONOTONIC,&end); //we want a monotonic clock here to avoid problems
+            struct timespec time;
+            clock_gettime(CLOCK_MONOTONIC,&time); //we want a monotonic clock here to avoid problems
+            starttimeNS=(Compute_float)time.tv_sec*(Compute_float)1e9+(Compute_float)time.tv_nsec;
             const unsigned int printfreq = 200;
             while (m->timesteps<Features.Simlength)
             {
                 //every now and then we print some statistics about when we are going to be finished - 
                 if (m->timesteps%printfreq==0)
                 {
-                    start = end;
-                    clock_gettime(CLOCK_MONOTONIC,&end);
-                    Compute_float nanoseconds = (Compute_float)(end.tv_nsec - start.tv_nsec) + (Compute_float)(end.tv_sec - start.tv_sec)*(Compute_float)1e9; //This is the most ridiculous stupid api ever.  Just use a bigger data type people
-                    Compute_float timeperstep = 1.0/(nanoseconds /(Compute_float)printfreq/(Compute_float)1e9);
+                    clock_gettime(CLOCK_MONOTONIC,&time);
+                    Compute_float nanosecondsNOW = (Compute_float)time.tv_nsec + (Compute_float)(time.tv_sec)*(Compute_float)1e9; //This is the most ridiculous stupid api ever.  Just use a bigger data type people
+                    Compute_float timeperstep = 1.0/((nanosecondsNOW-starttimeNS) /(Compute_float)m->timesteps/(Compute_float)1e9);
                     Compute_float secondstofinish = (Features.Simlength-m->timesteps)/timeperstep;
                     printf("%i timesteps / second.  Finishing in %i seconds, %i%% done\n",
                             (int)timeperstep, //print everything as ints to make the display a little nicer - don't need perfect accuraccy

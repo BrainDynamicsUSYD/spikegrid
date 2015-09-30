@@ -113,7 +113,7 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
                     for (int j = -STDP_RANGE ;j<=STDP_RANGE;j++)
                     {
                         if (i*i+j*j > STDP_RANGE_SQUARED) {continue;}
-                        STDP_At_point(coord,data,data2,i,j,const_couples,const_couples2);
+                 //       STDP_At_point(coord,data,data2,i,j,const_couples,const_couples2);
                     }
                 }
                 if (Features.Random_connections == ON)
@@ -126,7 +126,7 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
                         const size_t destidx           = LagIdx(randconns[i].destination,data->lags);
                         const size_t destidx2          = LagIdx(randconns[i].destination,data2->lags);
                         STDP_change rcchange        = STDP_change_calc(destidx,destidx2,data->P,data2->P,data->lags->lags,data2->lags->lags);
-                        randconns[i].stdp_strength  = clamp(randconns[i].stdp_strength-rcchange.Strength_decrease,randconns[i].strength,data->P->stdp_limit);
+                        randconns[i].stdp_strength  = clamp(randconns[i].stdp_strength-rcchange.Strength_decrease,randconns[i].strength,data->P->stdp_limit+1000);
                     }
                     //random connections to (x,y) - these will be getting increased - code is almost identical - except sign of change is reversed
                    unsigned int noconsArriving;
@@ -137,7 +137,7 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
                        const size_t destidx    = LagIdx(rc->source,data->lags);
                        const size_t destidx2   = LagIdx(rc->source,data2->lags);
                        STDP_change rcchange = STDP_change_calc(destidx,destidx2,data->P,data2->P,data->lags->lags,data2->lags->lags);
-                       rc->stdp_strength    = clamp(rc->stdp_strength+rcchange.Strength_decrease,rc->strength,data->P->stdp_limit);
+                       rc->stdp_strength    = clamp(rc->stdp_strength+rcchange.Strength_decrease,rc->strength,data->P->stdp_limit+1000);
                        //                                             ^ note plus sign (not minus) why?? - I assume the strengths are reversed - maybe this should be stremgth_increase?
                    }
                 }
@@ -203,7 +203,7 @@ Compute_float* COMangle(const  STDP_data* const S)
     }
     return ret;
 }
-void STDP_decay(const  STDP_data* const S)
+void STDP_decay(const  STDP_data* const S, randconns_info* rcs)
 {
     for (size_t i=0;i<grid_size*grid_size;i++)
     {
@@ -212,6 +212,15 @@ void STDP_decay(const  STDP_data* const S)
             for (int b=-STDP_RANGE;b<STDP_RANGE;b++)
             {
                S->connections[i*STDP_array_size*STDP_array_size+(size_t)(a+STDP_RANGE)*STDP_array_size + (size_t)(b+STDP_RANGE)] *= S->P->STDP_decay_factor;
+               if (rcs != NULL) //now decrement the STDP connections
+               {
+                   unsigned int norand;
+                   randomconnection* randconns=GetRandomConnsLeaving(coord(i),*rcs,&norand);
+                   for (unsigned int m=0;m<norand;m++)
+                   {
+                       randconns[m].stdp_strength *= S->P->STDP_decay_factor;
+                   }
+               }
             }
         }
     }

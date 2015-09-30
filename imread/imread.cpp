@@ -79,7 +79,7 @@ void CreateStims(const Compute_float timemodper,const Stimulus_parameters S,cons
 }
 //TODO: this function is getting ridiculously long - needs to be tidied up.
 //TODO: above note still true, adding extra parameters anyway
-void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimulus_parameters S,const Compute_float threshold, STDP_data* stdp,const randconns_info* const rcinfo)
+void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimulus_parameters S,const Compute_float threshold, STDP_data* stdp,randconns_info* const rcinfo)
 {
     if (cached==false) {imcache=ReadImage(S.ImagePath);cached=true;}
     const Compute_float timemodper = fmod(timemillis,S.timeperiod);
@@ -93,17 +93,41 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
             lastset=timemillis;
             if (S.Oscillating_path==ON)
             {
-                if (fmod(itercount/S.path_osc_freq,2)<1)  //are we on left / right branch
+                if (S.Oscillating_Stimulus_Side==ON)
                 {
-                    path1=true;
-                    path2=false;
+                    //we might need to swap the stimulus associatins - lets check
+                    if (fmod(itercount,S.path_osc_freq*2)<1)
+                    {
+                        int temp = rcinfo->SpecialAInd;
+                        rcinfo->SpecialAInd=rcinfo->SpecialBInd;
+                        rcinfo->SpecialBInd=temp;
+
+                    }
+                    if (fmod(itercount,4)<2)  //we alternate going left/right - but there is a 4 period cycle due to test trials
+                    {
+                        path1=true;
+                        path2=false;
+                    }
+                    else
+                    {
+                        path1=false;
+                        path2=true;
+                    }
                 }
                 else
                 {
-                    path1=false;
-                    path2=true;
+                    if (fmod(itercount/S.path_osc_freq,2)<1)  //are we on left / right branch
+                    {
+                        path1=true;
+                        path2=false;
+                    }
+                    else
+                    {
+                        path1=false;
+                        path2=true;
+                    }
                 }
-                if (fmod(itercount,2)< 1)
+                if (fmod(itercount,2)< 1) //set up a test trial
                 {
                     path1 = false;
                     path2 = false;
@@ -111,7 +135,7 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
                     fire2 = false;
                     stdp->RecordSpikes = OFF;
                 }
-                if (fmod(itercount,2)==1)
+                if (fmod(itercount,2)==1) //print a test trial
                 {
                     printf ("Res: %i %i\n",fire1,fire2);
                     stdp->RecordSpikes = ON;
@@ -123,7 +147,7 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
                 {
                     path1 = (RandFloat() < S.Prob1) && itercount < 21;
                     counts1 += path1==true?1:0;
-                    if ((int)itercount==21) {fire1=false;fire2=false;}
+                    if ((int)itercount==21) {fire1=false;fire2=false;} //this one seems to bail early
                     if ((int)itercount==22) {printf("%i %i %i\n",counts1,fire1,fire2);exit(EXIT_SUCCESS);}
                     path2 = !path1 && itercount < 21;
                 }
@@ -147,7 +171,6 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
                         stdp->RecordSpikes=ON;
                         path1 = (RandFloat() < S.Prob1);
                         path2 = !path1;
-
                     }
                 }
             }
@@ -161,7 +184,6 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
             printf("picking stimulus\n");
             CreateStims(timemodper,S,itercount);
         }
-
     }
     if (S.Oscillating_path==ON) {if (path1==false && path2==false) {stdp->RecordSpikes=OFF;} else {stdp->RecordSpikes=ON;}}
     const bool stim1 = ((fabs(timemodper-80.0)<.01 && stim1choice) && itercount >= S.PreconditioningTrials)  ;  //late wave
@@ -227,7 +249,6 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
                 {
                     if (rcinfo != NULL)
                     {
-                        printf("rand spike\n");
                         //if both set to false, this will activate stimulus 2 for testing
                         if (path1) {voltsin[rcinfo->SpecialAInd]=100; }
                         else       {voltsin[rcinfo->SpecialBInd]=100;}

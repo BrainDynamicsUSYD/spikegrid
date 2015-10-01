@@ -113,7 +113,7 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
                     for (int j = -STDP_RANGE ;j<=STDP_RANGE;j++)
                     {
                         if (i*i+j*j > STDP_RANGE_SQUARED) {continue;}
-                 //       STDP_At_point(coord,data,data2,i,j,const_couples,const_couples2);
+                        STDP_At_point(coord,data,data2,i,j,const_couples,const_couples2);
                     }
                 }
                 if (Features.Random_connections == ON)

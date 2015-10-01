@@ -42,12 +42,12 @@ static const parameters OneLayerModel = {.couple={0}}; //since unused - shortes 
 
 #define STDPparams .STDP=   \
 {                       \
-    .stdp_limit=9.5,    \
+    .stdp_limit=0.5,    \
     .stdp_tau=20,       \
-    .stdp_strength=0.05,  \
+    .stdp_strength=0.0005,  \
     .STDP_on=ON,\
-    .STDP_decay_factor=1,\
-    .STDP_decay_frequency=1000,\
+    .STDP_decay_factor=0.99,\
+    .STDP_decay_frequency=10000,\
 }
 
 #define Stimparams .Stim=\

@@ -151,7 +151,7 @@ void Non_zerocouplings(const couple_parameters c,Compute_float** validconns,int*
     int count = 0;
     for (int i=0;i<couple_array_size*couple_array_size;i++)
     {
-        if (fabs(couplemat[i])>0)
+        if (fabs(couplemat[i])>0.00001)
         {
             interestingconns[count]=couplemat[i];
             count++;

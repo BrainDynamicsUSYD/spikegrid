@@ -331,7 +331,8 @@ void tidylayer (layer* l,const Compute_float timemillis,const condmat* const __r
     }
     if (l->P->STDP.STDP_decay_frequency>0 && (int)(timemillis/Features.Timestep) % l->P->STDP.STDP_decay_frequency == 0)
     {
-        STDP_decay(l->STDP_data);
+        printf("decaying STDP\n");
+        STDP_decay(l->STDP_data,l->rcinfo);
     }
 
 }

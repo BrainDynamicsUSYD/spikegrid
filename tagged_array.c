@@ -70,6 +70,42 @@ fcoords* taggedArrayCOM(const tagged_array in)
     }
     return out;
 }
+Compute_float xbias_small(const volatile Compute_float* const data,const unsigned int smallsize)
+{
+    Compute_float ret = Zero;
+    const int halfsize=smallsize/2;
+    const //dp sopc
+    for (unsigned int i=0;i<smallsize;i++)
+    {
+        for (unsigned int j=0;j<smallsize;j++)
+        {
+            ret += data[i*smallsize+j]*((int)j-smallsize/2);
+        }
+    }
+    return ret;
+}
+#include <stdio.h>
+tagged_array* taggedArrayXBias(const tagged_array* in)
+{
+    const unsigned int size = tagged_array_size_(*in);
+    Compute_float* out = calloc(sizeof(Compute_float),size*size);
+    Compute_float min = 0; //safe to start these at zero
+    Compute_float max = 0;
+    printf("smallsize is %i half is %i \n",in->subgrid,in->subgrid/2);
+    for (unsigned int i=0;i<size;i++)
+    {
+        for (unsigned int j=0;j<size;j++)
+        {
+            const volatile Compute_float* data =  &in->data[((i+in->offset)*in->size + j + in->offset)*in->subgrid*in->subgrid];
+            out[i*size+j] = xbias_small(data,in->subgrid);
+            if (out[i*size+j] > max) {max=out[i*size+j];}
+            if (out[i*size+j] < min) {min=out[i*size+j];}
+        }
+    }
+    printf("min is %f, max is %f\n",min,max);
+    return tagged_array_new(out,size,0,1,min,max);
+}
+
 Compute_float tagged_arrayMAX(const tagged_array in)
 {
     const unsigned int size = tagged_array_size_(in);

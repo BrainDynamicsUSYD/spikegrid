@@ -169,6 +169,7 @@ STDP_data* STDP_init(const STDP_parameters* const S,const int trefrac_in_ts)
             .Updateable=ON, .UpdateFn=&STDP_mag,
             .function_arg =tagged_array_new(ret->connections,grid_size,0,1,-0.01,0.01)
         });
+
         initcount++;
     }
     else
@@ -178,6 +179,11 @@ STDP_data* STDP_init(const STDP_parameters* const S,const int trefrac_in_ts)
             .data.TA_data =tagged_array_new(ret->connections,grid_size,0,1,-0.01,0.01),
             .Updateable=ON, .UpdateFn=&STDP_mag,
             .function_arg =tagged_array_new(ret->connections,grid_size,0,1,-0.01,0.01)
+        });
+        CreateOutputtable((output_s){"STDP_bias2",    FLOAT_DATA,
+            .data.TA_data =tagged_array_new(ret->connections,grid_size,0,couple_array_size,-0.01,0.01),
+            .Updateable=ON, .UpdateFn=&taggedArrayXBias,
+            .function_arg =tagged_array_new(ret->connections,grid_size,0,couple_array_size,-0.01,0.01)
         });
     }
     return ret;
@@ -203,6 +209,7 @@ Compute_float* COMangle(const  STDP_data* const S)
     }
     return ret;
 }
+
 void STDP_decay(const  STDP_data* const S)
 {
     for (size_t i=0;i<grid_size*grid_size;i++)

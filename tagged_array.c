@@ -74,12 +74,11 @@ Compute_float xbias_small(const volatile Compute_float* const data,const unsigne
 {
     Compute_float ret = Zero;
     const int halfsize=smallsize/2;
-    const //dp sopc
     for (unsigned int i=0;i<smallsize;i++)
     {
         for (unsigned int j=0;j<smallsize;j++)
         {
-            ret += data[i*smallsize+j]*((int)j-smallsize/2);
+            ret += data[i*smallsize+j]*((int)j-halfsize);
         }
     }
     return ret;
@@ -91,7 +90,7 @@ tagged_array* taggedArrayXBias(const tagged_array* in)
     Compute_float* out = calloc(sizeof(Compute_float),size*size);
     Compute_float min = 0; //safe to start these at zero
     Compute_float max = 0;
-    printf("smallsize is %i half is %i \n",in->subgrid,in->subgrid/2);
+ //   printf("smallsize is %i half is %i \n",in->subgrid,in->subgrid/2);
     for (unsigned int i=0;i<size;i++)
     {
         for (unsigned int j=0;j<size;j++)

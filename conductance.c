@@ -233,6 +233,7 @@ void processopts(int argc, char** argv, parameters** newparam, parameters** newp
 }
 #endif
 
+Compute_float starttimeNS;
 ///Main function for the entire program
 /// @param argc number of cmdline args
 /// @param argv what the parameters actually are
@@ -269,10 +270,24 @@ int main(int argc,char** argv) //useful for testing w/out matlab
             Compute_float *FirstV,*SecondV,*FirstW,*SecondW;
             setuppointers(&FirstV,&SecondV,&FirstW,&SecondW,job,&actualsingle,&actualDualIn,&actualDualEx);
             //actually runs the model
+            struct timespec time;
+            clock_gettime(CLOCK_MONOTONIC,&time); //we want a monotonic clock here to avoid problems
+            starttimeNS=(Compute_float)time.tv_sec*(Compute_float)1e9+(Compute_float)time.tv_nsec;
+            const unsigned int printfreq = 200;
             while (m->timesteps<Features.Simlength)
             {
-
-                if (m->timesteps%100==0){printf("%i\n",m->timesteps);}
+                //every now and then we print some statistics about when we are going to be finished - 
+                if (m->timesteps%printfreq==0)
+                {
+                    clock_gettime(CLOCK_MONOTONIC,&time);
+                    Compute_float nanosecondsNOW = (Compute_float)time.tv_nsec + (Compute_float)(time.tv_sec)*(Compute_float)1e9; //This is the most ridiculous stupid api ever.  Just use a bigger data type people
+                    Compute_float timeperstep = 1.0/((nanosecondsNOW-starttimeNS) /(Compute_float)m->timesteps/(Compute_float)1e9);
+                    Compute_float secondstofinish = (Features.Simlength-m->timesteps)/timeperstep;
+                    printf("%i timesteps / second.  Finishing in %i seconds, %i%% done\n",
+                            (int)timeperstep, //print everything as ints to make the display a little nicer - don't need perfect accuraccy
+                            (int)secondstofinish,
+                            (int)((Compute_float)m->timesteps/Features.Simlength*100.0));
+                }
                 step_(FirstV,SecondV,FirstW,SecondW);//always fine to pass an extra argument here
                 //copy the output to be new input - this does seem slightly inelegant.  There is definitely room for improvement here
                 memcpy ( FirstV, m->layer1.voltages_out, sizeof ( Compute_float)*grid_size*grid_size);

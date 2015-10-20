@@ -18,8 +18,8 @@ typedef struct randconns_info
     const unsigned int numberper;           //no of conns leaving point - essentially fixed except in special cases
     const unsigned int nospecials;
     const on_off UsingFancySpecials;
-    const unsigned int SpecialAInd;
-    const unsigned int SpecialBInd;
+    unsigned int SpecialAInd;
+    unsigned int SpecialBInd;
     randomconnection* Aconns;
     randomconnection* Bconns;
 } randconns_info;

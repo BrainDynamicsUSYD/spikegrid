@@ -36,6 +36,7 @@ typedef struct
     const on_off Oscillating_path;
     const Compute_float path_osc_freq;
     const on_off LotsofTesting;
+    const on_off Oscillating_Stimulus_Side;
 } Stimulus_parameters;
 ///Parameters for a layer when it is the only one
 typedef struct

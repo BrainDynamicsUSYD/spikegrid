@@ -8,7 +8,7 @@
 #include "sizes.h"
 //creat a rather ridiculously sized matrix
 //allows for 10x the avg number of connections per point.  Incredibly wasteful.  It would be really nice to have some c++ vectors here
-const unsigned int overkill_factor = 10;
+const unsigned int overkill_factor = 20;
 
 randconns_info init_randconns_info(const randconn_parameters p)
 {

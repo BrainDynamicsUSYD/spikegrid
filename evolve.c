@@ -324,14 +324,13 @@ void tidylayer (layer* l,const Compute_float timemillis,const condmat* const __r
     }
     if (Features.ImageStim==ON)
     {
-        if (l->P->Stim.Periodic==ON)
+        if (l->P->Stim.Periodic==ON) //only stim excit layer
         {
-            ApplyStim(l->voltages_out,timemillis,l->P->Stim,l->P->potential.Vpk,l->STDP_data,l->rcinfo);
+            ApplyStim(l->voltages_out,timemillis,l->P->Stim,l->P->potential.Vpk,l->STDP_data,l->rcinfo,l->Layer_is_inhibitory);
         }
     }
-    if (l->P->STDP.STDP_decay_frequency>0 && (int)(timemillis/Features.Timestep) % l->P->STDP.STDP_decay_frequency == 0)
+    if (l->P->STDP.STDP_decay_frequency>0 && (int)(timemillis/Features.Timestep) % l->P->STDP.STDP_decay_frequency == 0 && l->STDP_data->RecordSpikes==ON)
     {
-        printf("decaying STDP\n");
         STDP_decay(l->STDP_data,l->rcinfo);
     }
 

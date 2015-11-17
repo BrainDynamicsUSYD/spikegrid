@@ -79,16 +79,15 @@ void CreateStims(const Compute_float timemodper,const Stimulus_parameters S,cons
 }
 //TODO: this function is getting ridiculously long - needs to be tidied up.
 //TODO: above note still true, adding extra parameters anyway
-void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimulus_parameters S,const Compute_float threshold, STDP_data* stdp,randconns_info* const rcinfo)
+void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimulus_parameters S,const Compute_float threshold, STDP_data* stdp,randconns_info* const rcinfo,const on_off Inhibitory)
 {
     if (cached==false) {imcache=ReadImage(S.ImagePath);cached=true;}
     const Compute_float timemodper = fmod(timemillis,S.timeperiod);
     const Compute_float itercount = timemillis/S.timeperiod;
     if (itercount < 1.0  && S.TestPathChoice) {return;} //do nothing in first period- in test path mode the first period fails so skip over it - is pretty short anyway as no testing
-
-    if (S.TestPathChoice)
+    if (S.TestPathChoice )
     {
-        if (timemodper < 0.001 && fabs(timemillis - lastset) > 0.01)
+        if (timemodper < 0.001 && fabs(timemillis - lastset) > 0.01 && Inhibitory==OFF)
         {
             lastset=timemillis;
             if (S.Oscillating_path==ON)
@@ -114,6 +113,36 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
                         path2=true;
                     }
                 }
+                else if (S.Gradual_stim_swap==ON)
+                {
+                    int oneind = rcinfo->SpecialAInd;
+                    int twoind = rcinfo->SpecialBInd;
+                    printf("firing - init - %i %i\n",oneind,twoind);
+                    if (oneind>twoind) {int temp=oneind;oneind=twoind;twoind=temp;}
+                    if (RandFloat() < -cos(2.0*M_PI/S.Gradual_swap_period*itercount)/2.0 + 0.5) //assign probabilities based on a cos curve
+                    {
+                        printf("firing - Side1 inhib is %i \n",Inhibitory);
+                        rcinfo->SpecialBInd=oneind;
+                        rcinfo->SpecialAInd=twoind;
+                    }
+                    else
+                    {
+                        printf("firing Side2\n");
+                        rcinfo->SpecialAInd=oneind;
+                        rcinfo->SpecialBInd=twoind;
+                    }
+
+                    if (fmod(itercount,4)<2)
+                    {
+                        path1=true;
+                        path2=false;
+                    }
+                    else
+                    {
+                        path2=true;
+                        path1=false;
+                    }
+                }
                 else
                 {
                     if (fmod(itercount/S.path_osc_freq,2)<1)  //are we on left / right branch
@@ -129,15 +158,21 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
                 }
                 if (fmod(itercount,2)< 1) //set up a test trial
                 {
+                    printf("firing - test\n");
                     path1 = false;
                     path2 = false;
-                    fire1 = false;
+                    fire1 = false; //fire1/2 serve to test whether the detection regions were activated
                     fire2 = false;
+                    int oneind = rcinfo->SpecialAInd;
+                    int twoind = rcinfo->SpecialBInd;
+                    if (oneind>twoind) {int temp=oneind;oneind=twoind;twoind=temp;}
+                    rcinfo->SpecialAInd=oneind; //always test the same stimulus
+                    rcinfo->SpecialBInd=twoind;
                     stdp->RecordSpikes = OFF;
                 }
-                if (fmod(itercount,2)==1) //print a test trial
+                if (fmod(itercount,2)==1) //print a test trial - this detects that the test trial has ended
                 {
-                    printf ("Res: %i %i\n",fire1,fire2);
+                    printf ("Res: %i %i %f\n",fire1,fire2,cos(2.0*M_PI/S.Gradual_swap_period*itercount)/2.0 + 0.5);
                     stdp->RecordSpikes = ON;
                 }
             }
@@ -247,15 +282,15 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
             {
                 if (voltsin[idx] > threshold)
                 {
-                    if (rcinfo != NULL)
+                    if (rcinfo != NULL && Inhibitory == OFF)
                     {
                         //if both set to false, this will activate stimulus 2 for testing
-                        if (path1) {voltsin[rcinfo->SpecialAInd]=100; }
-                        else       {voltsin[rcinfo->SpecialBInd]=100;}
+                        if (path1) {voltsin[rcinfo->SpecialAInd]=100; printf("firing path1 at %i\n",rcinfo->SpecialAInd); }
+                        else       {voltsin[rcinfo->SpecialBInd]=100; printf("firing path2 at %i\n",rcinfo->SpecialBInd); }
                     }
                 }
             }
-            else if (pixel == cv::Vec3b(0,255,255)) //yellow
+            else if (pixel == cv::Vec3b(0,255,255)) //yellow - these 2 do nothing
             {
             }
             else if (pixel == cv::Vec3b(255,0,255)) //purple

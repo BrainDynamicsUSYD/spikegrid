@@ -212,15 +212,15 @@ void STDP_decay(const  STDP_data* const S, randconns_info* rcs)
             for (int b=-STDP_RANGE;b<STDP_RANGE;b++)
             {
                S->connections[i*STDP_array_size*STDP_array_size+(size_t)(a+STDP_RANGE)*STDP_array_size + (size_t)(b+STDP_RANGE)] *= S->P->STDP_decay_factor;
-               if (rcs != NULL) //now decrement the STDP connections
-               {
-                   unsigned int norand;
-                   randomconnection* randconns=GetRandomConnsLeaving(coord(i),*rcs,&norand);
-                   for (unsigned int m=0;m<norand;m++)
-                   {
-                       randconns[m].stdp_strength *= S->P->STDP_decay_factor;
-                   }
-               }
+            }
+        }
+        if (rcs != NULL) //now decrement the STDP connections
+        {
+            unsigned int norand;
+            randomconnection* randconns=GetRandomConnsLeaving(coord(i),*rcs,&norand);
+            for (unsigned int m=0;m<norand;m++)
+            {
+                randconns[m].stdp_strength *= S->P->STDP_decay_factor;
             }
         }
     }

@@ -6,7 +6,7 @@ errs=[];
 actuals=[];
 count=0;
 xcs=[];
-for i=1:3:1000
+for i=1:2:1000 %every second trial - avoids bias from most recent trial
     subdata=data(data(:,1)==i,:);
     if (size(subdata,1)>1)
         count=count+1;

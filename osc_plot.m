@@ -5,10 +5,12 @@ means=[];
 errs=[];
 actuals=[];
 count=0;
-for i=1:2:1000
+xcs=[];
+for i=1:3:1000
     subdata=data(data(:,1)==i,:);
     if (size(subdata,1)>1)
         count=count+1;
+        xcs(count)=i;
         means(count)=mean(subdata(:,3));
         errs(count)=std(subdata(:,3))/sqrt(size(subdata,1));
         actuals(count)=subdata(1,4);
@@ -17,8 +19,12 @@ for i=1:2:1000
     end
 end
 hold off
-errorbar(means,errs,'.');
+errorbar(xcs,offset,offseterrs,'.');
 hold all
-errorbar(offset,offseterrs,'.');
-plot(actuals)
+errorbar(xcs,means,errs,'.');
+plot(xcs,actuals)
+xlim([0,350])
+xlabel('trial number')
+ylabel('probability of output along left path')
+saveas(gcf,'~/model-osc.png')
 

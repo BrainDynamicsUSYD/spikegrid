@@ -63,7 +63,7 @@ static const parameters OneLayerModel = {.couple={0}}; //since unused - shortes 
     .path_osc_freq = 100,\
     .Periodic = ON,\
     .Gradual_stim_swap=ON,\
-    .Gradual_swap_period=200,\
+    .Gradual_swap_period=400,\
 }
 #define Rparams .random=\
 { \

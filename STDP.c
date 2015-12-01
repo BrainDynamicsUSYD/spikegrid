@@ -94,7 +94,8 @@ void STDP_At_point(const coords coord ,STDP_data* const data,STDP_data* const re
 }
 void  DoSTDP(const Compute_float* const const_couples, const Compute_float* const const_couples2,
         STDP_data* data, STDP_data* const data2,
-        randconns_info* rcs)
+        randconns_info* rcs,
+        randconns_info* rcs2)
 {
     //whilst this looks like O(n^4) (n=gridsize), it is actually O(n^2) as STDP_RANGE is always fixed
     if (data->P->STDP_on ==OFF) {return;}
@@ -137,7 +138,19 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
                        const size_t destidx    = LagIdx(rc->source,data->lags);
                        const size_t destidx2   = LagIdx(rc->source,data2->lags);
                        STDP_change rcchange = STDP_change_calc(destidx,destidx2,data->P,data2->P,data->lags->lags,data2->lags->lags);
-                       rc->stdp_strength    = clamp(rc->stdp_strength+rcchange.Strength_decrease,rc->strength,data->P->stdp_limit+1000);
+                       rc->stdp_strength    = clamp(rc->stdp_strength+rcchange.Strength_increase,rc->strength,data->P->stdp_limit+1000);
+                       //                                             ^ note plus sign (not minus) why?? - I assume the strengths are reversed - maybe this should be stremgth_increase?
+                   }
+                    //for reasons this needs to be done twice - once for the second layer - bonus points - why not the other section?
+                   unsigned int noconsArriving2;
+                   randomconnection** rcbase2 = GetRandomConnsArriving(coord,*rcs2,&noconsArriving2);
+                   for (unsigned int i=0;i<noconsArriving2;i++)
+                   {
+                       randomconnection* rc = rcbase2[i];
+                       const size_t destidx    = LagIdx(rc->source,data->lags);
+                       const size_t destidx2   = LagIdx(rc->source,data2->lags);
+                       STDP_change rcchange = STDP_change_calc(destidx,destidx2,data->P,data2->P,data->lags->lags,data2->lags->lags);
+                       rc->stdp_strength    = clamp(rc->stdp_strength+rcchange.Strength_increase,rc->strength,data->P->stdp_limit+1000);
                        //                                             ^ note plus sign (not minus) why?? - I assume the strengths are reversed - maybe this should be stremgth_increase?
                    }
                 }
@@ -178,6 +191,11 @@ STDP_data* STDP_init(const STDP_parameters* const S,const int trefrac_in_ts)
             .data.TA_data =tagged_array_new(ret->connections,grid_size,0,1,-0.01,0.01),
             .Updateable=ON, .UpdateFn=&STDP_mag,
             .function_arg =tagged_array_new(ret->connections,grid_size,0,1,-0.01,0.01)
+        });
+        CreateOutputtable((output_s){"STDP_bias2",    FLOAT_DATA,
+            .data.TA_data =tagged_array_new(ret->connections,grid_size,0,couple_array_size,-0.01,0.01),
+            .Updateable=ON, .UpdateFn=&taggedArrayXBias,
+            .function_arg =tagged_array_new(ret->connections,grid_size,0,couple_array_size,-0.01,0.01)
         });
     }
     return ret;

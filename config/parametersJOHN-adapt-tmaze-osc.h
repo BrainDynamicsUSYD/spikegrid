@@ -63,7 +63,7 @@ static const parameters OneLayerModel = {.couple={0}}; //since unused - shortes 
     .path_osc_freq = 100,\
     .Periodic = ON,\
     .Gradual_stim_swap=ON,\
-    .Gradual_swap_period=400,\
+    .Gradual_swap_period=800,\
 }
 #define Rparams .random=\
 { \
@@ -129,14 +129,20 @@ static const parameters DualLayerModelEx =
 static const model_features Features =
 {
     .STD        = OFF,
-    .STDP		= ON, 
+    .STDP		= ON,
     .Random_connections = ON,
     .Timestep   = 0.1,
     .Simlength  = 10000000,
     .ImageStim  = ON,
     .job        = {.initcond = RAND_JOB, .Voltage_or_count = 1},
     .Disablewrapping = ON,
-    .output = {{.method = VIDEO,.Output="V2",.Delay=40, .Overlay="Trialno"},{.method=GUI,.Output="V2",.Delay=10,.Overlay="Timestep"}}
+    .output = {
+        {.method = VIDEO,.Output="V2",.Delay=40, .Overlay="Trialno"},
+        {.method=GUI,.Output="V2",.Delay=10,.Overlay="Timestep"},
+        {.method=TEXT,.Output="RC2",.Delay=10000},
+//        {.method=TEXT,.Output="V2",.Delay=10},
+        {.method=TEXT,.Output="STDP_bias2",.Delay=10000}
+    }
 };
 ///Constant external input to conductances
 static const extinput Extinput =

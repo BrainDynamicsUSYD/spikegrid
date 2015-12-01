@@ -22,7 +22,7 @@ hold off
 errorbar(xcs,offset,offseterrs,'.');
 hold all
 errorbar(xcs,means,errs,'.');
-plot(xcs,actuals)
+%plot(xcs,actuals)
 xlim([0,350])
 xlabel('trial number')
 ylabel('probability of output along left path')

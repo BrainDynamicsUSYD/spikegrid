@@ -119,7 +119,7 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
                     int twoind = rcinfo->SpecialBInd;
                     printf("firing - init - %i %i\n",oneind,twoind);
                     if (oneind>twoind) {int temp=oneind;oneind=twoind;twoind=temp;}
-                    if (RandFloat() < -cos(2.0*M_PI/S.Gradual_swap_period*itercount)/2.0 + 0.5) //assign probabilities based on a cos curve
+                    if (RandFloat() < round(-cos(2.0*M_PI/S.Gradual_swap_period*itercount)/2.0 + 0.5)) //assign probabilities based on a cos curve
                     {
                         printf("firing - Side1 inhib is %i \n",Inhibitory);
                         rcinfo->SpecialBInd=oneind;

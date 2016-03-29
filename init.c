@@ -62,7 +62,7 @@ layer setuplayer(const parameters p)
     const int trefrac_in_ts =(int) ((Compute_float)p.couple.tref / Features.Timestep);
     unsigned int flagcount;
     if (Features.Recovery == ON) {flagcount = (unsigned)cap;} //this needs a comment
-    else {flagcount = (unsigned)(cap/trefrac_in_ts) + 2;} //this needs a comment
+    else {flagcount = (unsigned)(cap/trefrac_in_ts) + 1 + 1;} //1 for possible fencepost problem. 1 for the space for the -1 at the end
     parameters* P = (parameters*)newdata(&p,sizeof(p));
     layer L =
     {   //I am not particularly happy with this block.  It is highly complicated.  One idea: have the init functions themselves decide to return null

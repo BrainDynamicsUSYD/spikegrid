@@ -287,7 +287,8 @@ void ApplyContinuousStim(Compute_float* voltsin,const Compute_float timemillis,c
             }
             else if (pixel == cv::Vec3b(127,0,87)) //127,0,127:foreground (purple - 128,0,128 in GIMP)
             {
-                voltsin[idx] += I2;
+                voltsin[idx] += I0;
+                if (timemillis>=1000 && timemillis<=2000) {voltsin[idx] += I2;}
             }
         }
     }

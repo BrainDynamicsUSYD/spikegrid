@@ -43,10 +43,12 @@ static const parameters OneLayerModel = {.couple={0}}; //since unused - shortes 
 
 #define STDPparams .STDP=   \
 {                       \
-    .stdp_limit=0.5,    \
+    .stdp_limit=0.07,    \
     .stdp_tau=20,       \
-    .stdp_strength=0.001,  \
-    .STDP_on=ON\
+    .stdp_strength=0.005,  \
+    .STDP_on=ON,\
+    .STDP_decay_factor=0.9985,\
+    .STDP_decay_frequency=100, \
 }
 #define Stimparams .Stim=\
 {\
@@ -59,11 +61,14 @@ static const parameters OneLayerModel = {.couple={0}}; //since unused - shortes 
     .TestPathChoice = ON,\
     .Periodic = ON,\
     .LotsofTesting = ON,\
+    .Oscillating_path = ON,\
     .Prob1=0.5,\
+    .Oscillating_Stimulus_Side=ON,\
+    .path_osc_freq=10000000,\
 }
 #define Rparams .random=\
 { \
-    .numberper = grid_size*grid_size/10, \
+    .numberper = grid_size*grid_size, \
     .str=1,\
     .Specials=0,\
     .FancySpecials=ON,\
@@ -128,7 +133,7 @@ static const model_features Features =
     .STDP       = ON,
     .Random_connections = ON,
     .Timestep   = 0.1,
-    .Simlength  = 100000,
+    .Simlength  = 300000,
     .ImageStim  = ON,
     .job        = {.initcond = RAND_JOB, .Voltage_or_count = 1},
     .Disablewrapping = ON,
@@ -146,7 +151,7 @@ static const sweepable Sweep =
     .offset=offsetof(parameters,Stim.Prob1) ,
     .minval = 0.500,
     .maxval = 0.5,
-    .count = 300,
+    .count = 80,
     .SweepEx = ON,
     .SweepIn = ON,
 };

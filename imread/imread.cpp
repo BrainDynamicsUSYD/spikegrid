@@ -5,6 +5,7 @@
 #include <iostream>
 #include <string>
 #include <cstdbool>
+#include <algorithm>
 #include "imread.h"
 extern "C"
 {
@@ -77,6 +78,28 @@ void CreateStims(const Compute_float timemodper,const Stimulus_parameters S,cons
     stim1choice = RandFloat() > S.NoUSprob;
     if (stim1choice && (int)itercount > lastonesfire) {onesfire++;lastonesfire=(int)itercount; printf("increase\n");}
 }
+
+bool randinit=false;
+double storerand=0.3;
+std::default_random_engine generator(1);
+//std::bernoulli_distribution distribution(0.5);
+std::normal_distribution<double> distribution(0,0.05);
+double nextrand()
+{
+/*    bool newrand=distribution(generator);
+    if (newrand==true)
+    {
+        storerand=storerand+0.02;
+    }
+    else
+    {
+        storerand=storerand-0.02;
+    } */
+    storerand=storerand + distribution(generator);
+    storerand=std::max(0.0,std::min(storerand,1.0));//clamp
+    return storerand;
+}
+
 //TODO: this function is getting ridiculously long - needs to be tidied up.
 //TODO: above note still true, adding extra parameters anyway
 void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimulus_parameters S,const Compute_float threshold, STDP_data* stdp,randconns_info* const rcinfo,const on_off Inhibitory)
@@ -119,7 +142,7 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
                     int twoind = rcinfo->SpecialBInd;
                     printf("firing - init - %i %i\n",oneind,twoind);
                     if (oneind>twoind) {int temp=oneind;oneind=twoind;twoind=temp;}
-                    if (RandFloat() < round(-cos(2.0*M_PI/S.Gradual_swap_period*itercount)/2.0 + 0.5)) //assign probabilities based on a cos curve
+                    if (RandFloat() < nextrand()) //round(-cos(2.0*M_PI/S.Gradual_swap_period*itercount)/2.0 + 0.5) ) //assign probabilities based on a cos curve
                     {
                         printf("firing - Side1 inhib is %i \n",Inhibitory);
                         rcinfo->SpecialBInd=oneind;
@@ -172,7 +195,7 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
                 }
                 if (fmod(itercount,2)==1) //print a test trial - this detects that the test trial has ended
                 {
-                    printf ("Res: %i %i %f\n",fire1,fire2,cos(2.0*M_PI/S.Gradual_swap_period*itercount)/2.0 + 0.5);
+                    printf ("Res -  %i %i %i %f\n",(int)itercount,fire1,fire2,storerand);//cos(2.0*M_PI/S.Gradual_swap_period*itercount)/2.0 + 0.5);
                     stdp->RecordSpikes = ON;
                 }
             }

@@ -85,6 +85,8 @@ void STDP_At_point(const coords coord ,STDP_data* const data,STDP_data* const re
         data->connections[fidx]    = clamp(data->   connections[fidx] + change.Strength_increase  ,const_couples[   cdx*couple_array_size + cdy],data->P->stdp_limit);
         data->connections[ridx]    = clamp(data->   connections[ridx] - change.Strength_decrease  ,const_couples[   cdx*couple_array_size + cdy],data->P->stdp_limit);
         revdata->connections[ridx] = clamp(revdata->connections[ridx] - change.Strength_increase  ,revconst_couples[cdx*couple_array_size + cdy],revdata->P->stdp_limit);
+        //TODO: I added this line - but I don't know if it should be in.  I suspect you can show that it always has no effect
+        //       revdata->connections[fidx] = clamp(revdata->connections[fidx] + change.Strength_decrease  ,revconst_couples[cdx*couple_array_size + cdy],revdata->P->stdp_limit);
 
         if (fabs(data->connections[fidx]) > 1.0 || fabs(data->connections[ridx]) > 1.0) //check is some connection has become massive - often indicative of a bug - note with strong STDP it is not necersarrily a bug.
         {

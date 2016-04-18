@@ -38,16 +38,16 @@ static const parameters OneLayerModel = {.couple={0}};
 
 #define stimparams .Stim =                          \
     {                                               \
-        .ImagePath  = "input_maps/D10_N200.png",    \
+        .ImagePath  = "input_maps/D21_N200.png",    \
         .timeperiod=1e6,                            \
         .lag=1e6,                                   \
         .PreconditioningTrials=0,                   \
         .NoUSprob=0,                                \
         .Testing=OFF,                               \
         .Periodic=OFF,                              \
-        .I2 = 3.00,                                 \
+        .I2 = 1.00,                                 \
         .I1 = 0,                                    \
-        .I0 = 0.75,                                 \
+        .I0 = 0.05,                                 \
         .mu = 0.04,                                 \
     }
 
@@ -62,7 +62,7 @@ static const parameters DualLayerModelIn =
             .dual = 
             {
                 .connectivity = EXPONENTIAL,   
-                .W            = -0.25, //vart W?
+                .W            = -0.48, //vart W?
                 .sigma        = 60, 
                 .synapse      = {.R=0,.D=1.5},
             }
@@ -114,8 +114,9 @@ static const model_features Features =
     .Theta      = OFF,
     .Timestep   = 0.05, // Works in like with 0.1 for midpoint. But if gE too small should addition be smaller too???
     .Simlength  = 40000,
+    .job        = {.initcond = RAND_JOB, .Voltage_or_count = 1},
     //.Outprefix = "ploscbEIF_sweepWI",  
-    .Outprefix = 'ploscbEIF_sweepWI2',
+    .Outprefix = "ploscbEIF_sweepGM",
     .output = {
         //{ .method=PICTURE,.Output=5,.Delay=1},  // THIS (AND ONLY THIS) BREAKS IT
         { .method=SPIKES,.Output="Spike1" ,.Delay=1}, // Exc. spikes
@@ -129,19 +130,19 @@ static const model_features Features =
 ///Parameters for conducting a parameter sweep.
 static const sweepable Sweep =
 {
-    .offset=offsetof(parameters,couple.Layer_parameters.dual.W),
-    .minval = -0.65,
-    .maxval = -0.36,
-    .count = 29,
-    .SweepEx = OFF,
-    .SweepIn = ON,
-    //
-    // .offset=offsetof(parameters,couple.normalization_parameters.glob_mult.GM),
-    // .minval = 0.5,
-    // .maxval = 2.0,
-    // .count = 30,
-    // .SweepEx = ON,
+    // .offset=offsetof(parameters,couple.Layer_parameters.dual.W),
+    // .minval = -0.65,
+    // .maxval = -0.36,
+    // .count = 29,
+    // .SweepEx = OFF,
     // .SweepIn = ON,
+    //
+    .offset=offsetof(parameters,couple.normalization_parameters.glob_mult.GM),
+    .minval = 0.5,
+    .maxval = 2.0,
+    .count = 30,
+    .SweepEx = ON,
+    .SweepIn = ON,
 };
 
 

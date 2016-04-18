@@ -43,9 +43,9 @@ static const parameters OneLayerModel = {.couple={0}}; //since unused - shortes 
 
 #define STDPparams .STDP=   \
 {                       \
-    .stdp_limit=0.07,    \
+    .stdp_limit=0.12,    \
     .stdp_tau=20,       \
-    .stdp_strength=0.005,  \
+    .stdp_strength=0.012,  \
     .STDP_on=ON,\
     .STDP_decay_factor=0.9985,\
     .STDP_decay_frequency=100, \
@@ -111,7 +111,7 @@ static const parameters DualLayerModelEx =
         {
             .dual =
             {
-                .W          =  0.25,
+                .W          =  0.24,
                 .sigma      = 20,
                 .synapse    = {.R=0.5,.D=2.0},
             }

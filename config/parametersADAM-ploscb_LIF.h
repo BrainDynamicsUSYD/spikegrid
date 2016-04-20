@@ -41,10 +41,10 @@ static const parameters OneLayerModel = {.couple={0}};
         .NoUSprob=0,                                \
         .Testing=OFF,                               \
         .Periodic=OFF,                              \
-        .I2 = 3.20,                                 \
+        .I2 = 0,                                 \
         .I1 = 0,                                    \
         .I0 = 0.80,                                 \
-        .mu = 0.04,                                 \
+        .mu = 0.80,                                 \
     }
 
 ///parameters for the inhibitory layer of the double layer model
@@ -58,15 +58,14 @@ static const parameters DualLayerModelIn =
             .dual = 
             {
                 .connectivity = HOMOGENEOUS,   
-                .W            = -0.345, //vart W?
-                .sigma        = 54, 
+                .W            = -0.23, //vart W?
+                .sigma        = 60, 
                 .synapse      = {.R=0,.D=1.5},
             }
         },
         .tref       = 5,
-        .norm_type = None,
-        //.norm_type = GlobalMultiplier,
-        //.normalization_parameters = {.glob_mult = {.GM=1}},
+        .norm_type = GlobalMultiplier,
+        .normalization_parameters = {.glob_mult = {.GM=1}},
     },
     potparams,
     stimparams,
@@ -83,15 +82,14 @@ static const parameters DualLayerModelEx =
             .dual =     
             {
                 .connectivity = EXPONENTIAL,   
-                .W            = 0.345, 
+                .W            = 0.23, 
                 .sigma        = 12,
                 .synapse      = {.R=0,.D=1.5},
             }
         },
         .tref       = 5,
-        .norm_type = None,
-        //.norm_type = GlobalMultiplier,
-        //.normalization_parameters = {.glob_mult = {.GM=1}},
+        .norm_type = GlobalMultiplier,
+        .normalization_parameters = {.glob_mult = {.GM=1}},
     },
     potparams,
     stimparams,
@@ -111,10 +109,10 @@ static const model_features Features =
     .STD        = OFF,  //if we need any of these features we can make the changes then.
     .Theta      = OFF,
     .Timestep   = 0.05, // Works in like with 0.1 for midpoint. But if gE too small should addition be smaller too???
-    .Simlength  = 40000,
+    .Simlength  = 50000,
     .ImageStim = ON,
     .job        = {.initcond = RAND_JOB, .Voltage_or_count = 1},
-    .Outprefix  = "ploscbLIF_trials",  // Make empty to keep in current directory
+    .Outprefix  = "ploscb_mex_sweepWI",  // Make empty to keep in current directory
     .output = {
         //{ .method=PICTURE,.Output=5,.Delay=1},  // THIS (AND ONLY THIS) BREAKS IT
         { .method=SPIKES,.Output="Spike1" ,.Delay=1}, // Exc. spikes
@@ -128,10 +126,10 @@ static const model_features Features =
 ///Parameters for conducting a parameter sweep.
 static const sweepable Sweep =
 {
-    // .offset=offsetof(parameters,Stim.I0),
-    // .minval = 0.80,
-    // .maxval = 4.00,
-    // .count = 8,
+    // .offset=offsetof(parameters,Stim.I2),
+    // .minval = 1,
+    // .maxval = 12,
+    // .count = 11,
     // .SweepEx = ON,
     // .SweepIn = ON,
     //
@@ -139,13 +137,20 @@ static const sweepable Sweep =
     // .minval = 3,
     // .maxval = 6,
     // .count = 3,
-    //  .SweepEx = OFF,
-    //  .SweepIn = ON,
+    // .SweepEx = OFF,
+    // .SweepIn = ON,
+    //
+    .offset=offsetof(parameters,couple.Layer_parameters.dual.W),
+    .minval = -0.40,
+    .maxval = -0.25,
+    .count = 15,
+    .SweepEx = OFF,
+    .SweepIn = ON,
     //
     // .offset=offsetof(parameters,couple.Layer_parameters.dual.W),
-    // .minval = -0.22,
-    // .maxval = -0.10,
-    // .count = 12,
+    // .minval = -0.30,
+    // .maxval = -0.15,
+    // .count = 15,
     // .SweepEx = OFF,
     // .SweepIn = ON,
     //
@@ -156,12 +161,12 @@ static const sweepable Sweep =
     // .SweepEx = ON,
     // .SweepIn = ON,
     //
-    .offset=offsetof(parameters,couple.Layer_parameters.dual.W),
-    .minval = 1,
-    .maxval = 1,
-    .count = 49,
-    .SweepEx = ON,
-    .SweepIn = ON,
+    // .offset=offsetof(parameters,couple.normalization_parameters.glob_mult.GM),
+    // .minval = 1,
+    // .maxval = 1,
+    // .count = 24,
+    // .SweepEx = ON,
+    // .SweepIn = ON,
 };
 
 

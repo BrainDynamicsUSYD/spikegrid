@@ -41,35 +41,21 @@ static const parameters OneLayerModel = {.couple={0}}; //since unused - shortes 
     .rate = 0,                  \
 }
 
-#define STDPparams .STDP=   \
-{                       \
-    .stdp_limit=0.5,    \
-    .stdp_tau=20,       \
-    .stdp_strength=0.001,  \
-    .STDP_on=OFF\
-}
-#define Stimparams .Stim=\
-{\
-    .ImagePath  = "input_maps/stoch_interact_Tmaze.png",\
-    .timeperiod=150,\
-    .lag=55,\
-    .PreconditioningTrials=0,\
-    .NoUSprob=0,\
-    .Testing = OFF,\
-    .TestPathChoice = ON,\
-    .Periodic = ON,\
-    .LotsofTesting = ON,\
-    .Prob1=0.5,\
-}
-#define Rparams .random=\
-{ \
-    .numberper = grid_size*grid_size/10, \
-    .str=1,\
-    .Specials=0,\
-    .FancySpecials=ON,\
-    .SpecialAInd=300,\
-    .SpecialBInd=200,\
-}
+#define stimparams .Stim =                          \
+    {                                               \
+        .ImagePath  = "input_maps/D10_N200.png",    \
+        .timeperiod=1e6,                            \
+        .lag=1e6,                                   \
+        .PreconditioningTrials=0,                   \
+        .NoUSprob=0,                                \
+        .Testing=OFF,                               \
+        .Periodic=OFF,                              \
+        .I2 = 0,                                 \
+        .I1 = 0,                                    \
+        .I0 = 0.80,                                 \
+        .mu = 0.80,                                 \
+    }
+
 ///parameters for the inhibitory layer of the double layer model
 static const parameters DualLayerModelIn =
 {
@@ -80,20 +66,18 @@ static const parameters DualLayerModelIn =
         {
             .dual =
             {
-                .W          = -0.5, //-0.40 //-0.57 //-0.70 //-1.25,
-                .sigma      = 90,
+                .W          = -0.49, //-0.5
+                .sigma      = 100,
                 .synapse    = {.R=0.5,.D=2.0},
             }
         },
 
         .norm_type = GlobalMultiplier,
-        .normalization_parameters = {.glob_mult = {.GM=1.0}},
+        .normalization_parameters = {.glob_mult = {.GM=1}},
         .tref       = 5,
     },
-    //STDPparams,
     potparams,
-    //Stimparams,
-    //Rparams,
+    stimparams,
     .skip=2,
 };
 ///parameters for the excitatory layer of the double layer model
@@ -113,43 +97,49 @@ static const parameters DualLayerModelEx =
         },
         .tref       = 5,
         .norm_type = GlobalMultiplier,
-        .normalization_parameters = {.glob_mult = {.GM=1.0}},
+        .normalization_parameters = {.glob_mult = {.GM=1}},
     },
-    //STDPparams,
     potparams,
     .skip=-2,
-    //Stimparams,
-    //Rparams,
+    stimparams,
 };
 ///Some global features that can be turned on and off
 static const model_features Features =
 {
     .STD        = OFF,
-    .STDP       = ON,
-    .Random_connections = ON,
-    .Timestep   = 0.1,
+    .STDP       = OFF,
+    .Random_connections = OFF,
+    .Timestep   = 0.05,
     .Simlength  = 100000,
     .ImageStim  = ON,
     .job        = {.initcond = RAND_JOB, .Voltage_or_count = 1},
     .Disablewrapping = OFF,
-    .output = {{.method = VIDEO,.Output="V2",.Delay=20, .Overlay="Trialno"},{.method=GUI,.Output="V2",.Delay=10,.Overlay="Timestep"}}
+    .Outprefix  = "john2_sweepWI",
+    .output = {
+        { .method=SPIKES,.Output="Spike1" ,.Delay=1}, // Exc. spikes
+        { .method=SPIKES,.Output="Spike2" ,.Delay=1}, // Inh. spikes
+        { .method=TEXT,.Output="gE",.Delay=20},    // Excitation
+        { .method=TEXT,.Output="gI",.Delay=20},    // Inhibition
+        { .method=TEXT,.Output="V1",.Delay=20},    // Exc. voltage 
+        { .method=TEXT,.Output="V2",.Delay=20},    // Inh. voltage
+    },
+};
 ///Constant external input to conductances
 static const extinput Extinput =
 {
-    .gE0 = 0.055,
-    .gI0 = 0.00,
+    .gE0 = 0,
+    .gI0 = 0,
 };
 ///Parameters for conducting a parameter sweep.
 static const sweepable Sweep =
 {
-    .offset=offsetof(parameters,Stim.Prob1) ,
-    .minval = 0.500,
-    .maxval = 0.5,
-    .count = 300,
-    .SweepEx = ON,
+    .offset=offsetof(parameters,couple.Layer_parameters.dual.W),
+    .minval = -0.55,
+    .maxval = -0.45,
+    .count = 10,
+    .SweepEx = OFF,
     .SweepIn = ON,
 };
-
 #ifdef __clang__
 #pragma clang diagnostic pop
 #else

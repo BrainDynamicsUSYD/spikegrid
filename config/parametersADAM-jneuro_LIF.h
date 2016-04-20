@@ -34,17 +34,17 @@ static const parameters OneLayerModel = {.couple={0}};
 
 #define stimparams .Stim =                          \
     {                                               \
-        .ImagePath  = "input_maps/D21_N200.png",    \
+        .ImagePath  = "input_maps/D10_N200.png",    \
         .timeperiod=1e6,                            \
         .lag=1e6,                                   \
         .PreconditioningTrials=0,                   \
         .NoUSprob=0,                                \
         .Testing=OFF,                               \
         .Periodic=OFF,                              \
-        .I2 = 3.20,                                 \
+        .I2 = 12.00,                                 \
         .I1 = 0,                                    \
         .I0 = 0.80,                                 \
-        .mu = 0.04,                                 \
+        .mu = 0.80,                                 \
     }
 
 ///parameters for the inhibitory layer of the double layer model
@@ -59,7 +59,7 @@ static const parameters DualLayerModelIn =
             {
                 .connectivity = HOMOGENEOUS,   
                 .W            = -0.23, //vart W?
-                .sigma        = 54, 
+                .sigma        = 60, 
                 .synapse      = {.R=0.5,.D=7.0},
             }
         },
@@ -112,7 +112,7 @@ static const model_features Features =
     .Simlength  = 50000,
     .ImageStim = ON,
     .job        = {.initcond = RAND_JOB, .Voltage_or_count = 1},
-    .Outprefix  = "jneuro_I2",  // Make empty to keep in current directory
+    .Outprefix  = "jneuro1_trials",  // Make empty to keep in current directory
     .output = {
         //{ .method=PICTURE,.Output=5,.Delay=1},  // THIS (AND ONLY THIS) BREAKS IT
         { .method=SPIKES,.Output="Spike1" ,.Delay=1}, // Exc. spikes
@@ -126,12 +126,12 @@ static const model_features Features =
 ///Parameters for conducting a parameter sweep.
 static const sweepable Sweep =
 {
-    .offset=offsetof(parameters,Stim.I2),
-    .minval = 0.40,
-    .maxval = 6.00,
-    .count = 14,
-    .SweepEx = ON,
-    .SweepIn = ON,
+    // .offset=offsetof(parameters,Stim.I2),
+    // .minval = 1,
+    // .maxval = 12,
+    // .count = 11,
+    // .SweepEx = ON,
+    // .SweepIn = ON,
     //
     // .offset=offsetof(parameters,couple.Layer_parameters.dual.synapse.D),
     // .minval = 3,
@@ -141,9 +141,9 @@ static const sweepable Sweep =
     //  .SweepIn = ON,
     //
     // .offset=offsetof(parameters,couple.Layer_parameters.dual.W),
-    // .minval = -0.22,
-    // .maxval = -0.10,
-    // .count = 12,
+    // .minval = -0.50,
+    // .maxval = -0.24,
+    // .count = 26,
     // .SweepEx = OFF,
     // .SweepIn = ON,
     //
@@ -154,12 +154,12 @@ static const sweepable Sweep =
     // .SweepEx = ON,
     // .SweepIn = ON,
     //
-    // .offset=offsetof(parameters,couple.normalization_parameters.glob_mult.GM),
-    // .minval = 1,
-    // .maxval = 1,
-    // .count = 20,
-    // .SweepEx = ON,
-    // .SweepIn = ON,
+    .offset=offsetof(parameters,couple.normalization_parameters.glob_mult.GM),
+    .minval = 1,
+    .maxval = 1,
+    .count = 24,
+    .SweepEx = ON,
+    .SweepIn = ON,
 };
 
 

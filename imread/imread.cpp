@@ -79,7 +79,6 @@ void CreateStims(const Compute_float timemodper,const Stimulus_parameters S,cons
     if (stim1choice && (int)itercount > lastonesfire) {onesfire++;lastonesfire=(int)itercount; printf("increase\n");}
 }
 
-bool randinit=false;
 double storerand=0.3;
 std::default_random_engine generator(1);
 //std::bernoulli_distribution distribution(0.5);

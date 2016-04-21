@@ -238,8 +238,8 @@ void StoreFiring(layer* L,const unsigned int timestep)
             {
                 const coords coord = {.x=x,.y=y};
                 const size_t baseidx = LagIdx(coord,L->firinglags);
-                modifyLags(L->firinglags,baseidx);
-                if (Features.STDP==ON) {modifyLags(L->STDP_data->lags,LagIdx(coord,L->STDP_data->lags));}
+                modifyLags(L->firinglags,baseidx,grid_index(coord));
+                if (Features.STDP==ON) {modifyLags(L->STDP_data->lags,LagIdx(coord,L->STDP_data->lags),grid_index(coord));}
                 //now - add in new spikes
                 if (L->voltages_out[grid_index(coord)]  >= L->P->potential.Vpk
                         ||
@@ -291,7 +291,7 @@ void RefractoryVoltages(Compute_float* const __restrict Vout,const couple_parame
     for (unsigned int i=0;i<grid_size*grid_size;i++)
     {
         unsigned int baseidx = i*l->lagsperpoint;
-        if (CurrentShortestLag(l,baseidx) <= trefrac_in_ts)
+        if (CurrentShortestLag(l,baseidx,i) <= trefrac_in_ts)
         {
             Vout[i] = CP.Vrt;
         }

@@ -105,7 +105,7 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
             const coords coord = {.x=x,.y=y};
             const size_t baseidx = LagIdx(coord,data->lags);
             //first - check if the neuron has fired this timestep
-            if ( CurrentShortestLag(data->lags,baseidx)==1) //so the neuron did actually fire at the last timestep
+            if ( CurrentShortestLag(data->lags,baseidx,grid_index(coord))==1) //so the neuron did actually fire at the last timestep
             {
                 //now check if other neurons recently fired - first for nearby connections
                 for (int i = -STDP_RANGE;i<=STDP_RANGE;i++)

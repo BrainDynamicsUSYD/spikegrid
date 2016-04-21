@@ -128,11 +128,11 @@ static const model_features Features =
     .STDP       = ON,
     .Random_connections = ON,
     .Timestep   = 0.1,
-    .Simlength  = 100000,
+    .Simlength  = 5000,
     .ImageStim  = ON,
     .job        = {.initcond = RAND_JOB, .Voltage_or_count = 1},
     .Disablewrapping = ON,
-    .output = {{.method = VIDEO,.Output="V2",.Delay=20, .Overlay="Trialno"},{.method=GUI,.Output="V2",.Delay=10,.Overlay="Timestep"},{.method=PICTURE,.Output="STDP_bias2",.Delay=20}}
+    .output = {{.method = VIDEO,.Output="V2",.Delay=20, .Overlay="Trialno"}}
 };
 ///Constant external input to conductances
 static const extinput Extinput =

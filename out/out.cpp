@@ -182,7 +182,9 @@ void SpikeOutput::DoOutput_()
     {
         for (Neuron_coord j=0;j<grid_size;j++)
         {
-            if (CurrentShortestLag(data,grid_index((coords){.x=i,.y=j})*data->lagsperpoint) == 1)
+            if (CurrentShortestLag(data,grid_index((coords){.x=i,.y=j})*data->lagsperpoint,grid_index((coords){.x=i,.y=j})) == 1)
+
+
             {
                 fprintf(f,"%i,%i:",i,j);
             }

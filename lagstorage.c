@@ -34,10 +34,6 @@ void lagstorage_dtor(lagstorage* l)
     free(l); //lagstorages are always allocated with malloc
 }
 #include<stdio.h>
-
-
-
-
 int16_t __attribute__((const,pure)) CurrentShortestLag(const lagstorage* const L,const size_t  baseidx,const size_t realbase)
 {
     const uint16_t count = L->counts[realbase];
@@ -69,7 +65,6 @@ void AddnewSpike(lagstorage* L,const size_t baseidx)
 //called for every neuron on every timestep
 void RemoveDeadSpike(lagstorage* L,const size_t baseidx)
 {
-
     if (L->lags[baseidx] == L->cap )//if first entry is at cap - remove and shuffle everything down
     {
         const size_t realbase = baseidx/L->lagsperpoint;
@@ -86,13 +81,11 @@ void RemoveDeadSpike(lagstorage* L,const size_t baseidx)
 //
 void modifyLags(lagstorage* L,const size_t baseidx,const size_t realbase)
 {
-    const int count =L->counts[realbase] ;
+    const uint16_t count =L->counts[realbase] ;
     //increment the firing lags.
-    unsigned int idx = 0;
-    while (idx<count)
+    for (uint16_t idx=0;idx<count;idx++)
     {
         L->lags[baseidx+idx]++;
-        idx++; //I wonder if there is a trick here in the increment?
         //maybe we could use some trick SSE instruction.
         //otherwise - maybe store a timestep number
     }

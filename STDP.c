@@ -184,6 +184,7 @@ STDP_data* STDP_init(const STDP_parameters* const S,const int trefrac_in_ts)
             .Updateable=ON, .UpdateFn=&STDP_mag,
             .function_arg =tagged_array_new(ret->connections,grid_size,0,1,-0.01,0.01)
         });
+
         initcount++;
     }
     else
@@ -223,6 +224,7 @@ Compute_float* COMangle(const  STDP_data* const S)
     }
     return ret;
 }
+
 void STDP_decay(const  STDP_data* const S, randconns_info* rcs)
 {
     for (size_t i=0;i<grid_size*grid_size;i++)

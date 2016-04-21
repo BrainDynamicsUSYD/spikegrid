@@ -26,3 +26,4 @@ fcoords* taggedArrayCOM(const tagged_array in);
 tagged_array* taggedArrayXBias(const tagged_array* in);
 Compute_float tagged_arrayMAX(const tagged_array in);
 Compute_float tagged_arrayMIN(const tagged_array in);
+tagged_array* taggedArrayXBias(const tagged_array* in);

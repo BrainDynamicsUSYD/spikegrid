@@ -17,7 +17,7 @@ lagstorage* lagstorage_init(const unsigned int flagcount,const int cap);
 void lagstorage_dtor(lagstorage* l);
 void AddnewSpike(lagstorage* L,const size_t baseidx);
 void modifyLags(lagstorage* L,const size_t baseidx,const size_t realidx);
-int16_t __attribute__((const,pure)) CurrentShortestLag(const lagstorage* const L,const size_t baseidx,const size_t realbase);
+int16_t __attribute__((const,pure,used)) CurrentShortestLag(const lagstorage* const L,const size_t baseidx,const size_t realbase);
 ///A small helper function to calculate the base idx for the lags at a given x and y coordinate.  Mostly just for convenience
 static inline size_t __attribute__((const,pure)) LagIdx(const coords c ,const lagstorage* L) {return (grid_index(c))*L->lagsperpoint;}
 #endif

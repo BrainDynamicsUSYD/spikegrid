@@ -38,14 +38,14 @@ static const parameters OneLayerModel = {.couple={0}};
 
 #define stimparams .Stim =                          \
     {                                               \
-        .ImagePath  = "input_maps/D21_N200.png",    \
+        .ImagePath  = "input_maps/D10_N200.png",    \
         .timeperiod=1e6,                            \
         .lag=1e6,                                   \
         .PreconditioningTrials=0,                   \
         .NoUSprob=0,                                \
         .Testing=OFF,                               \
         .Periodic=OFF,                              \
-        .I2 = 1.00,                                 \
+        .I2 = 0.20,                                 \
         .I1 = 0,                                    \
         .I0 = 0.05,                                 \
         .mu = 0.04,                                 \
@@ -61,10 +61,10 @@ static const parameters DualLayerModelIn =
         {
             .dual = 
             {
-                .connectivity = EXPONENTIAL,   
-                .W            = -0.48, //vart W?
+                .connectivity = HOMOGENEOUS,   
+                .W            = -0.375, //vart W?
                 .sigma        = 60, 
-                .synapse      = {.R=0,.D=1.5},
+                .synapse      = {.R=0,.D=2},
             }
         },
         .tref       = 5,
@@ -86,9 +86,9 @@ static const parameters DualLayerModelEx =
             .dual =     
             {
                 .connectivity = EXPONENTIAL,   
-                .W            = 0.48, 
+                .W            = 0.720, 
                 .sigma        = 12,
-                .synapse      = {.R=0,.D=1.5},
+                .synapse      = {.R=0,.D=2},
             }
         },
         .tref       = 5,
@@ -113,18 +113,18 @@ static const model_features Features =
     .STD        = OFF,  //if we need any of these features we can make the changes then.
     .Theta      = OFF,
     .Timestep   = 0.05, // Works in like with 0.1 for midpoint. But if gE too small should addition be smaller too???
+    .ImageStim = ON,
     .Simlength  = 40000,
     .job        = {.initcond = RAND_JOB, .Voltage_or_count = 1},
-    //.Outprefix = "ploscbEIF_sweepWI",  
-    .Outprefix = "ploscbEIF_sweepGM",
+    .Outprefix = "orig_lessGM",
     .output = {
         //{ .method=PICTURE,.Output=5,.Delay=1},  // THIS (AND ONLY THIS) BREAKS IT
         { .method=SPIKES,.Output="Spike1" ,.Delay=1}, // Exc. spikes
         { .method=SPIKES,.Output="Spike2" ,.Delay=1}, // Inh. spikes
-        { .method=TEXT,.Output="gE",.Delay=20},    // Excitation
-        { .method=TEXT,.Output="gI",.Delay=20},    // Inhibition
-        { .method=TEXT,.Output="V1",.Delay=20},    // Exc. voltage 
-        { .method=TEXT,.Output="V2",.Delay=20},    // Inh. voltage
+        { .method=TEXT,.Output="gE",.Delay=100},    // Excitation
+        { .method=TEXT,.Output="gI",.Delay=100},    // Inhibition
+        { .method=TEXT,.Output="V1",.Delay=100},    // Exc. voltage 
+        { .method=TEXT,.Output="V2",.Delay=100},    // Inh. voltage
     },                                            
 };
 ///Parameters for conducting a parameter sweep.
@@ -138,9 +138,9 @@ static const sweepable Sweep =
     // .SweepIn = ON,
     //
     .offset=offsetof(parameters,couple.normalization_parameters.glob_mult.GM),
-    .minval = 0.5,
-    .maxval = 2.0,
-    .count = 30,
+    .minval = 0.05,
+    .maxval = 0.45,
+    .count = 8,
     .SweepEx = ON,
     .SweepIn = ON,
 };

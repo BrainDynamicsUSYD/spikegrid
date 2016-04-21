@@ -1,22 +1,31 @@
-/// \file
+/// trying to recreate figure 4 from Johnson and redish - using a T maze
+/// this will try using a t-maze rather than the y-maze from before
 #include <stddef.h> //offsetof
 //these first few parameters actually escape into the paramheader file through magic
-#define grid_size 200 // fix to look at small step sizes!
+#define grid_size 200
 ///Total size of the grid
 ///Coupling range
-#define couplerange 15
+#define couplerange 25
 #ifndef PARAMETERS  //DO NOT REMOVE
 ///include guard
 #define PARAMETERS  //DO NOT REMOVE
-
+//disable warnings about float conversion in this file only
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wconversion"
+#else
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wfloat-conversion"
+#pragma GCC diagnostic ignored "-Wconversion"
+#endif
 //the following typedef must be before the include to get the right compute types
 ///Whether we are using the single or double layer model
 static const LayerNumbers ModelType = DUALLAYER;
 
 //Fun note - with the right optimisations GCC actually will pull these constants inline (for example disassemble evolvept_STDP with STDP off)
 ///Parameters for the single layer model
-static const parameters OneLayerModel = {.couple={0}};
-// Potential parameters
+static const parameters OneLayerModel = {.couple={0}}; //since unused - shortes possible definition that produces no warnings
+
 #define potparams .potential =     \
 {                                  \
     .type    =                     \
@@ -53,38 +62,37 @@ static const parameters DualLayerModelIn =
     .couple =
     {
         .Layertype = DUALLAYER,
-        .Layer_parameters = 
+        .Layer_parameters =
         {
-            .dual = 
+            .dual =
             {
-                .connectivity = HOMOGENEOUS,   
-                .W            = -0.23, //vart W?
-                .sigma        = 60, 
-                .synapse      = {.R=0,.D=1.5},
+                .W          = -0.49, //-0.5
+                .sigma      = 100,
+                .synapse    = {.R=0.5,.D=2.0},
             }
         },
-        .tref       = 5,
+
         .norm_type = GlobalMultiplier,
         .normalization_parameters = {.glob_mult = {.GM=1}},
+        .tref       = 5,
     },
     potparams,
     stimparams,
-    .skip = 2,
+    .skip=2,
 };
 ///parameters for the excitatory layer of the double layer model
 static const parameters DualLayerModelEx =
 {
-    .couple =   
+     .couple =
     {
         .Layertype = DUALLAYER,
-        .Layer_parameters = 
+        .Layer_parameters =
         {
-            .dual =     
+            .dual =
             {
-                .connectivity = EXPONENTIAL,   
-                .W            = 0.23, 
-                .sigma        = 12,
-                .synapse      = {.R=0,.D=1.5},
+                .W          =  0.25,
+                .sigma      = 20,
+                .synapse    = {.R=0.5,.D=2.0},
             }
         },
         .tref       = 5,
@@ -92,8 +100,29 @@ static const parameters DualLayerModelEx =
         .normalization_parameters = {.glob_mult = {.GM=1}},
     },
     potparams,
+    .skip=-2,
     stimparams,
-    .skip = -2, //3 out of 4? 
+};
+///Some global features that can be turned on and off
+static const model_features Features =
+{
+    .STD        = OFF,
+    .STDP       = OFF,
+    .Random_connections = OFF,
+    .Timestep   = 0.05,
+    .Simlength  = 100000,
+    .ImageStim  = ON,
+    .job        = {.initcond = RAND_JOB, .Voltage_or_count = 1},
+    .Disablewrapping = OFF,
+    .Outprefix  = "john2_sweepWI",
+    .output = {
+        { .method=SPIKES,.Output="Spike1" ,.Delay=1}, // Exc. spikes
+        { .method=SPIKES,.Output="Spike2" ,.Delay=1}, // Inh. spikes
+        { .method=TEXT,.Output="gE",.Delay=20},    // Excitation
+        { .method=TEXT,.Output="gI",.Delay=20},    // Inhibition
+        { .method=TEXT,.Output="V1",.Delay=20},    // Exc. voltage 
+        { .method=TEXT,.Output="V2",.Delay=20},    // Inh. voltage
+    },
 };
 ///Constant external input to conductances
 static const extinput Extinput =
@@ -101,73 +130,19 @@ static const extinput Extinput =
     .gE0 = 0,
     .gI0 = 0,
 };
-///Some global features that can be turned on and off
-static const model_features Features = 
-{
-    .Recovery   = OFF,
-    .STDP		= OFF, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep - 
-    .STD        = OFF,  //if we need any of these features we can make the changes then.
-    .Theta      = OFF,
-    .Timestep   = 0.05, // Works in like with 0.1 for midpoint. But if gE too small should addition be smaller too???
-    .Simlength  = 50000,
-    .ImageStim = ON,
-    .job        = {.initcond = RAND_JOB, .Voltage_or_count = 1},
-    .Outprefix  = "ploscb_mex_sweepWI",  // Make empty to keep in current directory
-    .output = {
-        //{ .method=PICTURE,.Output=5,.Delay=1},  // THIS (AND ONLY THIS) BREAKS IT
-        { .method=SPIKES,.Output="Spike1" ,.Delay=1}, // Exc. spikes
-        { .method=SPIKES,.Output="Spike2" ,.Delay=1}, // Inh. spikes
-        { .method=TEXT,.Output="gE",.Delay=20},    // Excitation
-        { .method=TEXT,.Output="gI",.Delay=20},    // Inhibition
-        { .method=TEXT,.Output="V1",.Delay=20},    // Exc. voltage 
-        { .method=TEXT,.Output="V2",.Delay=20},    // Inh. voltage
-    },                                            
-};
 ///Parameters for conducting a parameter sweep.
 static const sweepable Sweep =
 {
-    // .offset=offsetof(parameters,Stim.I2),
-    // .minval = 1,
-    // .maxval = 12,
-    // .count = 11,
-    // .SweepEx = ON,
-    // .SweepIn = ON,
-    //
-    // .offset=offsetof(parameters,couple.Layer_parameters.dual.synapse.D),
-    // .minval = 3,
-    // .maxval = 6,
-    // .count = 3,
-    // .SweepEx = OFF,
-    // .SweepIn = ON,
-    //
     .offset=offsetof(parameters,couple.Layer_parameters.dual.W),
-    .minval = -0.40,
-    .maxval = -0.25,
-    .count = 15,
+    .minval = -0.55,
+    .maxval = -0.45,
+    .count = 10,
     .SweepEx = OFF,
     .SweepIn = ON,
-    //
-    // .offset=offsetof(parameters,couple.Layer_parameters.dual.W),
-    // .minval = -0.30,
-    // .maxval = -0.15,
-    // .count = 15,
-    // .SweepEx = OFF,
-    // .SweepIn = ON,
-    //
-    // .offset=offsetof(parameters,couple.normalization_parameters.glob_mult.GM),
-    // .minval = 1,
-    // .maxval = 4,
-    // .count = 30,
-    // .SweepEx = ON,
-    // .SweepIn = ON,
-    //
-    // .offset=offsetof(parameters,couple.normalization_parameters.glob_mult.GM),
-    // .minval = 1,
-    // .maxval = 1,
-    // .count = 24,
-    // .SweepEx = ON,
-    // .SweepIn = ON,
 };
-
-
+#ifdef __clang__
+#pragma clang diagnostic pop
+#else
+#pragma GCC diagnostic pop
+#endif
 #endif //DO NOT REMOVE

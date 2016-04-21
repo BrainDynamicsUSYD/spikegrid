@@ -6,10 +6,13 @@
 #include "coupling.h"
 #include "mymath.h"
 #include "sizes.h"
+#include "tagged_array.h"
+#include "out/outputtable.h"
 //creat a rather ridiculously sized matrix
 //allows for 10x the avg number of connections per point.  Incredibly wasteful.  It would be really nice to have some c++ vectors here
-const unsigned int overkill_factor = 10;
+const unsigned int overkill_factor = 20;
 
+void CreateRCOutputtable(const randconns_info* const rcinfo);//forward declare
 randconns_info init_randconns_info(const randconn_parameters p)
 {
     return (randconns_info) {
@@ -77,7 +80,6 @@ void StoreNewRandconn(const randconns_info* rcinfo,const randomconnection rc,con
             exit(EXIT_FAILURE);
         }
     }
-
 }
 
 randconns_info* init_randconns(const randconn_parameters rparam,const couple_parameters couple)
@@ -136,6 +138,7 @@ randconns_info* init_randconns(const randconn_parameters rparam,const couple_par
     rcinfo.randconns_reverse=bigmat;
     randconns_info* rcpoint = malloc(sizeof(*rcpoint));
     memcpy(rcpoint,&rcinfo,sizeof(*rcpoint));
+    CreateRCOutputtable(rcpoint);
     return rcpoint;
 }
 randomconnection* GetRandomConnsLeaving(const coords coord ,const randconns_info rcinfo, unsigned int* numberconns)
@@ -184,4 +187,43 @@ randomconnection** GetRandomConnsArriving(const coords coord,const randconns_inf
     {
         return &(rcinfo.randconns_reverse[idx*(size_t)rcinfo.numberper*(size_t)overkill_factor]); //Ensure you return the address of this object - it is definitely required
     }
+}
+
+tagged_array* GetRCWeights(const tagged_array* const in)
+{
+    const randconns_info* rcinfo = (const randconns_info* const)in;//HACK TODO MASSIVE HACK
+    Compute_float* data = calloc(sizeof(Compute_float),grid_size*grid_size);
+    for (Neuron_coord x=0;x<grid_size;x++)
+    {
+        for (Neuron_coord y=0;y<grid_size;y++)
+        {
+            coords c = {.x=x,.y=y};
+            unsigned int count = 0;
+            randomconnection** rcbase = GetRandomConnsArriving(c,*rcinfo,&count);
+            for (unsigned int i=0;i<count;i++)
+            {
+                randomconnection* rc = rcbase[i];
+                if (grid_index(rc->source)==rcinfo->SpecialAInd)
+                {
+                    data[grid_index(rc->destination)] += rc->strength + rc->stdp_strength;
+                }
+            }
+        }
+    }
+    tagged_array* ret = tagged_array_new(data,grid_size,0,1,0,1);
+    return ret;
+}
+
+int callcount=0;
+void CreateRCOutputtable(const randconns_info* const rcinfo)
+{
+    if (callcount==0) {callcount++;return;}
+    CreateOutputtable(
+            (output_s) {
+            .name="RC2",  //only care about layer 2
+            .datatype=FLOAT_DATA,
+            .data.TA_data=GetRCWeights((const tagged_array* const)rcinfo),
+            .Updateable=ON,
+            .UpdateFn=&GetRCWeights,
+            .function_arg=(tagged_array*)rcinfo /*I really should stop this massive hackery*/});
 }

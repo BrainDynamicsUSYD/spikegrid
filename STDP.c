@@ -85,6 +85,8 @@ void STDP_At_point(const coords coord ,STDP_data* const data,STDP_data* const re
         data->connections[fidx]    = clamp(data->   connections[fidx] + change.Strength_increase  ,const_couples[   cdx*couple_array_size + cdy],data->P->stdp_limit);
         data->connections[ridx]    = clamp(data->   connections[ridx] - change.Strength_decrease  ,const_couples[   cdx*couple_array_size + cdy],data->P->stdp_limit);
         revdata->connections[ridx] = clamp(revdata->connections[ridx] - change.Strength_increase  ,revconst_couples[cdx*couple_array_size + cdy],revdata->P->stdp_limit);
+        //TODO: I added this line - but I don't know if it should be in.  I suspect you can show that it always has no effect
+        //       revdata->connections[fidx] = clamp(revdata->connections[fidx] + change.Strength_decrease  ,revconst_couples[cdx*couple_array_size + cdy],revdata->P->stdp_limit);
 
         if (fabs(data->connections[fidx]) > 1.0 || fabs(data->connections[ridx]) > 1.0) //check is some connection has become massive - often indicative of a bug - note with strong STDP it is not necersarrily a bug.
         {
@@ -94,7 +96,8 @@ void STDP_At_point(const coords coord ,STDP_data* const data,STDP_data* const re
 }
 void  DoSTDP(const Compute_float* const const_couples, const Compute_float* const const_couples2,
         STDP_data* data, STDP_data* const data2,
-        randconns_info* rcs)
+        randconns_info* rcs,
+        randconns_info* rcs2)
 {
     //whilst this looks like O(n^4) (n=gridsize), it is actually O(n^2) as STDP_RANGE is always fixed
     if (data->P->STDP_on ==OFF) {return;}
@@ -137,7 +140,19 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
                        const size_t destidx    = LagIdx(rc->source,data->lags);
                        const size_t destidx2   = LagIdx(rc->source,data2->lags);
                        STDP_change rcchange = STDP_change_calc(destidx,destidx2,data->P,data2->P,data->lags->lags,data2->lags->lags);
-                       rc->stdp_strength    = clamp(rc->stdp_strength+rcchange.Strength_decrease,rc->strength,data->P->stdp_limit+1000);
+                       rc->stdp_strength    = clamp(rc->stdp_strength+rcchange.Strength_increase,rc->strength,data->P->stdp_limit+1000);
+                       //                                             ^ note plus sign (not minus) why?? - I assume the strengths are reversed - maybe this should be stremgth_increase?
+                   }
+                    //for reasons this needs to be done twice - once for the second layer - bonus points - why not the other section?
+                   unsigned int noconsArriving2;
+                   randomconnection** rcbase2 = GetRandomConnsArriving(coord,*rcs2,&noconsArriving2);
+                   for (unsigned int i=0;i<noconsArriving2;i++)
+                   {
+                       randomconnection* rc = rcbase2[i];
+                       const size_t destidx    = LagIdx(rc->source,data->lags);
+                       const size_t destidx2   = LagIdx(rc->source,data2->lags);
+                       STDP_change rcchange = STDP_change_calc(destidx,destidx2,data->P,data2->P,data->lags->lags,data2->lags->lags);
+                       rc->stdp_strength    = clamp(rc->stdp_strength+rcchange.Strength_increase,rc->strength,data->P->stdp_limit+1000);
                        //                                             ^ note plus sign (not minus) why?? - I assume the strengths are reversed - maybe this should be stremgth_increase?
                    }
                 }
@@ -219,15 +234,15 @@ void STDP_decay(const  STDP_data* const S, randconns_info* rcs)
             for (int b=-STDP_RANGE;b<STDP_RANGE;b++)
             {
                S->connections[i*STDP_array_size*STDP_array_size+(size_t)(a+STDP_RANGE)*STDP_array_size + (size_t)(b+STDP_RANGE)] *= S->P->STDP_decay_factor;
-               if (rcs != NULL) //now decrement the STDP connections
-               {
-                   unsigned int norand;
-                   randomconnection* randconns=GetRandomConnsLeaving(coord(i),*rcs,&norand);
-                   for (unsigned int m=0;m<norand;m++)
-                   {
-                       randconns[m].stdp_strength *= S->P->STDP_decay_factor;
-                   }
-               }
+            }
+        }
+        if (rcs != NULL) //now decrement the STDP connections
+        {
+            unsigned int norand;
+            randomconnection* randconns=GetRandomConnsLeaving(coord(i),*rcs,&norand);
+            for (unsigned int m=0;m<norand;m++)
+            {
+                randconns[m].stdp_strength *= S->P->STDP_decay_factor;
             }
         }
     }

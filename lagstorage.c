@@ -34,22 +34,13 @@ void lagstorage_dtor(lagstorage* l)
     free(l); //lagstorages are always allocated with malloc
 }
 #include<stdio.h>
-int16_t __attribute__((const,pure)) CurrentShortestLag(const lagstorage* const L,const size_t  baseidx,const size_t realbase)
+int16_t __attribute__((const,pure)) CurrentShortestLag(
+        const lagstorage* const L,
+        const size_t  baseidx,
+        const size_t realbase)
 {
     const uint16_t count = L->counts[realbase];
-   // printf("%i\n",count);
     if (count==0) {return INT16_MAX;} else {return L->lags[baseidx+count-1];}
-/*    unsigned int idx=0;
-    while (L->lags[baseidx + idx] != -1)
-    {
-        idx++;
-    } //take the last entry - then check if in refrac period and set voltages
-    if (idx != 0)
-    {
-        return L->lags[baseidx+idx - 1]; //-1 or otherwise we return -1
-    }
-    else {return INT16_MAX;}
-*/
 }
 void AddnewSpike(lagstorage* L,const size_t baseidx)
 {

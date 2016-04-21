@@ -41,7 +41,7 @@ static const parameters OneLayerModel = {.couple={0}};
         .NoUSprob=0,                                \
         .Testing=OFF,                               \
         .Periodic=OFF,                              \
-        .I2 = 3.20,                                 \
+        .I2 = 8.00,                                 \
         .I1 = 0,                                    \
         .I0 = 0.80,                                 \
         .mu = 0.04,                                 \
@@ -59,7 +59,7 @@ static const parameters DualLayerModelIn =
             {
                 .connectivity = HOMOGENEOUS,   
                 .W            = -0.23, //vart W?
-                .sigma        = 54, 
+                .sigma        = 60, 
                 .synapse      = {.R=0.5,.D=2.0},
             }
         },
@@ -108,11 +108,11 @@ static const model_features Features =
     .STDP		= OFF, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep - 
     .STD        = OFF,  //if we need any of these features we can make the changes then.
     .Theta      = OFF,
-    .Timestep   = 0.01, // Works in like with 0.1 for midpoint. But if gE too small should addition be smaller too???
+    .Timestep   = 0.05, // Works in like with 0.1 for midpoint. But if gE too small should addition be smaller too???
     .Simlength  = 50000,
     .ImageStim = ON,
     .job        = {.initcond = RAND_JOB, .Voltage_or_count = 1},
-    .Outprefix  = "jneuro2_smalldt",  // Make empty to keep in current directory
+    .Outprefix  = "Plateau_sweepWI",  // Make empty to keep in current directory
     .output = {
         //{ .method=PICTURE,.Output=5,.Delay=1},  // THIS (AND ONLY THIS) BREAKS IT
         { .method=SPIKES,.Output="Spike1" ,.Delay=1}, // Exc. spikes
@@ -126,12 +126,19 @@ static const model_features Features =
 ///Parameters for conducting a parameter sweep.
 static const sweepable Sweep =
 {
-    .offset=offsetof(parameters,Stim.I2),
-    .minval = 0.40,
-    .maxval = 6.00,
-    .count = 14,
-    .SweepEx = ON,
-    .SweepIn = ON,
+    // .offset=offsetof(parameters,couple.Layer_parameters.dual.sigma),
+    // .minval = 12,
+    // .maxval = 24,
+    // .count = 12,
+    // .SweepEx = ON,
+    // .SweepIn = OFF,
+    //
+    // .offset=offsetof(parameters,Stim.I2),
+    // .minval = 0.40,
+    // .maxval = 6.00,
+    // .count = 14,
+    // .SweepEx = ON,
+    // .SweepIn = ON,
     //
     // .offset=offsetof(parameters,couple.Layer_parameters.dual.synapse.D),
     // .minval = 3,
@@ -140,12 +147,12 @@ static const sweepable Sweep =
     //  .SweepEx = OFF,
     //  .SweepIn = ON,
     //
-    // .offset=offsetof(parameters,couple.Layer_parameters.dual.W),
-    // .minval = -0.22,
-    // .maxval = -0.10,
-    // .count = 12,
-    // .SweepEx = OFF,
-    // .SweepIn = ON,
+    .offset=offsetof(parameters,couple.Layer_parameters.dual.W),
+    .minval = -0.23,
+    .maxval = -0.15,
+    .count = 8,
+    .SweepEx = OFF,
+    .SweepIn = ON,
     //
     // .offset=offsetof(parameters,couple.normalization_parameters.glob_mult.GM),
     // .minval = 1,

@@ -104,7 +104,6 @@ tagged_array* taggedArrayXBias(const tagged_array* in)
     printf("min is %f, max is %f\n",min,max);
     return tagged_array_new(out,size,0,1,min,max);
 }
-
 Compute_float tagged_arrayMAX(const tagged_array in)
 {
     const unsigned int size = tagged_array_size_(in);

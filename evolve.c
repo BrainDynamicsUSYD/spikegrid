@@ -18,67 +18,11 @@
     #include <android/log.h>
 #endif
 
-void evolvept (const coords c ,const Compute_float* const __restrict connections,const Compute_float Estrmod,const Compute_float Istrmod,condmat* __restrict cond_mat)
-{
-    for (int i = 0; i < couple_array_size;i++)
-    {
-        const int outoff = (c.x + i)*conductance_array_size +c.y;//as gE and gI are larger than he neuron grid size, don't have to worry about wrapping
-        for (int j = 0 ; j<couple_array_size;j++)
-        {
-            const int coupleidx = i*couple_array_size + j;
-            if (connections[coupleidx] > 0)
-            {
-                cond_mat->gE[outoff+j] += connections[coupleidx]*Estrmod;
-            }
-            else
-            {
-                cond_mat->gI[outoff+j] += -(connections[coupleidx]*Istrmod);
-            }
-        }
-    }
-}
 
-///Adds the effect of the spikes that have fired in the past to the gE and gI arrays as appropriate
-/// currently, single layer doesn't work (correctly)
-void AddSpikes_single_layer(layer L, condmat* __restrict__ cond_mat,const unsigned int time)
+void AddSpikes_single_layer(__attribute__((used))layer L,__attribute__((used)) condmat* __restrict__ cond_mat,__attribute__((used))const unsigned int time)
 {
-    for (Neuron_coord y=0;y<grid_size;y++)
-    {
-        for (Neuron_coord x=0;x<grid_size;x++)
-        {
-            const coords c = {.x=x,.y=y};
-            const size_t lagidx = LagIdx(c,L.firinglags);
-            size_t newlagidx = lagidx;
-            if (L.Mytimecourse==NULL) // Single layer TODO: change this if to use something more appropriate
-            {
-                Compute_float excstr = Zero;
-                Compute_float inhstr = Zero;
-
-                while (L.firinglags->lags[newlagidx] != -1)  //Note: I think perf might be overstating the amount of time on this line - although, if it isn't massive potential for perf improvement
-                {
-                    Compute_float this_excstr = L.Extimecourse[L.firinglags->lags[newlagidx]];
-                    Compute_float this_inhstr = L.Intimecourse[L.firinglags->lags[newlagidx]];
-                    if (Features.STD == ON)
-                    {
-                        this_excstr = this_excstr * STD_str(L.P->STD,c,time,L.firinglags->lags[newlagidx],L.std);
-                        this_inhstr = this_inhstr * STD_str(L.P->STD,c,time,L.firinglags->lags[newlagidx],L.std);
-                    }
-                    newlagidx++;
-                    excstr += this_excstr;
-                    inhstr += this_inhstr;
-                }
-                if (newlagidx != lagidx) //only fire if we had a spike.
-                {
-                    evolvept(c,L.connections,excstr,inhstr,cond_mat); // No support for STDP in single layer
-                }
-            }
-            else // Dual layer
-            {
-                printf("Addspikes_single called for a dual layer model - quitting\n");
-                exit(EXIT_FAILURE);
-            }
-        }
-    }
+    printf("single layer is currently unsupported\n");
+    //does nothing - if you want to see what used to be here use git blame - but it wasn't particularly good anyway.
 }
 ///This function adds in the overlapping bits back into the original matrix.  It is slightly opaque but using pictures you can convince yourself that it works
 ///To keep the evolvept code simple we use an array like this:

@@ -58,7 +58,7 @@ void RemoveDeadSpike(lagstorage* L,const size_t baseidx)
     L->counts[realbase]--;
     L->lags[baseidx]++;//required protection for the zero case
     memmove(&L->lags[baseidx],&L->lags[baseidx+1],(L->counts[realbase])*sizeof(L->lags[0]));
-
+}
 
 //called a lot - be careful
 void modifyLags(lagstorage* L,const size_t baseidx,const size_t realbase)

@@ -242,13 +242,7 @@ void processopts(int argc, char** argv, parameters** newparam, parameters** newp
 }
 #endif
 
-void seedrand(const InitConds initcond,const int jobno)
-{
-    //seed RNG as appropriate - with either time or job number
-    if     (initcond == RAND_TIME)  {srandom((unsigned)time(0));}
-    else if(initcond == RAND_JOB)   {srandom((unsigned)jobno +(unsigned) (yossarianjobnumber!= -1 ?yossarianjobnumber:0 ));}
-    else if(initcond == RAND_ZERO)  {srandom((unsigned)0);}
-}
+
 
 Compute_float starttimeNS;
 ///Main function for the entire program
@@ -272,7 +266,7 @@ int main(int argc,char** argv) //useful for testing w/out matlab
         int count = job->initcond==RAND_JOB?(int)job->Voltage_or_count:1; //default to 1 job
         for (int c = 0;c<count;c++)
         {
-            seedrand(job->initcond,c);
+            seedrand(job->initcond,c,yossarianjobnumber);
             //sets up the model code
             //lets create the actual parameters we use
             const parameters actualsingle = newparam  !=NULL ? *newparam  :OneLayerModel; //TODO: it is not going to be hard to remove these

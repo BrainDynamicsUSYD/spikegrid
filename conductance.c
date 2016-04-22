@@ -20,10 +20,19 @@
     #define APPNAME "myapp"
     #include <android/log.h>
 #endif
-
+#define CheckParam(Switch,var) if (Switch==ON && var==NULL) {printf ("%s is on, so I need %s as an input\n",#Switch,#var);return;}
 model* m;               ///< The model we are evolving through time - static data not great but it does only exist in this file
 int jobnumber=-1;        ///< The current job number - used for pics directory etc
 int yossarianjobnumber=-1;
+
+void copyStuff(
+        void* d1,const void* inp,const size_t bytes,
+        const on_off recovery, void* recoverydest,const void* recoverysource,const size_t recoverysize)
+
+{
+    memcpy(d1,inp,bytes);
+    if (recovery==ON) {memcpy(recoverydest,recoverysource,recoverysize);
+}
 //DO NOT CALL THIS FUNCTION "step" - this causes a weird collision in matlab that results in segfaults.  Incredibly fun to debug
 ///Function that steps the model through time (high level).
 /// I think maybe we should get rid of this function
@@ -33,19 +42,20 @@ int yossarianjobnumber=-1;
 /// @param inpW2 input recoveries for layer 2.  In the single layer model a dummy argument needs to be passed.
 void step_(const Compute_float* const inpV,const Compute_float* const inpV2, const Compute_float* inpW, const Compute_float* inpW2)
 {
-    if (Features.Recovery==ON && inpW==NULL){printf("missing first recovery input");exit(EXIT_FAILURE);}
+    CheckParam(ON,inpV)
+    CheckParam(Features.Recovery,inpW) //note checkparam is a macro here
     if (ModelType==DUALLAYER)
     {
-        if(inpV2==NULL)                         {printf("missing second input voltage in dual-layer model"); exit(EXIT_FAILURE);}
-        if(Features.Recovery==ON && inpW2==NULL){printf("missing second recovery input in dual-layer model");exit(EXIT_FAILURE);}
+        CheckParam(ON,inpV2)
+        CheckParam(Features.Recovery,inpW2)
     }
     m->timesteps++;
-    memcpy(m->layer1.voltages,inpV,sizeof(Compute_float)*grid_size*grid_size);
-    if (Features.Recovery==ON) {memcpy(m->layer1.recoverys,inpW,sizeof(Compute_float)*grid_size*grid_size);}
+    copyStuff(m->layer1.voltages,inpV,sizeof(Compute_float)*grid_size*grid_size,
+            Features.Recovery,m->layer1.recoverys,inpW,sizeof(Compute_float)*grid_size*grid_size);
     if (ModelType==DUALLAYER)
     {
-        memcpy(m->layer2.voltages,inpV2,sizeof(Compute_float)*grid_size*grid_size);
-        if (Features.Recovery==ON) {memcpy(m->layer2.recoverys,inpW2,sizeof(Compute_float)*grid_size*grid_size);}
+        copyStuff(m->layer2.voltages,inpV2,sizeof(Compute_float)*grid_size*grid_size,
+            Features.Recovery,m->layer2.recoverys,inpW2,sizeof(Compute_float)*grid_size*grid_size);
     }
     step1(m);
     DoOutputs(m->timesteps);

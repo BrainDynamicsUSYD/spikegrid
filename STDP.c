@@ -99,6 +99,16 @@ void STDP_At_point(const coords coord ,STDP_data* const data,STDP_data* const re
         }
     }
 }
+
+void changeconstr(randomconnection* rc,const STDP_data* const data,const STDP_data* const data2)
+{
+    const size_t destidx    = LagIdx(rc->source,data->lags);
+    const size_t destidx2   = LagIdx(rc->source,data2->lags);
+    STDP_change rcchange = STDP_change_calc(destidx,destidx2,data->P,data2->P,data->lags,data2->lags);
+    rc->stdp_strength    = clamp(rc->stdp_strength+rcchange.Strength_increase,rc->strength,data->P->stdp_limit+1000);
+    //                                             ^ note plus sign (not minus) why?? - I assume the strengths are reversed - maybe this should be stremgth_increase?
+}
+
 void  DoSTDP(const Compute_float* const const_couples, const Compute_float* const const_couples2,
         STDP_data* data, STDP_data* const data2,
         randconns_info* rcs,
@@ -141,24 +151,14 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
                    randomconnection** rcbase = GetRandomConnsArriving(coord,*rcs,&noconsArriving);
                    for (unsigned int i=0;i<noconsArriving;i++)
                    {
-                       randomconnection* rc = rcbase[i];
-                       const size_t destidx    = LagIdx(rc->source,data->lags);
-                       const size_t destidx2   = LagIdx(rc->source,data2->lags);
-                       STDP_change rcchange = STDP_change_calc(destidx,destidx2,data->P,data2->P,data->lags,data2->lags);
-                       rc->stdp_strength    = clamp(rc->stdp_strength+rcchange.Strength_increase,rc->strength,data->P->stdp_limit+1000);
-                       //                                             ^ note plus sign (not minus) why?? - I assume the strengths are reversed - maybe this should be stremgth_increase?
+                       changeconstr(rcbase[i],data,data2);
                    }
                     //for reasons this needs to be done twice - once for the second layer - bonus points - why not the other section?
                    unsigned int noconsArriving2;
                    randomconnection** rcbase2 = GetRandomConnsArriving(coord,*rcs2,&noconsArriving2);
                    for (unsigned int i=0;i<noconsArriving2;i++)
                    {
-                       randomconnection* rc = rcbase2[i];
-                       const size_t destidx    = LagIdx(rc->source,data->lags);
-                       const size_t destidx2   = LagIdx(rc->source,data2->lags);
-                       STDP_change rcchange = STDP_change_calc(destidx,destidx2,data->P,data2->P,data->lags,data2->lags);
-                       rc->stdp_strength    = clamp(rc->stdp_strength+rcchange.Strength_increase,rc->strength,data->P->stdp_limit+1000);
-                       //                                             ^ note plus sign (not minus) why?? - I assume the strengths are reversed - maybe this should be stremgth_increase?
+                       changeconstr(rcbase2[i],data,data2);
                    }
                 }
             }

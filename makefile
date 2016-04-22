@@ -1,6 +1,6 @@
 include config.mk
 #conductance.c always needs to be first - this ensures that the mexfile gets the right name
-SOURCES= conductance.c coupling.c  STDP.c STD.c output.c evolve.c newparam.c yossarian.c init.c theta.c printstruct.c cleanup.c evolvegen.c lagstorage.c  tagged_array.c localstim.c utils.c animal.c randconns.c phi.c
+SOURCES= conductance.c coupling.c  STDP.c STD.c output.c evolve.c newparam.c yossarian.c init.c theta.c printstruct.c cleanup.c evolvegen.c lagstorage.c  tagged_array.c localstim.c utils.c animal.c randconns.c phi.c timing.c
 BINARY=./a.out
 VERSION_HASH = $(shell git rev-parse HEAD)
 export CONFIG=whichparam.h config/*

@@ -1,4 +1,3 @@
-#include "typedefs.h"
 #include "sizes.h"
 #include "mymath.h"
 Compute_float* CreatePhiMatrix(void)

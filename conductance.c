@@ -8,7 +8,6 @@
 #include <stdlib.h> //exit
 #include <fenv.h>   //for some debugging
 #include <stdio.h>
-#include <time.h>
 #include "cleanup.h"
 #include "evolve.h"
 #include "newparam.h"
@@ -16,14 +15,24 @@
 #include "yossarian.h"
 #include "model.h"
 #include "out/out.h"
+#include "timing.h"
 #ifdef ANDROID
     #define APPNAME "myapp"
     #include <android/log.h>
 #endif
-
+#define CheckParam(Switch,var) if (Switch==ON && var==NULL) {printf ("%s is on, so I need %s as an input\n",#Switch,#var);return;}
 model* m;               ///< The model we are evolving through time - static data not great but it does only exist in this file
 int jobnumber=-1;        ///< The current job number - used for pics directory etc
 int yossarianjobnumber=-1;
+
+void copyStuff(
+        void* d1,const void* inp,const size_t bytes,
+        const on_off recovery, void* recoverydest,const void* recoverysource,const size_t recoverysize)
+
+{
+    memcpy(d1,inp,bytes);
+    if (recovery==ON) {memcpy(recoverydest,recoverysource,recoverysize);}
+}
 //DO NOT CALL THIS FUNCTION "step" - this causes a weird collision in matlab that results in segfaults.  Incredibly fun to debug
 ///Function that steps the model through time (high level).
 /// I think maybe we should get rid of this function
@@ -33,19 +42,20 @@ int yossarianjobnumber=-1;
 /// @param inpW2 input recoveries for layer 2.  In the single layer model a dummy argument needs to be passed.
 void step_(const Compute_float* const inpV,const Compute_float* const inpV2, const Compute_float* inpW, const Compute_float* inpW2)
 {
-    if (Features.Recovery==ON && inpW==NULL){printf("missing first recovery input");exit(EXIT_FAILURE);}
+    CheckParam(ON,inpV)
+    CheckParam(Features.Recovery,inpW) //note checkparam is a macro here
     if (ModelType==DUALLAYER)
     {
-        if(inpV2==NULL)                         {printf("missing second input voltage in dual-layer model"); exit(EXIT_FAILURE);}
-        if(Features.Recovery==ON && inpW2==NULL){printf("missing second recovery input in dual-layer model");exit(EXIT_FAILURE);}
+        CheckParam(ON,inpV2)
+        CheckParam(Features.Recovery,inpW2)
     }
     m->timesteps++;
-    memcpy(m->layer1.voltages,inpV,sizeof(Compute_float)*grid_size*grid_size);
-    if (Features.Recovery==ON) {memcpy(m->layer1.recoverys,inpW,sizeof(Compute_float)*grid_size*grid_size);}
+    copyStuff(m->layer1.voltages,inpV,sizeof(Compute_float)*grid_size*grid_size,
+            Features.Recovery,m->layer1.recoverys,inpW,sizeof(Compute_float)*grid_size*grid_size);
     if (ModelType==DUALLAYER)
     {
-        memcpy(m->layer2.voltages,inpV2,sizeof(Compute_float)*grid_size*grid_size);
-        if (Features.Recovery==ON) {memcpy(m->layer2.recoverys,inpW2,sizeof(Compute_float)*grid_size*grid_size);}
+        copyStuff(m->layer2.voltages,inpV2,sizeof(Compute_float)*grid_size*grid_size,
+            Features.Recovery,m->layer2.recoverys,inpW2,sizeof(Compute_float)*grid_size*grid_size);
     }
     step1(m);
     DoOutputs(m->timesteps);
@@ -176,7 +186,6 @@ struct option long_options[] = {{"help",no_argument,0,'h'},{"generate",no_argume
 
 void processopts (int argc,char** argv,parameters** newparam,parameters** newparamEx,parameters** newparamIn,on_off* OpenCv)
 {
-
     while (1)
     {
         int option_index=0;
@@ -233,7 +242,8 @@ void processopts(int argc, char** argv, parameters** newparam, parameters** newp
 }
 #endif
 
-Compute_float starttimeNS;
+
+
 ///Main function for the entire program
 /// @param argc number of cmdline args
 /// @param argv what the parameters actually are
@@ -255,10 +265,7 @@ int main(int argc,char** argv) //useful for testing w/out matlab
         int count = job->initcond==RAND_JOB?(int)job->Voltage_or_count:1; //default to 1 job
         for (int c = 0;c<count;c++)
         {
-            //seed RNG as appropriate - with either time or job number
-            if     (job->initcond == RAND_TIME){srandom((unsigned)time(0));}
-            else if(job->initcond==RAND_JOB)   {srandom((unsigned)c +(unsigned) (yossarianjobnumber!= -1 ?yossarianjobnumber:0 ));}
-            else if(job->initcond==RAND_ZERO)  {srandom((unsigned)0);}
+            seedrand(job->initcond,c,yossarianjobnumber);
             //sets up the model code
             //lets create the actual parameters we use
             const parameters actualsingle = newparam  !=NULL ? *newparam  :OneLayerModel; //TODO: it is not going to be hard to remove these
@@ -269,25 +276,13 @@ int main(int argc,char** argv) //useful for testing w/out matlab
 //            SaveModel(m);
             Compute_float *FirstV,*SecondV,*FirstW,*SecondW;
             setuppointers(&FirstV,&SecondV,&FirstW,&SecondW,job,&actualsingle,&actualDualIn,&actualDualEx);
-            //actually runs the model
-            struct timespec time;
-            clock_gettime(CLOCK_MONOTONIC,&time); //we want a monotonic clock here to avoid problems
-            starttimeNS=(Compute_float)time.tv_sec*(Compute_float)1e9+(Compute_float)time.tv_nsec;
+            inittimer();
             const unsigned int printfreq = 200;
+            //actually runs the model
             while (m->timesteps<Features.Simlength)
             {
                 //every now and then we print some statistics about when we are going to be finished - 
-                if (m->timesteps%printfreq==0)
-                {
-                    clock_gettime(CLOCK_MONOTONIC,&time);
-                    Compute_float nanosecondsNOW = (Compute_float)time.tv_nsec + (Compute_float)(time.tv_sec)*(Compute_float)1e9; //This is the most ridiculous stupid api ever.  Just use a bigger data type people
-                    Compute_float timeperstep = 1.0/((nanosecondsNOW-starttimeNS) /(Compute_float)m->timesteps/(Compute_float)1e9);
-                    Compute_float secondstofinish = (Features.Simlength-m->timesteps)/timeperstep;
-                    printf("%i timesteps / second.  Finishing in %i seconds, %i%% done\n",
-                            (int)timeperstep, //print everything as ints to make the display a little nicer - don't need perfect accuraccy
-                            (int)secondstofinish,
-                            (int)((Compute_float)m->timesteps/Features.Simlength*100.0));
-                }
+                if (m->timesteps%printfreq==0){timertick(m->timesteps,Features.Simlength);}
                 step_(FirstV,SecondV,FirstW,SecondW);//always fine to pass an extra argument here
                 //copy the output to be new input - this does seem slightly inelegant.  There is definitely room for improvement here
                 memcpy ( FirstV, m->layer1.voltages_out, sizeof ( Compute_float)*grid_size*grid_size);

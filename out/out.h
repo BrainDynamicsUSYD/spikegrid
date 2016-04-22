@@ -67,9 +67,10 @@ class VidOutput: public TAOutput //This class probably needs a destructor to end
 };
 class TextOutput : public SingleFileOutput //maybe this should inherit from TAoutput - unclear here
 {
+    const output_s* out;
     const tagged_array* data;
     public:
-        TextOutput(int,int,const tagged_array* );
+        TextOutput(int,int,const output_s* );
         void DoOutput_() ;
 };
 class ConsoleOutput: public TAOutput

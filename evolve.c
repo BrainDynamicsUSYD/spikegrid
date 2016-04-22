@@ -2,7 +2,6 @@
 #include <string.h> //memset
 #include <stdio.h>  //useful when we need to print things
 #include "paramheader.h" //in VS this needs to be early to compile - don't know why
-#include "enums.h"
 #include "STDP.h"
 #include "model.h"
 #include "theta.h"
@@ -18,67 +17,11 @@
     #include <android/log.h>
 #endif
 
-void evolvept (const coords c ,const Compute_float* const __restrict connections,const Compute_float Estrmod,const Compute_float Istrmod,condmat* __restrict cond_mat)
-{
-    for (int i = 0; i < couple_array_size;i++)
-    {
-        const int outoff = (c.x + i)*conductance_array_size +c.y;//as gE and gI are larger than he neuron grid size, don't have to worry about wrapping
-        for (int j = 0 ; j<couple_array_size;j++)
-        {
-            const int coupleidx = i*couple_array_size + j;
-            if (connections[coupleidx] > 0)
-            {
-                cond_mat->gE[outoff+j] += connections[coupleidx]*Estrmod;
-            }
-            else
-            {
-                cond_mat->gI[outoff+j] += -(connections[coupleidx]*Istrmod);
-            }
-        }
-    }
-}
 
-///Adds the effect of the spikes that have fired in the past to the gE and gI arrays as appropriate
-/// currently, single layer doesn't work (correctly)
-void AddSpikes_single_layer(layer L, condmat* __restrict__ cond_mat,const unsigned int time)
+void AddSpikes_single_layer(__attribute__((unused))layer L,__attribute__((unused)) condmat* __restrict__ cond_mat,__attribute__((unused))const unsigned int time)
 {
-    for (Neuron_coord y=0;y<grid_size;y++)
-    {
-        for (Neuron_coord x=0;x<grid_size;x++)
-        {
-            const coords c = {.x=x,.y=y};
-            const size_t lagidx = LagIdx(c,L.firinglags);
-            size_t newlagidx = lagidx;
-            if (L.Mytimecourse==NULL) // Single layer TODO: change this if to use something more appropriate
-            {
-                Compute_float excstr = Zero;
-                Compute_float inhstr = Zero;
-
-                while (L.firinglags->lags[newlagidx] != -1)  //Note: I think perf might be overstating the amount of time on this line - although, if it isn't massive potential for perf improvement
-                {
-                    Compute_float this_excstr = L.Extimecourse[L.firinglags->lags[newlagidx]];
-                    Compute_float this_inhstr = L.Intimecourse[L.firinglags->lags[newlagidx]];
-                    if (Features.STD == ON)
-                    {
-                        this_excstr = this_excstr * STD_str(L.P->STD,c,time,L.firinglags->lags[newlagidx],L.std);
-                        this_inhstr = this_inhstr * STD_str(L.P->STD,c,time,L.firinglags->lags[newlagidx],L.std);
-                    }
-                    newlagidx++;
-                    excstr += this_excstr;
-                    inhstr += this_inhstr;
-                }
-                if (newlagidx != lagidx) //only fire if we had a spike.
-                {
-                    evolvept(c,L.connections,excstr,inhstr,cond_mat); // No support for STDP in single layer
-                }
-            }
-            else // Dual layer
-            {
-                printf("Addspikes_single called for a dual layer model - quitting\n");
-                exit(EXIT_FAILURE);
-            }
-        }
-    }
+    printf("single layer is currently unsupported\n");
+    //does nothing - if you want to see what used to be here use git blame - but it wasn't particularly good anyway.
 }
 ///This function adds in the overlapping bits back into the original matrix.  It is slightly opaque but using pictures you can convince yourself that it works
 ///To keep the evolvept code simple we use an array like this:
@@ -238,8 +181,8 @@ void StoreFiring(layer* L,const unsigned int timestep)
             {
                 const coords coord = {.x=x,.y=y};
                 const size_t baseidx = LagIdx(coord,L->firinglags);
-                modifyLags(L->firinglags,baseidx);
-                if (Features.STDP==ON) {modifyLags(L->STDP_data->lags,LagIdx(coord,L->STDP_data->lags));}
+                modifyLags(L->firinglags,baseidx,grid_index(coord));
+                if (Features.STDP==ON) {modifyLags(L->STDP_data->lags,LagIdx(coord,L->STDP_data->lags),grid_index(coord));}
                 //now - add in new spikes
                 if (L->voltages_out[grid_index(coord)]  >= L->P->potential.Vpk
                         ||
@@ -291,7 +234,7 @@ void RefractoryVoltages(Compute_float* const __restrict Vout,const couple_parame
     for (unsigned int i=0;i<grid_size*grid_size;i++)
     {
         unsigned int baseidx = i*l->lagsperpoint;
-        if (CurrentShortestLag(l,baseidx) <= trefrac_in_ts)
+        if (CurrentShortestLag(l,baseidx,i) <= trefrac_in_ts)
         {
             Vout[i] = CP.Vrt;
         }
@@ -324,14 +267,13 @@ void tidylayer (layer* l,const Compute_float timemillis,const condmat* const __r
     }
     if (Features.ImageStim==ON)
     {
-        if (l->P->Stim.Periodic==ON)
+        if (l->P->Stim.Periodic==ON) //only stim excit layer
         {
-            ApplyStim(l->voltages_out,timemillis,l->P->Stim,l->P->potential.Vpk,l->STDP_data,l->rcinfo);
+            ApplyStim(l->voltages_out,timemillis,l->P->Stim,l->P->potential.Vpk,l->STDP_data,l->rcinfo,l->Layer_is_inhibitory);
         }
     }
-    if (l->P->STDP.STDP_decay_frequency>0 && (int)(timemillis/Features.Timestep) % l->P->STDP.STDP_decay_frequency == 0)
+    if (l->P->STDP.STDP_decay_frequency>0 && (int)(timemillis/Features.Timestep) % l->P->STDP.STDP_decay_frequency == 0 && l->STDP_data->RecordSpikes==ON)
     {
-        printf("decaying STDP\n");
         STDP_decay(l->STDP_data,l->rcinfo);
     }
 
@@ -372,7 +314,7 @@ void step1(model* m)
     if (m->NoLayers==DUALLAYER){tidylayer(&m->layer2,timemillis,m->cond_matrices,m->timesteps);}
     if (Features.STDP==ON)
     {
-        DoSTDP(m->layer1.connections,m->layer2.connections,m->layer1.STDP_data,m->layer2.STDP_data,m->layer1.rcinfo);
-        DoSTDP(m->layer2.connections,m->layer1.connections,m->layer2.STDP_data,m->layer1.STDP_data,m->layer2.rcinfo);
+        DoSTDP(m->layer1.connections,m->layer2.connections,m->layer1.STDP_data,m->layer2.STDP_data,m->layer1.rcinfo,m->layer2.rcinfo);
+        DoSTDP(m->layer2.connections,m->layer1.connections,m->layer2.STDP_data,m->layer1.STDP_data,m->layer2.rcinfo,m->layer1.rcinfo);
     }
 }

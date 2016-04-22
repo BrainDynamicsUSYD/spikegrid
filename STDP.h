@@ -14,7 +14,8 @@ typedef struct STDP_data //this does actually need to go in a header as the imag
 } STDP_data;
 void  DoSTDP(const Compute_float* const const_couples, const Compute_float* const const_couples2,
         STDP_data* data, STDP_data* const data2,
-        randconns_info* rcs);
+        randconns_info* rcs, randconns_info* rcs2
+        );
 STDP_data* STDP_init(const STDP_parameters* const S,const int trefrac_in_ts);
 Compute_float* COMangle(const  STDP_data* const S);
 

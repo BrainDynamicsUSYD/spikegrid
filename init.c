@@ -4,6 +4,7 @@
 #ifndef _WIN32
 #include <unistd.h> //gethostname
 #endif
+#include <time.h>
 #include <stdio.h>
 #include "mymath.h"
 #include "phi.h"
@@ -50,7 +51,13 @@ void Fixedinit(Compute_float* input, const Compute_float def_value,const Compute
     }
     input[grid_size*(grid_size/2) + (grid_size/2)] = mod_value;
 }
-
+void seedrand(const InitConds initcond,const int jobno,const int yossarianjobnumber)
+{
+    //seed RNG as appropriate - with either time or job number
+    if     (initcond == RAND_TIME)  {srandom((unsigned)time(0));}
+    else if(initcond == RAND_JOB)   {srandom((unsigned)jobno +(unsigned) (yossarianjobnumber!= -1 ?yossarianjobnumber:0 ));}
+    else if(initcond == RAND_ZERO)  {srandom((unsigned)0);}
+}
 ///given a parameters object, set up a layer object.
 ///currently this function is only called from the setup function (but it could be called directly)
 layer setuplayer(const parameters p)

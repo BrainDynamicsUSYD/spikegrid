@@ -23,7 +23,10 @@ extern "C"
 on_off showimages = ON;
 std::vector<Output*> outvec;
 
-void Output::update() {}
+void Output::update() 
+{
+
+}
 void Output::DoOutput()
 {
     this->update();
@@ -127,9 +130,13 @@ SingleFileOutput::SingleFileOutput(int idxin ,const int intervalin) : Output(int
    if (f==NULL) {printf("fopen failed for %s error is %s\n",buf,strerror(errno));}
 }
 
-TextOutput::TextOutput(int idxin,const int intervalin,const tagged_array* datain) : SingleFileOutput(idxin,intervalin) {data=datain;}
+TextOutput::TextOutput(int idxin,const int intervalin,const output_s* datain) : SingleFileOutput(idxin,intervalin) {out=datain;data=out->data.TA_data;}
 void TextOutput::DoOutput_()
 {
+    if (this->out->Updateable==ON)
+    {
+       this->data=this->out->UpdateFn(this->out->function_arg);
+    }
     Compute_float* actualdata = taggedarrayTocomputearray(*data);
     const unsigned int size = tagged_array_size_(*data);
     for (unsigned int i=0;i<size;i++)
@@ -182,7 +189,9 @@ void SpikeOutput::DoOutput_()
     {
         for (Neuron_coord j=0;j<grid_size;j++)
         {
-            if (CurrentShortestLag(data,grid_index((coords){.x=i,.y=j})*data->lagsperpoint) == 1)
+            if (CurrentShortestLag(data,grid_index((coords){.x=i,.y=j})*data->lagsperpoint,grid_index((coords){.x=i,.y=j})) == 1)
+
+
             {
                 fprintf(f,"%i,%i:",i,j);
             }
@@ -206,7 +215,7 @@ void MakeOutputs(const output_parameters* const m)
                 outvec.push_back(out);
                 break;
             case TEXT:
-                out = new TextOutput(i,m[i].Delay,outt->data.TA_data);
+                out = new TextOutput(i,m[i].Delay,outt);
                 outvec.push_back(out);
                 break;
             case CONSOLE:

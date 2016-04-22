@@ -18,7 +18,7 @@ typedef struct decay_parameters{
     const Compute_float D;  ///<decay time constant (units?)
     const Synaptic_evol synfun;
 } decay_parameters;
-typedef struct
+typedef struct //TODO: this whole struct is a mess and really should be tidied up. - for example get some better enums to describe the mutually exclusive states
 {
     const Compute_float timeperiod;
     const Compute_float lag;
@@ -37,6 +37,8 @@ typedef struct
     const Compute_float path_osc_freq;
     const on_off LotsofTesting;
     const on_off Oscillating_Stimulus_Side;
+    const on_off Gradual_stim_swap;
+    const Compute_float Gradual_swap_period;
 } Stimulus_parameters;
 ///Parameters for a layer when it is the only one
 typedef struct

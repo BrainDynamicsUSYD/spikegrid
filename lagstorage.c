@@ -11,6 +11,7 @@ lagstorage* lagstorage_init(const unsigned int flagcount,const int cap)
     lagstorage firinglags =
     {
         .lags         = calloc(sizeof(int16_t),grid_size*grid_size*(size_t)flagcount), //TODO: switching to store a timestep number here might be faster
+        .counts         = calloc(sizeof(int16_t),grid_size*grid_size),
         .cap          = cap,
         .lagsperpoint = flagcount
     };
@@ -32,60 +33,42 @@ void lagstorage_dtor(lagstorage* l)
     free(l->lags);
     free(l); //lagstorages are always allocated with malloc
 }
-
-int16_t __attribute__((const,pure)) CurrentShortestLag(const lagstorage* const L,const size_t  baseidx)
+#include<stdio.h>
+int16_t __attribute__((const,pure)) CurrentShortestLag(
+        const lagstorage* const L,
+        const size_t  baseidx,
+        const size_t realbase)
 {
-    unsigned int idx=0;
-    while (L->lags[baseidx + idx] != -1)
-    {
-        idx++;
-    } //take the last entry - then check if in refrac period and set voltages
-    if (idx != 0)
-    {
-        return L->lags[baseidx+idx - 1]; //-1 or otherwise we return -1
-    }
-    else {return INT16_MAX;}
-
+    const uint16_t count = L->counts[realbase];
+    if (count==0) {return INT16_MAX;} else {return L->lags[baseidx+count-1];}
 }
 void AddnewSpike(lagstorage* L,const size_t baseidx)
 {
+    const size_t realbase = baseidx/L->lagsperpoint;
     //find the empty idx
-    unsigned int idx = 0;
-    while (L->lags[baseidx + idx] != -1)
-    {
-        idx++;
-    }
+    const size_t idx = (size_t)L->counts[realbase];
     //and set it to 1 - this makes things work
     L->lags[baseidx + idx]=1;
-    //and set the next one to -1 to mark the end of the array
-    L->lags[baseidx + idx+1]= -1;
+    L->counts[realbase]++;
 }
 //called for every neuron on every timestep
 void RemoveDeadSpike(lagstorage* L,const size_t baseidx)
 {
-    if (L->lags[baseidx] == L->cap )//if first entry is at cap - remove and shuffle everything down
-    {
-        unsigned int idx2 = 0;
-        while (L->lags[baseidx+idx2] != -1) //move everthing down
-        {
-            L->lags[baseidx+idx2] = L->lags[baseidx+idx2+1]; //since this is the next one, we will always move the -1 as well
-            idx2++;
-        }
-    }
+    const size_t realbase = baseidx/L->lagsperpoint;
+    L->counts[realbase]--;
+    L->lags[baseidx]++;//required protection for the zero case
+    memmove(&L->lags[baseidx],&L->lags[baseidx+1],(L->counts[realbase])*sizeof(L->lags[0]));
 }
-//be careful - this function uses a pretty significant amount of time - called for every neuron at every timestep (twice with STDP)
-//
-void modifyLags(lagstorage* L,size_t baseidx)
+
+//called a lot - be careful
+void modifyLags(lagstorage* L,const size_t baseidx,const size_t realbase)
 {
+    if (L->lags[baseidx]==L->cap-1) {RemoveDeadSpike(L,baseidx);}
+    const uint16_t count =L->counts[realbase] ;
     //increment the firing lags.
-    unsigned int idx = 0;
-    while (L->lags[baseidx+idx] != -1)
+    for (uint16_t idx=0;idx<count;idx++)
     {
         L->lags[baseidx+idx]++;
-        idx++; //I wonder if there is a trick here in the increment?
-        //maybe we could use some trick SSE instruction.
-        //otherwise - maybe store a timestep number
     }
-    RemoveDeadSpike(L,baseidx); //the structure here could be nicer - however I wouldn't be surprised if gcc does some magic and auto inlines and reorders removedeadspike and modifylags
 }
 

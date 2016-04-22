@@ -1,5 +1,4 @@
-/// trying to recreate figure 4 from Johnson and redish - using a T maze
-/// this will try using a t-maze rather than the y-maze from before
+/// Testing adaptability in a t-maze based network model - here the probability of association will vary gradually over time
 #include <stddef.h> //offsetof
 //these first few parameters actually escape into the paramheader file through magic
 #define grid_size 200
@@ -43,13 +42,14 @@ static const parameters OneLayerModel = {.couple={0}}; //since unused - shortes 
 
 #define STDPparams .STDP=   \
 {                       \
-    .stdp_limit=0.12,    \
+    .stdp_limit=0.07,    \
     .stdp_tau=20,       \
-    .stdp_strength=0.012,  \
+    .stdp_strength=0.005,  \
     .STDP_on=ON,\
     .STDP_decay_factor=0.9985,\
-    .STDP_decay_frequency=100, \
+    .STDP_decay_frequency=100,\
 }
+
 #define Stimparams .Stim=\
 {\
     .ImagePath  = "input_maps/stoch_interact_Tmaze.png",\
@@ -59,12 +59,11 @@ static const parameters OneLayerModel = {.couple={0}}; //since unused - shortes 
     .NoUSprob=0,\
     .Testing = OFF,\
     .TestPathChoice = ON,\
-    .Periodic = ON,\
-    .LotsofTesting = ON,\
     .Oscillating_path = ON,\
-    .Prob1=0.5,\
-    .Oscillating_Stimulus_Side=ON,\
-    .path_osc_freq=10000000,\
+    .path_osc_freq = 100,\
+    .Periodic = ON,\
+    .Gradual_stim_swap=ON,\
+    .Gradual_swap_period=800,\
 }
 #define Rparams .random=\
 { \
@@ -104,14 +103,14 @@ static const parameters DualLayerModelIn =
 ///parameters for the excitatory layer of the double layer model
 static const parameters DualLayerModelEx =
 {
-     .couple =
+    .couple =
     {
         .Layertype = DUALLAYER,
         .Layer_parameters =
         {
             .dual =
             {
-                .W          =  0.24,
+                .W          =  0.25,
                 .sigma      = 20,
                 .synapse    = {.R=0.5,.D=2.0},
             }
@@ -130,14 +129,20 @@ static const parameters DualLayerModelEx =
 static const model_features Features =
 {
     .STD        = OFF,
-    .STDP       = ON,
+    .STDP		= ON,
     .Random_connections = ON,
     .Timestep   = 0.1,
-    .Simlength  = 300000,
+    .Simlength  = 10000000,
     .ImageStim  = ON,
     .job        = {.initcond = RAND_JOB, .Voltage_or_count = 1},
     .Disablewrapping = ON,
-    .output = {{.method = VIDEO,.Output="V2",.Delay=20, .Overlay="Trialno"}}
+    .output = {
+        {.method = VIDEO,.Output="V2",.Delay=40, .Overlay="Trialno"},
+        {.method=GUI,.Output="V2",.Delay=10,.Overlay="Timestep"},
+        {.method=TEXT,.Output="RC2",.Delay=10000},
+//        {.method=TEXT,.Output="V2",.Delay=10},
+        {.method=TEXT,.Output="STDP_bias2",.Delay=10000}
+    }
 };
 ///Constant external input to conductances
 static const extinput Extinput =
@@ -149,9 +154,9 @@ static const extinput Extinput =
 static const sweepable Sweep =
 {
     .offset=offsetof(parameters,Stim.Prob1) ,
-    .minval = 0.500,
-    .maxval = 0.5,
-    .count = 80,
+    .minval = 0.000,
+    .maxval = 0,
+    .count = 100,
     .SweepEx = ON,
     .SweepIn = ON,
 };

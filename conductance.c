@@ -31,7 +31,7 @@ void copyStuff(
 
 {
     memcpy(d1,inp,bytes);
-    if (recovery==ON) {memcpy(recoverydest,recoverysource,recoverysize);
+    if (recovery==ON) {memcpy(recoverydest,recoverysource,recoverysize);}
 }
 //DO NOT CALL THIS FUNCTION "step" - this causes a weird collision in matlab that results in segfaults.  Incredibly fun to debug
 ///Function that steps the model through time (high level).
@@ -186,7 +186,6 @@ struct option long_options[] = {{"help",no_argument,0,'h'},{"generate",no_argume
 
 void processopts (int argc,char** argv,parameters** newparam,parameters** newparamEx,parameters** newparamIn,on_off* OpenCv)
 {
-
     while (1)
     {
         int option_index=0;
@@ -243,6 +242,14 @@ void processopts(int argc, char** argv, parameters** newparam, parameters** newp
 }
 #endif
 
+void seedrand(const InitConds initcond,const int jobno)
+{
+    //seed RNG as appropriate - with either time or job number
+    if     (initcond == RAND_TIME)  {srandom((unsigned)time(0));}
+    else if(initcond == RAND_JOB)   {srandom((unsigned)jobno +(unsigned) (yossarianjobnumber!= -1 ?yossarianjobnumber:0 ));}
+    else if(initcond == RAND_ZERO)  {srandom((unsigned)0);}
+}
+
 Compute_float starttimeNS;
 ///Main function for the entire program
 /// @param argc number of cmdline args
@@ -265,10 +272,7 @@ int main(int argc,char** argv) //useful for testing w/out matlab
         int count = job->initcond==RAND_JOB?(int)job->Voltage_or_count:1; //default to 1 job
         for (int c = 0;c<count;c++)
         {
-            //seed RNG as appropriate - with either time or job number
-            if     (job->initcond == RAND_TIME){srandom((unsigned)time(0));}
-            else if(job->initcond==RAND_JOB)   {srandom((unsigned)c +(unsigned) (yossarianjobnumber!= -1 ?yossarianjobnumber:0 ));}
-            else if(job->initcond==RAND_ZERO)  {srandom((unsigned)0);}
+            seedrand(job->initcond,c);
             //sets up the model code
             //lets create the actual parameters we use
             const parameters actualsingle = newparam  !=NULL ? *newparam  :OneLayerModel; //TODO: it is not going to be hard to remove these

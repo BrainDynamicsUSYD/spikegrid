@@ -49,8 +49,6 @@ void AddnewSpike(lagstorage* L,const size_t baseidx)
     const size_t idx = (size_t)L->counts[realbase];
     //and set it to 1 - this makes things work
     L->lags[baseidx + idx]=1;
-    //and set the next one to -1 to mark the end of the array
-    L->lags[baseidx + idx+1]= -1;
     L->counts[realbase]++;
 }
 //called for every neuron on every timestep
@@ -58,15 +56,11 @@ void RemoveDeadSpike(lagstorage* L,const size_t baseidx)
 {
     const size_t realbase = baseidx/L->lagsperpoint;
     L->counts[realbase]--;
-    unsigned int idx2 = 0;
-    while (L->lags[baseidx+idx2] != -1) //move everthing down
-    {
-        L->lags[baseidx+idx2] = L->lags[baseidx+idx2+1]; //since this is the next one, we will always move the -1 as well
-        idx2++;
-    }
-}
-//be careful - this function uses a pretty significant amount of time - called for every neuron at every timestep (twice with STDP)
-//
+    L->lags[baseidx]++;//required protection for the zero case
+    memmove(&L->lags[baseidx],&L->lags[baseidx+1],(L->counts[realbase])*sizeof(L->lags[0]));
+
+
+//called a lot - be careful
 void modifyLags(lagstorage* L,const size_t baseidx,const size_t realbase)
 {
     if (L->lags[baseidx]==L->cap-1) {RemoveDeadSpike(L,baseidx);}
@@ -75,9 +69,6 @@ void modifyLags(lagstorage* L,const size_t baseidx,const size_t realbase)
     for (uint16_t idx=0;idx<count;idx++)
     {
         L->lags[baseidx+idx]++;
-        //maybe we could use some trick SSE instruction.
-        //otherwise - maybe store a timestep number
     }
- //   RemoveDeadSpike(L,baseidx); //the structure here could be nicer - however I wouldn't be surprised if gcc does some magic and auto inlines and reorders removedeadspike and modifylags
 }
 

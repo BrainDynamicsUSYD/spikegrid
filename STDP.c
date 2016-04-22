@@ -38,24 +38,29 @@ Compute_float clamp(Compute_float V,Compute_float target,Compute_float frac)
     else   {return V;}
 }
 
-STDP_change STDP_change_calc (const size_t destneuronidx,const size_t destinotherlayeridx, const STDP_parameters* const S, const STDP_parameters * const S2,const int16_t* const lags,const int16_t* revlags)
+STDP_change STDP_change_calc (
+        const size_t destneuronidx,const size_t destinotherlayeridx, 
+        const STDP_parameters* const S, const STDP_parameters * const S2,
+        const lagstorage* const lags, const lagstorage* const revlags)
 {
     STDP_change ret = {.Strength_increase=Zero, .Strength_decrease=Zero,.valid=OFF};
     unsigned int idx=0;
-    while (lags[destneuronidx+idx] != -1) //connections within the layer
+    const size_t destcountbase=destneuronidx/lags->lagsperpoint;
+    const uint16_t normcount = lags->counts[destcountbase];
+    for (uint16_t i = 0;i<normcount;i++)
     {
-        ret.Strength_decrease += STDP_strength(S,lags[destneuronidx+idx]);
-        ret.Strength_increase += STDP_strength(S,lags[destneuronidx+idx]);
-        idx++;
+        ret.Strength_decrease += STDP_strength(S,lags->lags[destneuronidx+i]);
+        ret.Strength_increase += STDP_strength(S,lags->lags[destneuronidx+i]);
         ret.valid = ON;
     }
-    idx = 0;
-    while (revlags[destinotherlayeridx+idx] != -1) //connections to the other layer.  This is way too complicated - but I tghink it should work
+    const size_t revcountbase=destinotherlayeridx/revlags->lagsperpoint;
+    const uint16_t revcount = revlags->counts[revcountbase];
+    for (uint16_t i = 0;i<revcount;i++)
     {
-        ret.Strength_increase += STDP_strength(S2,revlags[destinotherlayeridx+idx]);
+        ret.Strength_increase += STDP_strength(S2,revlags->lags[destinotherlayeridx+i]);
         //the connection from the other layer to the current layer uses the other layer parameters
         //slightly arbitrary but feels correct and maintains the sum of STDP=0 when window function is odd.
-        ret.Strength_decrease += STDP_strength(S, revlags[destinotherlayeridx+idx]);
+        ret.Strength_decrease += STDP_strength(S, revlags->lags[destinotherlayeridx+i]);
         idx++;
     }
     return ret;
@@ -70,7 +75,7 @@ void STDP_At_point(const coords coord ,STDP_data* const data,STDP_data* const re
     //calculate the indexes for the neuron we are connected to and compute the offsets
     const size_t baseidx =  LagIdx(wcoords,data->lags);
     const size_t baseidx2 = LagIdx(wcoords,revdata->lags);
-    STDP_change change = STDP_change_calc(baseidx,baseidx2,data->P,revdata->P,data->lags->lags,revdata->lags->lags);
+    STDP_change change = STDP_change_calc(baseidx,baseidx2,data->P,revdata->P,data->lags,revdata->lags);
     if (change.valid==ON)
     {
         // the other neuron actually fired - so we can apply STDP - need to apply in two directions
@@ -128,7 +133,7 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
                     {
                         const size_t destidx           = LagIdx(randconns[i].destination,data->lags);
                         const size_t destidx2          = LagIdx(randconns[i].destination,data2->lags);
-                        STDP_change rcchange        = STDP_change_calc(destidx,destidx2,data->P,data2->P,data->lags->lags,data2->lags->lags);
+                        STDP_change rcchange        = STDP_change_calc(destidx,destidx2,data->P,data2->P,data->lags,data2->lags);
                         randconns[i].stdp_strength  = clamp(randconns[i].stdp_strength-rcchange.Strength_decrease,randconns[i].strength,data->P->stdp_limit+1000);
                     }
                     //random connections to (x,y) - these will be getting increased - code is almost identical - except sign of change is reversed
@@ -139,7 +144,7 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
                        randomconnection* rc = rcbase[i];
                        const size_t destidx    = LagIdx(rc->source,data->lags);
                        const size_t destidx2   = LagIdx(rc->source,data2->lags);
-                       STDP_change rcchange = STDP_change_calc(destidx,destidx2,data->P,data2->P,data->lags->lags,data2->lags->lags);
+                       STDP_change rcchange = STDP_change_calc(destidx,destidx2,data->P,data2->P,data->lags,data2->lags);
                        rc->stdp_strength    = clamp(rc->stdp_strength+rcchange.Strength_increase,rc->strength,data->P->stdp_limit+1000);
                        //                                             ^ note plus sign (not minus) why?? - I assume the strengths are reversed - maybe this should be stremgth_increase?
                    }
@@ -151,7 +156,7 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
                        randomconnection* rc = rcbase2[i];
                        const size_t destidx    = LagIdx(rc->source,data->lags);
                        const size_t destidx2   = LagIdx(rc->source,data2->lags);
-                       STDP_change rcchange = STDP_change_calc(destidx,destidx2,data->P,data2->P,data->lags->lags,data2->lags->lags);
+                       STDP_change rcchange = STDP_change_calc(destidx,destidx2,data->P,data2->P,data->lags,data2->lags);
                        rc->stdp_strength    = clamp(rc->stdp_strength+rcchange.Strength_increase,rc->strength,data->P->stdp_limit+1000);
                        //                                             ^ note plus sign (not minus) why?? - I assume the strengths are reversed - maybe this should be stremgth_increase?
                    }

@@ -140,7 +140,7 @@ void  DoSTDP(const Compute_float* const const_couples, const Compute_float* cons
                     randomconnection* randconns = GetRandomConnsLeaving(coord,*rcs,&norand);
                     //random connections away from (x,y) - these will be getting decreased
                     for (unsigned int i = 0;i<norand;i++)
-                    {
+                    {   //note - this has the order of source/destination reversed compared to the arriving connections
                         const size_t destidx           = LagIdx(randconns[i].destination,data->lags);
                         const size_t destidx2          = LagIdx(randconns[i].destination,data2->lags);
                         STDP_change rcchange        = STDP_change_calc(destidx,destidx2,data->P,data2->P,data->lags,data2->lags);

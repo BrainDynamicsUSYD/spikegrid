@@ -8,7 +8,6 @@
 #include <stdlib.h> //exit
 #include <fenv.h>   //for some debugging
 #include <stdio.h>
-#include <time.h>
 #include "cleanup.h"
 #include "evolve.h"
 #include "newparam.h"

@@ -2,7 +2,6 @@
 #include <string.h> //memset
 #include <stdio.h>  //useful when we need to print things
 #include "paramheader.h" //in VS this needs to be early to compile - don't know why
-#include "enums.h"
 #include "STDP.h"
 #include "model.h"
 #include "theta.h"

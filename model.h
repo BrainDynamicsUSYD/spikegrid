@@ -1,6 +1,5 @@
 /// \file
 #include "layer.h" //TODO would be nice if this wasn't needed
-#include "sizes.h"
 typedef struct animal animal;
 typedef struct condmat {
     Compute_float gE [conductance_array_size*conductance_array_size];

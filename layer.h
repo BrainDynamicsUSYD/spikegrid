@@ -2,7 +2,6 @@
 #ifndef LAYER
 #define LAYER
 #include "enums.h" //needed at least for the is-inhibitory flag
-#include "typedefs.h"
 #include "sizes.h"
 typedef struct STD_data STD_data; //forward declare STD_data to make things cleaner - makes this file a little messier, but it makes it more obvious where things come from
 ///hold the requisite data for a layer that enables it to be evolved through time.

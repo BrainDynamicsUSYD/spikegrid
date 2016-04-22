@@ -19,7 +19,7 @@
 #endif
 
 
-void AddSpikes_single_layer(__attribute__((used))layer L,__attribute__((used)) condmat* __restrict__ cond_mat,__attribute__((used))const unsigned int time)
+void AddSpikes_single_layer(__attribute__((unused))layer L,__attribute__((unused)) condmat* __restrict__ cond_mat,__attribute__((unused))const unsigned int time)
 {
     printf("single layer is currently unsupported\n");
     //does nothing - if you want to see what used to be here use git blame - but it wasn't particularly good anyway.

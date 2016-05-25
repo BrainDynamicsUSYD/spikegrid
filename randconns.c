@@ -225,5 +225,5 @@ void CreateRCOutputtable(const randconns_info* const rcinfo)
             .data.TA_data=GetRCWeights((const tagged_array* const)rcinfo),
             .Updateable=ON,
             .UpdateFn=&GetRCWeights,
-            .function_arg=(tagged_array*)rcinfo /*I really should stop this massive hackery*/});
+            .function_arg=(const tagged_array*)rcinfo /*I really should stop this massive hackery*/});
 }

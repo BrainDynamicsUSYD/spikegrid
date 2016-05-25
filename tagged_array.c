@@ -73,7 +73,7 @@ fcoords* taggedArrayCOM(const tagged_array in)
 Compute_float xbias_small(const volatile Compute_float* const data,const unsigned int smallsize)
 {
     Compute_float ret = Zero;
-    const int halfsize=smallsize/2;
+    const int halfsize=(int)smallsize/2;
     for (unsigned int i=0;i<smallsize;i++)
     {
         for (unsigned int j=0;j<smallsize;j++)

@@ -83,9 +83,9 @@ GUIoutput::GUIoutput(int a,int b, const output_s* c, const char* const d, const 
         winname=(char*)malloc(20);
         strcpy(winname,wname);
         cvNamedWindow(wname,CV_WINDOW_NORMAL);
-        char* data=(char*)malloc(20);//create our own 20 byte chunk of ram to avoid a warning - TODO: free this ram
-        strcpy(data,wname);
-        cvSetMouseCallback(wname,mousecb,(void*)data);
+        char* cbdata=(char*)malloc(20);//create our own 20 byte chunk of ram to avoid a warning - TODO: free this ram
+        strcpy(cbdata,wname);
+        cvSetMouseCallback(wname,mousecb,(void*)cbdata);
     }
 }
 void GUIoutput::DoOutput_()

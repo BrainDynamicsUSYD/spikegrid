@@ -23,3 +23,4 @@ Some developer documentation can be auto-generated from the code using Doxygen w
 Things that need to be done:
 
 1. In some places, we might need to use `size_t` for things which are indexes in arrays.  There are at least a few places where we have assumed that `unsigned int` or `int` are sufficiently large.  For large grids with STDP / random connections, this may not actually be true.
+2. Many of the parameters are not used and/or not currently working - there should be a real project to make sure we have a test case for each option and that it can be easily tested.

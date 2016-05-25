@@ -150,7 +150,10 @@ void TextOutput::DoOutput_()
     fflush(f);//prevents stalling in matlab
     free(actualdata);
 }
-ConsoleOutput::ConsoleOutput(int idxin, const int intervalin, const output_s* datain) : TAOutput(idxin, intervalin, datain) {}
+ConsoleOutput::ConsoleOutput(int idxin, const int intervalin, const output_s* datain) : TAOutput(idxin, intervalin, datain)
+{
+    setvbuf(stdout,NULL,_IONBF,0);
+}
 void ConsoleOutput::DoOutput_()
 {
     #if defined(OPENCV) && !defined(_WIN32)

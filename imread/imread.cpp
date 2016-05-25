@@ -6,6 +6,7 @@
 #include <string>
 #include <cstdbool>
 #include <algorithm>
+#include <random>
 #include "imread.h"
 extern "C"
 {

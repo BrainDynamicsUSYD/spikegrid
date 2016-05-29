@@ -21,7 +21,7 @@ else #gcc
 
 	extrawarnings=-Wstrict-aliasing -fstrict-aliasing   -Wshadow  -Wconversion -Wdouble-promotion -Wformat=2 -Wunused -Wuninitialized -Wfloat-equal -Wunsafe-loop-optimizations -Wcast-qual -Wcast-align -Wwrite-strings  -Wlogical-op  -Wvector-operation-performance -Wno-pragmas
 	extraextrawarnings=-Wsuggest-attribute=pure  -Wsuggest-attribute=noreturn -Wstrict-overflow=4
-	export CFLAGS=-g -ggdb -Wall -Wextra  ${optflags} ${extrawarnings} ${extraextrawarnings} -Werror-implicit-function-declaration -fno-builtin-malloc
+	export CFLAGS=-g -ggdb -Wall -Wextra -I $(shell pwd)  ${optflags} ${extrawarnings} ${extraextrawarnings} -Werror-implicit-function-declaration -fno-builtin-malloc
 	cspecificwarnings= -Wjump-misses-init
 endif
 

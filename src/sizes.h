@@ -6,7 +6,7 @@
 #include "VS\VS\Winheader.h"
 #endif
 #define PARAMETERS
-#include "../whichparam.h"
+#include "whichparam.h"
 #undef  PARAMETERS
 //get some macros for various sizes
 ///Size of the "large" arrays (notable examples are gE and gI)

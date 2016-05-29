@@ -133,5 +133,5 @@ typedef struct sweepable
 } sweepable;
 
 
-#include "../whichparam.h"
+#include "whichparam.h"
 #endif

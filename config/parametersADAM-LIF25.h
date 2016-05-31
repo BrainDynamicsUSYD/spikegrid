@@ -21,17 +21,13 @@ static const parameters OneLayerModel = {.couple={0}};
 {                                       \
     .type    =                          \
     {                                   \
-        .type = EIF,                    \
-        .extra =                        \
-        {                               \
-            .EIF={.Vth=0.625,.Dpk=0.4375} \
-        }                               \
+        .type = LIF,                    \
     },                                  \
-    .Vrt     = -0.375,                 \
-    .Vpk    = 2.667,                  \
-    .Vlk     = 0,                     \
-    .Vex     = 4.667,                       \
-    .Vin     = -0.667,                     \
+    .Vrt     = -70,                     \
+    .Vpk    = -55,                      \
+    .Vlk     = -70,                     \
+    .Vex     = 0,                       \
+    .Vin     = -80,                     \
     .glk     = 0.05,                    \
     .rate = 0,                          \
 }
@@ -45,9 +41,9 @@ static const parameters OneLayerModel = {.couple={0}};
         .NoUSprob=0,                                \
         .Testing=OFF,                               \
         .Periodic=OFF,                              \
-        .I2 = 1.00,                                 \
+        .I2 = 4.00,                                 \
         .I1 = 0,                                    \
-        .I0 = 0.05,                                 \
+        .I0 = 0.80,                                 \
         .mu = 0.04,                                 \
     }
 
@@ -62,7 +58,7 @@ static const parameters DualLayerModelIn =
             .dual = 
             {
                 .connectivity = HOMOGENEOUS,   
-                .W            = -0.10, //vart W?
+                .W            = -0.03, //vart W?
                 .sigma        = 0, 
                 .synapse      = {.R=0,.D=2},
             }
@@ -86,8 +82,8 @@ static const parameters DualLayerModelEx =
             .dual =     
             {
                 .connectivity = EXPONENTIAL,   
-                .W            = 0.28, 
-                .sigma        = 15,
+                .W            = 0.04, 
+                .sigma        = 20,
                 .synapse      = {.R=0,.D=2},
             }
         },
@@ -115,8 +111,8 @@ static const model_features Features =
     .Timestep   = 0.05, // Works in like with 0.1 for midpoint. But if gE too small should addition be smaller too???
     .ImageStim = ON,
     .Simlength  = 40000,
-    //.job        = {.initcond = RAND_JOB, .Voltage_or_count = 1},
-    .Outprefix = "EIF25_sigE15_sweepI2",
+    .job        = {.initcond = RAND_JOB, .Voltage_or_count = 1},
+    .Outprefix = "LIF25_WI04_sweepI2",
     .output = {
         { .method=SPIKES,.Output="Spike1" ,.Delay=1}, // Exc. spikes
         { .method=SPIKES,.Output="Spike2" ,.Delay=1}, // Inh. spikes
@@ -124,31 +120,32 @@ static const model_features Features =
         { .method=TEXT,.Output="V2",.Delay=20},    // Inh. voltage
         { .method=TEXT,.Output="gE",.Delay=20},
         { .method=TEXT,.Output="gI",.Delay=20},
+        //{.method=GUI,.Output="V2",.Delay=1,.Overlay="Timestep"},
     },                                            
 };
 ///Parameters for conducting a parameter sweep.
 static const sweepable Sweep =
 {
     // .offset=offsetof(parameters,couple.Layer_parameters.dual.W),
-    // .minval = 0.28,
-    // .maxval = 0.28,
-    // .count = 20,
+    // .minval = 0.01,
+    // .maxval = 0.10,
+    // .count = 9,
     // .SweepEx = ON,
     // .SweepIn = OFF,
     // 
-    // .offset=offsetof(parameters,couple.normalization_parameters.glob_mult.GM),
-    // .minval = 1, // A good value is somewehre between 0.3 to 0.35
-    // .maxval = 1,
-    // .count = 25,
-    // .SweepEx = ON,
-    // .SweepIn = ON,
-    //
-    .offset=offsetof(parameters,Stim.I2),
-    .minval = 0.1,
-    .maxval = 2.0,
-    .count = 19,
+    .offset=offsetof(parameters,couple.normalization_parameters.glob_mult.GM),
+    .minval = 1, // A good value is somewehre between 0.3 to 0.35
+    .maxval = 1,
+    .count = 20,
     .SweepEx = ON,
     .SweepIn = ON,
+    //
+    // .offset=offsetof(parameters,Stim.I2),
+    // .minval = 0.80,
+    // .maxval = 8.00,
+    // .count = 9,
+    // .SweepEx = ON,
+    // .SweepIn = ON,
 };
 
 

@@ -1,10 +1,10 @@
 /// \file
 #include <stddef.h> //offsetof
 //these first few parameters actually escape into the paramheader file through magic
-#define grid_size 300 // fix to look at small step sizes!
+#define grid_size 60 // fix to look at small step sizes!
 ///Total size of the grid
 ///Coupling range
-#define couplerange 25
+#define couplerange 10
 #ifndef PARAMETERS  //DO NOT REMOVE
 ///include guard
 #define PARAMETERS  //DO NOT REMOVE
@@ -38,14 +38,14 @@ static const parameters OneLayerModel = {.couple={0}};
 
 #define stimparams .Stim =                          \
     {                                               \
-        .ImagePath  = "input_maps/S15_N300_C0.png",    \
+        .ImagePath  = "input_maps/D7_N60.png",    \
         .timeperiod=1e6,                            \
         .lag=1e6,                                   \
         .PreconditioningTrials=0,                   \
         .NoUSprob=0,                                \
         .Testing=OFF,                               \
         .Periodic=OFF,                              \
-        .I2 = 1.00,                                 \
+        .I2 = 0,                                 \
         .I1 = 0,                                    \
         .I0 = 0.05,                                 \
         .mu = 0.04,                                 \
@@ -62,8 +62,8 @@ static const parameters DualLayerModelIn =
             .dual = 
             {
                 .connectivity = HOMOGENEOUS,   
-                .W            = -0.10, //vart W?
-                .sigma        = 0, 
+                .W            = -0.375, //vart W?
+                .sigma        = 60, 
                 .synapse      = {.R=0,.D=2},
             }
         },
@@ -86,8 +86,8 @@ static const parameters DualLayerModelEx =
             .dual =     
             {
                 .connectivity = EXPONENTIAL,   
-                .W            = 0.28, 
-                .sigma        = 15,
+                .W            = 0.720, 
+                .sigma        = 5,
                 .synapse      = {.R=0,.D=2},
             }
         },
@@ -112,43 +112,44 @@ static const model_features Features =
     .STDP		= OFF, //Question - some of these do actually make more sense as a per-layer feature - just about everything that isn't the timestep - 
     .STD        = OFF,  //if we need any of these features we can make the changes then.
     .Theta      = OFF,
-    .Timestep   = 0.05, // Works in like with 0.1 for midpoint. But if gE too small should addition be smaller too???
+    .Timestep   = 0.01, // Works in like with 0.1 for midpoint. But if gE too small should addition be smaller too???
     .ImageStim = ON,
-    .Simlength  = 40000,
-    //.job        = {.initcond = RAND_JOB, .Voltage_or_count = 1},
-    .Outprefix = "EIF25_sigE15_sweepI2",
+    .Simlength  = 500000,
+    .job        = {.initcond = RAND_JOB, .Voltage_or_count = 1},
+    .Outprefix = "minitest",
     .output = {
+        //{ .method=PICTURE,.Output=5,.Delay=1},  // THIS (AND ONLY THIS) BREAKS IT
         { .method=SPIKES,.Output="Spike1" ,.Delay=1}, // Exc. spikes
         { .method=SPIKES,.Output="Spike2" ,.Delay=1}, // Inh. spikes
-        { .method=TEXT,.Output="V1",.Delay=20},    // Exc. voltage 
-        { .method=TEXT,.Output="V2",.Delay=20},    // Inh. voltage
-        { .method=TEXT,.Output="gE",.Delay=20},
-        { .method=TEXT,.Output="gI",.Delay=20},
+        { .method=TEXT,.Output="gE",.Delay=100},    // Excitation
+        { .method=TEXT,.Output="gI",.Delay=100},    // Inhibition
+        { .method=TEXT,.Output="V1",.Delay=100},    // Exc. voltage 
+        { .method=TEXT,.Output="V2",.Delay=100},    // Inh. voltage
     },                                            
 };
 ///Parameters for conducting a parameter sweep.
 static const sweepable Sweep =
 {
     // .offset=offsetof(parameters,couple.Layer_parameters.dual.W),
-    // .minval = 0.28,
-    // .maxval = 0.28,
-    // .count = 20,
-    // .SweepEx = ON,
-    // .SweepIn = OFF,
-    // 
-    // .offset=offsetof(parameters,couple.normalization_parameters.glob_mult.GM),
-    // .minval = 1, // A good value is somewehre between 0.3 to 0.35
-    // .maxval = 1,
-    // .count = 25,
-    // .SweepEx = ON,
+    // .minval = -0.65,
+    // .maxval = -0.36,
+    // .count = 29,
+    // .SweepEx = OFF,
     // .SweepIn = ON,
     //
-    .offset=offsetof(parameters,Stim.I2),
-    .minval = 0.1,
-    .maxval = 2.0,
-    .count = 19,
+    .offset=offsetof(parameters,couple.normalization_parameters.glob_mult.GM),
+    .minval = 1, // A good value is somewehre between 0.3 to 0.35
+    .maxval = 4,
+    .count = 15,
     .SweepEx = ON,
     .SweepIn = ON,
+    //
+    // .offset=offsetof(parameters,couple.normalization_parameters.glob_mult.GM),
+    // .minval = 1,
+    // .maxval = 1,
+    // .count = 19,
+    // .SweepEx = ON,
+    // .SweepIn = ON,
 };
 
 

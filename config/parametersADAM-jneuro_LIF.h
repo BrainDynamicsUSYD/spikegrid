@@ -1,7 +1,7 @@
 /// \file
 #include <stddef.h> //offsetof
 //these first few parameters actually escape into the paramheader file through magic
-#define grid_size 200 // fix to look at small step sizes!
+#define grid_size 300 // fix to look at small step sizes!
 ///Total size of the grid
 ///Coupling range
 #define couplerange 15
@@ -41,7 +41,7 @@ static const parameters OneLayerModel = {.couple={0}};
         .NoUSprob=0,                                \
         .Testing=OFF,                               \
         .Periodic=OFF,                              \
-        .I2 = 12.00,                                 \
+        .I2 = 0,                                 \
         .I1 = 0,                                    \
         .I0 = 0.80,                                 \
         .mu = 0.80,                                 \
@@ -58,7 +58,7 @@ static const parameters DualLayerModelIn =
             .dual = 
             {
                 .connectivity = HOMOGENEOUS,   
-                .W            = -0.23, //vart W?
+                .W            = -0.30, //vart W?
                 .sigma        = 60, 
                 .synapse      = {.R=0.5,.D=7.0},
             }

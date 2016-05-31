@@ -38,14 +38,14 @@ static const parameters OneLayerModel = {.couple={0}};
 
 #define stimparams .Stim =                          \
     {                                               \
-        .ImagePath  = "input_maps/S20_N300_C0.png",    \
+        .ImagePath  = "input_maps/S30_N300_C0.png",    \
         .timeperiod=1e6,                            \
         .lag=1e6,                                   \
         .PreconditioningTrials=0,                   \
         .NoUSprob=0,                                \
         .Testing=OFF,                               \
         .Periodic=OFF,                              \
-        .I2 = 0.50,                                 \
+        .I2 = 1.00,                                 \
         .I1 = 0,                                    \
         .I0 = 0.05,                                 \
         .mu = 0.04,                                 \
@@ -86,8 +86,8 @@ static const parameters DualLayerModelEx =
             .dual =     
             {
                 .connectivity = EXPONENTIAL,   
-                .W            = 0.105, 
-                .sigma        = 30,
+                .W            = 0.105, //0.105 
+                .sigma        = 30, //30
                 .synapse      = {.R=0,.D=2},
             }
         },
@@ -117,15 +117,15 @@ static const model_features Features =
     .Disablewrapping = OFF,
     .Simlength  = 50000,
     .job        = {.initcond = RAND_JOB, .Voltage_or_count = 1},
-    .Outprefix = "EIF30_trials",
+    .Outprefix = "EIF30_strongstim",
     .output = {
         //{ .method=PICTURE,.Output=5,.Delay=1},  // THIS (AND ONLY THIS) BREAKS IT
         { .method=SPIKES,.Output="Spike1" ,.Delay=1}, // Exc. spikes
         { .method=SPIKES,.Output="Spike2" ,.Delay=1}, // Inh. spikes
-        { .method=TEXT,.Output="gE",.Delay=20},    // Excitation
-        { .method=TEXT,.Output="gI",.Delay=20},    // Inhibition
-        { .method=TEXT,.Output="V1",.Delay=20},    // Exc. voltage 
-        { .method=TEXT,.Output="V2",.Delay=20},    // Inh. voltage
+        { .method=TEXT,.Output="V1",.Delay=20},       // Exc. voltage 
+        { .method=TEXT,.Output="V2",.Delay=20},       // Inh. voltage
+        { .method=TEXT,.Output="gE",.Delay=20},       // Excitation
+        { .method=TEXT,.Output="gI",.Delay=20},       // Inhibition
     },                                            
 };
 ///Parameters for conducting a parameter sweep.

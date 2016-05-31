@@ -6,6 +6,7 @@
 #include <string>
 #include <cstdbool>
 #include <algorithm>
+#include <random>
 #include "imread.h"
 extern "C"
 {
@@ -54,7 +55,7 @@ void StartTesting(Compute_float* voltsin, STDP_data* S)
 }
 int onesfire=0;
 int lastonesfire=-1;
-void EndTesting(STDP_data* S, const int trialno,const Stimulus_parameters Stim)
+void EndTesting(STDP_data* S, const int trialno)
 {
     state = Normal;
     if (fire1 && fire2)
@@ -72,7 +73,7 @@ bool path2; //make compiler happy - need to redo this whole function anyway
 int  counts1;
 Compute_float lastset;
 bool stim1choice=true;
-void CreateStims(const Compute_float timemodper,const Stimulus_parameters S,const Compute_float itercount)
+void CreateStims(const Stimulus_parameters S,const Compute_float itercount)
 {
     printf("createstims\n");
     stim1choice = RandFloat() > S.NoUSprob;
@@ -192,6 +193,7 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
                     rcinfo->SpecialBInd=twoind;
                     stdp->RecordSpikes = OFF;
                 }
+                //TODO: this is the only warning left - but I am hesitant to change it as it is in a crucial path and things seem to be working.  Potentially could be a problem with very large itercount - but should be OK for a range in which the integers can be represented exactly by Compute_float
                 if (fmod(itercount,2)==1) //print a test trial - this detects that the test trial has ended
                 {
                     printf ("Res -  %i %i %i %f\n",(int)itercount,fire1,fire2,storerand);//cos(2.0*M_PI/S.Gradual_swap_period*itercount)/2.0 + 0.5);
@@ -239,7 +241,7 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
         {
             lastset=timemillis;
             printf("picking stimulus\n");
-            CreateStims(timemodper,S,itercount);
+            CreateStims(S,itercount);
         }
     }
     if (S.Oscillating_path==ON) {if (path1==false && path2==false) {stdp->RecordSpikes=OFF;} else {stdp->RecordSpikes=ON;}}
@@ -249,7 +251,7 @@ void ApplyStim(Compute_float* voltsin,const Compute_float timemillis,const Stimu
     if (S.Testing == ON)
     {
         if (fabs(timemodper - 220) < 5) {StartTesting(voltsin,stdp);  }
-        if (fabs(timemodper ) < 0.01) {EndTesting(stdp,(int)(itercount - S.PreconditioningTrials),S);  }
+        if (fabs(timemodper ) < 0.01) {EndTesting(stdp,(int)(itercount - S.PreconditioningTrials));  }
     }
     if (timemodper < 5) { ResetVoltages(voltsin);} //reset before next period.
 

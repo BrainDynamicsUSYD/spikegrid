@@ -1,6 +1,7 @@
 #!/bin/bash
 #bash arrays are fun
 actualfiles=()
+abspath=$(pwd .)
 for var in config/*;
 do
     #quoting and using a bash array here is very important
@@ -14,7 +15,7 @@ if [ -z "${FILE}" ]; then
     FILE='config/parametersJOHN-travelling.h'
 else
     #fix up the path to be correct
-    FILE=$(echo config/$FILE)
+    FILE=$(echo $abspath/config/$FILE)
 fi
 #now generate the actual.h file
 echo '//disable warnings about float conversion in this file and most importantly what it includes

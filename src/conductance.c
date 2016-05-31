@@ -20,6 +20,7 @@
     #define APPNAME "myapp"
     #include <android/log.h>
 #endif
+//This needs to be a macro so that we can stringify the arguments - the #Switch
 #define CheckParam(Switch,var) if (Switch==ON && var==NULL) {printf ("%s is on, so I need %s as an input\n",#Switch,#var);return;}
 model* m;               ///< The model we are evolving through time - static data not great but it does only exist in this file
 int jobnumber=-1;        ///< The current job number - used for pics directory etc
@@ -180,8 +181,9 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
     return;
 }
 #else
-///Structure which holds the command line options that the program recognises
 #ifndef _WIN32
+//we don't have long options for win32 - so this part gets skipped - note that this means things like the cluster will break on win32
+///Structure which holds the command line options that the program recognises
 struct option long_options[] = {{"help",no_argument,0,'h'},{"generate",no_argument,0,'g'},{"sweep",required_argument,0,'s'},{"nocv",no_argument,0,'n'},{"nosegfault",no_argument,0,'f'},{0,0,0,0}};
 
 void processopts (int argc,char** argv,parameters** newparam,parameters** newparamEx,parameters** newparamIn,on_off* OpenCv)
@@ -238,7 +240,7 @@ void processopts (int argc,char** argv,parameters** newparam,parameters** newpar
 #else
 void processopts(int argc, char** argv, parameters** newparam, parameters** newparamEx, parameters** newparamIn, on_off* OpenCv)
 {
-	//TODO: command line not done on windows
+	//TODO: command line not done on windows - note that it might actually be possible to get this to work - but I don't really see the point
 }
 #endif
 
@@ -250,12 +252,11 @@ void processopts(int argc, char** argv, parameters** newparam, parameters** newp
 int main(int argc,char** argv) //useful for testing w/out matlab
 {
 #ifndef ANDROID //android doesn't support this function - note the error is that this will fail at linking so it needs to hide in the #if
- //   feenableexcept(FE_INVALID | FE_OVERFLOW); //segfault on NaN and overflow.  Note - this cannot be used in matlab
+ //   feenableexcept(FE_INVALID | FE_OVERFLOW); //segfault on NaN and overflow.  Note - this cannot be used in matlab - tends to produce many false positives so leave off, although can be interesting sometimes
 #endif
     parameters* newparam = NULL;
     parameters* newparamEx = NULL;
     parameters* newparamIn = NULL;
-    setvbuf(stdout,NULL,_IONBF,0); //mainly useful for the console visualisation - maybe move to there?
     processopts(argc,argv,&newparam,&newparamEx,&newparamIn,&showimages);
 
     const Job* job = &Features.job;

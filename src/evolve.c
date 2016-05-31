@@ -152,9 +152,9 @@ void CalcRecoverys(const Compute_float* const __restrict__ Vinput,
 //+ve skip is obvious.  -ve skip does the "inverse" of +ve skip
 //this function here could maybe use the coords - but it is very time sensitive, so leave as is
 int __attribute__((pure,const)) IsActiveNeuron (const int x, const int y,const signed char step)
-{
+{   //with a bit of paper you can convince yourself that this code does what it is supposed to
     const char test = (x % step) == 0 && (y % step) ==0;
-    return (test && step > 0) || (!test && step < 0);
+    return (test && step > 0) || (!test && step < 0); //here is the nice symettry we get with negative steps
 }
 void AddRandomRD(const coords c ,const randconns_info* const rcinfo, RD_data* __restrict RD,const Compute_float InitStr)
 {
@@ -199,7 +199,7 @@ void StoreFiring(layer* L,const unsigned int timestep)
                         L->voltages_out[grid_index(coord)]=L->P->potential.Vrt;
                         L->recoverys_out[grid_index(coord)]+=L->P->recovery.Wrt;
                     }
-                    Compute_float spikestr = 1.0/(L->RD->D - L->RD->R);
+                    Compute_float spikestr = 1.0/(L->RD->D - L->RD->R); //This normalizes the base size strength so that changing D/R only changes the timescale but leaves the integral constant
                     if (Features.STD==ON)
                     {
                         spikestr = spikestr * STD_str(L->P->STD,coord,timestep,1,L->std); //since we only emit a spike once, use 1 to force an update
@@ -285,7 +285,7 @@ void step1(model* m)
     const Compute_float timemillis = ((Compute_float)m->timesteps) * Features.Timestep ;
     //this memcpy based version for initializing gE/gI is marginally slower (probably cache issues) -
     memcpy(m->cond_matrices,m->cond_matrices_init,sizeof(*m->cond_matrices));
-    if (Features.LocalStim==ON)
+    if (Features.LocalStim==ON) //this isn't really used anymore
     {
         if (m->timesteps %1000 < 250) {ApplyLocalBoost(m->cond_matrices->gE,20,20);}
         else if (m->timesteps % 1000 < 500) {ApplyLocalBoost(m->cond_matrices->gE,20,60);}

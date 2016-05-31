@@ -83,7 +83,9 @@ GUIoutput::GUIoutput(int a,int b, const output_s* c, const char* const d, const 
         winname=(char*)malloc(20);
         strcpy(winname,wname);
         cvNamedWindow(wname,CV_WINDOW_NORMAL);
-        cvSetMouseCallback(wname,mousecb,(void*)wname);
+        char* cbdata=(char*)malloc(20);//create our own 20 byte chunk of ram to avoid a warning - TODO: free this ram
+        strcpy(cbdata,wname);
+        cvSetMouseCallback(wname,mousecb,(void*)cbdata);
     }
 }
 void GUIoutput::DoOutput_()
@@ -150,7 +152,10 @@ void TextOutput::DoOutput_()
     fflush(f);//prevents stalling in matlab
     free(actualdata);
 }
-ConsoleOutput::ConsoleOutput(int idxin, const int intervalin, const output_s* datain) : TAOutput(idxin, intervalin, datain) {}
+ConsoleOutput::ConsoleOutput(int idxin, const int intervalin, const output_s* datain) : TAOutput(idxin, intervalin, datain)
+{
+    setvbuf(stdout,NULL,_IONBF,0);
+}
 void ConsoleOutput::DoOutput_()
 {
     #if defined(OPENCV) && !defined(_WIN32)

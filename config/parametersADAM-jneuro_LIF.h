@@ -93,7 +93,7 @@ static const parameters DualLayerModelEx =
     },
     potparams,
     stimparams,
-    .skip = -2, //3 out of 4? 
+    .skip = 1, //3 out of 4? 
 };
 ///Constant external input to conductances
 static const extinput Extinput =

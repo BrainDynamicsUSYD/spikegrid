@@ -1,0 +1,4 @@
+#We need this direcotry to exist for the makefile - but don't wan't git to track files in it
+#The trick is essentially that the only tracked file is the gitignore
+*
+!.gitignore

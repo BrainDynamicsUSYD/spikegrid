@@ -43,7 +43,7 @@ static const parameters OneLayerModel = {.couple={0}};
         .Periodic=OFF,                              \
         .I2 = 0,                                 \
         .I1 = 0,                                    \
-        .I0 = 0.80,                                 \
+        .I0 = 0,                                 \
         .mu = 0.80,                                 \
     }
 
@@ -98,8 +98,8 @@ static const parameters DualLayerModelEx =
 ///Constant external input to conductances
 static const extinput Extinput =
 {
-    .gE0 = 0,
-    .gI0 = 0,
+    .gE0 = 0.015,
+    .gI0 = 0.002,
 };
 ///Some global features that can be turned on and off
 static const model_features Features = 
@@ -109,55 +109,27 @@ static const model_features Features =
     .STD        = OFF,  //if we need any of these features we can make the changes then.
     .Theta      = OFF,
     .Timestep   = 0.05, // Works in like with 0.1 for midpoint. But if gE too small should addition be smaller too???
-    .Simlength  = 50000,
+    .Simlength  = 90000,
     .ImageStim = ON,
     .job        = {.initcond = RAND_JOB, .Voltage_or_count = 1},
-    .Outprefix  = "jneuro1_trials",  // Make empty to keep in current directory
+    .Outprefix  = "jneuro_trials",  // Make empty to keep in current directory
     .output = {
         //{ .method=PICTURE,.Output=5,.Delay=1},  // THIS (AND ONLY THIS) BREAKS IT
         { .method=SPIKES,.Output="Spike1" ,.Delay=1}, // Exc. spikes
         { .method=SPIKES,.Output="Spike2" ,.Delay=1}, // Inh. spikes
-        { .method=TEXT,.Output="gE",.Delay=20},    // Excitation
-        { .method=TEXT,.Output="gI",.Delay=20},    // Inhibition
         { .method=TEXT,.Output="V1",.Delay=20},    // Exc. voltage 
         { .method=TEXT,.Output="V2",.Delay=20},    // Inh. voltage
+        { .method=TEXT,.Output="gE",.Delay=20},
+        { .method=TEXT,.Output="gI",.Delay=20},
     },                                            
 };
 ///Parameters for conducting a parameter sweep.
 static const sweepable Sweep =
 {
-    // .offset=offsetof(parameters,Stim.I2),
-    // .minval = 1,
-    // .maxval = 12,
-    // .count = 11,
-    // .SweepEx = ON,
-    // .SweepIn = ON,
-    //
-    // .offset=offsetof(parameters,couple.Layer_parameters.dual.synapse.D),
-    // .minval = 3,
-    // .maxval = 6,
-    // .count = 3,
-    //  .SweepEx = OFF,
-    //  .SweepIn = ON,
-    //
-    // .offset=offsetof(parameters,couple.Layer_parameters.dual.W),
-    // .minval = -0.50,
-    // .maxval = -0.24,
-    // .count = 26,
-    // .SweepEx = OFF,
-    // .SweepIn = ON,
-    //
-    // .offset=offsetof(parameters,couple.normalization_parameters.glob_mult.GM),
-    // .minval = 1,
-    // .maxval = 4,
-    // .count = 30,
-    // .SweepEx = ON,
-    // .SweepIn = ON,
-    //
     .offset=offsetof(parameters,couple.normalization_parameters.glob_mult.GM),
     .minval = 1,
     .maxval = 1,
-    .count = 24,
+    .count = 11,
     .SweepEx = ON,
     .SweepIn = ON,
 };

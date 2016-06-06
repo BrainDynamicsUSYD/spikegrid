@@ -72,7 +72,6 @@ layer setuplayer(const parameters p)
     layer L =
     {   //I am not particularly happy with this block.  It is highly complicated.  One idea: have the init functions themselves decide to return null
         .lags               = calloc(sizeof(simplestorage),1),
-        .refractime         = (uint8_t)trefrac_in_ts,
         .STDP_data          = Features.STDP==ON?STDP_init(&P->STDP,trefrac_in_ts):NULL, //problem - P defd later
         .connections        = CreateCouplingMatrix(p.couple),
         .std                = Features.STD==ON?STD_init(p.STD):NULL,
@@ -94,6 +93,8 @@ layer setuplayer(const parameters p)
     };
     L.RD->R=p.couple.Layer_parameters.dual.synapse.R;
     L.RD->D=p.couple.Layer_parameters.dual.synapse.D;
+
+    L.lags->trefrac_in_ts= (uint8_t)trefrac_in_ts;
     return L;
 }
 //sets the output directory - note output directory is a global

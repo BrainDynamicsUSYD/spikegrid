@@ -191,7 +191,7 @@ void StoreFiring(layer* L,const unsigned int timestep)
 
                    )
                 {
-                    AddnewSpike_simple(grid_index(coord),L->refractime,L->lags);
+                    AddnewSpike_simple(grid_index(coord),L->lags);
                     if (Features.STDP==ON && L->STDP_data->RecordSpikes==ON) {AddnewSpike(L->STDP_data->lags,LagIdx(coord,L->STDP_data->lags));}
                     if (Features.Recovery==ON) //reset recovery if needed.  Note recovery has no refractory period so a reset is required
                     {

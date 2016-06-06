@@ -33,7 +33,6 @@ typedef struct layer
     Compute_float* const Mytimecourse;    ///<store time course of synapses in dual layer case
     randconns_info* rcinfo;
     simplestorage* lags;
-    const uint8_t refractime;
     STDP_data*      STDP_data;
     parameters* P;                              ///<The parameters that we used to make the layer -can't be const as we need to free it
     STD_data*       std;                               ///<Some info that is needed for STD

@@ -1,7 +1,8 @@
 .PHONY: force_look
 SOURCES= conductance.c coupling.c  STDP.c STD.c output.c evolve.c newparam.c yossarian.c init.c theta.c printstruct.c cleanup.c evolvegen.c lagstorage.c  tagged_array.c localstim.c utils.c animal.c randconns.c phi.c timing.c
 ${BINARY}: ${SOURCES} *.h ${OFILES} ${CONFIG}
-	${CC} ${CFLAGS} ${opencvcflags}     ${SOURCES} ${OFILES} -o ${BINARY} -L. ${LDFLAGS}   ${opencvldflags}
+	@echo compiling main binary
+	@${CC} ${CFLAGS} ${opencvcflags}     ${SOURCES} ${OFILES} -o ${BINARY} -L. ${LDFLAGS}   ${opencvldflags}
 
 #manually compile the mex file.  This is actually similar to what matlab does but we get more control this way
 ${mexfile}: MATLAB = YES #sets variable for future makefiles

@@ -12,6 +12,7 @@
 #include "animal.h"
 #include "randconns.h"
 #include "lagstorage.h"
+#include "simplestorage.h"
 #ifdef ANDROID
     #define APPNAME "myapp"
     #include <android/log.h>
@@ -180,8 +181,6 @@ void StoreFiring(layer* L,const unsigned int timestep)
             if (IsActiveNeuron(x,y,skip))
             {
                 const coords coord = {.x=x,.y=y};
-                const size_t baseidx = LagIdx(coord,L->firinglags);
-                modifyLags(L->firinglags,baseidx,grid_index(coord));
                 if (Features.STDP==ON) {modifyLags(L->STDP_data->lags,LagIdx(coord,L->STDP_data->lags),grid_index(coord));}
                 //now - add in new spikes
                 if (L->voltages_out[grid_index(coord)]  >= L->P->potential.Vpk
@@ -192,7 +191,7 @@ void StoreFiring(layer* L,const unsigned int timestep)
 
                    )
                 {
-                    AddnewSpike(L->firinglags,baseidx);
+                    AddnewSpike_simple(grid_index(coord),L->refractime,L->lags);
                     if (Features.STDP==ON && L->STDP_data->RecordSpikes==ON) {AddnewSpike(L->STDP_data->lags,LagIdx(coord,L->STDP_data->lags));}
                     if (Features.Recovery==ON) //reset recovery if needed.  Note recovery has no refractory period so a reset is required
                     {
@@ -228,15 +227,14 @@ void StoreFiring(layer* L,const unsigned int timestep)
     }
 }
 ///Cleans up voltages for neurons that are in the refractory state
-void RefractoryVoltages(Compute_float* const __restrict Vout,const couple_parameters C,const lagstorage* const  l,const conductance_parameters CP)
+void RefractoryVoltages(Compute_float* const __restrict Vout,simplestorage* s,const conductance_parameters CP)
 {
-    const int trefrac_in_ts =(int) ((Compute_float)C.tref / Features.Timestep);
     for (unsigned int i=0;i<grid_size*grid_size;i++)
     {
-        unsigned int baseidx = i*l->lagsperpoint;
-        if (CurrentShortestLag(l,baseidx,i) <= trefrac_in_ts)
+        if (s->lags[i] > 0)
         {
             Vout[i] = CP.Vrt;
+            s->lags[i]--;
         }
     }
 }
@@ -254,7 +252,7 @@ void tidylayer (layer* l,const Compute_float timemillis,const condmat* const __r
                 ApplyContinuousStim(l->voltages_out,timemillis,l->P->Stim,Features.Timestep,l->Phimat);
             }
         }
-        RefractoryVoltages(l->voltages_out,l->P->couple,l->firinglags,l->P->potential);
+        RefractoryVoltages(l->voltages_out,l->lags,l->P->potential);
     }
     else
     {

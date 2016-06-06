@@ -9,6 +9,7 @@ typedef struct parameters parameters;
 typedef struct STDP_data STDP_data;
 typedef struct randconns_info randconns_info;
 typedef struct lagstorage lagstorage;
+typedef struct simplestorage simplestorage;
 typedef struct RD_data {
     Compute_float Rmat [conductance_array_size*conductance_array_size];
     Compute_float Dmat [conductance_array_size*conductance_array_size];
@@ -31,7 +32,8 @@ typedef struct layer
     Compute_float* const Intimecourse;    ///<store time course of In synapses - TODO: single layer broken
     Compute_float* const Mytimecourse;    ///<store time course of synapses in dual layer case
     randconns_info* rcinfo;
-    lagstorage*      firinglags;
+    simplestorage* lags;
+    const uint8_t refractime;
     STDP_data*      STDP_data;
     parameters* P;                              ///<The parameters that we used to make the layer -can't be const as we need to free it
     STD_data*       std;                               ///<Some info that is needed for STD

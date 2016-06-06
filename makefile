@@ -30,7 +30,8 @@ TEST:
 	$(MAKE) evolvegen.c
 	$(MAKE) -C src ${outlib}
 	$(MAKE) -C src ${imreadlib}
-	${CC}  ${CFLAGS} ${opencvcflags} -fno-omit-frame-pointer ${SOURCES} ${OFILES} -o ${BINARY} ${LDFLAGS}  ${opencvldflags}
+	$(MAKE) -C src ${BINARY}
+#	${CC}  ${CFLAGS} ${opencvcflags} -fno-omit-frame-pointer ${SOURCES} ${OFILES} -o ${BINARY} ${LDFLAGS}  ${opencvldflags}
 	mv whichparambackup.h whichparam.h #restore config choice
 	time ./a.out -n
 	mv job-{0..5} jobtest

@@ -1,7 +1,7 @@
 /// \file
 #include <stddef.h> //offsetof
 //these first few parameters actually escape into the paramheader file through magic
-#define grid_size 100
+#define grid_size 50
 ///Total size of the grid
 ///Coupling range
 #define couplerange 15
@@ -98,7 +98,8 @@ static const model_features Features =
     .Timestep   = 0.1,
     .Simlength  = 50000,
 
-    .output = {},
+ //   .output = { {.method=GUI,.Output="V1",.Delay=10,.Overlay="Timestep"} },
+
 };
 ///Constant external input to conductances
 static const extinput Extinput =

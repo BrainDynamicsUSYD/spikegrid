@@ -110,9 +110,9 @@ Compute_float __attribute__((const,pure)) rhs_func  (const Compute_float V,const
 void CalcVoltages(const Compute_float* const __restrict__ Vinput,
         const condmat * const __restrict__ cond_mat,
         const conductance_parameters C,
-        Compute_float* const __restrict__ Vout)
+        Compute_float* const __restrict__ Vout,const int skip)
 {
-    for (Neuron_coord x=0;x<grid_size;x++)
+    for (Neuron_coord x=0;x<grid_size;skip>0?x+=skip:x++)
     {
         for (Neuron_coord y=0;y<grid_size;y++)
         {
@@ -152,9 +152,10 @@ void CalcRecoverys(const Compute_float* const __restrict__ Vinput,
 //note when we have STDP, if you have one layer with skip +x and another with -x the code is massively simpler.
 //+ve skip is obvious.  -ve skip does the "inverse" of +ve skip
 //this function here could maybe use the coords - but it is very time sensitive, so leave as is
-int __attribute__((pure,const)) IsActiveNeuron (const int x, const int y,const signed char step)
+//seems to take about 20% of the time
+signed char __attribute__((pure,const)) IsActiveNeuron (const Neuron_coord x, const Neuron_coord y,const signed char step)
 {   //with a bit of paper you can convince yourself that this code does what it is supposed to
-    const char test = (x % step) == 0 && (y % step) ==0;
+    const signed char test = (x % step) == 0 && (y % step) ==0;
     return (test && step > 0) || (!test && step < 0); //here is the nice symettry we get with negative steps
 }
 void AddRandomRD(const coords c ,const randconns_info* const rcinfo, RD_data* __restrict RD,const Compute_float InitStr)
@@ -174,11 +175,11 @@ void AddRandomRD(const coords c ,const randconns_info* const rcinfo, RD_data* __
 void StoreFiring(layer* L,const unsigned int timestep)
 {
     const signed char skip = (signed char) (L->P->skip);
-    for (Neuron_coord x=0;x<grid_size;x++)
+    for (Neuron_coord x=0;x<grid_size;skip>0?x+=skip :x++) //this fancy skipping can make a pretty massive speed difference
     {
         for (Neuron_coord y=0;y<grid_size;y++)
         {
-            if (IsActiveNeuron(x,y,skip))
+            if ( IsActiveNeuron(x,y,skip))
             {
                 const coords coord = {.x=x,.y=y};
                 if (Features.STDP==ON) {modifyLags(L->STDP_data->lags,LagIdx(coord,L->STDP_data->lags),grid_index(coord));}
@@ -206,7 +207,6 @@ void StoreFiring(layer* L,const unsigned int timestep)
                     //all the different ways to add a spike
                     if (Features.STDP==OFF)
                     {
-                        //TODO: maybe the Addrd functions should take coords
                         AddRD(coord,L->connections, L->RD,spikestr);
                     }
                     else
@@ -244,7 +244,7 @@ void tidylayer (layer* l,const Compute_float timemillis,const condmat* const __r
 {
     if (Features.Recovery==OFF)
     {
-        CalcVoltages(l->voltages,cond_mat,l->P->potential,l->voltages_out);
+        CalcVoltages(l->voltages,cond_mat,l->P->potential,l->voltages_out,l->P->skip);
         if (Features.ImageStim==ON) //Dodgy fudge
         {
             if (!(l->P->Stim.Periodic))

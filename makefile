@@ -26,11 +26,12 @@ run: ${BINARY}
 TEST:
 	rm -rf jobtest/*
 	mv whichparam.h whichparambackup.h #backup config choice
-	echo -e '#include "config/parametersCANONICAL.h"' > whichparam.h
+	echo -e '#include "'$(shell pwd)/'config/parametersCANONICAL.h"' > whichparam.h
 	$(MAKE) evolvegen.c
-	$(MAKE) ${outlib}
-	$(MAKE) ${imreadlib}
-	${CC}  ${CFLAGS} ${opencvcflags} -fno-omit-frame-pointer ${SOURCES} ${OFILES} -o ${BINARY} ${LDFLAGS}  ${opencvldflags}
+	$(MAKE) -C src ${outlib}
+	$(MAKE) -C src ${imreadlib}
+	$(MAKE) -C src ${BINARY}
+#	${CC}  ${CFLAGS} ${opencvcflags} -fno-omit-frame-pointer ${SOURCES} ${OFILES} -o ${BINARY} ${LDFLAGS}  ${opencvldflags}
 	mv whichparambackup.h whichparam.h #restore config choice
 	time ./a.out -n
 	mv job-{0..5} jobtest

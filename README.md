@@ -18,6 +18,8 @@ If you are on yossarian, I have created builds using `Anaconda` (a python distri
 #Documentation
 Some developer documentation can be auto-generated from the code using Doxygen with the following command: `make docs`
 
+other documentation is available in the wiki here: https://github.com/BrainDynamicsUSYD/spikegrid/wiki
+
 #Long term code cleanup tasks:
 
 Things that need to be done:

@@ -1,7 +1,7 @@
 /// \file
 #include <stddef.h> //offsetof
 //these first few parameters actually escape into the paramheader file through magic
-#define grid_size 500 // fix to look at small step sizes!
+#define grid_size 300 // fix to look at small step sizes!
 ///Total size of the grid
 ///Coupling range
 #define couplerange 30
@@ -34,16 +34,16 @@ static const parameters OneLayerModel = {.couple={0}};
 
 #define stimparams .Stim =                          \
     {                                               \
-        .ImagePath  = "input_maps/S20_N500_C0.png", \
+        .ImagePath  = "input_maps/S20_N300_C0.png", \
         .timeperiod=1e6,                            \
         .lag=1e6,                                   \
         .PreconditioningTrials=0,                   \
         .NoUSprob=0,                                \
         .Testing=OFF,                               \
         .Periodic=OFF,                              \
-        .I2 = 3.00,                                 \
-        .I1 = 0.75,                                    \
-        .I0 = 0.75,                                 \
+        .I2 = 0.60,                                 \
+        .I1 = 0,                                    \
+        .I0 = 0.80,                                 \
         .mu = 0.04,                                 \
     }
 
@@ -110,9 +110,9 @@ static const model_features Features =
     .Theta      = OFF,
     .Timestep   = 0.05, // Works in like with 0.1 for midpoint. But if gE too small should addition be smaller too???
     .ImageStim = ON,
-    .Simlength  = 50000, //50000
+    .Simlength  = 60000, //50000
     .job        = {.initcond = RAND_JOB, .Voltage_or_count = 1},
-    .Outprefix = "LIF30_fixgauss2",
+    .Outprefix = "LIF30_I60",
     .output = {
         { .method=SPIKES,.Output="Spike1" ,.Delay=1}, // Exc. spikes
         { .method=SPIKES,.Output="Spike2" ,.Delay=1}, // Inh. spikes
@@ -134,9 +134,9 @@ static const sweepable Sweep =
     // .SweepIn = ON,
     // 
     .offset=offsetof(parameters,couple.normalization_parameters.glob_mult.GM),
-    .minval = 2, // A good value is somewehre between 0.3 to 0.35
-    .maxval = 4,
-    .count = 8,
+    .minval = 1, // A good value is somewehre between 0.3 to 0.35
+    .maxval = 1,
+    .count = 49,
     .SweepEx = ON,
     .SweepIn = ON,
     //

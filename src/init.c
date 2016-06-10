@@ -21,6 +21,7 @@
 #include "animal.h"
 #include "randconns.h"
 #include "lagstorage.h"
+#include "simplestorage.h"
 #ifndef _WIN32
 #define max(a,b) \
     ({ __typeof__ (a) _a = (a);\
@@ -67,13 +68,10 @@ layer setuplayer(const parameters p)
     if (p.couple.Layertype==SINGLELAYER) {cap=(int)max(setcap(p.couple.Layer_parameters.single.Ex,min_effect,Features.Timestep),setcap(p.couple.Layer_parameters.single.In,min_effect,Features.Timestep));}
     else                                 {cap=(int)setcap(p.couple.Layer_parameters.dual.synapse,min_effect,Features.Timestep);}
     const int trefrac_in_ts =(int) ((Compute_float)p.couple.tref / Features.Timestep);
-    unsigned int flagcount;
-    if (Features.Recovery == ON) {flagcount = (unsigned)cap;} //this needs a comment
-    else {flagcount = (unsigned)(cap/trefrac_in_ts) + 1 + 1;} //1 for possible fencepost problem. 1 for the space for the -1 at the end
     parameters* P = (parameters*)newdata(&p,sizeof(p));
     layer L =
     {   //I am not particularly happy with this block.  It is highly complicated.  One idea: have the init functions themselves decide to return null
-        .firinglags         = lagstorage_init(flagcount,cap), //TODO: this can be reduced as we now only need to keep track of things for the refractory period
+        .lags               = calloc(sizeof(simplestorage),1),
         .STDP_data          = Features.STDP==ON?STDP_init(&P->STDP,trefrac_in_ts):NULL, //problem - P defd later
         .connections        = CreateCouplingMatrix(p.couple),
         .std                = Features.STD==ON?STD_init(p.STD):NULL,
@@ -95,6 +93,8 @@ layer setuplayer(const parameters p)
     };
     L.RD->R=p.couple.Layer_parameters.dual.synapse.R;
     L.RD->D=p.couple.Layer_parameters.dual.synapse.D;
+
+    L.lags->trefrac_in_ts= (uint8_t)trefrac_in_ts;
     return L;
 }
 //sets the output directory - note output directory is a global

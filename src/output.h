@@ -6,7 +6,7 @@
 #endif
 #include "enums.h"
 typedef struct model model;
-typedef struct lagstorage lagstorage;
+typedef struct simplestorage simplestorage;
 typedef struct tagged_array tagged_array;
 
 ///The directory that we are outputting to
@@ -20,7 +20,7 @@ typedef struct output_s {
     const union
     {
         const tagged_array* TA_data;
-        const lagstorage*  Lag_data;
+        const simplestorage*  Lag_data;
     } data;                         ///< the data to return
     const on_off Updateable;
     tagged_array* (*UpdateFn) (const tagged_array* const in);

@@ -81,9 +81,9 @@ class ConsoleOutput: public TAOutput
 };
 class SpikeOutput: public SingleFileOutput
 {
-    const lagstorage* data;
+    const simplestorage* data;
     public:
-        SpikeOutput(int,int,const lagstorage*);
+        SpikeOutput(int,int,const simplestorage*);
         void DoOutput_();
 };
 extern "C" {

@@ -1,9 +1,9 @@
 exit=0;
-!make conductance.mexa64
+!make matlab
 time=1;
 %outputs={ 'STDU1','STDU2' };
 %outputs={ 'STDP1','STDP2' };
-outputs={ 'gE' , 'gI'};
+outputs={ 'V2' , 'V1'};
 %outputs={};
 %initial call
 [V, out1] = conductance('dummy',outputs);

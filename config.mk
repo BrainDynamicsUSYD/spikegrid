@@ -6,7 +6,7 @@ export DEFINES=-DOPENCV
 ##########
 #set up some variables for compiling
 ##########
-
+export MATLAB
 #graphite optimizations are hard on some systems - so disable them
 ifneq ($(shell gcc -v 2>&1 | grep with-isl ) ,)
 	optflags=-floop-interchange -floop-strip-mine -floop-block
@@ -34,7 +34,8 @@ ifeq ($(MATLAB),yes) #this has to be an if due to errors
 	#So there is a rather ridiculous amount of hackery here
 
 	#First find where matlab is - we need to use readlink and then dirname as matlab is almost always symlinked
-	export matlabdir=$(shell dirname $$(readlink -f $$(which matlab)))
+	#export matlabdir=$(shell dirname $$(readlink -f $$(which matlab)))
+	export matlabdir='/usr/physics/matlab2015a/bin'
 	#these C and ld flags are stolen from mex-v
 	export MATLABCFLAGS= -DMX_COMPAT_32 -D_GNU_SOURCE -DMATLAB_MEX_FILE -DMATLAB -I"${matlabdir}/../extern/include" -I"${matlabdir}/../simulink/include"
 	export ADAMMATLABCFLAGS= -DMX_COMPAT_32 -D_GNU_SOURCE -DMATLAB_MEX_FILE -I"${matlabdir}/../extern/include" -I"${matlabdir}/../simulink/include"

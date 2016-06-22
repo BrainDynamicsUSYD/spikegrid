@@ -97,7 +97,7 @@ extern on_off showimages;
 #include "../matlab_includes.h"
 #include "../output.h"
 void outputExtraThings(mxArray* plhs[],int nrhs,const mxArray* prhs[]);
-mxArray* outputToMxArray (const output_s input);
+mxArray* outputToMxArray (const output_s* input);
 #endif
 #ifdef __cplusplus
 	}

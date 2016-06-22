@@ -95,6 +95,8 @@ void setuppointers(Compute_float** FirstV,Compute_float** SecondV, Compute_float
 }
 
 #ifdef MATLAB
+#include <time.h>
+#include "out/outputtable.h"
 //The easeiest way to get data out with matlab is to use outputtomxarray and the easiest way to use that is with getoutputbyname.  Getoutputbyname is in output.h so include it.
 //#include "matlab_output.h"
 int setup_done=0;
@@ -137,8 +139,8 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
     if (setup_done==0)
     {
         srandom((unsigned)time(0));
-        if (ModelType==SINGLELAYER) {m=setup(OneLayerModel,OneLayerModel,ModelType,jobnumber,yossarianjobnumber);} //pass the same layer as a double parameter
-        else {m=setup(DualLayerModelIn,DualLayerModelEx,ModelType,jobnumber,yossarianjobnumber);}
+            if (ModelType==SINGLELAYER) {m=setup(OneLayerModel,OneLayerModel,ModelType,jobnumber,yossarianjobnumber,0);} //pass the same layer as a double parameter
+            else {m=setup(DualLayerModelIn,DualLayerModelEx,ModelType,jobnumber,yossarianjobnumber,0);}
         int i = 0;
         while(mexmappings[i].name != NULL)
         {
@@ -171,7 +173,7 @@ void mexFunction(int nlhs,mxArray *plhs[],int nrhs, const mxArray *prhs[])
         {
             if (ModelType==mexmappings[i].Lno && (Features.Recovery==ON || Features.Recovery==mexmappings[i].recovery))
             {
-                mxSetField(variables,0,mexmappings[i].name,outputToMxArray(getOutputByName(mexmappings[i].outname)));
+                mxSetField(variables,0,mexmappings[i].name,outputToMxArray(GetOutputByName(mexmappings[i].outname)));
             }
             i++;
         }

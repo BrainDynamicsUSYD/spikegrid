@@ -17,6 +17,7 @@ extern "C"
 #include "../tagged_array.h"
 #include "../cppparamheader.h"
 #include "../lagstorage.h"
+#include "../simplestorage.h"
 }
 #include "out.h" //and this is c++ again.
 
@@ -187,14 +188,15 @@ void ConsoleOutput::DoOutput_()
 #endif
 }
 
-SpikeOutput::SpikeOutput(int idxin,const int intervalin, const lagstorage* datain) : SingleFileOutput(idxin,intervalin) {data=datain;}
+SpikeOutput::SpikeOutput(int idxin,const int intervalin, const simplestorage* datain) : SingleFileOutput(idxin,intervalin) {data=datain;}
 void SpikeOutput::DoOutput_()
 {
     for (Neuron_coord i=0;i<grid_size;i++)
     {
         for (Neuron_coord j=0;j<grid_size;j++)
         {
-            if (CurrentShortestLag(data,grid_index((coords){.x=i,.y=j})*data->lagsperpoint,grid_index((coords){.x=i,.y=j})) == 1)
+            size_t index = grid_index((coords){.x=i,.y=j});
+            if (data->lags[index]==data->trefrac_in_ts)
 
 
             {

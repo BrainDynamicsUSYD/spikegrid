@@ -1,2 +1,3 @@
 ${imreadlib}: imread.cpp ${CONFIG-SUBD}
-	${CXX} ${CXXFLAGS}  -fpic ${opencvcflags} imread.cpp -o ${imreadlib} -shared
+	@echo "compiling imread"
+	@${CXX} ${CXXFLAGS}  -fpic ${opencvcflags} imread.cpp -o ${imreadlib} -shared

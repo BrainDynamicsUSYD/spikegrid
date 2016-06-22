@@ -339,7 +339,7 @@ void ApplyContinuousStim(Compute_float* voltsin,const Compute_float timemillis,c
             Compute_float grey = ((Compute_float)pixel.val[0])/255.0;
             voltsin[idx] += I0;
             voltsin[idx] += I1*cos(2*M_PI*S.mu*timemillis+Phimat[idx]);
-            if (timemillis>=4000 && timemillis<=4500)
+            if (timemillis>=2000 && timemillis<=3000)
             {
                 voltsin[idx] += I2*grey;
             }

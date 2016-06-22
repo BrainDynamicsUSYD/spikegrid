@@ -4,7 +4,7 @@
 #define grid_size 300 // fix to look at small step sizes!
 ///Total size of the grid
 ///Coupling range
-#define couplerange 15
+#define couplerange 30
 #ifndef PARAMETERS  //DO NOT REMOVE
 ///include guard
 #define PARAMETERS  //DO NOT REMOVE
@@ -17,34 +17,38 @@ static const LayerNumbers ModelType = DUALLAYER;
 ///Parameters for the single layer model
 static const parameters OneLayerModel = {.couple={0}};
 // Potential parameters
-#define potparams .potential =     \
-{                                  \
-    .type    =                     \
-    {                           \
-        .type = LIF,            \
-    },                          \
-    .Vrt     = -70,             \
-    .Vpk    = -55,              \
-    .Vlk     = -70,             \
-    .Vex     = 0,               \
-    .Vin     = -80,             \
-    .glk     = 0.05,            \
-    .rate = 0,                  \
+#define potparams .potential =          \
+{                                       \
+    .type    =                          \
+    {                                   \
+        .type = EIF,                    \
+        .extra =                        \
+        {                               \
+            .EIF={.Vth=0.625,.Dpk=0.4375} \
+        }                               \
+    },                                  \
+    .Vrt     = -0.375,                 \
+    .Vpk    = 2.000,                  \
+    .Vlk     = 0,                     \
+    .Vex     = 4.667,                       \
+    .Vin     = -0.667,                     \
+    .glk     = 0.050,                    \
+    .rate = 0,                          \
 }
 
 #define stimparams .Stim =                          \
     {                                               \
-        .ImagePath  = "input_maps/D10_N200.png",    \
+        .ImagePath  = "input_maps/S30_N300_C0.png",    \
         .timeperiod=1e6,                            \
         .lag=1e6,                                   \
         .PreconditioningTrials=0,                   \
         .NoUSprob=0,                                \
         .Testing=OFF,                               \
         .Periodic=OFF,                              \
-        .I2 = 0,                                 \
+        .I2 = 1.00,                                 \
         .I1 = 0,                                    \
-        .I0 = 0.80,                                 \
-        .mu = 0.80,                                 \
+        .I0 = 0.05,                                 \
+        .mu = 0.04,                                 \
     }
 
 ///parameters for the inhibitory layer of the double layer model
@@ -58,9 +62,9 @@ static const parameters DualLayerModelIn =
             .dual = 
             {
                 .connectivity = HOMOGENEOUS,   
-                .W            = -0.30, //vart W?
+                .W            = -0.070, //vart W?
                 .sigma        = 60, 
-                .synapse      = {.R=0.5,.D=7.0},
+                .synapse      = {.R=0,.D=2},
             }
         },
         .tref       = 5,
@@ -68,7 +72,7 @@ static const parameters DualLayerModelIn =
         .normalization_parameters = {.glob_mult = {.GM=1}},
     },
     potparams,
-    stimparams,
+    stimparams,    
     .skip = 2,
 };
 ///parameters for the excitatory layer of the double layer model
@@ -82,9 +86,9 @@ static const parameters DualLayerModelEx =
             .dual =     
             {
                 .connectivity = EXPONENTIAL,   
-                .W            = 0.23, 
-                .sigma        = 12,
-                .synapse      = {.R=0.5,.D=2.0},
+                .W            = 0.105, //0.105 
+                .sigma        = 30, //30
+                .synapse      = {.R=0,.D=2},
             }
         },
         .tref       = 5,
@@ -93,7 +97,7 @@ static const parameters DualLayerModelEx =
     },
     potparams,
     stimparams,
-    .skip = 1, //3 out of 4? 
+    .skip = -2, //3 out of 4?
 };
 ///Constant external input to conductances
 static const extinput Extinput =
@@ -109,57 +113,51 @@ static const model_features Features =
     .STD        = OFF,  //if we need any of these features we can make the changes then.
     .Theta      = OFF,
     .Timestep   = 0.05, // Works in like with 0.1 for midpoint. But if gE too small should addition be smaller too???
-    .Simlength  = 50000,
     .ImageStim = ON,
+    .Disablewrapping = OFF,
+    .Simlength  = 50000,
     .job        = {.initcond = RAND_JOB, .Voltage_or_count = 1},
-    .Outprefix  = "jneuro1_trials",  // Make empty to keep in current directory
+    .Outprefix = "EIF30_strongstim",
     .output = {
         //{ .method=PICTURE,.Output=5,.Delay=1},  // THIS (AND ONLY THIS) BREAKS IT
         { .method=SPIKES,.Output="Spike1" ,.Delay=1}, // Exc. spikes
         { .method=SPIKES,.Output="Spike2" ,.Delay=1}, // Inh. spikes
-        { .method=TEXT,.Output="gE",.Delay=20},    // Excitation
-        { .method=TEXT,.Output="gI",.Delay=20},    // Inhibition
-        { .method=TEXT,.Output="V1",.Delay=20},    // Exc. voltage 
-        { .method=TEXT,.Output="V2",.Delay=20},    // Inh. voltage
+        { .method=TEXT,.Output="V1",.Delay=20},       // Exc. voltage 
+        { .method=TEXT,.Output="V2",.Delay=20},       // Inh. voltage
+        { .method=TEXT,.Output="gE",.Delay=20},       // Excitation
+        { .method=TEXT,.Output="gI",.Delay=20},       // Inhibition
     },                                            
 };
 ///Parameters for conducting a parameter sweep.
 static const sweepable Sweep =
 {
-    // .offset=offsetof(parameters,Stim.I2),
-    // .minval = 1,
-    // .maxval = 12,
-    // .count = 11,
-    // .SweepEx = ON,
-    // .SweepIn = ON,
-    //
-    // .offset=offsetof(parameters,couple.Layer_parameters.dual.synapse.D),
-    // .minval = 3,
-    // .maxval = 6,
-    // .count = 3,
-    //  .SweepEx = OFF,
-    //  .SweepIn = ON,
-    //
-    // .offset=offsetof(parameters,couple.Layer_parameters.dual.W),
-    // .minval = -0.50,
-    // .maxval = -0.24,
-    // .count = 26,
-    // .SweepEx = OFF,
-    // .SweepIn = ON,
-    //
-    // .offset=offsetof(parameters,couple.normalization_parameters.glob_mult.GM),
-    // .minval = 1,
-    // .maxval = 4,
-    // .count = 30,
-    // .SweepEx = ON,
-    // .SweepIn = ON,
+    //.offset=offsetof(parameters,couple.Layer_parameters.dual.W),
+    //.minval = -0.24,
+    //.maxval = -0.15,
+    //.count = 9,
+    //.SweepEx = OFF,
+    //.SweepIn = ON,
     //
     .offset=offsetof(parameters,couple.normalization_parameters.glob_mult.GM),
-    .minval = 1,
+    .minval = 1, // A good value is somewhere between 0.3 to 0.35
     .maxval = 1,
-    .count = 24,
+    .count = 20,
     .SweepEx = ON,
     .SweepIn = ON,
+    // 
+    // .offset=offsetof(parameters,couple.normalization_parameters.glob_mult.GM),
+    // .minval = 1, // A good value is somewhere between 0.3 to 0.35
+    // .maxval = 4,
+    // .count = 15,
+    // .SweepEx = ON,
+    // .SweepIn = ON,
+    //
+    // .offset=offsetof(parameters,Stim.I2),
+    // .minval = 0.5,
+    // .maxval = 5.0,
+    // .count = 9,
+    // .SweepEx = ON,
+    // .SweepIn = ON,
 };
 
 

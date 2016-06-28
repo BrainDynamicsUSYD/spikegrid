@@ -6,9 +6,9 @@ function txt2mat(p)
 % ________________________________________________________________________________________
 % Mandatory inputs 
 % p.datatype: give string of type of file to convert - 'TEXT' or 'SPIKES'
-% p.filename: give string of filename to convert, e.g. '1.txt'
+% p.filename: give string of filename to convert, e.g. '1' for 1.txt
 % ________________________________________________________________________________________
-% Mandatory inputs for SPIKE only
+% Mandatory inputs for SPIKES only
 % p.gridlength: specify size of the grid, along one dimension as integer, e.g. for a 30x30 grid you would use 30
 % p.timelength: number of time steps as integer 
 % p.timestep: time step of simulation as decimal 

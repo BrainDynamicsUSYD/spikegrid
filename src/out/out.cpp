@@ -153,6 +153,28 @@ void TextOutput::DoOutput_()
     fflush(f);//prevents stalling in matlab
     free(actualdata);
 }
+
+BinaryOutput::BinaryOutput(int idxin,const int intervalin,const output_s* datain) : SingleFileOutput(idxin,intervalin) {out=datain;data=out->data.TA_data;}
+void BinaryOutput::DoOutput_()
+{
+    if (this->out->Updateable==ON)
+    {
+       this->data=this->out->UpdateFn(this->out->function_arg);
+    }
+    Compute_float* actualdata = taggedarrayTocomputearray(*data);
+    const unsigned int size = tagged_array_size_(*data);
+    // for (unsigned int i=0;i<size;i++)
+    // {
+    //     for (unsigned int j=0;j<size;j++)
+    //     {
+    //         fwrite(actualdata[i*size+j],sizeof(double),1,f);
+    //     }
+    // }
+    fwrite(actualdata,sizeof(Compute_float),size*size,f);
+    fflush(f);//prevents stalling in matlab
+    free(actualdata);
+}
+
 ConsoleOutput::ConsoleOutput(int idxin, const int intervalin, const output_s* datain) : TAOutput(idxin, intervalin, datain)
 {
     setvbuf(stdout,NULL,_IONBF,0);
@@ -239,6 +261,10 @@ void MakeOutputs(const output_parameters* const m)
                 break;
             case GUI:
                 out = new GUIoutput(i,m[i].Delay,outt ,m[i].Overlay,outt->name);
+                outvec.push_back(out);
+                break;
+            case BINARY:
+                out = new BinaryOutput(i,m[i].Delay,outt);
                 outvec.push_back(out);
                 break;
             default:

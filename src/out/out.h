@@ -73,6 +73,14 @@ class TextOutput : public SingleFileOutput //maybe this should inherit from TAou
         TextOutput(int,int,const output_s* );
         void DoOutput_() ;
 };
+class BinaryOutput : public SingleFileOutput //maybe this should inherit from TAoutput - unclear here
+{
+    const output_s* out;
+    const tagged_array* data;
+    public:
+        BinaryOutput(int,int,const output_s* );
+        void DoOutput_() ;
+};
 class ConsoleOutput: public TAOutput
 {
     public:

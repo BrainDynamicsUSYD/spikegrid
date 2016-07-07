@@ -1,4 +1,4 @@
-% Converts the text file output of the C model into data that matlab can work with and saves as a .mat file
+% Converts the text file output of the C model into data that matlab can work with and saves as a .mat file. I have tried to add as much validation as possible but if you accidentally try to apply this to exc+inh inputs with two different formats it will probably give very weird seeming errors.
 
 function txt2mat(p)
 
@@ -24,7 +24,7 @@ function txt2mat(p)
 if ~isfield(p,'datatype')
 	error('Your input structure must have a "datatype" field!')
 else
-	if ~strcmp(p.datatype,'TEXT') && ~strcmp(p.datatype,'SPIKES')
+	if ~strcmp(p.datatype,'TEXT') && ~strcmp(p.datatype,'SPIKES') && ~strcmp(p.datatype,'BINARY')
 		error('datatype field must be either SPIKES or TEXT!')
 	end
 end
@@ -38,6 +38,9 @@ end
 if ~isfield(p,'filenameI')
 	p.filenameI = [];
 	warning('Entering in only one filename may result in empty values associated with excitatory/inhibitory neurons if you are looking at spikes or voltages')
+end
+if ~isfield(p,'gridlength') && strcmp(p.datatype,'BINARY')
+	error('Input structure must have a gridlength for datatype BINARY!')
 end
 if ~isfield(p,'gridlength') && strcmp(p.datatype,'SPIKES')
 	error('Input structure must have a gridlength for datatype SPIKES!')
@@ -55,11 +58,11 @@ switch p.datatype
 	% VARIABLES: Voltage, excitatory conductance or inhibitory conductance
 	case 'TEXT' 
 
-		% Get voltage
+		% Get variable
 		try
 			varGrid = csvread(sprintf('%s.txt',p.filename)); 
 		catch 
-			error('Error in csvread; most likely you are trying to apply TEXT method to SPIKES data')
+			error('Error in csvread; most likely you are trying to apply TEXT method to SPIKES or BINARY data')
 		end
 		varGrid = varGrid(:,1:end-1)';
 
@@ -79,6 +82,11 @@ switch p.datatype
 		if ~isempty(p.filenameI)
 
 			% Second voltage file (inhibitory neurons)
+			try
+				varGridI = csvread(sprintf('%s.txt',p.filenameI)); 
+			catch 
+				error('Error in csvread; most likely you are trying to apply TEXT method to SPIKES or BINARY data')
+			end
 			varGridI = csvread(sprintf('%s.txt',p.filenameI)); 
 			varGridI = varGridI(:,1:end-1)';
 			varGridI = reshape(varGridI,[p.gridlength^2,size(varGridI,2)/p.gridlength]);
@@ -119,7 +127,7 @@ switch p.datatype
 		try
 			timeCell = cellfun(@(x) sub2ind([p.gridlength,p.gridlength],x(1:2:end),x(2:2:end)),coords,'UniformOutput',0);
 		catch 
-			error('Error in sub2ind; most likely you are trying to apply SPIKES method to TEXT data')
+			error('Error in sub2ind; most likely you are trying to apply SPIKES method to TEXT or BINARY data')
 		end
 		spikeCell = cell(p.gridlength^2,1);
 
@@ -158,9 +166,55 @@ switch p.datatype
 			end
 		end
 
-	% Save as a .mat file in results folder with the same name
-	save([p.filename,p.filenameI],'spikeCell')
+		% Save as a .mat file in results folder with the same name
+		save([p.filename,p.filenameI],'spikeCell')
 
-	end
+
+	% VARIABLES: Voltage, excitatory conductance or inhibitory conductance
+	case 'BINARY' 
+
+		% Get variable
+		FID = fopen(sprintf('%s.txt',p.filename));
+		varGrid = fread(FID,[p.gridlength,inf],'float64');
+		fclose(FID);
+
+		% Number of time steps
+		p.timelength = size(varGrid,2)/p.gridlength;
+		if mod(p.timelength,1)~=0
+			error('Grid does not appear to be square. It is possible you are trying to apply BINARY method to SPIKES or TEXT data')
+		end
+
+		% Reshape into matrix of (gridlength x gridlength x timelength)
+		varGrid = reshape(varGrid,[p.gridlength^2,p.timelength]);
+
+		% Only for combining excitatory and inhibitory voltage values in grid with 3:1 proportionality
+		if ~isempty(p.filenameI)
+
+			% Second voltage file (inhibitory neurons)
+			FID = fopen(sprintf('%s.txt',p.filenameI));
+			varGridI = fread(FID,[p.gridlength,inf],'float64');
+			fclose(FID);
+			varGridI = reshape(varGridI,[p.gridlength^2,size(varGridI,2)/p.gridlength]);
+
+			% Check outputs have the same gridsize
+			if p.gridlength~=sqrt(size(varGridI,1))
+				error('Grids of VE and VI are not the same size')
+			end
+
+			% Check outputs have the same timelength
+			if p.timelength~=size(varGridI,2)
+				error('VE and VI do not have the same lengths of time')
+			end
+
+			% Get odd gridpoints and use as inhibitory values (replaces dummy values in excitatory neurons)
+			[x,y] = meshgrid(1:p.gridlength,1:p.gridlength);
+			isinh = (mod(x,2)~=0 & mod(y,2)~=0);
+			isinh = isinh(:);
+			varGrid(isinh,:) = varGridI(isinh,:);
+
+		end
+
+		% Save as a .mat file in results folder with the same name
+		save([p.filename,p.filenameI],'varGrid','-v7.3')
 
 end

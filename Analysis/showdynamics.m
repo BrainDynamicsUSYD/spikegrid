@@ -4,19 +4,18 @@ function showdynamics(varGrid,varargin)
 % Figure 1: shows values across the grid at one time step.
 % Figure 2: shows values across time at one grid point, with dashed horizontal line indicating the current time
 % There will also be a MENU which has the following options:
-% > : Move forward a small amount in time (default is +1 time step)
-% >> : Move forward a large amount in time (default is +10 time steps)
-% < : Move backward a small amount in time (default is -1 time steps)
-% < : Move backward a large amount in time (default is -10 time steps)
-% time: Skip to a specified time. A prompt will appear in the terminal asking you to type in a desired time
+% >    : Move forward a small amount in time (default is +1 time step)
+% >>   : Move forward a large amount in time (default is +10 time steps)
+% <    : Move backward a small amount in time (default is -1 time steps)
+% <<   : Move backward a large amount in time (default is -10 time steps)
+% time : Skip to a specified time. A prompt will appear in the terminal asking you to type in a desired time
 % trace: Pick a new neuron to obtain the trace of (Figure 2). A target will appear when you move the cursor over Figure 1. Clicking on a particular neuron will update the trace to show that neuron's dynamics
-% fig: Writes a matlab figure and a png file of Figure 1 to the current directory. A prompt will ask you to type a name for the file into the terminal. Make sure you use a ' before and after the name so MATLAB knows it's a string e.g. 'myfilename'
-% end: Closes this function but retains the figures
+% fig  : Writes a matlab figure and a png file of Figure 1 to the current directory. A prompt will ask you to type a name for the file into the terminal. Make sure you use a ' before and after the name so MATLAB knows it's a string e.g. 'myfilename'
+% end  : Closes this function but retains the figures
 
 % INPUT
 % varGrid data, which can be obtained by using the txt2mat.m function to extract data from the C simulation. For a simulation of grid NxN with T recorded time intervals, varGrid is a matrix of dimensions N^2 x T
 % varargin (optional): Set minumum and maximum values for colormap and y-axis of the trace, like this: [max,min], e.g. [0,1] for minimum of 0 and maximum of 1. If unspecified the code detects the smallest and largest values in the entire data set and uses them
-
 
 % Close lingering figures
 close all

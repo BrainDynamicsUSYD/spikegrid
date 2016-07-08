@@ -14,7 +14,7 @@ else
 	#hack to get a warning
 	IGNORE := $(shell >&2 echo no ISL - some gcc optimizations have been disabled)
 endif
-ifeq ($(CC),clang)
+ifeq ($(shell $(CC) -v 2>&1 | grep -c "clang version"), 1) #this is becayse ifeq CC,clang doesn't work on a mac
 	export CFLAGS= -g -Wno-padded -Wno-missing-prototypes -Wno-missing-variable-declarations -Weverything -pedantic  -Ofast -Wno-documentation-unknown-command -Wno-covered-switch-default -Wno-old-style-cast -Wno-extended-offsetof
 else #gcc
 	optflags:=${optflags} -Ofast -msse -msse2 -msse3 -funsafe-loop-optimizations -mtune=native -march=native  -ftree-loop-optimize   -flto  -fassociative-math -fno-signed-zeros -freciprocal-math -ffinite-math-only -fno-trapping-math -ftree-vectorize

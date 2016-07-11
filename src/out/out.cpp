@@ -153,6 +153,28 @@ void TextOutput::DoOutput_()
     fflush(f);//prevents stalling in matlab
     free(actualdata);
 }
+
+BinaryOutput::BinaryOutput(int idxin,const int intervalin,const output_s* datain) : SingleFileOutput(idxin,intervalin) {out=datain;data=out->data.TA_data;}
+void BinaryOutput::DoOutput_()
+{
+    if (this->out->Updateable==ON)
+    {
+       this->data=this->out->UpdateFn(this->out->function_arg);
+    }
+    Compute_float* actualdata = taggedarrayTocomputearray(*data);
+    const unsigned int size = tagged_array_size_(*data);
+    // for (unsigned int i=0;i<size;i++)
+    // {
+    //     for (unsigned int j=0;j<size;j++)
+    //     {
+    //         fwrite(actualdata[i*size+j],sizeof(double),1,f);
+    //     }
+    // }
+    fwrite(actualdata,sizeof(Compute_float),size*size,f);
+    fflush(f);//prevents stalling in matlab
+    free(actualdata);
+}
+
 ConsoleOutput::ConsoleOutput(int idxin, const int intervalin, const output_s* datain) : TAOutput(idxin, intervalin, datain)
 {
     setvbuf(stdout,NULL,_IONBF,0);
@@ -241,6 +263,10 @@ void MakeOutputs(const output_parameters* const m)
                 out = new GUIoutput(i,m[i].Delay,outt ,m[i].Overlay,outt->name);
                 outvec.push_back(out);
                 break;
+            case BINARY:
+                out = new BinaryOutput(i,m[i].Delay,outt);
+                outvec.push_back(out);
+                break;
             default:
                 break;
         }
@@ -273,13 +299,13 @@ void CleanupOutputs()
 #ifdef MATLAB
 #include "../matlab_includes.h"
 //When using matlab, we want to be able to output just about any array of stuff.  This function does the work
-mxArray* outputToMxArray (const output_s input)
+mxArray* outputToMxArray (const output_s* input)
 {
-    switch (input.datatype)
+    switch (input->datatype)
     {
         case FLOAT_DATA:
             {
-                const tagged_array* const data = input.data.TA_data;
+                const tagged_array* const data = input->data.TA_data;
                 const unsigned int size = tagged_array_size_(*data)*data->subgrid;
                 mxArray* ret = mxCreateNumericMatrix((int)size,(int)size,MatlabDataType(),mxREAL); //matlab has signed ints for array sizes - really?
                 Compute_float* dataptr =  (Compute_float*)mxGetData(ret);
@@ -293,7 +319,7 @@ mxArray* outputToMxArray (const output_s input)
             return NULL;
     }
 }
-mxArray* outputToMxStruct(const output_s input)
+mxArray* outputToMxStruct(const output_s* input)
 {
     const char* fieldnames[] = {"data","min","max"};
     mxArray* output = mxCreateStructMatrix(1,1,3,fieldnames);
@@ -301,10 +327,10 @@ mxArray* outputToMxStruct(const output_s input)
     Compute_float* minptr = (Compute_float*)mxGetData(minarr);
     mxArray* maxarr = mxCreateNumericMatrix(1,1,MatlabDataType(),mxREAL);
     Compute_float* maxptr = (Compute_float*)mxGetData(maxarr);
-    if (input.datatype==FLOAT_DATA) //ringbuffer data doesn't really have a min/max
+    if (input->datatype==FLOAT_DATA) //ringbuffer data doesn't really have a min/max
     {
-        maxptr[0]=input.data.TA_data->maxval;
-        minptr[0]=input.data.TA_data->minval;
+        maxptr[0]=input->data.TA_data->maxval;
+        minptr[0]=input->data.TA_data->minval;
     }
     else {minptr[0]=Zero;maxptr[0]=Zero;}
     mxSetField(output,0,"data",outputToMxArray(input));
@@ -324,7 +350,7 @@ void outputExtraThings(mxArray* plhs[],int nrhs,const mxArray* prhs[])
     {
         char* data=(char*)malloc(sizeof(char)*1024); //should be big enough
         mxGetString(mxGetCell(prhs[1],i),data,1023);
-        mxSetCell(plhs[1],i,outputToMxStruct(getOutputByName(data)));
+        mxSetCell(plhs[1],i,outputToMxStruct(GetOutputByName(data)));
     }
 }
 #endif

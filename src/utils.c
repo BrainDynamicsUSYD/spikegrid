@@ -42,6 +42,7 @@ static void * my_malloc_hook (size_t size, __attribute__((unused)) const void * 
   if (result==NULL)
   {
       printf("Malloc failed - returned NULL - quitting early\n");
+      printf("This is probably because you have insufficient RAM.  Try shrinking the grid size or disabling STDP/random connections\n");
       exit(EXIT_FAILURE);
   }
   // Restore our own hooks */

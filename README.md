@@ -1,6 +1,12 @@
 # spikegrid
 John and Adams spiking conductance based model with STDP.
 
+#Copyright
+Currently John and Adam are the main authors, most of the C code was written by John and Adam wrote most of the MATLAB code.  For details check the git logs.
+
+As PhD students, they (rather than the University) own the copyright to their code - see the Uni Intellectual Property policy here http://sydney.edu.au/policies/showdoc.aspx?recnum=PDOC2016/418&RendNum=0 (section 8).
+
+
 #Dependencies
 1. OpenCV - used for visualization and some output - this can be disabled in the makefile, but many features will be lost.
     OpenCV 2.X.X is best and is the version that most linux distros seem to be packaging.  OpenCV 3 can also be used, but some of the paths for the include files are different

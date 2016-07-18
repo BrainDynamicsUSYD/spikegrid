@@ -2,7 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include "lagstorage.h"
-
+//This is currently only used for STDP as the STDP timescale may have multiple spikes from a single neuron occuring within the window
+//for STDP, which can't happen for the refractory state - which can use the much simpler simplestorage.
+//conceptually this class basically just keeps a list of lag times to the spikes at a point and provides an efficient way to store them
 ///The lagstorage functions have some issues - mainly while loops to find the end etc.  However, it looks like it is
 ///slower to keep track of the count
 ///One thing to fix would be auto-calculating lengths - bit it is a little tricky as STDP uses a different mechanism

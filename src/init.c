@@ -73,7 +73,6 @@ layer setuplayer(const parameters p)
     {   //I am not particularly happy with this block.  It is highly complicated.  One idea: have the init functions themselves decide to return null
         .lags               = calloc(sizeof(simplestorage),1),
         .STDP_data          = Features.STDP==ON?STDP_init(&P->STDP,trefrac_in_ts):NULL, //problem - P defd later
-        .connections        = CreateCouplingMatrix(p.couple),
         .std                = Features.STD==ON?STD_init(p.STD):NULL,
         .Phimat             = (p.Stim.Periodic==OFF && Features.ImageStim==ON)?CreatePhiMatrix():NULL,
         .P                  = P,
@@ -85,7 +84,7 @@ layer setuplayer(const parameters p)
     };
     L.RD->R=p.couple.Layer_parameters.dual.synapse.R;
     L.RD->D=p.couple.Layer_parameters.dual.synapse.D;
-
+    memcpy(&L.connections,CreateCouplingMatrix(p.couple),sizeof(Compute_float)*couple_array_size*couple_array_size);
     L.lags->trefrac_in_ts= (uint8_t)trefrac_in_ts;
     return L;
 }

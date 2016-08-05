@@ -29,7 +29,7 @@ typedef struct in_out
 typedef struct layer
 {
     Compute_float* const Phimat;
-    Compute_float* const connections;     ///<Matrix of connections coming from a single point
+    Compute_float const connections[couple_array_size*couple_array_size];     ///<Matrix of connections coming from a single point
     in_out voltages;
     in_out recoverys;
     randconns_info* rcinfo;

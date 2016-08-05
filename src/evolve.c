@@ -107,10 +107,10 @@ Compute_float __attribute__((const,pure)) rhs_func  (const Compute_float V,const
 
 ///Uses precalculated gE and gI to integrate the voltages forward through time.
 ///Uses eulers method
-void CalcVoltages(const Compute_float* const __restrict__ Vinput,
-        const condmat * const __restrict__ cond_mat,
+void CalcVoltages(in_out* const __restrict__ Voltages,
+        const condmat * __restrict__ cond_mat,
         const conductance_parameters C,
-        Compute_float* const __restrict__ Vout,const int skip)
+        const int skip)
 {
     for (Neuron_coord x=0;x<grid_size;skip>0?x+=skip:x++)
     {
@@ -119,20 +119,18 @@ void CalcVoltages(const Compute_float* const __restrict__ Vinput,
             const coords c = {.x=x,.y=y};
             const size_t idx =Conductance_index(c);
             const size_t idx2=  grid_index(c);
-            const Compute_float rhs = rhs_func(Vinput[idx2],cond_mat->gE[idx],cond_mat->gI[idx],C);
-            Vout[idx2]=Vinput[idx2]+Features.Timestep*rhs;
+            const Compute_float rhs = rhs_func(Voltages->In[idx2],cond_mat->gE[idx],cond_mat->gI[idx],C);
+            Voltages->Out[idx2]=Voltages->In[idx2]+Features.Timestep*rhs;
         }
     }
 }
 ///Uses precalculated gE and gI to integrate the voltages and recoverys forward through time. This uses the Euler method
 //this should probably take a struct as input - way too many arguments
-void CalcRecoverys(const Compute_float* const __restrict__ Vinput,
-        const Compute_float* const __restrict__ Winput,
+void CalcRecoverys(in_out* const __restrict__ Voltages,
+        in_out* const __restrict__ Recoveries,
         const condmat* const __restrict__ cond_mat,
         const conductance_parameters C,
-        const recovery_parameters R,
-        Compute_float* const __restrict__ Vout,
-        Compute_float* const __restrict__ Wout)
+        const recovery_parameters R)
 {    // Adaptive quadratic integrate-and-fire
     for (Neuron_coord x=0;x<grid_size;x++)
     {
@@ -141,10 +139,10 @@ void CalcRecoverys(const Compute_float* const __restrict__ Vinput,
             const coords c = {.x=x,.y=y};
             const size_t idx =Conductance_index(c);
             const size_t idx2=  grid_index(c);
-            const Compute_float rhsV=rhs_func(Vinput[idx2],cond_mat->gE[idx],cond_mat->gI[idx],C)-Winput[idx2];
-            const Compute_float rhsW=R.Wcv*(R.Wir*(Vinput[idx2]-C.Vlk) - Winput[idx2]);
-            Vout[idx2] = Vinput[idx2] + Features.Timestep*rhsV;
-            Wout[idx2] = Winput[idx2] + Features.Timestep*rhsW;
+            const Compute_float rhsV=rhs_func(Voltages->In[idx2],cond_mat->gE[idx],cond_mat->gI[idx],C)-Recoveries->In[idx2];
+            const Compute_float rhsW=R.Wcv*(R.Wir*(Voltages->In[idx2]-C.Vlk) - Recoveries->In[idx2]);
+            Voltages->Out[idx2] = Voltages->In[idx2] + Features.Timestep*rhsV;
+            Recoveries->Out[idx2] = Recoveries->In[idx2] + Features.Timestep*rhsW;
         }
     }
 }
@@ -184,7 +182,7 @@ void StoreFiring(layer* L,const unsigned int timestep)
                 const coords coord = {.x=x,.y=y};
                 if (Features.STDP==ON) {modifyLags(L->STDP_data->lags,LagIdx(coord,L->STDP_data->lags),grid_index(coord));}
                 //now - add in new spikes
-                if (L->voltages_out[grid_index(coord)]  >= L->P->potential.Vpk
+                if (L->voltages.Out[grid_index(coord)]  >= L->P->potential.Vpk
                         ||
                         //next part - add random spikes
                         (L->P->potential.rate > 0 && //this check is because the compiler doesn't optimize the call to random() otherwise
@@ -196,8 +194,8 @@ void StoreFiring(layer* L,const unsigned int timestep)
                     if (Features.STDP==ON && L->STDP_data->RecordSpikes==ON) {AddnewSpike(L->STDP_data->lags,LagIdx(coord,L->STDP_data->lags));}
                     if (Features.Recovery==ON) //reset recovery if needed.  Note recovery has no refractory period so a reset is required
                     {
-                        L->voltages_out[grid_index(coord)]=L->P->potential.Vrt;
-                        L->recoverys_out[grid_index(coord)]+=L->P->recovery.Wrt;
+                        L->voltages.Out[grid_index(coord)]=L->P->potential.Vrt;
+                        L->recoverys.Out[grid_index(coord)]+=L->P->recovery.Wrt;
                     }
                     Compute_float spikestr = 1.0/(L->RD->D - L->RD->R); //This normalizes the base size strength so that changing D/R only changes the timescale but leaves the integral constant
                     if (Features.STD==ON)
@@ -221,7 +219,7 @@ void StoreFiring(layer* L,const unsigned int timestep)
             }
             else //non-active neurons never get to fire
             {
-                L->voltages_out[x*grid_size+y]=-1000; //skipped neurons set to -1000 - probably not required but perf impact should be minimal - also ensures they will never be >Vpk  - removing this would make the pictures smoother
+                L->voltages.Out[x*grid_size+y]=-1000; //skipped neurons set to -1000 - probably not required but perf impact should be minimal - also ensures they will never be >Vpk  - removing this would make the pictures smoother
             }
         }
     }
@@ -244,30 +242,30 @@ void tidylayer (layer* l,const Compute_float timemillis,const condmat* const __r
 {
     if (Features.Recovery==OFF)
     {
-        CalcVoltages(l->voltages,cond_mat,l->P->potential,l->voltages_out,l->P->skip);
+        CalcVoltages(&l->voltages,cond_mat,l->P->potential,l->P->skip);
         if (Features.ImageStim==ON) //Dodgy fudge
         {
             if (!(l->P->Stim.Periodic))
             {
-                ApplyContinuousStim(l->voltages_out,timemillis,l->P->Stim,Features.Timestep,l->Phimat);
+                ApplyContinuousStim(l->voltages.Out,timemillis,l->P->Stim,Features.Timestep,l->Phimat);
             }
         }
-        RefractoryVoltages(l->voltages_out,l->lags,l->P->potential);
+        RefractoryVoltages(l->voltages.Out,l->lags,l->P->potential);
     }
     else
     {
-        CalcRecoverys(l->voltages,l->recoverys,cond_mat,l->P->potential,l->P->recovery,l->voltages_out,l->recoverys_out);
+        CalcRecoverys(&l->voltages,&l->recoverys,cond_mat,l->P->potential,l->P->recovery);
     }
     StoreFiring(l,timestep);
     if (Features.Theta==ON)
     {
-        dotheta(l->voltages_out,l->P->theta,timemillis);
+        dotheta(l->voltages.Out,l->P->theta,timemillis);
     }
     if (Features.ImageStim==ON)
     {
         if (l->P->Stim.Periodic==ON) //only stim excit layer
         {
-            ApplyStim(l->voltages_out,timemillis,l->P->Stim,l->P->potential.Vpk,l->STDP_data,l->rcinfo,l->Layer_is_inhibitory);
+            ApplyStim(l->voltages.Out,timemillis,l->P->Stim,l->P->potential.Vpk,l->STDP_data,l->rcinfo,l->Layer_is_inhibitory);
         }
     }
     if (l->P->STDP.STDP_decay_frequency>0 && (int)(timemillis/Features.Timestep) % l->P->STDP.STDP_decay_frequency == 0 && l->STDP_data->RecordSpikes==ON)

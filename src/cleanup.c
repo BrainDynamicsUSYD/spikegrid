@@ -14,10 +14,10 @@ void FreeIfNotNull(void* v)
 ///@param l layer to free
 void CleanupLayer(layer* l)
 {
-    FreeIfNotNull(l->voltages);
-    FreeIfNotNull(l->voltages_out);
-    FreeIfNotNull(l->recoverys);
-    FreeIfNotNull(l->recoverys_out);
+    //FreeIfNotNull(l->voltages);
+    //FreeIfNotNull(l->voltages_out);
+   // FreeIfNotNull(l->recoverys);
+   // FreeIfNotNull(l->recoverys_out);
     FreeIfNotNull(l->connections);
     FreeIfNotNull(l->P);
     FreeIfNotNull(l->std);

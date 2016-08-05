@@ -28,10 +28,10 @@ void output_init(const model* const m)
     CreateOutputtable((output_s){"gI",          FLOAT_DATA, .data.TA_data=tagged_array_new(m->cond_matrices->gI,                     conductance_array_size, couplerange,   1,0,2)});
     CreateOutputtable((output_s){"Coupling1",   FLOAT_DATA, .data.TA_data=tagged_array_new(m->layer1.connections,     couple_array_size,      0,             1,-0.5,0.5)});
     CreateOutputtable((output_s){"Coupling2",   FLOAT_DATA, .data.TA_data=tagged_array_new(m->layer2.connections,     couple_array_size,      0,             1,-0.5,0.5)});
-    CreateOutputtable((output_s){"V1",          FLOAT_DATA, .data.TA_data=tagged_array_new(m->layer1.voltages_out,    grid_size,              0,             1,m->layer1.P->potential.Vin,m->layer1.P->potential.Vpk)});
-    CreateOutputtable((output_s){"V2",          FLOAT_DATA, .data.TA_data=tagged_array_new(m->layer2.voltages_out,    grid_size,              0,             1,m->layer2.P->potential.Vin,m->layer2.P->potential.Vpk)});
-    CreateOutputtable((output_s){"Recovery1",   FLOAT_DATA, .data.TA_data=tagged_array_new(m->layer1.recoverys_out,   grid_size,              0,             1,0,100)});
-    CreateOutputtable((output_s){"Recovery2",   FLOAT_DATA, .data.TA_data=tagged_array_new(m->layer2.recoverys_out,   grid_size,              0,             1,0,100)});
+    CreateOutputtable((output_s){"V1",          FLOAT_DATA, .data.TA_data=tagged_array_new(m->layer1.voltages.Out,    grid_size,              0,             1,m->layer1.P->potential.Vin,m->layer1.P->potential.Vpk)});
+    CreateOutputtable((output_s){"V2",          FLOAT_DATA, .data.TA_data=tagged_array_new(m->layer2.voltages.Out,    grid_size,              0,             1,m->layer2.P->potential.Vin,m->layer2.P->potential.Vpk)});
+    CreateOutputtable((output_s){"Recovery1",   FLOAT_DATA, .data.TA_data=tagged_array_new(m->layer1.recoverys.Out,   grid_size,              0,             1,0,100)});
+    CreateOutputtable((output_s){"Recovery2",   FLOAT_DATA, .data.TA_data=tagged_array_new(m->layer2.recoverys.Out,   grid_size,              0,             1,0,100)});
     CreateOutputtable((output_s){"Spike1",      SPIKE_DATA, .data.Lag_data=m->layer1.lags});
     CreateOutputtable((output_s){"Spike2",      SPIKE_DATA, .data.Lag_data=m->layer2.lags});
     //note: some outputs defined elsewhere - it seems more convenient

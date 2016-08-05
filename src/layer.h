@@ -16,6 +16,12 @@ typedef struct RD_data {
     Compute_float R; //TODO: these should be const - but difficult to get initialize them then - maybe need a sub struct for the matrices?
     Compute_float D;
 } RD_data;
+
+typedef struct in_out
+{
+    Compute_float In [grid_size*grid_size];
+    Compute_float Out [grid_size*grid_size];
+} in_out;
 //making some of these arrays fixed rather than pointers would be nice
 //it would probably improve cache access.
 //However, there would be issues - some functions pass layer rather than layer* which
@@ -24,10 +30,8 @@ typedef struct layer
 {
     Compute_float* const Phimat;
     Compute_float* const connections;     ///<Matrix of connections coming from a single point
-    Compute_float* voltages;                    ///<Input voltages
-    Compute_float* voltages_out;                ///<return value
-    Compute_float* recoverys;                   ///<Recovery variable
-    Compute_float* recoverys_out;               ///<Return value for recovery variable
+    in_out voltages;
+    in_out recoverys;
     randconns_info* rcinfo;
     simplestorage* lags;
     STDP_data*      STDP_data;

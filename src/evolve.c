@@ -45,7 +45,7 @@ void fixboundary(Compute_float* __restrict input)
     for (int i=0;i<couplerange;i++)
     {
         for (int j=0;j<conductance_array_size;j++)
-        {
+        {   //the indices through this function are a little messy - but kind of stuck that way
             input[(grid_size+i)*conductance_array_size + j] += input[i*conductance_array_size+j]; //add to bottom
             input[i*conductance_array_size+j] = 0;
             input[(i+couplerange)*conductance_array_size+j] += input[(grid_size+couplerange+i)*conductance_array_size+j];//add to top

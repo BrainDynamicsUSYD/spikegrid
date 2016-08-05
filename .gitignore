@@ -63,3 +63,4 @@ maskgen.c
 whichparambackup.h
 res*
 osc-data
+.#*

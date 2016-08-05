@@ -28,9 +28,6 @@ typedef struct layer
     Compute_float* voltages_out;                ///<return value
     Compute_float* recoverys;                   ///<Recovery variable
     Compute_float* recoverys_out;               ///<Return value for recovery variable
-    Compute_float* const Extimecourse;    ///<store time course of Ex synapses - TODO: single layer broken
-    Compute_float* const Intimecourse;    ///<store time course of In synapses - TODO: single layer broken
-    Compute_float* const Mytimecourse;    ///<store time course of synapses in dual layer case
     randconns_info* rcinfo;
     simplestorage* lags;
     STDP_data*      STDP_data;

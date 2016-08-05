@@ -76,12 +76,6 @@ layer setuplayer(const parameters p)
         .connections        = CreateCouplingMatrix(p.couple),
         .std                = Features.STD==ON?STD_init(p.STD):NULL,
         .Phimat             = (p.Stim.Periodic==OFF && Features.ImageStim==ON)?CreatePhiMatrix():NULL,
-        .Extimecourse       = p.couple.Layertype==SINGLELAYER?
-            Synapse_timecourse_cache((unsigned int)cap,p.couple.Layer_parameters.single.Ex,Features.Timestep):NULL,
-        .Intimecourse       = p.couple.Layertype==SINGLELAYER?
-            Synapse_timecourse_cache((unsigned int)cap,p.couple.Layer_parameters.single.In,Features.Timestep):NULL,
-        .Mytimecourse       = p.couple.Layertype==DUALLAYER?
-           Synapse_timecourse_cache((unsigned int)cap,p.couple.Layer_parameters.dual.synapse,Features.Timestep):NULL,
         .P                  = P,
         .voltages           = calloc(sizeof(Compute_float),grid_size*grid_size),
         .voltages_out       = calloc(sizeof(Compute_float),grid_size*grid_size),

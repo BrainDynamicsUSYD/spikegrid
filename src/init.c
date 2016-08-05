@@ -63,10 +63,6 @@ void seedrand(const InitConds initcond,const int jobno,const int yossarianjobnum
 ///currently this function is only called from the setup function (but it could be called directly)
 layer setuplayer(const parameters p)
 {
-    const Compute_float min_effect = (Compute_float)1E-6;
-    int cap; //this cap should really be calculated in lagstorage init - it doesn't feel quite appropriate here
-    if (p.couple.Layertype==SINGLELAYER) {cap=(int)max(setcap(p.couple.Layer_parameters.single.Ex,min_effect,Features.Timestep),setcap(p.couple.Layer_parameters.single.In,min_effect,Features.Timestep));}
-    else                                 {cap=(int)setcap(p.couple.Layer_parameters.dual.synapse,min_effect,Features.Timestep);}
     const int trefrac_in_ts =(int) ((Compute_float)p.couple.tref / Features.Timestep);
     parameters* P = (parameters*)newdata(&p,sizeof(p));
     layer L =
@@ -74,18 +70,20 @@ layer setuplayer(const parameters p)
         .lags               = calloc(sizeof(simplestorage),1),
         .STDP_data          = Features.STDP==ON?STDP_init(&P->STDP,trefrac_in_ts):NULL, //problem - P defd later
         .std                = Features.STD==ON?STD_init(p.STD):NULL,
-        .Phimat             = (p.Stim.Periodic==OFF && Features.ImageStim==ON)?CreatePhiMatrix():NULL,
         .P                  = P,
-        //.recoverys          = Features.Recovery==ON?calloc(sizeof(Compute_float),grid_size*grid_size):NULL,
-        //.recoverys_out      = Features.Recovery==ON?calloc(sizeof(Compute_float),grid_size*grid_size):NULL,
         .Layer_is_inhibitory = p.couple.Layertype==DUALLAYER && p.couple.Layer_parameters.dual.W<0,
         .rcinfo             = Features.Random_connections==ON?init_randconns(p.random,p.couple): NULL,
         .RD                 = calloc(sizeof(RD_data),1),
     };
     L.RD->R=p.couple.Layer_parameters.dual.synapse.R;
     L.RD->D=p.couple.Layer_parameters.dual.synapse.D;
-    memcpy(&L.connections,CreateCouplingMatrix(p.couple),sizeof(Compute_float)*couple_array_size*couple_array_size);
     L.lags->trefrac_in_ts= (uint8_t)trefrac_in_ts;
+    //some things to fix up when we switch to returning a pointer
+    memcpy((Compute_float*)L.connections,CreateCouplingMatrix(p.couple),sizeof(Compute_float)*couple_array_size*couple_array_size); //warning here about cast-qual is fine - nasty hack - but acceptable there is a way to bypass it when we use an explicit malloc later
+    if (p.Stim.Periodic==OFF && Features.ImageStim==ON) 
+    {
+        memcpy((Compute_float*)L.Phimat,CreatePhiMatrix(),grid_size*grid_size*sizeof(Compute_float));
+    }
     return L;
 }
 //sets the output directory - note output directory is a global

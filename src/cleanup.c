@@ -18,7 +18,7 @@ void CleanupLayer(layer* l)
     //FreeIfNotNull(l->voltages_out);
    // FreeIfNotNull(l->recoverys);
    // FreeIfNotNull(l->recoverys_out);
-    FreeIfNotNull(l->connections);
+    //FreeIfNotNull(l->connections);
     FreeIfNotNull(l->P);
     FreeIfNotNull(l->std);
  //   lagstorage_dtor(l->firinglags);

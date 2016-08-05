@@ -28,7 +28,7 @@ typedef struct in_out
 //would cause problems (segfaults that are stack overflows)
 typedef struct layer
 {
-    Compute_float* const Phimat;
+    Compute_float const Phimat[grid_size*grid_size];
     Compute_float const connections[couple_array_size*couple_array_size];     ///<Matrix of connections coming from a single point
     in_out voltages;
     in_out recoverys;

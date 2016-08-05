@@ -41,7 +41,7 @@ static const parameters OneLayerModel = {.couple={0}};
         .NoUSprob=0,                                \
         .Testing=OFF,                               \
         .Periodic=OFF,                              \
-        .I2 = 0.60,                                 \
+        .I2 = 1.60,                                 \
         .I1 = 0,                                    \
         .I0 = 0.80,                                 \
         .mu = 0.04,                                 \
@@ -110,16 +110,16 @@ static const model_features Features =
     .Theta      = OFF,
     .Timestep   = 0.05, // Works in like with 0.1 for midpoint. But if gE too small should addition be smaller too???
     .ImageStim = ON,
-    .Simlength  = 60000, //50000
+    .Simlength  = 70000, //50000
     .job        = {.initcond = RAND_JOB, .Voltage_or_count = 1},
-    .Outprefix = "LIF30_I60",
+    .Outprefix = "LIF30_I160",
     .output = {
         { .method=SPIKES,.Output="Spike1" ,.Delay=1}, // Exc. spikes
         { .method=SPIKES,.Output="Spike2" ,.Delay=1}, // Inh. spikes
-        { .method=TEXT,.Output="V1",.Delay=20},    // Exc. voltage 
-        { .method=TEXT,.Output="V2",.Delay=20},    // Inh. voltage
-        { .method=TEXT,.Output="gE",.Delay=20},
-        { .method=TEXT,.Output="gI",.Delay=20},
+        { .method=BINARY,.Output="V1",.Delay=20},    // Exc. voltage 
+        { .method=BINARY,.Output="V2",.Delay=20},    // Inh. voltage
+        { .method=BINARY,.Output="gE",.Delay=20},
+        { .method=BINARY,.Output="gI",.Delay=20},
         //{.method=GUI,.Output="V2",.Delay=1,.Overlay="Timestep"},
     },                                            
 };

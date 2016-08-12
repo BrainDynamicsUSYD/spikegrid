@@ -71,10 +71,9 @@ layer setuplayer(const parameters p)
         .P                  = P,
         .Layer_is_inhibitory = p.couple.Layertype==DUALLAYER && p.couple.Layer_parameters.dual.W<0,
         .rcinfo             = Features.Random_connections==ON?init_randconns(p.random,p.couple): NULL,
-        .RD                 = calloc(sizeof(RD_data),1),
+        .RD.R               = p.couple.Layer_parameters.dual.synapse.R,
+        .RD.D               = p.couple.Layer_parameters.dual.synapse.D,
     };
-    L.RD->R=p.couple.Layer_parameters.dual.synapse.R;
-    L.RD->D=p.couple.Layer_parameters.dual.synapse.D;
     L.lags.trefrac_in_ts= (uint8_t)trefrac_in_ts;
     //some things to fix up when we switch to returning a pointer
     memcpy((Compute_float*)L.connections,CreateCouplingMatrix(p.couple),sizeof(Compute_float)*couple_array_size*couple_array_size); //warning here about cast-qual is fine - nasty hack - but acceptable there is a way to bypass it when we use an explicit malloc later

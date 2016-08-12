@@ -37,6 +37,6 @@ typedef struct layer
     parameters* P;                              ///<The parameters that we used to make the layer -can't be const as we need to free it
     STD_data*       std;                               ///<Some info that is needed for STD
     const on_off Layer_is_inhibitory;
-    RD_data* RD;
+    RD_data RD;
 } layer;
 #endif

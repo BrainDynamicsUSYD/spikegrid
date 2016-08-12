@@ -196,7 +196,7 @@ void StoreFiring(layer* L,const unsigned int timestep)
                         L->voltages.Out[grid_index(coord)]=L->P->potential.Vrt;
                         L->recoverys.Out[grid_index(coord)]+=L->P->recovery.Wrt;
                     }
-                    Compute_float spikestr = 1.0/(L->RD->D - L->RD->R); //This normalizes the base size strength so that changing D/R only changes the timescale but leaves the integral constant
+                    Compute_float spikestr = 1.0/(L->RD.D - L->RD.R); //This normalizes the base size strength so that changing D/R only changes the timescale but leaves the integral constant
                     if (Features.STD==ON)
                     {
                         spikestr = spikestr * STD_str(L->P->STD,coord,timestep,1,L->std); //since we only emit a spike once, use 1 to force an update
@@ -204,15 +204,15 @@ void StoreFiring(layer* L,const unsigned int timestep)
                     //all the different ways to add a spike
                     if (Features.STDP==OFF)
                     {
-                        AddRD(coord,L->connections, L->RD,spikestr);
+                        AddRD(coord,L->connections, &L->RD,spikestr);
                     }
                     else
                     {
-                        AddRD_STDP(coord,L->connections,L->STDP_data->connections,L->RD,spikestr);
+                        AddRD_STDP(coord,L->connections,L->STDP_data->connections,&L->RD,spikestr);
                     }
                     if (Features.Random_connections==ON)
                     {
-                        AddRandomRD(coord,L->rcinfo,L->RD,spikestr);
+                        AddRandomRD(coord,L->rcinfo,&L->RD,spikestr);
                     }
                 }
             }
@@ -297,8 +297,8 @@ void step1(model* m)
     //from this point the GE and GI are actually fixed - as a result there is no more layer interaction - so do things sequentially to each layer
     if (m->NoLayers==DUALLAYER)
     {
-        FixRD(m->layer1.RD,m->cond_matrices,m->layer1.Layer_is_inhibitory);
-        FixRD(m->layer2.RD,m->cond_matrices,m->layer2.Layer_is_inhibitory);
+        FixRD(&m->layer1.RD,m->cond_matrices,m->layer1.Layer_is_inhibitory);
+        FixRD(&m->layer2.RD,m->cond_matrices,m->layer2.Layer_is_inhibitory);
     }
     else
     {

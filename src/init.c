@@ -21,7 +21,6 @@
 #include "animal.h"
 #include "randconns.h"
 #include "lagstorage.h"
-#include "simplestorage.h"
 #ifndef _WIN32
 #define max(a,b) \
     ({ __typeof__ (a) _a = (a);\
@@ -67,7 +66,6 @@ layer setuplayer(const parameters p)
     parameters* P = (parameters*)newdata(&p,sizeof(p));
     layer L =
     {   //I am not particularly happy with this block.  It is highly complicated.  One idea: have the init functions themselves decide to return null
-        .lags               = calloc(sizeof(simplestorage),1),
         .STDP_data          = Features.STDP==ON?STDP_init(&P->STDP,trefrac_in_ts):NULL, //problem - P defd later
         .std                = Features.STD==ON?STD_init(p.STD):NULL,
         .P                  = P,
@@ -77,7 +75,7 @@ layer setuplayer(const parameters p)
     };
     L.RD->R=p.couple.Layer_parameters.dual.synapse.R;
     L.RD->D=p.couple.Layer_parameters.dual.synapse.D;
-    L.lags->trefrac_in_ts= (uint8_t)trefrac_in_ts;
+    L.lags.trefrac_in_ts= (uint8_t)trefrac_in_ts;
     //some things to fix up when we switch to returning a pointer
     memcpy((Compute_float*)L.connections,CreateCouplingMatrix(p.couple),sizeof(Compute_float)*couple_array_size*couple_array_size); //warning here about cast-qual is fine - nasty hack - but acceptable there is a way to bypass it when we use an explicit malloc later
     if (p.Stim.Periodic==OFF && Features.ImageStim==ON) 

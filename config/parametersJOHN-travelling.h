@@ -1,7 +1,7 @@
 /// \file
 #include <stddef.h> //offsetof
 //these first few parameters actually escape into the paramheader file through magic
-#define grid_size 50
+#define grid_size 200
 ///Total size of the grid
 ///Coupling range
 #define couplerange 15

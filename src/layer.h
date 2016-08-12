@@ -2,14 +2,13 @@
 #ifndef LAYER
 #define LAYER
 #include "enums.h" //needed at least for the is-inhibitory flag
-#include "sizes.h"
+#include "simplestorage.h"
 typedef struct STD_data STD_data; //forward declare STD_data to make things cleaner - makes this file a little messier, but it makes it more obvious where things come from
 ///hold the requisite data for a layer that enables it to be evolved through time.
 typedef struct parameters parameters;
 typedef struct STDP_data STDP_data;
 typedef struct randconns_info randconns_info;
 typedef struct lagstorage lagstorage;
-typedef struct simplestorage simplestorage;
 typedef struct RD_data {
     Compute_float Rmat [conductance_array_size*conductance_array_size];
     Compute_float Dmat [conductance_array_size*conductance_array_size];
@@ -33,7 +32,7 @@ typedef struct layer
     in_out voltages;
     in_out recoverys;
     randconns_info* rcinfo;
-    simplestorage* lags;
+    simplestorage lags;
     STDP_data*      STDP_data;
     parameters* P;                              ///<The parameters that we used to make the layer -can't be const as we need to free it
     STD_data*       std;                               ///<Some info that is needed for STD

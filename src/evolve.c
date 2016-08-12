@@ -12,7 +12,6 @@
 #include "animal.h"
 #include "randconns.h"
 #include "lagstorage.h"
-#include "simplestorage.h"
 #ifdef ANDROID
     #define APPNAME "myapp"
     #include <android/log.h>
@@ -190,7 +189,7 @@ void StoreFiring(layer* L,const unsigned int timestep)
 
                    )
                 {
-                    AddnewSpike_simple(grid_index(coord),L->lags);
+                    AddnewSpike_simple(grid_index(coord),&L->lags);
                     if (Features.STDP==ON && L->STDP_data->RecordSpikes==ON) {AddnewSpike(L->STDP_data->lags,LagIdx(coord,L->STDP_data->lags));}
                     if (Features.Recovery==ON) //reset recovery if needed.  Note recovery has no refractory period so a reset is required
                     {
@@ -250,7 +249,7 @@ void tidylayer (layer* l,const Compute_float timemillis,const condmat* const __r
                 ApplyContinuousStim(l->voltages.Out,timemillis,l->P->Stim,Features.Timestep,l->Phimat);
             }
         }
-        RefractoryVoltages(l->voltages.Out,l->lags,l->P->potential);
+        RefractoryVoltages(l->voltages.Out,&l->lags,l->P->potential);
     }
     else
     {

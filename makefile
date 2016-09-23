@@ -41,7 +41,7 @@ TEST:
 
 #documentation
 docs: html/index.html
-html/index.html: ${SOURCES} *.h Doxyfile
+html/index.html: ${SOURCES}  Doxyfile
 		echo "Suphys computers don't have dot installed, so graphs will be missing if this was run on silliac"
 	doxygen Doxyfile
 #yossarian

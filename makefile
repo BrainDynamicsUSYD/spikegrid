@@ -15,6 +15,7 @@ export OFILES=${imreadlib} ${outlib}
 ###########
 ${BINARY}: force_look
 	$(MAKE) -C src ${BINARY}
+matlab: MATLAB=yes
 matlab: ${mexfile}
 ${mexfile}: force_look
 	$(MAKE) -C src ${mexfile}

@@ -5,7 +5,7 @@ SOURCES= conductance.c coupling.c  STDP.c STD.c output.c evolve.c newparam.c yos
 ${BINARY}: ${SOURCES} *.h ${OFILES} ${CONFIG}
 	@echo compiling main binary
 	@${CC} ${CFLAGS} ${opencvcflags}     ${SOURCES} ${OFILES} -o ${BINARY} -L. ${LDFLAGS}   ${opencvldflags}
-
+ifeq ($(MATLAB),yes)
 #manually compile the mex file.  This is actually similar to what matlab does but we get more control this way
 #these C and ld flags are stolen from mex-v
 #here some hackery - use pkg-config to learn the names of the libs but then find to only get the ones matlab has a copy of
@@ -23,6 +23,7 @@ ${mexfile}:  ${SOURCES} *.h ${CONFIG}  ${OFILES}
 	echo ${MATLABCFLAGS}
 	echo ${MATLABLDFLAGS}
 	${CC} -fpic ${CFLAGS} ${opencvcflags} ${SOURCES} ${OFILES} -o ${mexfile} -L. ${CLIBFLAGS} ${LDFLAGS} ${opencvldflags}
+endif
 #generated .c file - for speed
 #libs / o files / generated source
 ${maskgen} : force_look ${CONFIG}

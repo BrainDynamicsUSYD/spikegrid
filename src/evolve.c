@@ -111,9 +111,11 @@ void CalcVoltages(in_out* const __restrict__ Voltages,
         const conductance_parameters C,
         const int skip)
 {
-    for (Neuron_coord x=0;x<grid_size;skip>0?x+=skip:x++)
+    //the nskip is a hack around x+=skip suffering from integer promotion
+    const Neuron_coord nskip = skip>0?(Neuron_coord)skip:(Neuron_coord)1;
+    for (Neuron_coord x=0;x<grid_size;skip>0?x=(Neuron_coord)(nskip+x):x++)
     {
-        for (Neuron_coord y=0;y<grid_size;y++)
+        for (Neuron_coord y=0;y<grid_size;y++) //not worth skipping in the y direction
         {
             const coords c = {.x=x,.y=y};
             const size_t idx =Conductance_index(c);
@@ -172,7 +174,9 @@ void AddRandomRD(const coords c ,const randconns_info* const rcinfo, RD_data* __
 void StoreFiring(layer* L,const unsigned int timestep)
 {
     const signed char skip = (signed char) (L->P->skip);
-    for (Neuron_coord x=0;x<grid_size;skip>0?x+=skip :x++) //this fancy skipping can make a pretty massive speed difference
+    //the nskip is a hack around x+=skip suffering from integer promotion
+    const Neuron_coord nskip = skip>0?(Neuron_coord)skip:(Neuron_coord)1;
+    for (Neuron_coord x=0;x<grid_size;skip>0?x=(Neuron_coord)(nskip+x):x++)//this fancy skipping can make a pretty massive speed difference
     {
         for (Neuron_coord y=0;y<grid_size;y++)
         {

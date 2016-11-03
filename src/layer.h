@@ -25,32 +25,30 @@ typedef struct in_out
 //it would probably improve cache access.
 //However, there would be issues - some functions pass layer rather than layer* which
 //would cause problems (segfaults that are stack overflows)
+
+#define layer_members \
+    Compute_float const Phimat[grid_size*grid_size];                    \
+    Compute_float const connections[couple_array_size*couple_array_size]; \
+    in_out voltages;                                                    \
+    in_out recoverys;                                                   \
+    randconns_info* rcinfo;                                             \
+    simplestorage lags;                                                 \
+    STDP_data*      STDP_data;                                          \
+    parameters* P;                                                      \
+    STD_data*       std;                                                \
+    const on_off Layer_is_inhibitory;                                   \
+    RD_data RD;
+
+
 typedef struct layer
 {
-    Compute_float const Phimat[grid_size*grid_size];
-    Compute_float const connections[couple_array_size*couple_array_size];     ///<Matrix of connections coming from a single point
-    in_out voltages;
-    in_out recoverys;
-    randconns_info* rcinfo;
-    simplestorage lags;
-    STDP_data*      STDP_data;
-    parameters* P;                              ///<The parameters that we used to make the layer -can't be const as we need to free it
-    STD_data*       std;                               ///<Some info that is needed for STD
-    const on_off Layer_is_inhibitory;
-    RD_data RD;
-} layer;
+    layer_members
+   } layer;
 typedef struct nonconstlayer
 {
-    Compute_float Phimat[grid_size*grid_size];
-    Compute_float connections[couple_array_size*couple_array_size];     ///<Matrix of connections coming from a single point
-    in_out voltages;
-    in_out recoverys;
-    randconns_info* rcinfo;
-    simplestorage lags;
-    STDP_data*      STDP_data;
-    parameters* P;                              ///<The parameters that we used to make the layer -can't be const as we need to free it
-    STD_data*       std;                               ///<Some info that is needed for STD
-    on_off Layer_is_inhibitory;
-    RD_data RD;
+    //oh god the horror
+    #define const
+    layer_members
+    #undef const
 } nonconstlayer;
 #endif

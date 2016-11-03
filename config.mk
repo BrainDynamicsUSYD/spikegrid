@@ -46,8 +46,8 @@ ifeq ($(MATLAB),yes) #this has to be an if due to errors
 	export matlabopencvldflags:= -Wl,-rpath -Wl,${matlabdir} ${matlabopencvldflags} $(shell pkg-config --libs-only-l opencv)
 endif
 #set up some non-matlab variables
-export DEBUGFLAGS= -g -std=gnu11 ${DEFINES}
-export CXXDEBUGFLAGS= -g -std=c++11 ${DEFINES}
+export DEBUGFLAGS= -g -std=gnu11 ${DEFINES} -I $(shell pwd)
+export CXXDEBUGFLAGS= -g -std=c++11 ${DEFINES} -I $(shell pwd)
 export CLIBFLAGS= -fPIC -shared
 export LDFLAGS= -lm -g
 export opencvcflags=$(shell  pkg-config --cflags opencv)

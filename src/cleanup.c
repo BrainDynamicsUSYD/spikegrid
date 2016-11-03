@@ -32,10 +32,10 @@ void CleanupLayer(layer* l)
 ///@param m model to clean up
 void CleanupModel(model* m)
 {
-    CleanupLayer(&m->layer1);
+    CleanupLayer(m->layer1);
     if (m->NoLayers==DUALLAYER)
     {
-        CleanupLayer(&m->layer2);
+        CleanupLayer(m->layer2);
     }
     CleanupOutput();
     CleanupOutputs();

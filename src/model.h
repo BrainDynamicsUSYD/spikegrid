@@ -9,8 +9,8 @@ typedef struct condmat {
 ///This holds both layes and things that we need to keep track of over time that aren't in the layers (main example gE,gI)
 typedef struct model
 {
-	layer layer1;                                                       ///< First layer
-	layer layer2;
+	layer* layer1;                                                       ///< First layer
+	layer* layer2;
     unsigned int timesteps;
     const LayerNumbers NoLayers;                                        ///<Whether this is a single or double layer model
 	animal*         animal;

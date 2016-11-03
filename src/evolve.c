@@ -18,7 +18,7 @@
 #endif
 
 
-void AddSpikes_single_layer(__attribute__((unused))layer L,__attribute__((unused)) condmat* __restrict__ cond_mat,__attribute__((unused))const unsigned int time)
+void AddSpikes_single_layer(__attribute__((unused))layer* L,__attribute__((unused)) condmat* __restrict__ cond_mat,__attribute__((unused))const unsigned int time)
 {
     printf("single layer is currently unsupported\n");
     //does nothing - if you want to see what used to be here use git blame - but it wasn't particularly good anyway.
@@ -301,19 +301,19 @@ void step1(model* m)
     //from this point the GE and GI are actually fixed - as a result there is no more layer interaction - so do things sequentially to each layer
     if (m->NoLayers==DUALLAYER)
     {
-        FixRD(&m->layer1.RD,m->cond_matrices,m->layer1.Layer_is_inhibitory);
-        FixRD(&m->layer2.RD,m->cond_matrices,m->layer2.Layer_is_inhibitory);
+        FixRD(&m->layer1->RD,m->cond_matrices,m->layer1->Layer_is_inhibitory);
+        FixRD(&m->layer2->RD,m->cond_matrices,m->layer2->Layer_is_inhibitory);
     }
     else
     {
         fixboundary(m->cond_matrices->gE);
         fixboundary(m->cond_matrices->gI);
     }
-    tidylayer(&m->layer1,timemillis,m->cond_matrices,m->timesteps);
-    if (m->NoLayers==DUALLAYER){tidylayer(&m->layer2,timemillis,m->cond_matrices,m->timesteps);}
+    tidylayer(m->layer1,timemillis,m->cond_matrices,m->timesteps);
+    if (m->NoLayers==DUALLAYER){tidylayer(m->layer2,timemillis,m->cond_matrices,m->timesteps);}
     if (Features.STDP==ON)
     {
-        DoSTDP(m->layer1.connections,m->layer2.connections,m->layer1.STDP_data,m->layer2.STDP_data,m->layer1.rcinfo,m->layer2.rcinfo);
-        DoSTDP(m->layer2.connections,m->layer1.connections,m->layer2.STDP_data,m->layer1.STDP_data,m->layer2.rcinfo,m->layer1.rcinfo);
+        DoSTDP(m->layer1->connections,m->layer2->connections,m->layer1->STDP_data,m->layer2->STDP_data,m->layer1->rcinfo,m->layer2->rcinfo);
+        DoSTDP(m->layer2->connections,m->layer1->connections,m->layer2->STDP_data,m->layer1->STDP_data,m->layer2->rcinfo,m->layer1->rcinfo);
     }
 }

@@ -60,12 +60,13 @@ void seedrand(const InitConds initcond,const int jobno,const int yossarianjobnum
 }
 ///given a parameters object, set up a layer object.
 ///currently this function is only called from the setup function (but it could be called directly)
-layer setuplayer(const parameters p)
+layer* setuplayer(const parameters p)
 {
     const int trefrac_in_ts =(int) ((Compute_float)p.couple.tref / Features.Timestep);
     parameters* P = (parameters*)newdata(&p,sizeof(p));
-    layer L =
-    {   //I am not particularly happy with this block.  It is highly complicated.  One idea: have the init functions themselves decide to return null
+    nonconstlayer * L = malloc(sizeof(*L));
+    *L =
+        (nonconstlayer){   //I am not particularly happy with this block.  It is highly complicated.  One idea: have the init functions themselves decide to return null
         .STDP_data          = Features.STDP==ON?STDP_init(&P->STDP,trefrac_in_ts):NULL, //problem - P defd later
         .std                = Features.STD==ON?STD_init(p.STD):NULL,
         .P                  = P,
@@ -74,14 +75,14 @@ layer setuplayer(const parameters p)
         .RD.R               = p.couple.Layer_parameters.dual.synapse.R,
         .RD.D               = p.couple.Layer_parameters.dual.synapse.D,
     };
-    L.lags.trefrac_in_ts= (uint8_t)trefrac_in_ts;
+    L->lags.trefrac_in_ts= (uint8_t)trefrac_in_ts;
     //some things to fix up when we switch to returning a pointer
-    memcpy((Compute_float*)L.connections,CreateCouplingMatrix(p.couple),sizeof(Compute_float)*couple_array_size*couple_array_size); //warning here about cast-qual is fine - nasty hack - but acceptable there is a way to bypass it when we use an explicit malloc later
+    memcpy((Compute_float*)L->connections,CreateCouplingMatrix(p.couple),sizeof(Compute_float)*couple_array_size*couple_array_size); //warning here about cast-qual is fine - nasty hack - but acceptable there is a way to bypass it when we use an explicit malloc later
     if (p.Stim.Periodic==OFF && Features.ImageStim==ON) 
     {
-        memcpy((Compute_float*)L.Phimat,CreatePhiMatrix(),grid_size*grid_size*sizeof(Compute_float));
+        memcpy((Compute_float*)L->Phimat,CreatePhiMatrix(),grid_size*grid_size*sizeof(Compute_float));
     }
-    return L;
+    return (layer*)L;
 }
 //sets the output directory - note output directory is a global
 void PickOutputDir(const int jobnumber,const int yossarianjobnumber)
@@ -134,8 +135,8 @@ model* setup(const parameters p,const parameters p2,const LayerNumbers lcount,co
     remove(buf);//cleanup the old struct file
    // printout_struct(&p,"parameters",outdir,0);     //save the first parameters object
    // printout_struct(&p2,"parameters",outdir,1);    //save the second parameters object and display everything
-    const layer l1  = setuplayer(p);
-    const layer l2  = lcount==DUALLAYER?setuplayer(p2):l1;
+    const layer* l1  = setuplayer(p);
+    const layer* l2  = lcount==DUALLAYER?setuplayer(p2):l1;
     condmat* condmatinit = calloc(sizeof(condmat),1);
     for (Neuron_coord i=0;i<grid_size;i++)
     {

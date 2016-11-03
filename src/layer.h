@@ -39,4 +39,18 @@ typedef struct layer
     const on_off Layer_is_inhibitory;
     RD_data RD;
 } layer;
+typedef struct nonconstlayer
+{
+    Compute_float Phimat[grid_size*grid_size];
+    Compute_float connections[couple_array_size*couple_array_size];     ///<Matrix of connections coming from a single point
+    in_out voltages;
+    in_out recoverys;
+    randconns_info* rcinfo;
+    simplestorage lags;
+    STDP_data*      STDP_data;
+    parameters* P;                              ///<The parameters that we used to make the layer -can't be const as we need to free it
+    STD_data*       std;                               ///<Some info that is needed for STD
+    on_off Layer_is_inhibitory;
+    RD_data RD;
+} nonconstlayer;
 #endif

@@ -1,4 +1,6 @@
 /// \file
+#ifndef STDP_FILE
+#define STDP_FILE
 #include "typedefs.h"
 #include "enums.h"
 typedef struct STDP_parameters STDP_parameters;
@@ -25,3 +27,4 @@ tagged_array* STDP_mag(const tagged_array* const in);
 int __attribute__((pure,const)) wrap (int n);
 Compute_float clamp(Compute_float V,Compute_float target,Compute_float frac);
 #endif //note testing code
+#endif

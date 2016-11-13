@@ -8,6 +8,7 @@
 #include "sizes.h"
 #include "tagged_array.h"
 #include "out/outputtable.h"
+#include "init/layer.h"
 //creat a rather ridiculously sized matrix
 //allows for 10x the avg number of connections per point.  Incredibly wasteful.  It would be really nice to have some c++ vectors here
 const unsigned int overkill_factor = 20;

@@ -42,3 +42,5 @@ ${imreadlib}: force_look ${CONFIG}
 	$(MAKE) -C imread ${imreadlib}
 ${outlib}: force_look ${CONFIG}
 	$(MAKE) -C out ${outlib}
+${initlib}: force_look ${CONFIG}
+	$(MAKE) -C init ${initlib}

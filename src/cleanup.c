@@ -14,30 +14,11 @@ void FreeIfNotNull(void* v)
 ///@param l layer to free
 void CleanupLayer(layer* l)
 {
-    //FreeIfNotNull(l->voltages);
-    //FreeIfNotNull(l->voltages_out);
-   // FreeIfNotNull(l->recoverys);
-   // FreeIfNotNull(l->recoverys_out);
-    //FreeIfNotNull(l->connections);
-    FreeIfNotNull(l->P);
-    FreeIfNotNull(l->std);
- //   lagstorage_dtor(l->firinglags);
-//    free(l->RD);
- //   CleanupRingBuffer(&l->spikes);
-   // CleanupRingBuffer(&l->spikes_STDP);
-//    FreeIfNotNull(l->spikes.data);
-
+    //TODO fixme
 }
 ///Free all memory used by a model
 ///@param m model to clean up
 void CleanupModel(model* m)
 {
-    CleanupLayer(m->layer1);
-    if (m->NoLayers==DUALLAYER)
-    {
-        CleanupLayer(m->layer2);
-    }
-    CleanupOutput();
-    CleanupOutputs();
-    free(m);
+    //TODO - fixme
 }

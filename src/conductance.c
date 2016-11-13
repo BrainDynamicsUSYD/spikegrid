@@ -16,6 +16,7 @@
 #include "model.h"
 #include "out/out.h"
 #include "timing.h"
+#include "init/model.h"
 #ifdef ANDROID
     #define APPNAME "myapp"
     #include <android/log.h>
@@ -51,12 +52,12 @@ void step_(const Compute_float* const inpV,const Compute_float* const inpV2, con
         CheckParam(Features.Recovery,inpW2)
     }
     m->timesteps++;
-    copyStuff(&m->layer1->voltages,inpV,sizeof(Compute_float)*grid_size*grid_size,
-            Features.Recovery,&m->layer1->recoverys,inpW,sizeof(Compute_float)*grid_size*grid_size);
+    copyStuff(&m->layer1.voltages,inpV,sizeof(Compute_float)*grid_size*grid_size,
+            Features.Recovery,&m->layer1.recoverys,inpW,sizeof(Compute_float)*grid_size*grid_size);
     if (ModelType==DUALLAYER)
     {
-        copyStuff(&m->layer2->voltages,inpV2,sizeof(Compute_float)*grid_size*grid_size,
-            Features.Recovery,&m->layer2->recoverys,inpW2,sizeof(Compute_float)*grid_size*grid_size);
+        copyStuff(&m->layer2.voltages,inpV2,sizeof(Compute_float)*grid_size*grid_size,
+            Features.Recovery,&m->layer2.recoverys,inpW2,sizeof(Compute_float)*grid_size*grid_size);
     }
     step1(m);
     DoOutputs(m->timesteps);
@@ -288,10 +289,10 @@ int main(int argc,char** argv) //useful for testing w/out matlab
                 if (m->timesteps%printfreq==0){timertick(m->timesteps,Features.Simlength);}
                 step_(FirstV,SecondV,FirstW,SecondW);//always fine to pass an extra argument here
                 //copy the output to be new input - this does seem slightly inelegant.  There is definitely room for improvement here
-                memcpy ( FirstV, m->layer1->voltages.Out, sizeof ( Compute_float)*grid_size*grid_size);
-                if(SecondV != NULL){memcpy(SecondV,m->layer2->voltages.Out, sizeof(Compute_float)*grid_size*grid_size);}
-                if(FirstW != NULL) {memcpy(FirstW, m->layer1->recoverys.Out,sizeof(Compute_float)*grid_size*grid_size);}
-                if(SecondW != NULL){memcpy(SecondW,m->layer2->recoverys.Out,sizeof(Compute_float)*grid_size*grid_size);}
+                memcpy ( FirstV, m->layer1.voltages.Out, sizeof ( Compute_float)*grid_size*grid_size);
+                if(SecondV != NULL){memcpy(SecondV,m->layer2.voltages.Out, sizeof(Compute_float)*grid_size*grid_size);}
+                if(FirstW != NULL) {memcpy(FirstW, m->layer1.recoverys.Out,sizeof(Compute_float)*grid_size*grid_size);}
+                if(SecondW != NULL){memcpy(SecondW,m->layer2.recoverys.Out,sizeof(Compute_float)*grid_size*grid_size);}
             }
             FreeIfNotNull(FirstV);
             FreeIfNotNull(SecondV);

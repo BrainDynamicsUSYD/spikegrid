@@ -132,6 +132,7 @@ typedef struct sweepable
     const on_off Intify;        ///<round numbers to integer
 } sweepable;
 
-
+#ifndef __cplusplus
 #include "whichparam.h"
+#endif
 #endif

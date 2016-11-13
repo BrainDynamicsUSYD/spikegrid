@@ -6,9 +6,10 @@ export CONFIG=${whichparam} $(shell pwd)/config/*
 export VIEWERBIN=$(shell pwd)/watch
 export outlib=$(shell pwd)/lib/out.o
 export imreadlib=$(shell pwd)/lib/imread.o
+export initlib=$(shell pwd)/lib/init.o
 export maskgen=$(shell pwd)/lib/mask
 export mexfile=$(shell pwd)/conductance.mexa64
-export OFILES=${imreadlib} ${outlib}
+export OFILES=${imreadlib} ${outlib} ${initlib}
 .PHONY: profile clean submit docs debug viewer ${VIEWERBIN}  force_look TEST watch matlab run
 ###########
 # The different ways to create the binary

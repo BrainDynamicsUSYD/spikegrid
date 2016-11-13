@@ -2,6 +2,7 @@
 #define RANDCONNS
 #include "typedefs.h"
 #include "enums.h"
+#include "paramheader.h"
 typedef struct randconn_parameters randconn_parameters;
 typedef struct randomconnection
 {
@@ -24,7 +25,7 @@ typedef struct randconns_info
     randomconnection* Bconns;
 } randconns_info;
 
-randconns_info* init_randconns();
+randconns_info* init_randconns(const randconn_parameters rparam,const couple_parameters couple);
 
 randomconnection** GetRandomConnsArriving(const coords coord, const randconns_info rcinfo, unsigned int* numberconns);
 randomconnection* GetRandomConnsLeaving  (const coords coord, const randconns_info rcinfo, unsigned int* numberconns);

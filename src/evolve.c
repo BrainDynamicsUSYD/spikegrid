@@ -4,6 +4,7 @@
 #include "paramheader.h" //in VS this needs to be early to compile - don't know why
 #include "STDP.h"
 #include "model.h"
+#include "init/model.h"
 #include "theta.h"
 #include "evolvegen.h"
 #include "STD.h"
@@ -173,7 +174,7 @@ void AddRandomRD(const coords c ,const randconns_info* const rcinfo, RD_data* __
 ///TODO: make faster - definitely room for improvement here
 void StoreFiring(layer* L,const unsigned int timestep)
 {
-    const signed char skip = (signed char) (L->P->skip);
+    const signed char skip = (signed char) (L->P.skip);
     //the nskip is a hack around x+=skip suffering from integer promotion
     const Neuron_coord nskip = skip>0?(Neuron_coord)skip:(Neuron_coord)1;
     for (Neuron_coord x=0;x<grid_size;skip>0?x=(Neuron_coord)(nskip+x):x++)//this fancy skipping can make a pretty massive speed difference
@@ -183,36 +184,36 @@ void StoreFiring(layer* L,const unsigned int timestep)
             if ( IsActiveNeuron(x,y,skip))
             {
                 const coords coord = {.x=x,.y=y};
-                if (Features.STDP==ON) {modifyLags(L->STDP_data->lags,LagIdx(coord,L->STDP_data->lags),grid_index(coord));}
+                if (Features.STDP==ON) {modifyLags(L->STDP_Data->lags,LagIdx(coord,L->STDP_Data->lags),grid_index(coord));}
                 //now - add in new spikes
-                if (L->voltages.Out[grid_index(coord)]  >= L->P->potential.Vpk
+                if (L->voltages.Out[grid_index(coord)]  >= L->P.potential.Vpk
                         ||
                         //next part - add random spikes
-                        (L->P->potential.rate > 0 && //this check is because the compiler doesn't optimize the call to random() otherwise
-                         (RandFloat() < (L->P->potential.rate*((Compute_float)0.001)*Features.Timestep)))
+                        (L->P.potential.rate > 0 && //this check is because the compiler doesn't optimize the call to random() otherwise
+                         (RandFloat() < (L->P.potential.rate*((Compute_float)0.001)*Features.Timestep)))
 
                    )
                 {
                     AddnewSpike_simple(grid_index(coord),&L->lags);
-                    if (Features.STDP==ON && L->STDP_data->RecordSpikes==ON) {AddnewSpike(L->STDP_data->lags,LagIdx(coord,L->STDP_data->lags));}
+                    if (Features.STDP==ON && L->STDP_Data->RecordSpikes==ON) {AddnewSpike(L->STDP_Data->lags,LagIdx(coord,L->STDP_Data->lags));}
                     if (Features.Recovery==ON) //reset recovery if needed.  Note recovery has no refractory period so a reset is required
                     {
-                        L->voltages.Out[grid_index(coord)]=L->P->potential.Vrt;
-                        L->recoverys.Out[grid_index(coord)]+=L->P->recovery.Wrt;
+                        L->voltages.Out[grid_index(coord)]=L->P.potential.Vrt;
+                        L->recoverys.Out[grid_index(coord)]+=L->P.recovery.Wrt;
                     }
                     Compute_float spikestr = 1.0/(L->RD.D - L->RD.R); //This normalizes the base size strength so that changing D/R only changes the timescale but leaves the integral constant
                     if (Features.STD==ON)
                     {
-                        spikestr = spikestr * STD_str(L->P->STD,coord,timestep,1,L->std); //since we only emit a spike once, use 1 to force an update
+                        spikestr = spikestr * STD_str(L->P.STD,coord,timestep,1,L->std); //since we only emit a spike once, use 1 to force an update
                     }
                     //all the different ways to add a spike
                     if (Features.STDP==OFF)
                     {
-                        AddRD(coord,L->connections, &L->RD,spikestr);
+                        AddRD(coord,L->connections.connections, &L->RD,spikestr);
                     }
                     else
                     {
-                        AddRD_STDP(coord,L->connections,L->STDP_data->connections,&L->RD,spikestr);
+                        AddRD_STDP(coord,L->connections.connections,L->STDP_Data->connections,&L->RD,spikestr);
                     }
                     if (Features.Random_connections==ON)
                     {
@@ -245,35 +246,35 @@ void tidylayer (layer* l,const Compute_float timemillis,const condmat* const __r
 {
     if (Features.Recovery==OFF)
     {
-        CalcVoltages(&l->voltages,cond_mat,l->P->potential,l->P->skip);
+        CalcVoltages(&l->voltages,cond_mat,l->P.potential,l->P.skip);
         if (Features.ImageStim==ON) //Dodgy fudge
         {
-            if (!(l->P->Stim.Periodic))
+            if (!(l->P.Stim.Periodic))
             {
-                ApplyContinuousStim(l->voltages.Out,timemillis,l->P->Stim,Features.Timestep,l->Phimat);
+                ApplyContinuousStim(l->voltages.Out,timemillis,l->P.Stim,Features.Timestep,l->phimat.phimat);
             }
         }
-        RefractoryVoltages(l->voltages.Out,&l->lags,l->P->potential);
+        RefractoryVoltages(l->voltages.Out,&l->lags,l->P.potential);
     }
     else
     {
-        CalcRecoverys(&l->voltages,&l->recoverys,cond_mat,l->P->potential,l->P->recovery);
+        CalcRecoverys(&l->voltages,&l->recoverys,cond_mat,l->P.potential,l->P.recovery);
     }
     StoreFiring(l,timestep);
     if (Features.Theta==ON)
     {
-        dotheta(l->voltages.Out,l->P->theta,timemillis);
+        dotheta(l->voltages.Out,l->P.theta,timemillis);
     }
     if (Features.ImageStim==ON)
     {
-        if (l->P->Stim.Periodic==ON) //only stim excit layer
+        if (l->P.Stim.Periodic==ON) //only stim excit layer
         {
-            ApplyStim(l->voltages.Out,timemillis,l->P->Stim,l->P->potential.Vpk,l->STDP_data,l->rcinfo,l->Layer_is_inhibitory);
+            ApplyStim(l->voltages.Out,timemillis,l->P.Stim,l->P.potential.Vpk,l->STDP_Data,l->rcinfo,l->Layer_is_inhibitory);
         }
     }
-    if (l->P->STDP.STDP_decay_frequency>0 && (int)(timemillis/Features.Timestep) % l->P->STDP.STDP_decay_frequency == 0 && l->STDP_data->RecordSpikes==ON)
+    if (l->P.STDP.STDP_decay_frequency>0 && (int)(timemillis/Features.Timestep) % l->P.STDP.STDP_decay_frequency == 0 && l->STDP_Data->RecordSpikes==ON)
     {
-        STDP_decay(l->STDP_data,l->rcinfo);
+        STDP_decay(l->STDP_Data,l->rcinfo);
     }
 
 }
@@ -283,37 +284,37 @@ void step1(model* m)
 {
     const Compute_float timemillis = ((Compute_float)m->timesteps) * Features.Timestep ;
     //this memcpy based version for initializing gE/gI is marginally slower (probably cache issues) -
-    memcpy(m->cond_matrices,m->cond_matrices_init,sizeof(*m->cond_matrices));
+    memcpy(&m->cond_matrices,&m->cond_matrices_init,sizeof(m->cond_matrices));
     if (Features.LocalStim==ON) //this isn't really used anymore
     {
-        if (m->timesteps %1000 < 250) {ApplyLocalBoost(m->cond_matrices->gE,20,20);}
-        else if (m->timesteps % 1000 < 500) {ApplyLocalBoost(m->cond_matrices->gE,20,60);}
-        else if (m->timesteps % 1000 < 750) {ApplyLocalBoost(m->cond_matrices->gE,60,20);}
-        else  {ApplyLocalBoost(m->cond_matrices->gE,60,60);}
+        if (m->timesteps %1000 < 250) {ApplyLocalBoost(m->cond_matrices.gE,20,20);}
+        else if (m->timesteps % 1000 < 500) {ApplyLocalBoost(m->cond_matrices.gE,20,60);}
+        else if (m->timesteps % 1000 < 750) {ApplyLocalBoost(m->cond_matrices.gE,60,20);}
+        else  {ApplyLocalBoost(m->cond_matrices.gE,60,60);}
     }
     if(Features.UseAnimal==ON)
     {
         MoveAnimal(m->animal,timemillis);
-        AnimalEffects(*m->animal,m->cond_matrices->gE,timemillis);
+        AnimalEffects(*m->animal,m->cond_matrices.gE,timemillis);
     }
     // Add spiking input to the conductances
-    if (m->NoLayers==SINGLELAYER) {AddSpikes_single_layer(m->layer2,m->cond_matrices,m->timesteps);}
+    if (m->NoLayers==SINGLELAYER) {AddSpikes_single_layer(&m->layer2,&m->cond_matrices,m->timesteps);}
     //from this point the GE and GI are actually fixed - as a result there is no more layer interaction - so do things sequentially to each layer
     if (m->NoLayers==DUALLAYER)
     {
-        FixRD(&m->layer1->RD,m->cond_matrices,m->layer1->Layer_is_inhibitory);
-        FixRD(&m->layer2->RD,m->cond_matrices,m->layer2->Layer_is_inhibitory);
+        FixRD(&m->layer1.RD,&m->cond_matrices,m->layer1.Layer_is_inhibitory);
+        FixRD(&m->layer2.RD,&m->cond_matrices,m->layer2.Layer_is_inhibitory);
     }
     else
     {
-        fixboundary(m->cond_matrices->gE);
-        fixboundary(m->cond_matrices->gI);
+        fixboundary(m->cond_matrices.gE);
+        fixboundary(m->cond_matrices.gI);
     }
-    tidylayer(m->layer1,timemillis,m->cond_matrices,m->timesteps);
-    if (m->NoLayers==DUALLAYER){tidylayer(m->layer2,timemillis,m->cond_matrices,m->timesteps);}
+    tidylayer(&m->layer1,timemillis,&m->cond_matrices,m->timesteps);
+    if (m->NoLayers==DUALLAYER){tidylayer(&m->layer2,timemillis,&m->cond_matrices,m->timesteps);}
     if (Features.STDP==ON)
     {
-        DoSTDP(m->layer1->connections,m->layer2->connections,m->layer1->STDP_data,m->layer2->STDP_data,m->layer1->rcinfo,m->layer2->rcinfo);
-        DoSTDP(m->layer2->connections,m->layer1->connections,m->layer2->STDP_data,m->layer1->STDP_data,m->layer2->rcinfo,m->layer1->rcinfo);
+        DoSTDP(m->layer1.connections.connections,m->layer2.connections.connections,m->layer1.STDP_Data,m->layer2.STDP_Data,m->layer1.rcinfo,m->layer2.rcinfo);
+        DoSTDP(m->layer2.connections.connections,m->layer1.connections.connections,m->layer2.STDP_Data,m->layer1.STDP_Data,m->layer2.rcinfo,m->layer1.rcinfo);
     }
 }

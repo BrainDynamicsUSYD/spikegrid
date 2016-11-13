@@ -99,7 +99,7 @@ int main()
     printf("#include \"sizes.h\"\n");
     printf("#include \"mymath.h\"\n");
     printf("#include \"paramheader.h\"\n");
-    printf("#include \"layer.h\"\n");
+    printf("#include \"init/layer.h\"\n");
     printf("long long int spikecount  = 0;\n");
     printf("void evolvept_duallayer (const int x,const int y,const Compute_float* const __restrict connections,const Compute_float strmod, Compute_float* __restrict condmat)\n");
     printf("{\n");

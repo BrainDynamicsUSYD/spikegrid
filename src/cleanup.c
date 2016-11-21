@@ -1,9 +1,9 @@
 /// \file
 #include <stdlib.h>
 #include "output.h"
-#include "model.h"
 #include "out/out.h"
 #include "lagstorage.h"
+#include "init/model.h"
 ///Free a pointer if it is not null
 ///@param v pointer to free
 void FreeIfNotNull(void* v)

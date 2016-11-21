@@ -15,7 +15,6 @@
 #include "paramheader.h"
 #include "STDP.h"
 #include "evolvegen.h"
-#include "model.h"
 #include "out/out.h"
 #include "init/model.h"
 #include "utils.h"

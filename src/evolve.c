@@ -3,7 +3,6 @@
 #include <stdio.h>  //useful when we need to print things
 #include "paramheader.h" //in VS this needs to be early to compile - don't know why
 #include "STDP.h"
-#include "model.h"
 #include "init/model.h"
 #include "theta.h"
 #include "evolvegen.h"

@@ -69,7 +69,7 @@ struct layer
     randconns_info* rcinfo;
     simplestorage lags;
     STDP_data*      STDP_Data;
-    parameters P;  /*TODO - would be nice for this parameters object to be const - should be doable just messes with the paramters object having every single field be const*/
+    const parameters P;
     STD_data*       std;
     const on_off Layer_is_inhibitory;
     RD_data RD;

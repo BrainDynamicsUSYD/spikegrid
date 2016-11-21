@@ -35,11 +35,25 @@ layer::layer(const parameters p, const model_features f,const int trefrac_in_ts)
     STDP_Data(f.STDP==ON?STDP_init(&p.STDP,trefrac_in_ts):NULL),
     P(p),
     //std data here
-    //   Layer_is_inhibitory((p.couple.Layertype==DUALLAYER && p.couple.Layer_parameters.dual.W<0)?on_off::ON:on_off::OFF)
-    Layer_is_inhibitory (on_off::ON),
+    Layer_is_inhibitory((p.couple.Layertype==DUALLAYER && p.couple.Layer_parameters.dual.W<0)?on_off::ON:on_off::OFF),
     RD(p.couple.Layer_parameters.dual.synapse)
     //RD here - actually doable in cpp
 {
+    for (int i=0;i<grid_size*grid_size;i++)
+    {
+        this->lags.lags[i]=0;
+    }
+    for (int i=0;i<grid_size;i++)
+    {
+        for (int j=0;j<grid_size;j++)
+        {
+            coords c;
+            c.x=i;
+            c.y=j;
+            const size_t idx = grid_index(c);
+            this->voltages.Out[idx]=-100;
+        }
+    }
     this->lags.trefrac_in_ts = (uint8_t)trefrac_in_ts;
 }
 layer* makelayer(const parameters p, const model_features f, const int trefrac_in_ts)

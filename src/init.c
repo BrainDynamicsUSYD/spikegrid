@@ -19,7 +19,6 @@
 #include "out/out.h"
 #include "init/model.h"
 #include "utils.h"
-#include "animal.h"
 #include "randconns.h"
 #include "lagstorage.h"
 #ifndef _WIN32

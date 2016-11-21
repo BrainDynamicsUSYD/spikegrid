@@ -3,8 +3,6 @@
 #include "opencv2/highgui/highgui.hpp"
 #include <stdio.h>
 #include <iostream>
-#include <string>
-#include <cstdbool>
 #include <algorithm>
 #include <random>
 #include "imread.h"

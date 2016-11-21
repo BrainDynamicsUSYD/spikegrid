@@ -13,7 +13,6 @@
 #include "newparam.h"
 #include "init.h"
 #include "yossarian.h"
-#include "model.h"
 #include "out/out.h"
 #include "timing.h"
 #include "init/model.h"

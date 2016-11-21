@@ -1,5 +1,5 @@
 ///\file
-#include <string.h> //memset
+#include <string.h> //memcpy
 #include <stdio.h>  //useful when we need to print things
 #include "paramheader.h" //in VS this needs to be early to compile - don't know why
 #include "STDP.h"
@@ -10,7 +10,6 @@
 #include "STD.h"
 #include "mymath.h"
 #include "localstim.h"
-#include "animal.h"
 #include "randconns.h"
 #include "lagstorage.h"
 #ifdef ANDROID

@@ -1,7 +1,6 @@
 #ifndef RANDCONNS
 #define RANDCONNS
 #include "typedefs.h"
-#include "enums.h"
 #include "paramheader.h"
 typedef struct randconn_parameters randconn_parameters;
 typedef struct randomconnection

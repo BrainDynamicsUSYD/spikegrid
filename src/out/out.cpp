@@ -154,6 +154,7 @@ void TextOutput::DoOutput_()
     free(actualdata);
 }
 
+// SINGLE PRECISION
 BinaryOutput::BinaryOutput(int idxin,const int intervalin,const output_s* datain) : SingleFileOutput(idxin,intervalin) {out=datain;data=out->data.TA_data;}
 void BinaryOutput::DoOutput_()
 {
@@ -163,17 +164,51 @@ void BinaryOutput::DoOutput_()
     }
     Compute_float* actualdata = taggedarrayTocomputearray(*data);
     const unsigned int size = tagged_array_size_(*data);
-    // for (unsigned int i=0;i<size;i++)
-    // {
-    //     for (unsigned int j=0;j<size;j++)
-    //     {
-    //         fwrite(actualdata[i*size+j],sizeof(double),1,f);
-    //     }
-    // }
-    fwrite(actualdata,sizeof(Compute_float),size*size,f);
+    // The lines below are fudge
+    const unsigned int shrunksize = 81; //81 //300
+    float* shrunkdata = (float*)malloc(sizeof(float)*shrunksize*shrunksize);
+    for (unsigned int i=0;i<shrunksize;i++)
+    {
+        for (unsigned int j=0;j<shrunksize;j++)
+        {
+            shrunkdata[i*shrunksize+j] = (float)actualdata[i*size+j]; // AHA!
+        }
+    }
+    fwrite(shrunkdata,sizeof(float),shrunksize*shrunksize,f);
+    // This next line below is non-fudge
+    // fwrite(actualdata,sizeof(Compute_float),size*size,f);
     fflush(f);//prevents stalling in matlab
     free(actualdata);
+    free(shrunkdata);
 }
+
+// // DOUBLE PRECISION
+// BinaryOutput::BinaryOutput(int idxin,const int intervalin,const output_s* datain) : SingleFileOutput(idxin,intervalin) {out=datain;data=out->data.TA_data;}
+// void BinaryOutput::DoOutput_()
+// {
+//     if (this->out->Updateable==ON)
+//     {
+//        this->data=this->out->UpdateFn(this->out->function_arg);
+//     }
+//     Compute_float* actualdata = taggedarrayTocomputearray(*data);
+//     const unsigned int size = tagged_array_size_(*data);
+//     // The lines below are fudge
+//     const unsigned int shrunksize = 300; //81
+//     Compute_float* shrunkdata = (Compute_float*)malloc(sizeof(Compute_float)*shrunksize*shrunksize);
+//     for (unsigned int i=0;i<shrunksize;i++)
+//     {
+//         for (unsigned int j=0;j<shrunksize;j++)
+//         {
+//             shrunkdata[i*shrunksize+j] = actualdata[i*size+j]; // AHA!
+//         }
+//     }
+//     fwrite(shrunkdata,sizeof(Compute_float),shrunksize*shrunksize,f);
+//     // This next line below is non-fudge
+//     // fwrite(actualdata,sizeof(Compute_float),size*size,f);
+//     fflush(f);//prevents stalling in matlab
+//     free(actualdata);
+//     free(shrunkdata);
+// }
 
 ConsoleOutput::ConsoleOutput(int idxin, const int intervalin, const output_s* datain) : TAOutput(idxin, intervalin, datain)
 {

@@ -41,7 +41,7 @@ static const parameters OneLayerModel = {.couple={0}};
         .NoUSprob=0,                                \
         .Testing=OFF,                               \
         .Periodic=OFF,                              \
-        .I2 = 1.60,                                 \
+        .I2 = 2.40,                                 \
         .I1 = 0,                                    \
         .I0 = 0.80,                                 \
         .mu = 0.04,                                 \
@@ -112,7 +112,7 @@ static const model_features Features =
     .ImageStim = ON,
     .Simlength  = 70000, //50000
     .job        = {.initcond = RAND_JOB, .Voltage_or_count = 1},
-    .Outprefix = "LIF30_I160",
+    .Outprefix = "I240full",
     .output = {
         { .method=SPIKES,.Output="Spike1" ,.Delay=1}, // Exc. spikes
         { .method=SPIKES,.Output="Spike2" ,.Delay=1}, // Inh. spikes
@@ -136,7 +136,7 @@ static const sweepable Sweep =
     .offset=offsetof(parameters,couple.normalization_parameters.glob_mult.GM),
     .minval = 1, // A good value is somewehre between 0.3 to 0.35
     .maxval = 1,
-    .count = 49,
+    .count = 499,
     .SweepEx = ON,
     .SweepIn = ON,
     //

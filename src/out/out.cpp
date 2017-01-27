@@ -165,7 +165,7 @@ void BinaryOutput::DoOutput_()
     Compute_float* actualdata = taggedarrayTocomputearray(*data);
     const unsigned int size = tagged_array_size_(*data);
     // The lines below are fudge
-    const unsigned int shrunksize = 81; //81 //300
+    const unsigned int shrunksize = 300;
     float* shrunkdata = (float*)malloc(sizeof(float)*shrunksize*shrunksize);
     for (unsigned int i=0;i<shrunksize;i++)
     {

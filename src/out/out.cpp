@@ -164,8 +164,7 @@ void BinaryOutput::DoOutput_()
     }
     Compute_float* actualdata = taggedarrayTocomputearray(*data);
     const unsigned int size = tagged_array_size_(*data);
-    // The lines below are fudge
-    const unsigned int shrunksize = 300;
+    const unsigned int shrunksize = 81;
     float* shrunkdata = (float*)malloc(sizeof(float)*shrunksize*shrunksize);
     for (unsigned int i=0;i<shrunksize;i++)
     {
@@ -175,8 +174,6 @@ void BinaryOutput::DoOutput_()
         }
     }
     fwrite(shrunkdata,sizeof(float),shrunksize*shrunksize,f);
-    // This next line below is non-fudge
-    // fwrite(actualdata,sizeof(Compute_float),size*size,f);
     fflush(f);//prevents stalling in matlab
     free(actualdata);
     free(shrunkdata);

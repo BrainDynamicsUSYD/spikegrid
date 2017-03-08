@@ -89,7 +89,12 @@ void PickOutputDir(const int jobnumber,const int yossarianjobnumber)
         }
         else
         {
-            sprintf(outdir,"%s/%s/job-%s/",getenv("HOME"),Features.Outprefix,nostring);
+            // For use on yossarian comment the artemis line out and vice-versa
+            // yossarian 
+            sprintf(outdir,"%s/%s/job-%s/",getenv("HOME"),Features.Outprefix,nostring); 
+            // // artemis
+            // sprintf(outdir,"/project/RDS-FSC-Evoked-RW/%s/job-%s/",Features.Outprefix,nostring);
+
         }
     }
     recursive_mkdir(outdir);

@@ -81,12 +81,13 @@ void CreateStims(const Compute_float timemodper,const Stimulus_parameters S,cons
 
 bool randinit=false;
 double storerand=0.3;
-std::default_random_engine generator(1);
+//std::default_random_engine generator(1);
 //std::bernoulli_distribution distribution(0.5);
-std::normal_distribution<double> distribution(0,0.05);
+//std::normal_distribution<double> distribution(0,0.05);
 double nextrand()
 {
-/*    bool newrand=distribution(generator);
+    /*
+    bool newrand=distribution(generator);
     if (newrand==true)
     {
         storerand=storerand+0.02;
@@ -94,10 +95,11 @@ double nextrand()
     else
     {
         storerand=storerand-0.02;
-    } */
+    } 
     storerand=storerand + distribution(generator);
     storerand=std::max(0.0,std::min(storerand,1.0));//clamp
     return storerand;
+    */
 }
 
 //TODO: this function is getting ridiculously long - needs to be tidied up.

@@ -9,7 +9,7 @@ typedef struct tagged_array{
     const volatile Compute_float* const data; ///< the actual data
     const unsigned int size;                  ///< the total dimensions
     const unsigned int offset;                ///< offset (used by the gE and gI matrices
-    const unsigned int subgrid;               ///< used when there is a subgrid within the grid - currently the only example is STDP.  The default value of this should be 1 - often not implemented
+    const unsigned int subgrid;               ///< used when there is a subgrid within the grid - currently the only example is STDP.  The default value of this should be 1 - often not implemen
     const Compute_float minval;               ///< minimum value in array (for a colorbar - currently unused)
     const Compute_float maxval;               ///< maximum value in array (for a colorbar - currently unused)
 } tagged_array;

@@ -137,7 +137,7 @@ static const model_features Features =
     .ImageStim  = ON,
     .job        = {.initcond = RAND_JOB, .Voltage_or_count = 1},
     .Disablewrapping = ON,
-    .output = {{.method = VIDEO,.Output="V2",.Delay=20, .Overlay="Trialno"},{.method=GUI,.Output="V2",.Delay=10,.Overlay="Timestep"}}
+    .output = {{.method = PICTURE,.Output="V2",.Delay=10000, .Overlay="Trialno"},{.method=GUI,.Output="V2",.Delay=10,.Overlay="Timestep"}}
 };
 ///Constant external input to conductances
 static const extinput Extinput =

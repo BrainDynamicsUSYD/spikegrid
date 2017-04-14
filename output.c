@@ -5,6 +5,7 @@
 #include "tagged_array.h"
 #include "mymath.h"
 #include "out/outputtable.h"
+#include "STDP.h"
 //declare the extern variables from the header
 char __attribute__((used)) outdir[100]; //using flto on ubuntu hides this symbol for some reason.  Adding used fixes it
 //outptu holds an open reference to the model - this enables the mini functions to work
@@ -34,6 +35,7 @@ void output_init(const model* const m)
     CreateOutputtable((output_s){"Recovery2",   FLOAT_DATA, .data.TA_data=tagged_array_new(m->layer2.recoverys_out,   grid_size,              0,             1,0,100)});
     CreateOutputtable((output_s){"Spike1",      SPIKE_DATA, .data.Lag_data=m->layer1.firinglags});
     CreateOutputtable((output_s){"Spike2",      SPIKE_DATA, .data.Lag_data=m->layer2.firinglags});
+    CreateOutputtable((output_s){"STDPSTR", FLOAT_DATA, .data.TA_data = tagged_array_new(m->layer2.STDP_data->connections,grid_size*couple_array_size,0,1,-.5,.5)});
     //note: some outputs defined elsewhere - it seems more convenient
     //Create the overlays - the functions are defined earlier in the file.
     CreateOverlay((overlaytext){"Trialno",Trialno});

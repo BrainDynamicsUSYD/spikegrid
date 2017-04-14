@@ -13,7 +13,7 @@ typedef enum LayerNumbers {SINGLELAYER=0,DUALLAYER=1} LayerNumbers;
 ///Enum to determine whether there is a recovery variable
 typedef enum NEURON_TYPE {LIF=0,QIF=1,EIF=2} neuron_type;
 ///Specify the destination of the output
-typedef enum {NO_OUTPUT = 0,PICTURE = 1,TEXT=2,CONSOLE=3,SPIKES=4,VIDEO=5,GUI=6} output_method;
+typedef enum {NO_OUTPUT = 0,PICTURE = 1,TEXT=2,CONSOLE=3,SPIKES=4,VIDEO=5,GUI=6,SELSTRENGTHS=7} output_method;
 ///Types of initial conditions that we have
 typedef enum {RAND_TIME=0,RAND_JOB=1,RAND_ZERO=2,SINGLE_SPIKE=3} InitConds;
 ///Types of evolution of synaptic time course

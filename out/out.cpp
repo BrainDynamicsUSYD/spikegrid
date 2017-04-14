@@ -14,12 +14,13 @@
 #include "outputtable.h"
 extern "C"
 {
+    #include "../sizes.h"
 #include "../tagged_array.h"
 #include "../cppparamheader.h"
 #include "../lagstorage.h"
+#include "../STDP.h"
 }
 #include "out.h" //and this is c++ again.
-
 on_off showimages = ON;
 std::vector<Output*> outvec;
 
@@ -129,6 +130,38 @@ SingleFileOutput::SingleFileOutput(int idxin ,const int intervalin) : Output(int
    f=fopen(buf,"w");
    if (f==NULL) {printf("fopen failed for %s error is %s\n",buf,strerror(errno));}
 }
+STDPstrCompareOutput::STDPstrCompareOutput(int idxin,const int intervalin,const output_s* datain) : SingleFileOutput(idxin,intervalin) {out=datain;data=out->data.TA_data;}
+void STDPstrCompareOutput::DoOutput_()
+{
+    if (this->out->Updateable==ON)
+    {
+        this->data=this->out->UpdateFn(this->out->function_arg);
+    }
+    Compute_float* actualdata = taggedarrayTocomputearray(*data);
+    const unsigned int size = tagged_array_size_(*data);
+    //start from 105,30 - go to 95,26 and 113,26
+    const coords startcoords = {.x=32,.y=105};
+    const int yoffset = 4;
+    const int xoffset = -4;
+    const size_t fidx = grid_index(startcoords)*STDP_array_size*STDP_array_size + (xoffset+STDP_RANGE)*STDP_array_size + (-yoffset + STDP_RANGE);
+    const size_t fidx2 = grid_index(startcoords)*STDP_array_size*STDP_array_size + (xoffset+STDP_RANGE)*STDP_array_size + (yoffset+STDP_RANGE);
+    int i = 32;
+    int j = 105;
+    for (int k=0;k<STDP_array_size;k++)
+    {
+        for (int l=0;l<STDP_array_size;l++)
+        {
+            const int idx = (i*grid_size+j)*STDP_array_size*STDP_array_size + k*STDP_array_size +l;
+            if(actualdata[idx] != 0)
+            {
+                //            printf("NonZero: %i %i %i %i",i,j,k,l);
+            }
+        }
+    }
+    fprintf(f,"%f,%f\n",actualdata[fidx],actualdata[fidx2]);
+    fflush(f);//prevents stalling in matlab
+    free(actualdata);
+}
 
 TextOutput::TextOutput(int idxin,const int intervalin,const output_s* datain) : SingleFileOutput(idxin,intervalin) {out=datain;data=out->data.TA_data;}
 void TextOutput::DoOutput_()
@@ -232,8 +265,11 @@ void MakeOutputs(const output_parameters* const m)
                 out = new GUIoutput(i,m[i].Delay,outt ,m[i].Overlay,outt->name);
                 outvec.push_back(out);
                 break;
-            default:
-                break;
+        case SELSTRENGTHS:
+            out = new STDPstrCompareOutput(i,m[i].Delay,outt);
+            outvec.push_back(out);
+        default:
+            break;
         }
         i++;
     }

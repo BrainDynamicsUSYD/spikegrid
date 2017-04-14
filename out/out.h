@@ -57,6 +57,14 @@ class SingleFileOutput : public Output
         SingleFileOutput(int,int );
         virtual void DoOutput_() {}
 };
+class STDPstrCompareOutput : public SingleFileOutput
+{
+    const output_s * out;
+    const tagged_array* data;
+    public:
+    STDPstrCompareOutput(int,int, const output_s*);
+    void DoOutput_();
+};
 class VidOutput: public TAOutput //This class probably needs a destructor to end the video.  Vlc will probably handle the file just fine though.
 {
     const overlaytext* overlay;

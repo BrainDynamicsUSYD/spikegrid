@@ -13,6 +13,7 @@
 const unsigned int overkill_factor = 20;
 
 void CreateRCOutputtable(const randconns_info* const rcinfo);//forward declare
+void CreateRCOutputtable2(const randconns_info* const rcinfo);//forward declare
 randconns_info init_randconns_info(const randconn_parameters p)
 {
     return (randconns_info) {
@@ -139,6 +140,7 @@ randconns_info* init_randconns(const randconn_parameters rparam,const couple_par
     randconns_info* rcpoint = malloc(sizeof(*rcpoint));
     memcpy(rcpoint,&rcinfo,sizeof(*rcpoint));
     CreateRCOutputtable(rcpoint);
+    CreateRCOutputtable2(rcpoint);
     return rcpoint;
 }
 randomconnection* GetRandomConnsLeaving(const coords coord ,const randconns_info rcinfo, unsigned int* numberconns)
@@ -226,4 +228,35 @@ void CreateRCOutputtable(const randconns_info* const rcinfo)
             .Updateable=ON,
             .UpdateFn=&GetRCWeights,
             .function_arg=(tagged_array*)rcinfo /*I really should stop this massive hackery*/});
+}
+
+//test point is 28,109
+tagged_array* GetRCWeights2(const tagged_array* const in)
+{
+    const randconns_info* rcinfo = (const randconns_info* const)in;//HACK TODO MASSIVE HACK
+    Compute_float* data = calloc(sizeof(Compute_float),1);
+    const int x = 28;
+    const int y = 109;
+            coords c = {.x=x,.y=y};
+            unsigned int count = 0;
+            randomconnection** rcbase = GetRandomConnsArriving(c,*rcinfo,&count);
+            for (unsigned int i=0;i<count;i++)
+            {
+                randomconnection* rc = rcbase[i];
+                data[0] += rc->stdp_strength;
+            }
+    tagged_array* ret = tagged_array_new(data,1,0,1,0,1);
+    return ret;
+}
+void CreateRCOutputtable2(const randconns_info* const rcinfo)
+{
+    if (callcount==0) {callcount++;return;}
+    CreateOutputtable(
+        (output_s) {
+            .name="RC4",  //only care about layer 2
+                .datatype=FLOAT_DATA,
+                .data.TA_data=GetRCWeights2((const tagged_array* const)rcinfo),
+                .Updateable=ON,
+                .UpdateFn=&GetRCWeights2,
+                .function_arg=(tagged_array*)rcinfo /*I really should stop this massive hackery*/});
 }
